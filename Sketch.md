@@ -6,19 +6,22 @@ Let's call it bk for now ("bayesian keras"... that'll have to change, obvi)
 ## bk.variables
 Just a way go get raw variational variables
 - Variable (returns a tfp.normal, shape can be >1)
--  PositiveVariable
--  BoundedVariable
+- PositiveVariable
+- BoundedVariable
 alternatively, just do Variable(..., lb=0) or Variable(..., lb=0, ub=1)
 and should be able to set the estimator: Variable(..., estimator='flipout') #or 'random'?
 
 ## bk.layers
+Layers output a tf.Tensor, whereas variables, distributions, and models output a tfd.distribution
 (Built with tfp's flipout estimators)
 - BaseLayer (from which all other layers inherit)
 - Sequential
 - Dense (default activation is relu)
+- Embedding (default is to not use prob dist for embeddings)
 - Conv1D
 - Conv2D
 - LTSM? Maybe put that on the Todo list...
+All should have an in=... arg which specifies their input(s)
 
 ## bk.distributions
 (Basically aliases tfp distributions, also add LogNormal and LogitNormal?)
@@ -75,7 +78,7 @@ And the layers and models and everything should have sensible default priors (li
 ## Evaluation of the posterior
 Then should also have ways to draw from posterior dist,eg
 
--  model.predict(x) #take avg/median/mode? of draws from posterior
+- model.predict(x) #take avg/median/mode? of draws from posterior
 - model.residuals(x, y) #compute residuals on validation data (returns data, plots by default but can control w/ plot=False)
 - model.plot_residuals(x, y) #plot the residual distribution
 - model.metrics(x, y, metric_list) #compute metrics on validation data
