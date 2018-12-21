@@ -95,6 +95,7 @@ Then should also have ways to draw from posterior dist,eg
 
 (funcs which draw from posterior can take a num_samples arg for # of samples)
 
+But, most of these will only work with y-variables which are continuous?
 
 
 ## Implementation notes

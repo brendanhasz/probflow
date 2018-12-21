@@ -1,4 +1,7 @@
 """Layers.
+
+TODO: more info...
+
 """
 
 #imports...

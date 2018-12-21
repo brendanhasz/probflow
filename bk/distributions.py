@@ -1,3 +1,6 @@
-"""Distributions.
+"""Probability distributions.
+
+TODO: more info...
+
 """
 

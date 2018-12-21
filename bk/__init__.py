@@ -1,3 +1,4 @@
+from . import base_models
 from . import distributions
 from . import models
 from . import layers
