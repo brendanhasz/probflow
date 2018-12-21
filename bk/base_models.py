@@ -220,6 +220,9 @@ class BaseModel(ABC):
         # Compute the model probability
         probs = self.prob(x, y)
 
+        # TODO: alternatively, x_by should be able to be any array_like
+        # as long as it's same size as x.shape[0]
+
         # Plot probability as a fn of x_by cols of x
         px, py = self._plot_by(x[:,x_by], probs, 
                                bins=bins, plot=plot)
@@ -371,6 +374,9 @@ class ContinuousModel(BaseModel):
         # Compute whether each sample was covered by the interval
         covered = self.pred_dist_covered(x, y, prc)
 
+        # TODO: alternatively, x_by should be able to be any array_like
+        # as long as it's same size as x.shape[0]
+        
         # Plot probability as a fn of x_by cols of x
         px, py = self._plot_by(x[:,x_by], covered, 
                                bins=bins, plot=plot)

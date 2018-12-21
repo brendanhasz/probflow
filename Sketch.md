@@ -154,6 +154,10 @@ Perhaps make a RandomVariable() which takes a slice of the x_values placeholder?
 ## Handling Bijectors
 ???
 
+## Model comparison
+somehow.  AIC/BIC/DIC?  Could you do LOO?
+I mean.  Or just use held-out log posterior prob...
+
 
 
 # EXAMPLES
