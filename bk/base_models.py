@@ -4,8 +4,22 @@ TODO: more info...
 
 """
 
+
+
 from abc import ABC, abstractmethod
 from scipy import stats
+import numpy as np
+import tensorflow as tf
+import tensorflow_probability as tfp
+
+#from . import base_models
+from . import distributions
+from . import layers
+from . import models
+from . import transformations
+from . import variables
+
+
 
 class BaseModel(ABC):
     """Abstract model class (just used as implementation base)
@@ -14,6 +28,18 @@ class BaseModel(ABC):
 
     """
 
+    @property
+    @abstractmethod
+    def default_args(self):
+        """Model parameters and their default values.
+        
+        Inheriting class must define this property as a dict, where
+        keys are strings of model parameter names and values are
+        model argument values.  Values can be of type int, float,
+        np.ndarray, tf.tensor, or tfp.distribution.
+        """
+        pass
+
 
     def __init__(self, *args, **kwargs):
         """Construct model.
@@ -21,9 +47,25 @@ class BaseModel(ABC):
         TODO: docs. Mention that actually building the tf graph is
         delayed until build() or fit() is called.
         """
-        self.args = args
-        self.kwargs = kwargs
+
+        # Set model arguments, using args, kwargs, and defaults 
+        for ix, arg in enumerate(self.default_args):
+            if ix<len(args):
+                self.args[arg] = args[ix]
+            elif arg in kwargs:
+                self.args[arg] = kwargs[arg]
+            else:
+                self.args[arg] = self.default_args[arg]
+
+        # Ensure all required arguments have been set
+        if None in self.args.values():
+            raise TypeError('required model arg(s) were not set. '+
+                            type(self).__name__+' requires args: '+
+                            ', '.join(self.default_args.keys())) 
+
+        # Set attribs for the built model and fit state
         self.built_model = None
+        self.built_args = None
         self.is_fit = False
 
 
@@ -47,6 +89,7 @@ class BaseModel(ABC):
         TODO: Docs...
 
         """
+        # TODO: recursively build this model's args
         # TODO: build the model
         # TODO: set up the data for fitting
         # TODO: fit the model
@@ -171,7 +214,7 @@ class BaseModel(ABC):
             raise ValueError('method '+str(method)+' is invalid')
 
 
-    def _plot_by(self, x, data, bins=100, what='mean'):
+    def plot_by(self, x, data, bins=100, what='mean'):
         """Compute and plot mean of data as a function of x.
 
         x should be (N,1) or (N,2)
@@ -224,7 +267,7 @@ class BaseModel(ABC):
         # as long as it's same size as x.shape[0]
 
         # Plot probability as a fn of x_by cols of x
-        px, py = self._plot_by(x[:,x_by], probs, 
+        px, py = self.plot_by(x[:,x_by], probs, 
                                bins=bins, plot=plot)
 
         return px, py
@@ -378,7 +421,7 @@ class ContinuousModel(BaseModel):
         # as long as it's same size as x.shape[0]
         
         # Plot probability as a fn of x_by cols of x
-        px, py = self._plot_by(x[:,x_by], covered, 
+        px, py = self.plot_by(x[:,x_by], covered, 
                                bins=bins, plot=plot)
 
         return px, py

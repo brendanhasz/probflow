@@ -1,6 +1,8 @@
 """Transformations.
 
 TODO: more info...
+if input is tensor, they should return a (transformed) tensor
+if input is distribution, return a bijected distribution
 
 """
 
