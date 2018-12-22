@@ -13,11 +13,11 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 #from . import base_models
-from . import distributions
+#from . import distributions
 from . import layers
-from . import models
-from . import transformations
-from . import variables
+#from . import models
+#from . import transformations
+#from . import variables
 
 
 
@@ -80,6 +80,25 @@ class BaseModel(ABC):
         `self.kwargs`.
         """
         pass
+
+
+    def build_args(self, data):
+        """Build each of the model's arguments."""
+        for arg in self.args:
+            if isinstance(self.args[arg], (int, float, 
+                                           np.ndarray,
+                                           tf.Tensor)):
+                self.built_args[arg] = self.args[arg]
+            elif isinstance(self.args[arg], layers.BaseLayer):
+                # TODO: ???
+            elif isinstance(self.args[arg], BaseModel):
+                self.built_args[arg] = self.args[arg].build()
+            else:
+                msg = ('Invalid type for model argument ' + arg +
+                       '. Must be one of: int, float, np.ndarray,'+ 
+                       ' tf.Tensor, or a bk layer, model, '+
+                       'distribution, or transformation.')
+                raise TypeError(msg)
 
 
     def fit(self, x, y, batch_size=128, epochs=100, 
@@ -536,3 +555,6 @@ class CategoricalModel(BaseModel):
 
     # TODO: are there categorical equivalents of predictive_prc, 
     # pred_dist_covered, pred_dist_coverage, and coverage_by?
+
+
+# TODO: DiscreteModel (for poisson etc)
