@@ -63,14 +63,57 @@ class BaseModel(ABC):
                             type(self).__name__+' requires args: '+
                             ', '.join(self.default_args.keys())) 
 
+        # Ensure all arguments are of correct type
+        for arg in self.args:
+            if not (self._arg_is_tensor(arg) or 
+                    self._arg_is_layer(arg) or 
+                    self._arg_is_model(arg)):
+                msg = ('Invalid type for model argument ' + arg +
+                       '. Must be one of: int, float, np.ndarray,'+ 
+                       ' tf.Tensor, or a bk layer, model, '+
+                       'distribution, or transformation.')
+                raise TypeError(msg)
+
         # Set attribs for the built model and fit state
         self.built_model = None
         self.built_args = None
         self.is_fit = False
 
 
+    def _arg_is(self, type_str, arg_str):
+        """Return true if arg (string) is of type type_str."""
+        if type_str=='number':
+            return isinstance(self.args[arg], (int, float, 
+                                               np.ndarray))
+        elif type_str=='tensor':
+            return isinstance(self.args[arg], tf.Tensor)
+        elif type_str=='tensor_like':
+            return isinstance(self.args[arg], (int, float, 
+                                               np.ndarray,
+                                               tf.Tensor))
+        elif type_str=='layer':
+            return isinstance(self.args[arg], layers.BaseLayer)
+        elif type_str=='model':
+            return isinstance(self.args[arg], BaseModel)
+        else:
+            # TODO: error message
+            raise TypeError ...
+
+
+    def build_args(self, data):
+        """Build each of the model's arguments."""
+        for arg in self.args:
+            if _arg_is('tensor_like', arg):
+                self.built_args[arg] = self.args[arg]
+            elif _arg_is('layer', arg):
+                # TODO: ???
+            elif _arg_is('model', arg):
+                self.built_args[arg] = self.args[arg].build()
+                # TODO: wait do you need to do .sample() here?
+
+
     @abstractmethod
-    def build(self, data):
+    def _build(self, data):
         """Build model.
         
         Inheriting class must define this method by building the 
@@ -82,23 +125,10 @@ class BaseModel(ABC):
         pass
 
 
-    def build_args(self, data):
-        """Build each of the model's arguments."""
-        for arg in self.args:
-            if isinstance(self.args[arg], (int, float, 
-                                           np.ndarray,
-                                           tf.Tensor)):
-                self.built_args[arg] = self.args[arg]
-            elif isinstance(self.args[arg], layers.BaseLayer):
-                # TODO: ???
-            elif isinstance(self.args[arg], BaseModel):
-                self.built_args[arg] = self.args[arg].build()
-            else:
-                msg = ('Invalid type for model argument ' + arg +
-                       '. Must be one of: int, float, np.ndarray,'+ 
-                       ' tf.Tensor, or a bk layer, model, '+
-                       'distribution, or transformation.')
-                raise TypeError(msg)
+    def build(self, data):
+        """First build model's args and then build the model."""
+        self.build_args(data)
+        return self._build(data)
 
 
     def fit(self, x, y, batch_size=128, epochs=100, 

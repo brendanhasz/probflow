@@ -6,7 +6,12 @@ if input is distribution, return a bijected distribution
 
 """
 
-#imports...
+
+
+import numpy as np
+import tensorflow as tf
+import tensorflow_probability as tfp
+
 
 class Exp(ContinuousModel):
     """TODO
@@ -17,7 +22,22 @@ class Exp(ContinuousModel):
 
     """
 
-    # TODO: implement
+    # Transformation parameters and their default values
+    self.default_args = {
+        'val': None
+    }
+    
+
+    def _build(self, data):
+        """Build the transformation model.
+
+        TODO: Docs...
+
+        """
+        if self._arg_is('number', 'val'):
+            return np.exp(self.args['val'])
+        elif self._arg_is('tensor', 'val'):
+            return tf.math.exp(self.args['val'])
 
 
 class Log(ContinuousModel):
@@ -29,4 +49,20 @@ class Log(ContinuousModel):
 
     """
 
-    # TODO: implement
+    # Transformation parameters and their default values
+    self.default_args = {
+        'val': None
+    }
+    
+
+    def _build(self, data):
+        """Build the transformation model.
+
+        TODO: Docs...
+
+        """
+        if self._arg_is('number', 'val'):
+            return np.log(self.args['val'])
+        elif self._arg_is('tensor', 'val'):
+            return tf.math.log(self.args['val'])
+            
