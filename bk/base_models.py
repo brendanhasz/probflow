@@ -77,7 +77,10 @@ class BaseModel(ABC):
         # Set attribs for the built model and fit state
         self.built_model = None
         self.built_args = None
+        self.intercepted_model = None
+        self.intercepted_args = None
         self.is_fit = False
+        self.losses = 0
 
 
     def _arg_is(self, type_str, arg_str):
@@ -108,12 +111,25 @@ class BaseModel(ABC):
             elif _arg_is('layer', arg):
                 # TODO: ???
             elif _arg_is('model', arg):
-                self.built_args[arg] = self.args[arg].build()
-                # TODO: wait do you need to do .sample() here?
+                self.built_args[arg] = self.args[arg].build(data).sample()
+
+
+    def meanify_args(self, data):
+        """Build each of the model's arguments, but w/ distribution means."""
+        for arg in self.args:
+            if _arg_is('tensor_like', arg):
+                self.mean_args[arg] = self.args[arg]
+            elif _arg_is('layer', arg):
+                # TODO: ???
+            elif _arg_is('model', arg):
+                self.mean_args[arg] = self.args[arg].meanify(data).mean()
+
+        # TODO: no this isn't right, you need to be able to access the dists of
+        # the *trained* model, which is already built then trained as self.built_model
 
 
     @abstractmethod
-    def _build(self, data):
+    def _build(self, args, data):
         """Build model.
         
         Inheriting class must define this method by building the 
@@ -128,7 +144,18 @@ class BaseModel(ABC):
     def build(self, data):
         """First build model's args and then build the model."""
         self.build_args(data)
-        return self._build(data)
+        self.built_model = self._build(self.built_args, self.data)
+        return self.built_model
+
+
+    def meanify(self, data):
+        """First build model's args and then build the model, w/ dist means."""
+        self.meanify_args(data)
+        self.mean_model = self._build(self.mean_args, self.data)
+        return self.mean_model
+
+        # TODO: no this isn't right, you need to be able to access the dists of
+        # the *trained* model, which is already built then trained as self.built_model
 
 
     def fit(self, x, y, batch_size=128, epochs=100, 
@@ -138,10 +165,16 @@ class BaseModel(ABC):
         TODO: Docs...
 
         """
-        # TODO: recursively build this model's args
-        # TODO: build the model
-        # TODO: set up the data for fitting
+
+        # Set up the data for fitting
+        # TODO
+
+        # Recursively build this model and its args
+        model = self.build(data)
+
+
         # TODO: fit the model
+
         self.is_fit = True
         pass
 
@@ -299,6 +332,16 @@ class BaseModel(ABC):
         #tf_prob = self.built_model.prob()
         # with tf.Session() as sess:
         #   prob = sess.run(tf_prob, feed_dict=???)
+
+        # TODO: but will have to SAMPLE from model and compute prob multiple times?
+        # then what - take average? or median. 
+        # that doesn't make sense... 
+        # somehow need to be able to take the mean of every variational parameter...
+        # which is - sigh - intercepting like in edward.
+        # the predict() method should use that too
+        # maybe you should also have meanify(), and meanify_args()
+        #   as the equivalents of build(), and build_args(), but using the 
+        #   mean of any distribution?
 
 
     def prob_by(self, x, y, x_by, bins=100, plot=True):

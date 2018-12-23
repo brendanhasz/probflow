@@ -28,16 +28,16 @@ class Exp(ContinuousModel):
     }
     
 
-    def _build(self, data):
+    def _build(self, args, data):
         """Build the transformation model.
 
         TODO: Docs...
 
         """
         if self._arg_is('number', 'val'):
-            return np.exp(self.args['val'])
+            return np.exp(args['val'])
         elif self._arg_is('tensor', 'val'):
-            return tf.math.exp(self.args['val'])
+            return tf.math.exp(args['val'])
 
 
 class Log(ContinuousModel):
@@ -55,14 +55,14 @@ class Log(ContinuousModel):
     }
     
 
-    def _build(self, data):
+    def _build(self, args, data):
         """Build the transformation model.
 
         TODO: Docs...
 
         """
         if self._arg_is('number', 'val'):
-            return np.log(self.args['val'])
+            return np.log(args['val'])
         elif self._arg_is('tensor', 'val'):
-            return tf.math.log(self.args['val'])
+            return tf.math.log(args['val'])
             

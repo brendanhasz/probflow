@@ -28,14 +28,14 @@ class Normal(ContinuousModel):
     }
     
 
-    def _build(self, data):
+    def _build(self, args, data):
         """Build the distribution model.
 
         TODO: Docs...
 
         """
-        return tfd.Normal(loc=self.built_args['loc'],
-                          scale=self.built_args['scale'])
+        return tfd.Normal(loc=args['loc'],
+                          scale=args['scale'])
 
 
 
@@ -55,10 +55,10 @@ class HalfNormal(ContinuousModel):
     }
     
 
-    def _build(self, data):
+    def _build(self, args, data):
         """Build the distribution model.
 
         TODO: Docs...
 
         """
-        return tfd.HalfNormal(scale=self.built_args['scale'])
+        return tfd.HalfNormal(scale=args['scale'])
