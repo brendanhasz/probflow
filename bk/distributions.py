@@ -31,22 +31,18 @@ class Normal(ContinuousModel):
     
 
     def _build(self, args, data):
-        """Build the distribution model.
-
-        TODO: Docs...
-
-        """
-        return tfd.Normal(loc=args['loc'],
-                          scale=args['scale'])
+        """Build the distribution model."""
+        return tfd.Normal(loc=args['loc'], scale=args['scale'])
 
 
-    def _log_loss(self, args, vals):
+    def _log_loss(self, obj, vals):
         """Compute the loss due to the value."""
-        tfd.Normal(loc=args['loc'], scale=args['scale']).log_prob(vals)
-        # TODO: so the values are the sampled values? so self.built_model.sample()?
-        # but the parent calls that so how can we compute it...? 
-        # may have to have parent call this in sum_arg_losses (when this obj is an arg)
-        # then fit() calls this with vals = the y variable
+        return obj.log_prob(vals)
+        # TODO: well, this returns *a* normal distribution, but is that what we want?
+        # don't we really want to do self.built_model.log_prob(vals)?
+        # but that will only work if it's a distribution and instead of args we pass model
+        # will it work for layers?
+
 
 
 class HalfNormal(ContinuousModel):
@@ -66,12 +62,14 @@ class HalfNormal(ContinuousModel):
     
 
     def _build(self, args, data):
-        """Build the distribution model.
-
-        TODO: Docs...
-
-        """
+        """Build the distribution model."""
         return tfd.HalfNormal(scale=args['scale'])
+
+
+    def _log_loss(self, args, vals):
+        """Compute the loss due to the value."""
+        # TODO: same as 
+
 
 
 # TODO: other common distributions

@@ -42,11 +42,7 @@ class Add(BaseLayer):
     
 
     def _build(self, args, data):
-        """Build the distribution model.
-
-        TODO: Docs...
-
-        """
+        """Build the layer."""
         return args['a'] + args['b']
 
 
@@ -73,11 +69,7 @@ class Sub(BaseLayer):
     
 
     def _build(self, args, data):
-        """Build the distribution model.
-
-        TODO: Docs...
-
-        """
+        """Build the layer."""
         return args['a'] - args['b']
 
 
@@ -104,11 +96,7 @@ class Mul(BaseLayer):
     
 
     def _build(self, args, data):
-        """Build the distribution model.
-
-        TODO: Docs...
-
-        """
+        """Build the layer."""
         return args['a'] * args['b']
 
 
@@ -135,11 +123,7 @@ class Div(BaseLayer):
     
 
     def _build(self, args, data):
-        """Build the distribution model.
-
-        TODO: Docs...
-
-        """
+        """Build the layer."""
         return args['a'] / args['b']
 
 
@@ -165,11 +149,7 @@ class Abs(BaseLayer):
     
 
     def _build(self, args, data):
-        """Build the distribution model.
-
-        TODO: Docs...
-
-        """
+        """Build the layer."""
         return tf.abs(args['val'])
 
 
@@ -195,11 +175,7 @@ class Exp(BaseLayer):
     
 
     def _build(self, args, data):
-        """Build the distribution model.
-
-        TODO: Docs...
-
-        """
+        """Build the layer."""
         return tf.exp(args['val'])
 
 
@@ -230,20 +206,12 @@ class Log(BaseLayer):
     
 
     def _build(self, args, data):
-        """Build the distribution model.
-
-        TODO: Docs...
-
-        """
-        #TODO: need to account for the jacobian if input is a BaseModel
-        #  may have to override build() and call super.build() and then
-        #  if input is a BaseModel, add jacobian to log_loss
-        #  that would be how to handle the loss in the base layer too!
+        """Build the layer."""
         return tf.log(args['val'])
 
 
-    def _log_loss(self, args, vals):
-        """Add the Jacobian adjustment if input is a distribution."""
+    def _log_loss(self, obj, vals):
+        """The loss is a Jacobian adjustment if input is a distribution."""
         if isinstance(self.arg['val'], BaseModel):
             # TODO: compute the jacobian adjustment
         else:
@@ -274,11 +242,8 @@ class Dense(BaseLayer):
     
 
     def _build(self, args, data):
-        """Build the distribution model.
+        """Build the layer."""
 
-        TODO: Docs...
-
-        """
 
         # If no input specified, assume data is input
         if isinstance(args['input'], list) and len(args['input'])==0:

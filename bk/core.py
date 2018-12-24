@@ -70,12 +70,33 @@ class BaseLayer(ABC):
                 raise TypeError(msg)
 
         # Set attribs for the built layer and fit state
-        self.built_layer = None
+        self.built_obj = None
         self.built_args = None
-        self.mean_layer = None
+        self.mean_obj = None
         self.mean_args = None
         self.is_fit = False
         self.log_loss = 0
+
+
+    @abstractmethod
+    def _build(self, args, data):
+        """Build layer.
+        
+        Inheriting class must define this method by building the layer for that
+        class.  Should return a `Tensor` or a `tfp.distribution` using the
+        layer arguments in args (a dict).
+        """
+        pass
+
+
+    @abstractmethod
+    def _log_loss(self, obj, vals):
+        """Compute the log loss incurred by this layer.
+        
+        Inheriting class must define this method by computing the loss of this
+        layer (and only this layer, not its args!).
+        """
+        pass
 
 
     def _arg_is(self, type_str, arg_str):
@@ -99,42 +120,19 @@ class BaseLayer(ABC):
 
 
     def build_args(self, data):
-        """Build each of the model's arguments."""
+        """Build each of the layer's arguments."""
         for arg in self.args:
             if _arg_is('tensor_like', arg):
                 self.built_args[arg] = self.args[arg]
                 self.mean_args[arg] = self.args[arg]
             elif _arg_is('model', arg):
                 self.args[arg].build(data)
-                self.built_args[arg] = self.args[arg].built_model.sample()
-                self.mean_args[arg] = self.args[arg].mean_model.mean()
+                self.built_args[arg] = self.args[arg].built_obj.sample()
+                self.mean_args[arg] = self.args[arg].mean_obj.mean()
             elif _arg_is('layer', arg):
                 self.args[arg].build(data)
-                self.built_args[arg] = self.args[arg].built_model
-                self.mean_args[arg] = self.args[arg].mean_model
-
-
-    @abstractmethod
-    def _build(self, args, data):
-        """Build layer.
-        
-        Inheriting class must define this method by building the 
-        layer for that class.  Should set `self.built_model` to a
-        TensorFlow Probability distribution, using the inputs to 
-        the constructor which are stored in `self.args` and 
-        `self.kwargs`.
-        """
-        pass
-
-
-    @abstractmethod
-    def _log_loss(self, args):
-        """Compute the loss incurred by this layer.
-        
-        Inheriting class must define this method by computing the loss of this
-        layer (and only this layer, not its args!).
-        """
-        pass
+                self.built_args[arg] = self.args[arg].built_obj
+                self.mean_args[arg] = self.args[arg].mean_obj
 
 
     def sum_arg_losses(self):
@@ -145,6 +143,11 @@ class BaseLayer(ABC):
             if _arg_is('tensor_like', arg):
                 pass #no loss incurred by tensors
             elif _arg_is('layer', arg):
+
+                # TODO: this is wrong:
+                # how should _log_loss work?
+                # _log_loss(args, vals) or _log_loss(built_obj, vals)
+
                 self.arg_loss_sum += (
                     self.args[arg].arg_loss_sum + 
                     self.args[arg]._log_loss(self.args[arg].built_args, 
@@ -159,8 +162,8 @@ class BaseLayer(ABC):
         """Build layer's args and then build the layer."""
         self.build_args(data)
         self.sum_arg_losses()
-        self.built_model = self._build(self.built_args, self.data)
-        self.mean_model = self._build(self.mean_args, self.data)
+        self.built_obj = self._build(self.built_args, self.data)
+        self.mean_obj = self._build(self.mean_args, self.data)
 
 
     def __add__(self, other):
@@ -185,7 +188,7 @@ class BaseLayer(ABC):
 
     def __abs__(self, other):
         """Take the absoute value of the output of this model."""
-        return Abs(self, other)
+        return Abs(self)
 
 
 
@@ -193,15 +196,9 @@ class BaseModel(BaseLayer):
     """Abstract model class (just used as an implementation base)
 
     TODO: More info...
+    talk about how a model defines a parameterized probability distribution which
+    you can call fit on
 
-    Inheriting class must define the _build() method by building the 
-    layer for that class.  Should set `self.built_model` to a
-    TensorFlow Probability distribution, using the model parameters,
-    which after being built are stored in `self.built_args`.
-
-    Inheriting class must also define the `default_args` attribute as a dict, 
-    where keys are strings of layer parameter names and values are layer 
-    argument values.  
     """
 
 
@@ -220,13 +217,13 @@ class BaseModel(BaseLayer):
 
         # Recursively build this model and its args
         self.build(data)
-        model = self.built_model
+        model = self.built_obj
 
         # Set up TensorFlow graph for the losses
         self.log_loss = (self.arg_loss_sum + 
-                         self._log_loss(self.built_args, y_vals))
+                         self._log_loss(self.built_obj, y_vals))
         self.mean_log_loss = (self.mean_arg_loss_sum + 
-                         self._log_loss(self.mean_args, y_vals))
+                              self._log_loss(self.mean_obj, y_vals))
 
         # TODO: fit the model
 
@@ -397,9 +394,9 @@ class BaseModel(BaseLayer):
         # Compute probability of y given x
         # TODO
         # if dist:
-        #   #sample prob from self.built_model.prob()?
+        #   #sample prob from self.mean_obj.prob()?
         # else:
-        #   tf_prob = self.mean_model.prob()
+        #   tf_prob = self.mean_obj.prob()
         # with tf.Session() as sess:
         #   prob = sess.run(tf_prob, feed_dict=???) #make the feed dict x and y
 
