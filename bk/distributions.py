@@ -10,6 +10,8 @@ import tensorflow_probability as tfp
 tfd = tfp.distributions
 
 
+# TODO: define continuous vs categorical distributions? (and inherit accordingly?)
+
 
 class Normal(ContinuousModel):
     """TODO
@@ -62,3 +64,6 @@ class HalfNormal(ContinuousModel):
 
         """
         return tfd.HalfNormal(scale=args['scale'])
+
+
+# TODO: other common distributions

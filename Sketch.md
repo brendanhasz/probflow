@@ -20,7 +20,7 @@ Layers output a tf.Tensor, whereas variables, distributions, and models output a
 - Embedding (default is to not use prob dist for embeddings)
 - Conv1D
 - Conv2D
-- LTSM? Maybe put that on the Todo list...
+- LSTM? Maybe put that on the Todo list...
 All should have an in=... arg which specifies their input(s)
 
 ## bk.distributions
@@ -70,6 +70,7 @@ Also should have callbacks like let's to do early stopping etc
 Also have a monitor param which somehow lets you monitor the value of parameters over training?
 And make sure to make it sklearn-compatible (ie you can put it in a pipeline and everything)
 should have a show_tensorboard option (default is False) https://www.tensorflow.org/guide/summaries_and_tensorboard
+
 
 ## Priors
 Should have some way to set priors?
@@ -153,6 +154,9 @@ Perhaps make a RandomVariable() which takes a slice of the x_values placeholder?
 
 ## Handling Bijectors
 ???
+
+## Mixture distribution
+A continuous distribution which takes a list of other distrbutions.
 
 ## Model comparison
 somehow.  AIC/BIC/DIC?  Could you do LOO?
