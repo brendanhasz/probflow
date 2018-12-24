@@ -1,4 +1,4 @@
-"""Abstract model classes.
+"""Abstract classes.
 
 TODO: more info...
 
@@ -20,8 +20,8 @@ from transformations import BaseTransformation
 
 
 
-class BaseModel(ABC):
-    """Abstract model class (just used as an implementation base)
+class BaseLayer(ABC):
+    """Abstract layer class (just used as an implementation base)
 
     TODO: More info...
 
@@ -30,24 +30,22 @@ class BaseModel(ABC):
     @property
     @abstractmethod
     def default_args(self):
-        """Model parameters and their default values.
+        """Layer parameters and their default values.
         
-        Inheriting class must define this property as a dict, where
-        keys are strings of model parameter names and values are
-        model argument values.  Values can be of type int, float,
-        np.ndarray, tf.tensor, or tfp.distribution.
+        Inheriting class must define this property as a dict, where keys are 
+        strings of layer parameter names and values are layer argument values.  
         """
         pass
 
 
     def __init__(self, *args, **kwargs):
-        """Construct model.
+        """Construct layer.
 
         TODO: docs. Mention that actually building the tf graph is
         delayed until build() or fit() is called.
         """
 
-        # Set model arguments, using args, kwargs, and defaults 
+        # Set layer arguments, using args, kwargs, and defaults 
         for ix, arg in enumerate(self.default_args):
             if ix<len(args):
                 self.args[arg] = args[ix]
@@ -58,18 +56,23 @@ class BaseModel(ABC):
 
         # Ensure all required arguments have been set
         if None in self.args.values():
-            raise TypeError('required model arg(s) were not set. '+
+            raise TypeError('required arg(s) were not set. '+
                             type(self).__name__+' requires args: '+
                             ', '.join(self.default_args.keys())) 
 
         # Ensure all arguments are of correct type
         for arg in self.args:
-            self._ensure_arg_type(arg)
+            if not self._arg_is('valid', arg):
+                msg = ('Invalid type for ' + type(self).__name__ + 
+                       'argument ' + arg + '. Must be one of: int, float, ' + 
+                       'np.ndarray, tf.Tensor, or a bk layer, model, ' +
+                       'or distribution.')
+                raise TypeError(msg)
 
-        # Set attribs for the built model and fit state
-        self.built_model = None
+        # Set attribs for the built layer and fit state
+        self.built_layer = None
         self.built_args = None
-        self.mean_model = None
+        self.mean_layer = None
         self.mean_args = None
         self.is_fit = False
         self.log_loss = 0
@@ -78,33 +81,21 @@ class BaseModel(ABC):
     def _arg_is(self, type_str, arg_str):
         """Return true if arg (string) is of type type_str."""
         if type_str=='number':
-            return isinstance(self.args[arg], (int, float, 
-                                               np.ndarray))
+            return isinstance(self.args[arg], (int, float, np.ndarray))
         elif type_str=='tensor':
             return isinstance(self.args[arg], tf.Tensor)
         elif type_str=='tensor_like':
-            return isinstance(self.args[arg], (int, float, 
-                                               np.ndarray,
-                                               tf.Tensor))
+            return isinstance(self.args[arg], (int,float,np.ndarray,tf.Tensor))
         elif type_str=='model':
             return isinstance(self.args[arg], BaseModel)
         elif type_str=='layer':
             return isinstance(self.args[arg], BaseLayer)
+        elif type_str=='valid':
+            return isinstance(self.args[arg], (int, float, np.ndarray,
+                                               tf.Tensor, BaseModel, BaseLayer))
         else:
             raise TypeError('type_str must a string, one of: number, tensor,' +
-                            ' tensor_like, or bk model or layer')
-
-
-    def _ensure_arg_type(self, arg_str):
-        """Ensure argument `arg_str` has a valid type."""
-        #TODO: make this actually work correctly
-        for arg_type in ['tensor_like', 'model', 'layer', 'trans']:
-            if self._arg_is(arg_type, )
-                msg = ('Invalid type for ' + type(self).__name__ + ' model ' + 
-                       'argument ' + arg + '. Must be one of: int, float, ' + 
-                       'np.ndarray, tf.Tensor, or a bk layer, model, ' +
-                       'or distribution.')
-                raise TypeError(msg)
+                            ' tensor_like, model, layer, or valid')
 
 
     def build_args(self, data):
@@ -114,20 +105,21 @@ class BaseModel(ABC):
                 self.built_args[arg] = self.args[arg]
                 self.mean_args[arg] = self.args[arg]
             elif _arg_is('model', arg):
-                t_arg = self.args[arg].build(data)
-                self.built_args[arg] = t_arg.sample()
-                self.mean_args[arg] = t_arg.mean()
+                self.args[arg].build(data)
+                self.built_args[arg] = self.args[arg].built_model.sample()
+                self.mean_args[arg] = self.args[arg].mean_model.mean()
             elif _arg_is('layer', arg):
-                t_arg = self.args[arg].build(data)
-                self.built_args[arg], self.mean_args[arg] = t_arg
-                #TODO: not sure how to handle mean model 
+                self.args[arg].build(data)
+                self.built_args[arg] = self.args[arg].built_model
+                self.mean_args[arg] = self.args[arg].mean_model
+
 
     @abstractmethod
     def _build(self, args, data):
-        """Build model.
+        """Build layer.
         
         Inheriting class must define this method by building the 
-        model for that class.  Should set `self.built_model` to a
+        layer for that class.  Should set `self.built_model` to a
         TensorFlow Probability distribution, using the inputs to 
         the constructor which are stored in `self.args` and 
         `self.kwargs`.
@@ -141,7 +133,6 @@ class BaseModel(ABC):
         self.built_model = self._build(self.built_args, self.data)
         self.mean_model = self._build(self.mean_args, self.data)
         #TODO: set self.log_loss to own log_loss plus log_loss of each arg
-        return self.built_model
 
 
     def __add__(self, other):
@@ -169,11 +160,22 @@ class BaseModel(ABC):
         return Abs(self, other)
 
 
-    # ----------------------------------------------
-    # I think BaseLayer should include everything above here
-    # and then BaseModel(BaseLayer) starts here
-    # ----------------------------------------------
-    
+
+class BaseModel(BaseLayer):
+    """Abstract model class (just used as an implementation base)
+
+    TODO: More info...
+
+    Inheriting class must define the _build() method by building the 
+    layer for that class.  Should set `self.built_model` to a
+    TensorFlow Probability distribution, using the model parameters,
+    which after being built are stored in `self.built_args`.
+
+    Inheriting class must also define the `default_args` attribute as a dict, 
+    where keys are strings of layer parameter names and values are layer 
+    argument values.  
+    """
+
 
     def fit(self, x, y, batch_size=128, epochs=100, 
             optimizer='adam', learning_rate=None, metrics=None):
@@ -187,8 +189,8 @@ class BaseModel(ABC):
         # TODO
 
         # Recursively build this model and its args
-        model = self.build(data)
-
+        self.build(data)
+        model = self.built_model
 
         # TODO: fit the model
 
