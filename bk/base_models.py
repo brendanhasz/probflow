@@ -14,15 +14,14 @@ import tensorflow_probability as tfp
 
 #from . import base_models
 #from . import distributions
-from . import layers
-#from . import models
-#from . import transformations
-#from . import variables
+
+from layers import BaseLayer
+from transformations import BaseTransformation
 
 
 
 class BaseModel(ABC):
-    """Abstract model class (just used as implementation base)
+    """Abstract model class (just used as an implementation base)
 
     TODO: More info...
 
@@ -65,14 +64,7 @@ class BaseModel(ABC):
 
         # Ensure all arguments are of correct type
         for arg in self.args:
-            if not (self._arg_is_tensor(arg) or 
-                    self._arg_is_layer(arg) or 
-                    self._arg_is_model(arg)):
-                msg = ('Invalid type for model argument ' + arg +
-                       '. Must be one of: int, float, np.ndarray,'+ 
-                       ' tf.Tensor, or a bk layer, model, '+
-                       'distribution, or transformation.')
-                raise TypeError(msg)
+            self._ensure_arg_type(arg)
 
         # Set attribs for the built model and fit state
         self.built_model = None
@@ -80,7 +72,7 @@ class BaseModel(ABC):
         self.mean_model = None
         self.mean_args = None
         self.is_fit = False
-        self.losses = 0
+        self.log_loss = 0
 
 
     def _arg_is(self, type_str, arg_str):
@@ -94,13 +86,27 @@ class BaseModel(ABC):
             return isinstance(self.args[arg], (int, float, 
                                                np.ndarray,
                                                tf.Tensor))
-        elif type_str=='layer':
-            return isinstance(self.args[arg], layers.BaseLayer)
         elif type_str=='model':
             return isinstance(self.args[arg], BaseModel)
+        elif type_str=='layer':
+            return isinstance(self.args[arg], BaseLayer)
+        elif type_str=='trans':
+            return isinstance(self.args[arg], BaseTransformation)
         else:
-            # TODO: error message
-            raise TypeError ...
+            raise TypeError('type_str must a string, one of: number, tensor,' +
+                            ' tensor_like, model, layer, or trans')
+
+
+    def _ensure_arg_type(self, arg_str):
+        """Ensure argument `arg_str` has a valid type."""
+        #TODO: make this actually work correctly
+        for arg_type in ['tensor_like', 'model', 'layer', 'trans']:
+            if self._arg_is(arg_type, )
+                msg = ('Invalid type for ' + type(self).__name__ + ' model ' + 
+                       'argument ' + arg + '. Must be one of: int, float, ' + 
+                       'np.ndarray, tf.Tensor, or a bk layer, model, '+
+                       'distribution, or transformation.')
+                raise TypeError(msg)
 
 
     def build_args(self, data):
@@ -109,12 +115,16 @@ class BaseModel(ABC):
             if _arg_is('tensor_like', arg):
                 self.built_args[arg] = self.args[arg]
                 self.mean_args[arg] = self.args[arg]
-            elif _arg_is('layer', arg):
-                # TODO: ???
             elif _arg_is('model', arg):
                 t_arg = self.args[arg].build(data)
                 self.built_args[arg] = t_arg.sample()
                 self.mean_args[arg] = t_arg.mean()
+            elif _arg_is('layer', arg):
+                t_arg = self.args[arg].build(data)
+                self.built_args[arg], self.mean_args[arg] = t_arg
+            elif _arg_is('trans', arg):
+                # TODO: ???
+
 
 
     @abstractmethod
@@ -135,6 +145,7 @@ class BaseModel(ABC):
         self.build_args(data)
         self.built_model = self._build(self.built_args, self.data)
         self.mean_model = self._build(self.mean_args, self.data)
+        #TODO: set self.log_loss to own log_loss plus log_loss of each arg
         return self.built_model
 
 
@@ -222,10 +233,10 @@ class BaseModel(ABC):
         prc : float
             Percentile of the predictive distribution to use as 
             a prediction when ``method=='prc'`. Between 0 and 100
-            inclusive.
+            inclusive (default=50).
         num_samples : int
             Number of samples to draw from the posterior predictive
-            distribution.
+            distribution (default=100).
 
         Returns
         -------

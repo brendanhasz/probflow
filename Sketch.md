@@ -76,6 +76,13 @@ should have a show_tensorboard option (default is False) https://www.tensorflow.
 Should have some way to set priors?
 And the layers and models and everything should have sensible default priors (like normal dist w/ mu=0 and sig=1)
 
+
+## Keeping track of the loss
+in build() will have to compute the log_loss and set self.log_loss to that
+and when computing that, make sure to add the losses of all children too
+Still have to figure out whether the -elbo loss is just the log posterior prob, or do we need to add the kl term?
+
+
 ## Evaluation of the posterior
 Then should also have ways to draw from posterior dist,eg
 
@@ -119,6 +126,7 @@ So for each of a things parameters, it detects if that param is a tfd.distributi
     if so use .sample(sample_size=batch_size)
 
 
+
 # TODOs: 
 
 ## Tensorflow graph
@@ -127,7 +135,9 @@ https://www.tensorflow.org/guide/graph_viz
 
 ## Handling data inputs
 Don't worry about this till you get the main stuff working...
-To manually feed in data, use tf.placeholders
+To manually feed in data, use Input layer?
+which takes list of ints (cols of x for which this Input obj should represent)
+  or list of strings (if x is a pandas df)
     i.e., use tf.placeholders where you want them in 
     can pass dict between placeholders and their data/dataset_iterators 
 Layers and models have an in=... arg which specifies the input to their first layer?
