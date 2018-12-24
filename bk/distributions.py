@@ -40,6 +40,14 @@ class Normal(ContinuousModel):
                           scale=args['scale'])
 
 
+    def _log_loss(self, args, vals):
+        """Compute the loss due to the value."""
+        tfd.Normal(loc=args['loc'], scale=args['scale']).log_prob(vals)
+        # TODO: so the values are the sampled values? so self.built_model.sample()?
+        # but the parent calls that so how can we compute it...? 
+        # may have to have parent call this in sum_arg_losses (when this obj is an arg)
+        # then fit() calls this with vals = the y variable
+
 
 class HalfNormal(ContinuousModel):
     """TODO

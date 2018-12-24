@@ -127,12 +127,40 @@ class BaseLayer(ABC):
         pass
 
 
+    @abstractmethod
+    def _log_loss(self, args):
+        """Compute the loss incurred by this layer.
+        
+        Inheriting class must define this method by computing the loss of this
+        layer (and only this layer, not its args!).
+        """
+        pass
+
+
+    def sum_arg_losses(self):
+        """Sum the loss of all this layer's arguments."""
+        self.arg_loss_sum = 0
+        self.mean_arg_loss_sum = 0
+        for arg in self.args:
+            if _arg_is('tensor_like', arg):
+                pass #no loss incurred by tensors
+            elif _arg_is('layer', arg):
+                self.arg_loss_sum += (
+                    self.args[arg].arg_loss_sum + 
+                    self.args[arg]._log_loss(self.args[arg].built_args, 
+                                             self.built_args[arg]))
+                self.mean_arg_loss_sum += (
+                    self.args[arg].mean_arg_loss_sum + 
+                    self.args[arg]._log_loss(self.args[arg].mean_args, 
+                                             self.mean_args[arg]))
+
+
     def build(self, data):
-        """First build model's args and then build the model."""
+        """Build layer's args and then build the layer."""
         self.build_args(data)
+        self.sum_arg_losses()
         self.built_model = self._build(self.built_args, self.data)
         self.mean_model = self._build(self.mean_args, self.data)
-        #TODO: set self.log_loss to own log_loss plus log_loss of each arg
 
 
     def __add__(self, other):
@@ -187,10 +215,18 @@ class BaseModel(BaseLayer):
 
         # Set up the data for fitting
         # TODO
+        #y_vals = iterator...
+        #x_vals = iterator...
 
         # Recursively build this model and its args
         self.build(data)
         model = self.built_model
+
+        # Set up TensorFlow graph for the losses
+        self.log_loss = (self.arg_loss_sum + 
+                         self._log_loss(self.built_args, y_vals))
+        self.mean_log_loss = (self.mean_arg_loss_sum + 
+                         self._log_loss(self.mean_args, y_vals))
 
         # TODO: fit the model
 

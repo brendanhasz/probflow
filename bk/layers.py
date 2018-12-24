@@ -50,6 +50,12 @@ class Add(BaseLayer):
         return args['a'] + args['b']
 
 
+    def _log_loss(self, args, vals):
+        """Addition incurrs no loss."""
+        return 0
+
+
+
 class Sub(BaseLayer):
     """A layer which subtracts one input from another.
 
@@ -73,6 +79,11 @@ class Sub(BaseLayer):
 
         """
         return args['a'] - args['b']
+
+
+    def _log_loss(self, args, vals):
+        """Subtraction incurrs no loss."""
+        return 0
 
 
 
@@ -101,6 +112,11 @@ class Mul(BaseLayer):
         return args['a'] * args['b']
 
 
+    def _log_loss(self, args, vals):
+        """Multiplication incurrs no loss."""
+        return 0
+
+
 
 class Div(BaseLayer):
     """A layer which divides one input by another.
@@ -125,6 +141,11 @@ class Div(BaseLayer):
 
         """
         return args['a'] / args['b']
+
+
+    def _log_loss(self, args, vals):
+        """Division incurrs no loss."""
+        return 0
 
 
 
@@ -152,6 +173,11 @@ class Abs(BaseLayer):
         return tf.abs(args['val'])
 
 
+    def _log_loss(self, args, vals):
+        """Absolute value incurrs no loss."""
+        return 0
+
+
 
 class Exp(BaseLayer):
     """A layer which outputs the natural exponent of its input.
@@ -177,6 +203,16 @@ class Exp(BaseLayer):
         return tf.exp(args['val'])
 
 
+    def _log_loss(self, args, vals):
+        """Add the Jacobian adjustment if input is a distribution."""
+        if isinstance(self.arg['val'], BaseModel):
+            # TODO: compute the jacobian adjustment
+        else:
+            return 0
+
+    # TODO: hmm, well if you can compute the log loss of it then... maybe these 
+    # transformations CAN inherit from model instead of layer
+
 
 class Log(BaseLayer):
     """A layer which outputs the natural log of its input.
@@ -199,7 +235,19 @@ class Log(BaseLayer):
         TODO: Docs...
 
         """
+        #TODO: need to account for the jacobian if input is a BaseModel
+        #  may have to override build() and call super.build() and then
+        #  if input is a BaseModel, add jacobian to log_loss
+        #  that would be how to handle the loss in the base layer too!
         return tf.log(args['val'])
+
+
+    def _log_loss(self, args, vals):
+        """Add the Jacobian adjustment if input is a distribution."""
+        if isinstance(self.arg['val'], BaseModel):
+            # TODO: compute the jacobian adjustment
+        else:
+            return 0
 
 
 
@@ -240,7 +288,6 @@ class Dense(BaseLayer):
         # TODO
         # NOTE: may have to implement manually w/ bk.Variable? in order to let the mean_model work...
 
-        # TODO: should return built_model, mean_model
 
 
 
