@@ -40,6 +40,7 @@ class Exp(ContinuousModel):
             return tf.math.exp(args['val'])
 
 
+
 class Log(ContinuousModel):
     """TODO
 

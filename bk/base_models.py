@@ -77,8 +77,8 @@ class BaseModel(ABC):
         # Set attribs for the built model and fit state
         self.built_model = None
         self.built_args = None
-        self.intercepted_model = None
-        self.intercepted_args = None
+        self.mean_model = None
+        self.mean_args = None
         self.is_fit = False
         self.losses = 0
 
@@ -108,24 +108,13 @@ class BaseModel(ABC):
         for arg in self.args:
             if _arg_is('tensor_like', arg):
                 self.built_args[arg] = self.args[arg]
-            elif _arg_is('layer', arg):
-                # TODO: ???
-            elif _arg_is('model', arg):
-                self.built_args[arg] = self.args[arg].build(data).sample()
-
-
-    def meanify_args(self, data):
-        """Build each of the model's arguments, but w/ distribution means."""
-        for arg in self.args:
-            if _arg_is('tensor_like', arg):
                 self.mean_args[arg] = self.args[arg]
             elif _arg_is('layer', arg):
                 # TODO: ???
             elif _arg_is('model', arg):
-                self.mean_args[arg] = self.args[arg].meanify(data).mean()
-
-        # TODO: no this isn't right, you need to be able to access the dists of
-        # the *trained* model, which is already built then trained as self.built_model
+                t_arg = self.args[arg].build(data)
+                self.built_args[arg] = t_arg.sample()
+                self.mean_args[arg] = t_arg.mean()
 
 
     @abstractmethod
@@ -145,17 +134,8 @@ class BaseModel(ABC):
         """First build model's args and then build the model."""
         self.build_args(data)
         self.built_model = self._build(self.built_args, self.data)
-        return self.built_model
-
-
-    def meanify(self, data):
-        """First build model's args and then build the model, w/ dist means."""
-        self.meanify_args(data)
         self.mean_model = self._build(self.mean_args, self.data)
-        return self.mean_model
-
-        # TODO: no this isn't right, you need to be able to access the dists of
-        # the *trained* model, which is already built then trained as self.built_model
+        return self.built_model
 
 
     def fit(self, x, y, batch_size=128, epochs=100, 
@@ -279,6 +259,8 @@ class BaseModel(ABC):
         #TODO: should really do straight in tf, 
         # not tf->numpy->sample
 
+        # TODO: and should use mean model, not sampling
+
         # Compute prediction based on the predictive distribution
         if method=='mean':
             return np.mean(pred_dist, axis=2)
@@ -313,12 +295,22 @@ class BaseModel(ABC):
         #TODO
 
 
-    def prob(self, x, y):
-        """Compute the probability of observations `y` given `x` and
-        the model.
+    def log_prob(self, x, y, individually=True, dist=False, num_samples=1000):
+        """Compute the log probability of `y` given `x` and the model.
+
 
         TODO: docs...
-        returns vector of probs w/ shape (x.shape[0],)
+
+        if individually is True, returns prob for each sample individually
+            so return shape is (x.shape[0],?)
+        if individually is False, returns product of each individual prob
+            so return shape is (1,?)
+        if dist is True, returns log probability posterior distribution
+            (distribution of probs for lots of samples from the model) 
+            so return shape is (?,num_samples)
+        if dist is False, returns log posterior prob assuming each variable 
+            takes the mean value of its variational distribution
+            so return shape iss (?,1)
 
         """
 
@@ -329,9 +321,12 @@ class BaseModel(ABC):
 
         # Compute probability of y given x
         # TODO
-        #tf_prob = self.built_model.prob()
+        # if dist:
+        #   #sample prob from self.built_model.prob()?
+        # else:
+        #   tf_prob = self.mean_model.prob()
         # with tf.Session() as sess:
-        #   prob = sess.run(tf_prob, feed_dict=???)
+        #   prob = sess.run(tf_prob, feed_dict=???) #make the feed dict x and y
 
         # TODO: but will have to SAMPLE from model and compute prob multiple times?
         # then what - take average? or median. 
@@ -344,19 +339,21 @@ class BaseModel(ABC):
         #   mean of any distribution?
 
 
-    def prob_by(self, x, y, x_by, bins=100, plot=True):
-        """Plot the probability of observations `y` given `x` and
-        the model as a function of specified independent variables.
+    def log_prob_by(self, x, y, x_by, bins=100, plot=True):
+        """Plot the log probability of observations `y` given `x` and the model 
+        as a function of independent variable(s) `x_by`.
 
         TODO: docs...
 
         """
-        
-        # Compute the model probability
-        probs = self.prob(x, y)
 
-        # TODO: alternatively, x_by should be able to be any array_like
-        # as long as it's same size as x.shape[0]
+        # TODO: check types of x, y, and x_by.
+        # x + y should be able to be numpy arrays or ints or floats or pandas arrays
+        # x_by should be able to be all those OR list of strings
+        #    (length 1 or 2, col names to use if x is a pandas df)
+
+        # Compute the model posterior probability for each observation
+        probs = self.log_prob(x, y)
 
         # Plot probability as a fn of x_by cols of x
         px, py = self.plot_by(x[:,x_by], probs, 
@@ -365,70 +362,68 @@ class BaseModel(ABC):
         return px, py
 
 
-    def log_prob(self, x, y):
-        """Compute the log probability of observations `y` given 
-        `x` and the model.
+    def prob(self, x, y, individually=True, dist=False, num_samples=1000):
+        """Compute the probability of `y` given `x` and the model.
 
         TODO: docs...
 
+        also, this should probably use log_prob, above, then exp it...
         """
 
-        # Check model has been fit
-        self.ensure_is_fit()
-
-        # TODO: evaluate log_prob w/ tf like above
+        # TODO: evaluate log_prob w/ tf like in log_prob above
 
 
-    def log_prob_by(self, x, y, x_by, bins=100):
-        """Plot the log probability of observations `y` given `x` 
-        and the model as a function of specified independent 
-        variables
+    def prob_by(self, x, y, x_by, bins=100, plot=True):
+        """Plot the probability of observations `y` given `x` and the model 
+        as a function of independent variable(s) `x_by`.
+
+        TODO: docs...
+        
         """
-        # TODO: same idea as prob_by, above
+        
+        # TODO: same idea as log_prob_by above
 
 
     def cdf(self, x, y):
-        """Compute the cumulative probability of observations `y` 
-        given `x` and the model.
+        """Compute the cumulative probability of `y` given `x` and the model.
 
         TODO: docs...
 
         """
 
-        # Check model has been fit
-        self.ensure_is_fit()
-
-        # TODO: evaluate cdf w/ tf like above
+        # TODO: same idea as log_prob above
 
 
     def cdf_by(self, x, y, x_by, bins=100):
-        """Plot the cumulative probability of observations `y` 
-        given `x` and the model as a function of specified 
-        independent variables
+        """Plot the cumulative probability of observations `y` given `x` and 
+        the model as a function of independent variable(s) `x_by`.
+
+        TODO: docs...
+        
         """
-        # TODO: same idea as prob_by, above
+
+        # TODO: same idea as log_prob_by above
 
 
     def log_cdf(self, x, y):
-        """Compute the log cumulative probability of observations 
-        `y` given `x` and the model.
+        """Compute the log cumulative probability of `y` given `x` and the model.
 
         TODO: docs...
 
         """
 
-        # Check model has been fit
-        self.ensure_is_fit()
-
-        # TODO: evaluate log_cdf w/ tf like above
+        # TODO: same idea as log_prob above
 
 
     def log_cdf_by(self, x, y, x_by, bins=100):
-        """Plot the log cumulative probability of observations `y` 
-        given `x` and the model as a function of specified 
-        independent variables
+        """Plot the log cumulative probability of observations `y` given `x` 
+        and the model as a function of independent variable(s) `x_by`.
+
+        TODO: docs...
+        
         """
-        # TODO: same idea as prob_by, above
+
+        # TODO: same idea as log_prob_by above
 
 
 
