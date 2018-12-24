@@ -15,7 +15,7 @@ import tensorflow_probability as tfp
 #from . import base_models
 #from . import distributions
 
-from layers import BaseLayer
+from layers import BaseLayer, Add, Sub, Mul, Div, Abs
 from transformations import BaseTransformation
 
 
@@ -143,6 +143,37 @@ class BaseModel(ABC):
         #TODO: set self.log_loss to own log_loss plus log_loss of each arg
         return self.built_model
 
+
+    def __add__(self, other):
+        """Add this model to another model, layer, variable, or value."""
+        return Add(self, other)
+
+
+    def __sub__(self, other):
+        """Subtract this model from another model, layer, variable, or value."""
+        return Sub(self, other)
+
+
+    def __mul__(self, other):
+        """Multiply this model by another model, layer, variable, or value."""
+        return Mul(self, other)
+
+
+    def __div__(self, other):
+        """Divide this model by another model, layer, variable, or value."""
+        return Div(self, other)
+
+
+    def __abs__(self, other):
+        """Take the absoute value of the output of this model."""
+        return Abs(self, other)
+
+
+    # ----------------------------------------------
+    # I think BaseLayer should include everything above here
+    # and then BaseModel(BaseLayer) starts here
+    # ----------------------------------------------
+    
 
     def fit(self, x, y, batch_size=128, epochs=100, 
             optimizer='adam', learning_rate=None, metrics=None):

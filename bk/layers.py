@@ -2,6 +2,9 @@
 
 TODO: more info...
 
+A layer, unlike a model, returns a single value
+whereas a model returns a probability distribution!
+
 """
 
 
@@ -69,13 +72,21 @@ class Add(BaseLayer):
 
     """
 
-    def __init__(self, a, b):
-        """Construct the layer.
+    # Layer arguments and their default values
+    self.default_args = {
+        'a': None,
+        'b': None
+    }
+    
 
-        TODO: docs...
+    def _build(self, args, data):
+        """Build the distribution model.
+
+        TODO: Docs...
 
         """
-        pass
+        return tfd.Normal(loc=args['loc'],
+                          scale=args['scale'])
 
 
     def build(self, data):
@@ -126,6 +137,18 @@ class Mul(BaseLayer):
 
 class Div(BaseLayer):
     """A layer which divides one input by another.
+
+
+    TODO: More info...
+
+
+    """
+
+    # TODO
+
+
+class Abs(BaseLayer):
+    """A layer which outputs the absolute value of its input.
 
 
     TODO: More info...
