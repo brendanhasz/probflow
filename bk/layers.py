@@ -19,7 +19,10 @@ class BaseLayer(ABC):
 
     """
 
-    # TODO
+    # TODO: i feel like BaseLayer should have everything BaseModel has,
+    # up until the fit() method.  So maybe should put BaseLayer in 
+    # base_models.py, and then BaseModel inherits BaseLayer and adds to it 
+    # (adds fit, predict, all that stuff) 
 
     @abstractmethod
     def __init__(self, *args, **kwargs):
@@ -38,6 +41,8 @@ class BaseLayer(ABC):
         tuple where the first element is the built model and the second element
         is the mean model (model evaluated with the mean of each variables 
         variational distribution).
+
+        Also has to update self.log_loss
         """
         pass        
 
@@ -55,9 +60,48 @@ class Input(BaseLayer):
     # TODO
 
 
+class Add(BaseLayer):
+    """A layer which adds two inputs.
 
-class Sequential(BaseLayer):
-    """A sequence of layers.
+
+    TODO: More info...
+
+
+    """
+
+    def __init__(self, a, b):
+        """Construct the layer.
+
+        TODO: docs...
+
+        """
+        pass
+
+
+    def build(self, data):
+        """Build the tensorflow graph for this layer and its arguments.
+
+        TODO: docs...
+
+        TODO: Also has to update self.log_loss
+        """
+        pass    
+
+    if isinstance(input, (int, float, np.ndarray)):
+        return np.exp(input)
+    elif isinstance(input, tf.Tensor):
+        return tf.exp(input)
+    elif isinstance(input, BaseModel):
+        return ExpTransform(input)
+    elif isinstance(input, BaseLayer):
+
+    elif isinstance(input, BaseTransformation):
+
+    else:
+
+
+class Sub(BaseLayer):
+    """A layer which subtracts one input from another.
 
 
     TODO: More info...
@@ -67,6 +111,53 @@ class Sequential(BaseLayer):
 
     # TODO
 
+
+class Mul(BaseLayer):
+    """A layer which multiplies two inputs.
+
+
+    TODO: More info...
+
+
+    """
+
+    # TODO
+
+
+class Div(BaseLayer):
+    """A layer which divides one input by another.
+
+
+    TODO: More info...
+
+
+    """
+
+    # TODO
+
+
+class Exp(BaseLayer):
+    """A layer which outputs the natural exponent of its input.
+
+
+    TODO: More info...
+
+
+    """
+
+    # TODO
+
+
+class Log(BaseLayer):
+    """A layer which outputs the natural log of its input.
+
+
+    TODO: More info...
+
+
+    """
+
+    # TODO
 
 
 class Dense(BaseLayer):
@@ -122,6 +213,19 @@ class Dense(BaseLayer):
         # NOTE: may have to implement manually w/ bk.Variable? in order to let the mean_model work...
 
         # TODO: should return built_model, mean_model
+
+
+
+class Sequential(BaseLayer):
+    """A sequence of layers.
+
+
+    TODO: More info...
+
+
+    """
+
+    # TODO
 
 
 

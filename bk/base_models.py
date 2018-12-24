@@ -90,11 +90,9 @@ class BaseModel(ABC):
             return isinstance(self.args[arg], BaseModel)
         elif type_str=='layer':
             return isinstance(self.args[arg], BaseLayer)
-        elif type_str=='trans':
-            return isinstance(self.args[arg], BaseTransformation)
         else:
             raise TypeError('type_str must a string, one of: number, tensor,' +
-                            ' tensor_like, model, layer, or trans')
+                            ' tensor_like, or bk model or layer')
 
 
     def _ensure_arg_type(self, arg_str):
@@ -104,8 +102,8 @@ class BaseModel(ABC):
             if self._arg_is(arg_type, )
                 msg = ('Invalid type for ' + type(self).__name__ + ' model ' + 
                        'argument ' + arg + '. Must be one of: int, float, ' + 
-                       'np.ndarray, tf.Tensor, or a bk layer, model, '+
-                       'distribution, or transformation.')
+                       'np.ndarray, tf.Tensor, or a bk layer, model, ' +
+                       'or distribution.')
                 raise TypeError(msg)
 
 
@@ -122,10 +120,7 @@ class BaseModel(ABC):
             elif _arg_is('layer', arg):
                 t_arg = self.args[arg].build(data)
                 self.built_args[arg], self.mean_args[arg] = t_arg
-            elif _arg_is('trans', arg):
-                # TODO: ???
-
-
+                #TODO: not sure how to handle mean model 
 
     @abstractmethod
     def _build(self, args, data):
