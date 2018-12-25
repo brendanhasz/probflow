@@ -22,7 +22,25 @@ class Input(BaseLayer):
 
     """
 
-    # TODO
+    # Layer arguments and their default values
+    self.default_args = {
+        'cols': np.array([]) #indexes of columns to use
+    }
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        if isinstance(args['cols'], np.ndarray) and len(args['cols'])==0:
+            return data
+        else:
+            # TODO: slice data by cols
+            pass
+
+
+    def _log_loss(self, obj, vals):
+        """Data incurrs no loss."""
+        return 0
+
 
 
 class Add(BaseLayer):
@@ -46,7 +64,7 @@ class Add(BaseLayer):
         return args['a'] + args['b']
 
 
-    def _log_loss(self, args, vals):
+    def _log_loss(self, obj, vals):
         """Addition incurrs no loss."""
         return 0
 
@@ -73,7 +91,7 @@ class Sub(BaseLayer):
         return args['a'] - args['b']
 
 
-    def _log_loss(self, args, vals):
+    def _log_loss(self, obj, vals):
         """Subtraction incurrs no loss."""
         return 0
 
@@ -100,7 +118,7 @@ class Mul(BaseLayer):
         return args['a'] * args['b']
 
 
-    def _log_loss(self, args, vals):
+    def _log_loss(self, obj, vals):
         """Multiplication incurrs no loss."""
         return 0
 
@@ -127,7 +145,7 @@ class Div(BaseLayer):
         return args['a'] / args['b']
 
 
-    def _log_loss(self, args, vals):
+    def _log_loss(self, obj, vals):
         """Division incurrs no loss."""
         return 0
 
@@ -153,7 +171,7 @@ class Abs(BaseLayer):
         return tf.abs(args['val'])
 
 
-    def _log_loss(self, args, vals):
+    def _log_loss(self, obj, vals):
         """Absolute value incurrs no loss."""
         return 0
 
@@ -230,9 +248,9 @@ class Dense(BaseLayer):
 
     # Layer arguments and their default values
     self.default_args = {
-        'input': [], 
+        'input': np.array([]), 
         'units': 1, 
-        'activation': [], 
+        'activation': np.array([]), 
         'use_bias': True,
         'weight_initializer': ??,
         'bias_initializer': ??,
@@ -246,7 +264,7 @@ class Dense(BaseLayer):
 
 
         # If no input specified, assume data is input
-        if isinstance(args['input'], list) and len(args['input'])==0:
+        if isinstance(args['input'], np.ndarray) and len(args['input'])==0:
             self.input = data
 
 

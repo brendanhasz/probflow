@@ -3,6 +3,39 @@ With added support for viewing/drawing from posteriors, computing predictive dis
 
 Let's call it bk for now ("bayesian keras"... that'll have to change, obvi)
 
+TODO short term:
+- Get sphynx working
+- docs for BaseLayer
+- Variable (don't worry about lb and ub for now)
+- BaseModel (except for the stuff_by funcs and the cdf funcs)
+- BaseModel docs
+- Input layer
+- Test and debug a simple 1d linear model
+- More test which cover distributions, layers, and core elements you've written (ensure right shapes etc)
+- Tests that ensure layer or model can take any (valid) combo of types as args
+- Write/docs for rest of core
+- Dense layer!
+- Test and compare to stan or edward
+- Tests for dense
+- Sequential layer
+- Tests
+- Models which only use Dense
+- Tests
+
+TODO: mid term:
+- Bernoulli and Poisson dists
+- Models which use them (Classifiers)
+- Tests
+
+TODO long term:
+- Conv layers
+- Pooling layer
+- Embedding layer
+- Nueral Matrix Factorization
+- Tensorflow graph / dashboard
+- Model comparison
+- Mixture distribution
+
 ## bk.variables
 Just a way go get raw variational variables
 - Variable (returns a tfp.normal, shape can be >1)

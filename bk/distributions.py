@@ -12,8 +12,23 @@ tfd = tfp.distributions
 
 # TODO: define continuous vs categorical distributions? (and inherit accordingly?)
 
+class ContinuousDistribution(ContinuousModel):
+    """TODO
 
-class Normal(ContinuousModel):
+
+    TODO: More info...
+
+
+    """
+    
+
+    def _log_loss(self, obj, vals):
+        """Compute the log loss ."""
+        return obj.log_prob(vals)
+
+
+
+class Normal(ContinuousDistribution):
     """TODO
 
 
@@ -35,17 +50,8 @@ class Normal(ContinuousModel):
         return tfd.Normal(loc=args['loc'], scale=args['scale'])
 
 
-    def _log_loss(self, obj, vals):
-        """Compute the loss due to the value."""
-        return obj.log_prob(vals)
-        # TODO: well, this returns *a* normal distribution, but is that what we want?
-        # don't we really want to do self.built_model.log_prob(vals)?
-        # but that will only work if it's a distribution and instead of args we pass model
-        # will it work for layers?
 
-
-
-class HalfNormal(ContinuousModel):
+class HalfNormal(ContinuousDistribution):
     """TODO
 
 
@@ -64,11 +70,6 @@ class HalfNormal(ContinuousModel):
     def _build(self, args, data):
         """Build the distribution model."""
         return tfd.HalfNormal(scale=args['scale'])
-
-
-    def _log_loss(self, args, vals):
-        """Compute the loss due to the value."""
-        # TODO: same as 
 
 
 

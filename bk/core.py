@@ -21,19 +21,83 @@ from transformations import BaseTransformation
 
 
 class BaseLayer(ABC):
-    """Abstract layer class (just used as an implementation base)
+    """Abstract layer class (used as an implementation base)
 
-    TODO: More info...
+    This is an abstract base class for a layer.  Layers are objects which take 
+    other objects as input (can be either other layers or tensors) and output a
+    tensor.  A layer's inputs 
+
+
+    Required attributes and methods
+    -------------------------------
+    An inheriting class must define the following properties and methods:
+    - `default_args` (attribute)
+    - `_build` (method)
+    - `_log_loss` (method)
+
+    The `default_args` attribute should contain a dict whose keys are the names
+    of the layer's arguments, and whose values are the default value of each 
+    argument.  Setting an argument's value in `default_args` to `None` causes
+    that argument to be mandatory (TypeError if that argument's value is not 
+    specified when instantiating the class).
+
+    The `_build` method should return a `Tensor` which was built from this 
+    layer's arguments. TODO: more details...
+
+    The `_log_loss` method should return the log loss incurred by this layer. TODO: more...
+
+
+    See Also
+    --------
+    func : why you should see it
+
+
+    Notes
+    -----
+    TODO: Docs...
+
+
+    Examples
+    --------
+    We can define a layer which adds two arguments like so:
+    ```
+    class Add(BaseLayer):
+
+        self.default_args = {
+            'a': None,
+            'b': None
+        }
+
+        def _build(self, args, data):
+            return args['a'] + args['b']
+
+        def _log_loss(self, obj, vals):
+            return 0
+    ```
+
+    then we can use that layer to add two other layers or tensors:
+
+    ```
+    x = Input()
+    b = Variable()
+    mu = Add(x, b)
+    ```
+
+    For more examples, see Add, Sub, Mul, Div, Abs, Exp, and Log in layers.py
 
     """
+
 
     @property
     @abstractmethod
     def default_args(self):
         """Layer parameters and their default values.
-        
-        Inheriting class must define this property as a dict, where keys are 
-        strings of layer parameter names and values are layer argument values.  
+
+        Inheriting class must define this attribute as a dict whose keys are 
+        the names of the layer's arguments, and whose values are the default 
+        value of each argument.  Setting an argument's value in `default_args` 
+        to `None` causes that argument to be mandatory (TypeError if that 
+        argument's value is not specified when instantiating the class).
         """
         pass
 
@@ -85,6 +149,9 @@ class BaseLayer(ABC):
         Inheriting class must define this method by building the layer for that
         class.  Should return a `Tensor` or a `tfp.distribution` using the
         layer arguments in args (a dict).
+
+        TODO: docs...
+
         """
         pass
 
@@ -95,6 +162,9 @@ class BaseLayer(ABC):
         
         Inheriting class must define this method by computing the loss of this
         layer (and only this layer, not its args!).
+
+        TODO: docs...
+
         """
         pass
 
@@ -143,23 +213,22 @@ class BaseLayer(ABC):
             if _arg_is('tensor_like', arg):
                 pass #no loss incurred by tensors
             elif _arg_is('layer', arg):
-
-                # TODO: this is wrong:
-                # how should _log_loss work?
-                # _log_loss(args, vals) or _log_loss(built_obj, vals)
-
                 self.arg_loss_sum += (
                     self.args[arg].arg_loss_sum + 
-                    self.args[arg]._log_loss(self.args[arg].built_args, 
+                    self.args[arg]._log_loss(self.args[arg].built_obj, 
                                              self.built_args[arg]))
                 self.mean_arg_loss_sum += (
                     self.args[arg].mean_arg_loss_sum + 
-                    self.args[arg]._log_loss(self.args[arg].mean_args, 
+                    self.args[arg]._log_loss(self.args[arg].mean_obj, 
                                              self.mean_args[arg]))
 
 
     def build(self, data):
-        """Build layer's args and then build the layer."""
+        """Build layer's args and then build the layer.
+
+        TODO: actually do docs for this one...
+
+        """
         self.build_args(data)
         self.sum_arg_losses()
         self.built_obj = self._build(self.built_args, self.data)
