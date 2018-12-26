@@ -15,8 +15,8 @@ import tensorflow_probability as tfp
 #from . import base_models
 #from . import distributions
 
-from layers import BaseLayer, Add, Sub, Mul, Div, Abs
-from transformations import BaseTransformation
+from layers import Add, Sub, Mul, Div, Abs
+from variables import Variable
 
 
 
@@ -169,21 +169,23 @@ class BaseLayer(ABC):
         pass
 
 
-    def _arg_is(self, type_str, arg_str):
-        """Return true if arg (string) is of type type_str."""
+    def _arg_is(self, type_str, arg):
+        """Return true if arg is of type type_str."""
         if type_str=='number':
-            return isinstance(self.args[arg], (int, float, np.ndarray))
+            return isinstance(arg, (int, float, np.ndarray))
         elif type_str=='tensor':
-            return isinstance(self.args[arg], tf.Tensor)
+            return isinstance(arg, tf.Tensor)
         elif type_str=='tensor_like':
-            return isinstance(self.args[arg], (int,float,np.ndarray,tf.Tensor))
+            return isinstance(arg, (int,float,np.ndarray,tf.Tensor))
         elif type_str=='model':
-            return isinstance(self.args[arg], BaseModel)
+            return isinstance(arg, BaseModel)
         elif type_str=='layer':
-            return isinstance(self.args[arg], BaseLayer)
+            return isinstance(arg, BaseLayer)
+        elif type_str=='variable':
+            return isinstance(arg, Variable)
         elif type_str=='valid':
-            return isinstance(self.args[arg], (int, float, np.ndarray,
-                                               tf.Tensor, BaseModel, BaseLayer))
+            return isinstance(arg, (int, float, np.ndarray,
+                                    tf.Tensor, BaseModel, BaseLayer))
         else:
             raise TypeError('type_str must a string, one of: number, tensor,' +
                             ' tensor_like, model, layer, or valid')
@@ -191,36 +193,41 @@ class BaseLayer(ABC):
 
     def build_args(self, data):
         """Build each of the layer's arguments."""
-        for arg in self.args:
+        for arg, arg_name in self.args.items():
             if _arg_is('tensor_like', arg):
-                self.built_args[arg] = self.args[arg]
-                self.mean_args[arg] = self.args[arg]
+                self.built_args[arg_name] = arg
+                self.mean_args[arg_name] = arg
             elif _arg_is('model', arg):
-                self.args[arg].build(data)
-                self.built_args[arg] = self.args[arg].built_obj.sample()
-                self.mean_args[arg] = self.args[arg].mean_obj.mean()
+                arg.build(data)
+                self.built_args[arg_name] = arg.built_obj.sample()
+                self.mean_args[arg_name] = arg.mean_obj.mean()
             elif _arg_is('layer', arg):
-                self.args[arg].build(data)
-                self.built_args[arg] = self.args[arg].built_obj
-                self.mean_args[arg] = self.args[arg].mean_obj
+                arg.build(data)
+                self.built_args[arg_name] = arg.built_obj
+                self.mean_args[arg_name] = arg.mean_obj
+            elif _arg_is('variable', arg):
+                arg.build(data)
+                self.built_args[arg_name] = arg.sample()
+                self.mean_args[arg_name] = arg.mean()
 
 
     def sum_arg_losses(self):
         """Sum the loss of all this layer's arguments."""
         self.arg_loss_sum = 0
         self.mean_arg_loss_sum = 0
-        for arg in self.args:
+        for arg, arg_name in self.args.items():
             if _arg_is('tensor_like', arg):
                 pass #no loss incurred by tensors
             elif _arg_is('layer', arg):
                 self.arg_loss_sum += (
-                    self.args[arg].arg_loss_sum + 
-                    self.args[arg]._log_loss(self.args[arg].built_obj, 
-                                             self.built_args[arg]))
+                    arg.arg_loss_sum + 
+                    arg._log_loss(arg.built_obj, self.built_args[arg_name]))
                 self.mean_arg_loss_sum += (
-                    self.args[arg].mean_arg_loss_sum + 
-                    self.args[arg]._log_loss(self.args[arg].mean_obj, 
-                                             self.mean_args[arg]))
+                    arg.mean_arg_loss_sum + 
+                    arg._log_loss(arg.mean_obj, self.mean_args[arg_name]))
+            elif _arg_is('variable', arg):
+                self.arg_loss_sum += arg.log_loss(self.built_args[arg_name])
+                self.mean_arg_loss_sum += arg.log_loss(self.mean_args[arg_name])
 
 
     def build(self, data):
@@ -236,27 +243,27 @@ class BaseLayer(ABC):
 
 
     def __add__(self, other):
-        """Add this model to another model, layer, variable, or value."""
+        """Add this layer to another layer, variable, or value."""
         return Add(self, other)
 
 
     def __sub__(self, other):
-        """Subtract this model from another model, layer, variable, or value."""
+        """Subtract from this layer another layer, variable, or value."""
         return Sub(self, other)
 
 
     def __mul__(self, other):
-        """Multiply this model by another model, layer, variable, or value."""
+        """Multiply this layer by another layer, variable, or value."""
         return Mul(self, other)
 
 
     def __div__(self, other):
-        """Divide this model by another model, layer, variable, or value."""
+        """Divide this layer by another layer, variable, or value."""
         return Div(self, other)
 
 
     def __abs__(self, other):
-        """Take the absoute value of the output of this model."""
+        """Take the absolute value of the input to this layer."""
         return Abs(self)
 
 

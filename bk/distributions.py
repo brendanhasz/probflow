@@ -10,9 +10,22 @@ import tensorflow_probability as tfp
 tfd = tfp.distributions
 
 
-# TODO: define continuous vs categorical distributions? (and inherit accordingly?)
 
-class ContinuousDistribution(ContinuousModel):
+class BaseDistribution():
+    """
+
+    TODO: More info...
+
+    """
+
+    def _log_loss(self, obj, vals):
+        """Compute the log loss ."""
+        return obj.log_prob(vals)
+        #TODO: might have to wrap that in tf.reduce_mean()?
+
+
+
+class ContinuousDistribution(BaseDistribution, ContinuousModel):
     """TODO
 
 
@@ -20,11 +33,19 @@ class ContinuousDistribution(ContinuousModel):
 
 
     """
-    
+    pass
 
-    def _log_loss(self, obj, vals):
-        """Compute the log loss ."""
-        return obj.log_prob(vals)
+
+
+class CategoricalDistribution(BaseDistribution, CategoricalModel):
+    """TODO
+
+
+    TODO: More info...
+
+
+    """
+    pass
 
 
 
@@ -73,4 +94,4 @@ class HalfNormal(ContinuousDistribution):
 
 
 
-# TODO: other common distributions
+# TODO: other common distributions, esp Bernoulli and Poisson

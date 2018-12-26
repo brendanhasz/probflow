@@ -237,6 +237,14 @@ class Log(BaseLayer):
 
 
 
+# TODO: Logit
+
+
+
+# TODO: Probit
+
+
+
 class Dense(BaseLayer):
     """A densely-connected neural network layer.
 
