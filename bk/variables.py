@@ -85,6 +85,8 @@ class Variable():
     def sample(self):
         """Sample from the variational distribution."""
         # TODO: should return a tensor generated w/ flipout w/ correct batch shape
+        # https://arxiv.org/pdf/1803.04386.pdf
+        # https://github.com/tensorflow/probability/blob/master/tensorflow_probability/python/layers/dense_variational.py#L687
 
 
     def mean(self):
