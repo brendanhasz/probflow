@@ -12,15 +12,14 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-#from . import base_models
-#from . import distributions
-
-from layers import Add, Sub, Mul, Div, Abs
-from variables import Variable
 
 
+class _BaseObj(ABC):
+    pass
 
-class BaseLayer(ABC):
+
+
+class BaseLayer(_BaseObj):
     """Abstract layer class (used as an implementation base)
 
     This is an abstract base class for a layer.  Layers are objects which take 
@@ -182,7 +181,7 @@ class BaseLayer(ABC):
         elif type_str=='layer':
             return isinstance(arg, BaseLayer)
         elif type_str=='variable':
-            return isinstance(arg, Variable)
+            return isinstance(arg, _BaseObj) #a variable!
         elif type_str=='valid':
             return isinstance(arg, (int, float, np.ndarray,
                                     tf.Tensor, BaseModel, BaseLayer))
@@ -192,7 +191,7 @@ class BaseLayer(ABC):
 
 
     def build_args(self, data):
-        """Build each of the layer's arguments."""
+        """Build each of this layer's arguments."""
         for arg, arg_name in self.args.items():
             if _arg_is('tensor_like', arg):
                 self.built_args[arg_name] = arg
@@ -231,7 +230,7 @@ class BaseLayer(ABC):
 
 
     def build(self, data):
-        """Build layer's args and then build the layer.
+        """Build this layer's arguments and loss, and then build the layer.
 
         TODO: actually do docs for this one...
 
@@ -242,29 +241,29 @@ class BaseLayer(ABC):
         self.mean_obj = self._build(self.mean_args, self.data)
 
 
-    def __add__(self, other):
-        """Add this layer to another layer, variable, or value."""
-        return Add(self, other)
+    #def __add__(self, other):
+    #    """Add this layer to another layer, variable, or value."""
+    #    return Add(self, other)
 
 
-    def __sub__(self, other):
-        """Subtract from this layer another layer, variable, or value."""
-        return Sub(self, other)
+    #def __sub__(self, other):
+    #    """Subtract from this layer another layer, variable, or value."""
+    #    return Sub(self, other)
 
 
-    def __mul__(self, other):
-        """Multiply this layer by another layer, variable, or value."""
-        return Mul(self, other)
+    #def __mul__(self, other):
+    #   """Multiply this layer by another layer, variable, or value."""
+    #    return Mul(self, other)
 
 
-    def __div__(self, other):
-        """Divide this layer by another layer, variable, or value."""
-        return Div(self, other)
+    #def __div__(self, other):
+    #    """Divide this layer by another layer, variable, or value."""
+    #    return Div(self, other)
 
 
-    def __abs__(self, other):
-        """Take the absolute value of the input to this layer."""
-        return Abs(self)
+    #def __abs__(self, other):
+    #    """Take the absolute value of the input to this layer."""
+    #    return Abs(self)
 
 
 
@@ -327,7 +326,7 @@ class BaseModel(BaseLayer):
         pass
 
         
-    def predictive_distribution(self, x, num_samples=100):
+    def predictive_distribution(self, x, num_samples=1000):
         """Draw samples from the model given x.
 
         TODO: Docs...
@@ -339,15 +338,27 @@ class BaseModel(BaseLayer):
         # Check model has been fit
         self.ensure_is_fit()
 
-        #TODO
+        #TODO: actually compute the samples
         pass
 
 
-    def predict(self, x, method='mean', prc=50, num_samples=100):
+    def confidence_intervals(self, x, prcs=[2.5, 97.5], num_samples=1000):
+        """Compute confidence intervals on predictions for x.
+
+        TODO: docs, prcs contains percentiles of predictive_distribution to use
+
+        """
+        pred_dist = self.predictive_distribution(x, num_samples=num_samples)
+        return np.percentile(pred_dist, prcs)
+
+
+    def predict(self, x):
         """Predict dependent variable for samples in x.
 
-        TODO: explain how predictions are generated from the
-        posterior predictive distributions, etc.
+        TODO: explain how predictions are generated using the mean of each
+        variational distribution
+
+        TODO: update parameters list below which is wrong
 
         Parameters
         ----------
@@ -441,6 +452,7 @@ class BaseModel(BaseLayer):
         plots 2d plot w/ colormap where goes to black w/ less datapoints
         """
         #TODO
+        pass
 
 
     def log_prob(self, x, y, individually=True, dist=False, num_samples=1000):
@@ -519,6 +531,7 @@ class BaseModel(BaseLayer):
         """
 
         # TODO: evaluate log_prob w/ tf like in log_prob above
+        pass
 
 
     def prob_by(self, x, y, x_by, bins=100, plot=True):
@@ -530,6 +543,7 @@ class BaseModel(BaseLayer):
         """
         
         # TODO: same idea as log_prob_by above
+        pass
 
 
     def cdf(self, x, y):
@@ -540,6 +554,7 @@ class BaseModel(BaseLayer):
         """
 
         # TODO: same idea as log_prob above
+        pass
 
 
     def cdf_by(self, x, y, x_by, bins=100):
@@ -551,6 +566,7 @@ class BaseModel(BaseLayer):
         """
 
         # TODO: same idea as log_prob_by above
+        pass
 
 
     def log_cdf(self, x, y):
@@ -561,6 +577,7 @@ class BaseModel(BaseLayer):
         """
 
         # TODO: same idea as log_prob above
+        pass
 
 
     def log_cdf_by(self, x, y, x_by, bins=100):
@@ -572,6 +589,7 @@ class BaseModel(BaseLayer):
         """
 
         # TODO: same idea as log_prob_by above
+        pass
 
 
 
@@ -581,15 +599,6 @@ class ContinuousModel(BaseModel):
     TODO: More info...
 
     """
-
-    def predict(self, x, method='mean', prc=50, num_samples=100):
-        """Predict dependent variable for samples in x.
-
-        TODO: Docs...
-
-        """
-        return BaseModel.predict(self, x, method=method, prc=prc,
-                                 num_samples=num_samples)
 
 
     def predictive_prc(self, x, y):
@@ -728,15 +737,6 @@ class CategoricalModel(BaseModel):
     TODO: More info...
 
     """
-
-    def predict(self, x, method='mode', prc=50, num_samples=100):
-        """Predict dependent variable for samples in x.
-
-        TODO: Docs...
-
-        """
-        return BaseModel.predict(self, x, method=method, prc=prc, 
-                                 num_samples=num_samples)
 
 
     def calibration_curve(self, x, y, split_by=None, bins=10):

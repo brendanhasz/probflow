@@ -7,9 +7,10 @@ whereas a model returns a probability distribution!
 
 """
 
+import numpy as np
 
-
-from core import BaseLayer
+from .distributions import Normal
+from .core import BaseLayer
 
 
 
@@ -23,7 +24,7 @@ class Input(BaseLayer):
     """
 
     # Layer arguments and their default values
-    self.default_args = {
+    default_args = {
         'cols': np.array([]) #indexes of columns to use
     }
     
@@ -53,7 +54,7 @@ class Add(BaseLayer):
     """
 
     # Layer arguments and their default values
-    self.default_args = {
+    default_args = {
         'a': None,
         'b': None
     }
@@ -80,7 +81,7 @@ class Sub(BaseLayer):
     """
 
     # Layer arguments and their default values
-    self.default_args = {
+    default_args = {
         'a': None,
         'b': None
     }
@@ -107,7 +108,7 @@ class Mul(BaseLayer):
     """
 
     # Layer arguments and their default values
-    self.default_args = {
+    default_args = {
         'a': None,
         'b': None
     }
@@ -134,7 +135,7 @@ class Div(BaseLayer):
     """
 
     # Layer arguments and their default values
-    self.default_args = {
+    default_args = {
         'a': None,
         'b': None
     }
@@ -161,7 +162,7 @@ class Abs(BaseLayer):
     """
 
     # Layer arguments and their default values
-    self.default_args = {
+    default_args = {
         'val': None
     }
     
@@ -187,7 +188,7 @@ class Exp(BaseLayer):
     """
 
     # Layer arguments and their default values
-    self.default_args = {
+    default_args = {
         'val': None
     }
     
@@ -201,6 +202,7 @@ class Exp(BaseLayer):
         """Add the Jacobian adjustment if input is a distribution."""
         if isinstance(self.arg['val'], BaseModel):
             # TODO: compute the jacobian adjustment
+            pass
         else:
             return 0
 
@@ -218,7 +220,7 @@ class Log(BaseLayer):
     """
 
     # Layer arguments and their default values
-    self.default_args = {
+    default_args = {
         'val': None
     }
     
@@ -232,6 +234,7 @@ class Log(BaseLayer):
         """The loss is a Jacobian adjustment if input is a distribution."""
         if isinstance(self.arg['val'], BaseModel):
             # TODO: compute the jacobian adjustment
+            pass
         else:
             return 0
 
@@ -255,15 +258,17 @@ class Dense(BaseLayer):
     """
 
     # Layer arguments and their default values
-    self.default_args = {
+    default_args = {
         'input': np.array([]), 
         'units': 1, 
         'activation': np.array([]), 
         'use_bias': True,
-        'weight_initializer': ??,
-        'bias_initializer': ??,
-        'weight_prior': ??Normal(0,1)??,
-        'bias_prior': ??Normal(0,1)??
+        'weight_initializer': None, #TODO: glorot or something as default?
+        'bias_initializer': None,   #TODO: glorot or something as default?
+        'weight_prior_fn': Normal,
+        'weight_prior_args': [0, 1],
+        'bias_prior_fn': Normal,
+        'bias_prior_args': [0, 1]
     }
     
 
@@ -277,6 +282,7 @@ class Dense(BaseLayer):
 
 
         # TODO
+
         # NOTE: may have to implement manually w/ bk.Variable? in order to let the mean_model work...
 
 
@@ -292,6 +298,7 @@ class Sequential(BaseLayer):
     """
 
     # TODO
+    pass
 
 
 
@@ -305,6 +312,7 @@ class Conv1d(BaseLayer):
     """
 
     # TODO
+    pass
 
 
 
@@ -318,6 +326,7 @@ class Conv2d(BaseLayer):
     """
 
     # TODO
+    pass
 
 
 
@@ -335,7 +344,7 @@ class Embedding(BaseLayer):
     """
 
     # TODO
-
+    pass
 
 
 # TODO: LSTM

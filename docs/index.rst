@@ -1,27 +1,17 @@
-Welcome to bayesian_keras's documentation!
-==========================================
+bayesian_keras
+==============
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   :hidden:
 
    variables
    layers
    distributions
    models
    ready_made_models
+   examples
+   api
 
-
-Here's the docs:
-
-http://www.sphinx-doc.org/en/1.5/tutorial.html
-
-https://pythonhosted.org/an_example_pypi_project/sphinx.html
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+TODO: introduction, getting started (a few simple examples), installation, etc

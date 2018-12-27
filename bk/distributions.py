@@ -7,7 +7,8 @@ TODO: more info...
 
 
 import tensorflow_probability as tfp
-tfd = tfp.distributions
+
+from .core import ContinuousModel, CategoricalModel
 
 
 
@@ -20,8 +21,7 @@ class BaseDistribution():
 
     def _log_loss(self, obj, vals):
         """Compute the log loss ."""
-        return obj.log_prob(vals)
-        #TODO: might have to wrap that in tf.reduce_mean()?
+        return tf.reduce_mean(obj.log_prob(vals))
 
 
 
@@ -60,7 +60,7 @@ class Normal(ContinuousDistribution):
 
 
     # Distribution parameters and their default values
-    self.default_args = {
+    default_args = {
         'loc': 0,
         'scale': 1
     }
@@ -68,7 +68,7 @@ class Normal(ContinuousDistribution):
 
     def _build(self, args, data):
         """Build the distribution model."""
-        return tfd.Normal(loc=args['loc'], scale=args['scale'])
+        return tfp.distributions.Normal(loc=args['loc'], scale=args['scale'])
 
 
 
@@ -83,14 +83,14 @@ class HalfNormal(ContinuousDistribution):
 
 
     # Distribution parameters and their default values
-    self.default_args = {
+    default_args = {
         'scale': 1
     }
     
 
     def _build(self, args, data):
         """Build the distribution model."""
-        return tfd.HalfNormal(scale=args['scale'])
+        return tfp.distributions.HalfNormal(scale=args['scale'])
 
 
 

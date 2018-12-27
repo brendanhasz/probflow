@@ -11,10 +11,10 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../'))
 
 
 # -- Project information -----------------------------------------------------
@@ -73,6 +73,11 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
+# Packages to mock import
+autodoc_mock_imports = ['scipy', 'tensorflow', 'tensorflow_probability']
+
+# Set the member order
+autodoc_member_order = 'bysource'
 
 # -- Options for HTML output -------------------------------------------------
 

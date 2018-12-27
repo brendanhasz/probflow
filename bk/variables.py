@@ -13,17 +13,13 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 tfd = tfp.distributions
 
-from core import BaseLayer
-from distributions import BaseDistribution, Normal
+from .distributions import Normal
+from .core import _BaseObj
 
 
 
-# ensure prior is a BaseDistribution
-
-
-class Variable():
+class Variable(_BaseObj):
     """TODO Variational variable
-
 
     TODO: More info...
 
@@ -42,13 +38,6 @@ class Variable():
         TODO: docs.
 
         """
-
-        # Check types
-        assert isinstance(prior_fn, BaseDistribution)
-        # TODO: shape must be list of ints
-        # TODO: prior_args must be list of ???
-
-        # Assign attributes
         self.shape = shape
         self.prior_fn = prior_fn
         self.prior_args = prior_args
@@ -57,7 +46,11 @@ class Variable():
     
 
     def build(self, data):
-        """Build the layer."""
+        """Build the layer.
+
+        TODO: docs
+
+        """
 
         # Build the prior distribution
         prior = self.prior_fn(*self.prior_args)
@@ -83,17 +76,33 @@ class Variable():
 
 
     def sample(self):
-        """Sample from the variational distribution."""
+        """Sample from the variational distribution.
+        
+        """
         # TODO: should return a tensor generated w/ flipout w/ correct batch shape
         # https://arxiv.org/pdf/1803.04386.pdf
         # https://github.com/tensorflow/probability/blob/master/tensorflow_probability/python/layers/dense_variational.py#L687
 
+        #TODO: do we have to re-compute batch size here so it'll work w/ both validation and training?
+
+        # TODO: transform generated values w/ exp (if one of ub or lb is set),
+        # or with logit (if both are set)
+
 
     def mean(self):
-        """Mean of the variational distribution."""
+        """Mean of the variational distribution.
+
+        TODO: docs
+
+        """
         return self.posterior.mean()
+        # TODO: transform w/ exp or logit if needed (depending on if lb and ub are set)
 
 
     def log_loss(self, vals):
-        """Loss due to prior."""
+        """Loss due to prior.
+
+        TODO: docs
+
+        """
         return tf.reduce_sum(self.prior.log_prob(vals))
