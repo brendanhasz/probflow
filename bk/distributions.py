@@ -7,6 +7,7 @@ TODO: more info...
 
 
 import tensorflow_probability as tfp
+tfd = tfp.distributions
 
 from .core import ContinuousModel, CategoricalModel
 
@@ -68,7 +69,7 @@ class Normal(ContinuousDistribution):
 
     def _build(self, args, data):
         """Build the distribution model."""
-        return tfp.distributions.Normal(loc=args['loc'], scale=args['scale'])
+        return tfd.Normal(loc=args['loc'], scale=args['scale'])
 
 
 
@@ -90,7 +91,7 @@ class HalfNormal(ContinuousDistribution):
 
     def _build(self, args, data):
         """Build the distribution model."""
-        return tfp.distributions.HalfNormal(scale=args['scale'])
+        return tfd.HalfNormal(scale=args['scale'])
 
 
 

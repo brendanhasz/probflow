@@ -14,12 +14,12 @@ import tensorflow_probability as tfp
 
 
 
-class _BaseObj(ABC):
+class BaseVariable(ABC):
     pass
 
 
 
-class BaseLayer(_BaseObj):
+class BaseLayer(ABC):
     """Abstract layer class (used as an implementation base)
 
     This is an abstract base class for a layer.  Layers are objects which take 
@@ -181,7 +181,7 @@ class BaseLayer(_BaseObj):
         elif type_str=='layer':
             return isinstance(arg, BaseLayer)
         elif type_str=='variable':
-            return isinstance(arg, _BaseObj) #a variable!
+            return isinstance(arg, BaseVariable)
         elif type_str=='valid':
             return isinstance(arg, (int, float, np.ndarray,
                                     tf.Tensor, BaseModel, BaseLayer))
