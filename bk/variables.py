@@ -24,8 +24,11 @@ class Variable(BaseVariable):
     TODO: More info...
 
     Additional kwargs include lb, ub, 
-    post_arg_names - names of the posterior distribution parameters
-
+    post_param_names - names of the posterior distribution parameters
+    post_param_lb - lower bounds for posterior dist params
+    post_param_ub - upper bounds for posterior dist params
+    lb - lower bound for this variable
+    ub - upper bound for this variable
     """
 
     def __init__(self, 
@@ -38,12 +41,23 @@ class Variable(BaseVariable):
                  post_param_lb=[None, 0],
                  post_param_ub=[None, None],
                  lb=None,
-                 ub=None):
+                 ub=None,
+                 seed=None):
         """Construct variable.
 
         TODO: docs.
 
         """
+
+        # Check types
+        # TODO: name must be str, 
+        # prior_fn and posterior_fn must be bk.distributions,
+        # prior_params must be list of floats or ints (or np array or tensor?)
+        # post_param_names must be list of strs
+        # post_param_lb and _ub must be list of floats, int, None, (or np array or tensor?)
+        # lb must be None, float, int, (or single np value?)
+
+        # Assign attributes
         self.shape = shape
         self.name = name
         self.prior_fn = prior_fn
@@ -54,12 +68,13 @@ class Variable(BaseVariable):
         self.post_param_ub = post_param_ub
         self.lb = lb
         self.ub = ub
+        self.seed = seed
 
 
     def _bound(self, data, lb, ub):
         """Bound data by applying a transformation.
 
-        TODO: docs... explain exp for >0, sigmoid for both lb+ub
+        TODO: docs... explain exp for bound on one side, sigmoid for both lb+ub
 
         """
         if ub is None:
@@ -107,6 +122,22 @@ class Variable(BaseVariable):
         """Sample from the variational distribution.
         
         """
+
+        # Compute input and batch shape
+        # TODO
+        input_shape = ...
+
+        # Seed generator
+        seed_stream = tfd.SeedStream(self.seed, salt=self.name)
+
+
+        # TODO: 
+        sign_in = random_rademacher(
+            input_shape,
+            dtype=inputs.dtype,
+            seed=seed_stream())
+
+
         # TODO: should return a tensor generated w/ flipout w/ correct batch shape
         # https://arxiv.org/pdf/1803.04386.pdf
         # https://github.com/tensorflow/probability/blob/master/tensorflow_probability/python/layers/dense_variational.py#L687
@@ -120,7 +151,7 @@ class Variable(BaseVariable):
         # so return self._bound(generated_output, self.lb, self.ub)
 
 
-    def mean(self):
+    def mean(self, data):
         """Mean of the variational distribution.
 
         TODO: docs
@@ -138,3 +169,4 @@ class Variable(BaseVariable):
 
         """
         return tf.reduce_sum(self.prior.log_prob(vals))
+        # TODO: have to add KL term?

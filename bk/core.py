@@ -13,7 +13,6 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 
-
 class BaseVariable(ABC):
     pass
 
@@ -241,6 +240,7 @@ class BaseLayer(ABC):
         self.mean_obj = self._build(self.mean_args, self.data)
 
 
+    # TODO: fix the circular imports so these can work:
     #def __add__(self, other):
     #    """Add this layer to another layer, variable, or value."""
     #    return Add(self, other)
