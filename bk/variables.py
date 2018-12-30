@@ -6,12 +6,11 @@ TODO: more info...
 
 
 
-from abc import ABC, abstractmethod
-from scipy import stats
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 tfd = tfp.distributions
+from tensorflow_probability.python.math import random_rademacher
 
 from .distributions import Normal
 from .core import BaseVariable
@@ -42,7 +41,8 @@ class Variable(BaseVariable):
                  post_param_ub=[None, None],
                  lb=None,
                  ub=None,
-                 seed=None):
+                 seed=None,
+                 estimator='flipout'):
         """Construct variable.
 
         TODO: docs.
@@ -56,6 +56,7 @@ class Variable(BaseVariable):
         # post_param_names must be list of strs
         # post_param_lb and _ub must be list of floats, int, None, (or np array or tensor?)
         # lb must be None, float, int, (or single np value?)
+        # estimator can be None (just generate random nums for all), flipout, and that's it for now
 
         # Assign attributes
         self.shape = shape
@@ -123,32 +124,69 @@ class Variable(BaseVariable):
         
         """
 
-        # Compute input and batch shape
+        # Compute shapes
         # TODO
-        input_shape = ...
+        batch_shape = data.shape[0]
 
         # Seed generator
         seed_stream = tfd.SeedStream(self.seed, salt=self.name)
 
+        # Draw random samples from the posterior
+        if self.estimator is None:
+            samples = self.posterior.sample(sample_shape=batch_shape,
+                                            seed=seed_stream())
 
-        # TODO: 
-        sign_in = random_rademacher(
-            input_shape,
-            dtype=inputs.dtype,
-            seed=seed_stream())
+        # Use the Flipout estimator (https://arxiv.org/abs/1803.04386)
+        elif self.estimator=='flipout':
+
+            # Flipout only works w/ distributions symmetric around 0
+            if not isinstance(self.posterior, [tfd.Normal, tfd.StudentT, tfd.Cauchy])
+                raise ValueError('flipout requires a symmetric posterior ' +
+                                 'distribution in the location-scale family')
+
+            # TODO: should return a tensor generated w/ flipout w/ correct batch shape
+            # https://arxiv.org/pdf/1803.04386.pdf
+            # https://github.com/tensorflow/probability/blob/master/tensorflow_probability/python/layers/dense_variational.py#L687
+            # initial draws from posterior are shared across samples in the mini-batch 
+            #   and so should be of shape (1,?,?...)
+
+            # TODO:
+
+            # Posterior mean
+            w_mean = self._bound(self.posterior.mean(), lb, ub)
+
+            # Sample from centered posterior distribution
+            w_sample = self.posterior.sample(seed=seed_stream()) - w_mean
+
+            # TODO: 
+            sign_in = random_rademacher(
+                self.shape,
+                dtype=data.dtype,
+                seed=seed_stream())
+
+            sign_out = random_rademacher(
+                tf.concat([batch_shape,
+                           tf.expand_dims(???, axis=0)], 0),
+                dtype=data.dtype,
+                seed=seed_stream())
 
 
-        # TODO: should return a tensor generated w/ flipout w/ correct batch shape
-        # https://arxiv.org/pdf/1803.04386.pdf
-        # https://github.com/tensorflow/probability/blob/master/tensorflow_probability/python/layers/dense_variational.py#L687
+            samples = w_mean + _matmul(_matmul(w_sample, sign_out), sign_in)
+            # TODO: transpose sign_in?
 
-        #TODO: do we have to re-compute batch size here so it'll work w/ both validation and training?
-        # Compute size of batch
-        self.batch_size = data.shape[0]
+            perturbed_inputs = self._matmul(
+                inputs * sign_input, self.kernel_posterior_affine_tensor) * sign_output
 
-        # TODO: transform generated values w/ exp (if one of ub or lb is set),
-        # or with logit (if both are set)
-        # so return self._bound(generated_output, self.lb, self.ub)
+            outputs = self._matmul(inputs, self.kernel_posterior.distribution.loc)
+
+            outputs += perturbed_inputs
+
+        # No other estimators supported at the moment
+        else:
+            raise ValueError('estimator must be None or flipout')
+
+        # Apply bounds and return
+        return self._bound(samples, lb, ub)
 
 
     def mean(self, data):
@@ -157,9 +195,7 @@ class Variable(BaseVariable):
         TODO: docs
 
         """
-        return self.posterior.mean()
-        # TODO: transform w/ exp or logit if needed (depending on if lb and ub are set)
-        # so return self._bound(generated_output, self.lb, self.ub)
+        return self._bound(self.posterior.mean(), lb, ub)
 
 
     def log_loss(self, vals):

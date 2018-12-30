@@ -4,7 +4,6 @@ With added support for viewing/drawing from posteriors, computing predictive dis
 Let's call it bk for now ("bayesian keras"... that'll have to change, obvi)
 
 TODO short term:
-- Get sphynx working
 - docs for BaseLayer
 - Variable (don't worry about lb and ub for now)
 - BaseModel (except for the stuff_by funcs and the cdf funcs)
