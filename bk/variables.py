@@ -12,7 +12,7 @@ import tensorflow_probability as tfp
 tfd = tfp.distributions
 from tensorflow_probability.python.math import random_rademacher
 
-from .distributions import Normal
+from .distributions import BaseDistribution, Normal
 from .core import BaseVariable
 
 
@@ -21,6 +21,19 @@ class Variable(BaseVariable):
     """TODO Variational variable
 
     TODO: More info...
+
+    Parameters
+    ----------
+    shape : int, list of ints, or np.ndarray
+        Shape of the array containing the variables.
+    name : str
+        Name of the variable(s).
+    prior_fn : bk distribution
+        Prior probability distribution function.
+    prior_params : np.ndarray, list of ints, floats, or np.ndarray s
+        Parameters of the prior distribution.  You can use different prior
+        parameter values for each element of the variable array by passing a 
+        list of np.ndarrays, where each has shape matching the `shape` arg.
 
     Additional kwargs include lb, ub, 
     post_param_names - names of the posterior distribution parameters
@@ -31,7 +44,7 @@ class Variable(BaseVariable):
     """
 
     def __init__(self, 
-                 shape=[1],
+                 shape=1,
                  name='Variable',
                  prior_fn=Normal,
                  prior_params=[0, 1],
@@ -50,10 +63,48 @@ class Variable(BaseVariable):
         """
 
         # Check types
-        # TODO: name must be str, 
-        # prior_fn and posterior_fn must be bk.distributions,
-        # prior_params must be list of floats or ints (or np array or tensor?)
-        # post_param_names must be list of strs
+        assert isinstance(shape, [int, list, np.ndarray]), \
+            ('shape must be an int, list of ints, or a numpy ndarray')
+        if isinstance(shape, int):
+            assert shape>0, 'shape must be positive'
+        if isinstance(shape, list):
+            for t_shape in shape:
+                assert isinstance(t_shape, int), 'shape must be integer(s)'
+        if isinstance(shape, np.ndarray):
+            assert shape.dtype.char in np.typecodes['AllInteger'], \
+                'shape must be integer(s)'
+            assert np.all(shape>=0), 'shape must be positive'
+        assert isinstance(name, str), 'name must be a string'
+        assert isinstance(prior_fn, BaseDistribution), \
+            'prior_fn must be a bk distribution'
+        assert isinstance(prior_params, [int, float, list, np.ndarray]), \
+            ('prior_params must be a np.ndarray, a list of ints, a list of' + 
+             'floats, or a list of np.ndarray s')
+        if isinstance(prior_params, list):
+            for t_param in prior_params:
+                assert isinstance(t_param, [int, float, np.ndarray]), \
+                    ('prior_params must be a list of ints, floats, or' + 
+                     'np.ndarray s')
+                if isinstance(t_param, np.ndarray):
+                    assert all((m==n) or (m==1) or (n==1) for m, n in
+                               zip(t_param.shape[::-1], 
+                                   np.zeros(shape).shape[::-1])) \
+                        'prior_params must be broadcastable to shape'
+        assert isinstance(posterior_fn, BaseDistribution), \
+            'posterior_fn must be a bk distribution'
+        assert isinstance(post_param_names, list), \
+            'post_param_names must be a list of strings'        
+        assert all(isinstance(n, str) for n in post_param_names), \
+            'post_param_names must be a list of strings'
+
+        # TODO: 
+        #post_param_lb=[None, 0],
+        #post_param_ub=[None, None],
+        #lb=None,
+        #ub=None,
+        #seed=None,
+        #estimator='flipout'
+
         # post_param_lb and _ub must be list of floats, int, None, (or np array or tensor?)
         # lb must be None, float, int, (or single np value?)
         # estimator can be None (just generate random nums for all), flipout, and that's it for now
