@@ -22,25 +22,12 @@ class Variable(BaseVariable):
 
     TODO: More info...
 
-    Parameters
+    References
     ----------
-    shape : int, list of ints, or np.ndarray
-        Shape of the array containing the variables.
-    name : str
-        Name of the variable(s).
-    prior_fn : bk distribution
-        Prior probability distribution function.
-    prior_params : np.ndarray, list of ints, floats, or np.ndarray s
-        Parameters of the prior distribution.  You can use different prior
-        parameter values for each element of the variable array by passing a 
-        list of np.ndarrays, where each has shape matching the `shape` arg.
-
-    Additional kwargs include lb, ub, 
-    post_param_names - names of the posterior distribution parameters
-    post_param_lb - lower bounds for posterior dist params
-    post_param_ub - upper bounds for posterior dist params
-    lb - lower bound for this variable
-    ub - upper bound for this variable
+    [1]: Yeming Wen, Paul Vicol, Jimmy Ba, Dustin Tran, and Roger Grosse. 
+         Flipout: Efficient Pseudo-Independent Weight Perturbations on 
+         Mini-Batches. _International Conference on Learning Representations_, 
+         2018. https://arxiv.org/abs/1803.04386
     """
 
     def __init__(self, 
@@ -56,10 +43,81 @@ class Variable(BaseVariable):
                  ub=None,
                  seed=None,
                  estimator='flipout'):
-        """Construct variable.
+        """Construct an array of variable(s).
 
-        TODO: docs.
+        Parameters
+        ----------
+        shape : int, list of ints, or 1D np.ndarray
+            Shape of the array containing the variables. 
+            Default = 1
+        name : str
+            Name of the variable(s).  
+            Default = 'Variable'
+        prior_fn : bk distribution
+            Prior probability distribution function.  
+            Default = Normal
+        prior_params : np.ndarray, list of ints, floats, or `np.ndarray`s
+            Parameters of the prior distribution.  To use different prior
+            parameter values for each element of the variable array, pass a 
+            list of np.ndarrays, where each has shape matching the `shape` arg.
+            Default = [0, 1] (assumes `prior_fn` = `Normal`)
+        posterior_fn : bk distribution
+            Probability distribution function to use to approximate the 
+            posterior. Must be a distribution from the location-scale family 
+            (such as Normal, StudentT, Cauchy)
+            Default = Normal
+        post_param_names : list of strings
+            List of posterior distribution parameter names.  Elements in this 
+            list should correspond to elements of `post_param_lb` and 
+            `post_param_ub`.
+            Default = ['loc', 'scale'] (assumes `posterior_fn` = `Normal`)
+        post_param_lb : list of ints or floats or `None`s
+            List of posterior distribution parameter lower bounds.  The 
+            variational distribution's i-th unconstrained parameter value will 
+            be transformed to fall between `post_param_lb[i]` and 
+            `post_param_ub[i]`. Elements of this list should correspond to 
+            elements of `post_param_names` and `post_param_ub`.
+            Default = [None, 0] (assumes `posterior_fn` = `Normal`)
+        post_param_ub : list of ints or floats or `None`s
+            List of posterior distribution parameter upper bounds.  The 
+            variational distribution's i-th unconstrained parameter value will 
+            be transformed to fall between `post_param_lb[i]` and 
+            `post_param_ub[i]`. Elements of this list should correspond to 
+            elements of `post_param_names` and `post_param_ub`.
+            Default = [None, None] (assumes `posterior_fn` = `Normal`)
+        lb : int, float, or None
+            Lower bound for the variable(s).  The unconstrained posterior 
+            distribution(s) will be transformed to lie between `lb` and `ub`.
+            Default = None
+        ub : int, float, or None
+            Upper bound for the variable(s).  The unconstrained posterior 
+            distribution(s) will be transformed to lie between `lb` and `ub`.
+            Default = None
+        seed : int, float, or None
+            Seed for the random number generator (a `tfd.SeedStream`).  Set to 
+            `None` to use the global seed.
+            Default = None
+        estimator : {'flipout' or None}
+            Method of posterior estimator to use. Valid methods:
 
+            * None: Generate random samples from the variational distribution 
+              for each batch independently.
+            * 'flipout': Use the Flipout estimator [1] to more efficiently 
+              generate samples from the variational distribution.
+
+            Default = 'flipout'
+
+        Examples
+        --------
+        TODO
+
+        References
+        ----------
+        [1]: Yeming Wen, Paul Vicol, Jimmy Ba, Dustin Tran, and Roger Grosse. 
+             Flipout: Efficient Pseudo-Independent Weight Perturbations on 
+             Mini-Batches. 
+             _International Conference on Learning Representations_, 2018.
+             https://arxiv.org/abs/1803.04386
         """
 
         # Check types
@@ -96,18 +154,26 @@ class Variable(BaseVariable):
             'post_param_names must be a list of strings'        
         assert all(isinstance(n, str) for n in post_param_names), \
             'post_param_names must be a list of strings'
-
-        # TODO: 
-        #post_param_lb=[None, 0],
-        #post_param_ub=[None, None],
-        #lb=None,
-        #ub=None,
-        #seed=None,
-        #estimator='flipout'
-
-        # post_param_lb and _ub must be list of floats, int, None, (or np array or tensor?)
-        # lb must be None, float, int, (or single np value?)
-        # estimator can be None (just generate random nums for all), flipout, and that's it for now
+        assert isinstance(post_param_lb, list), \
+            'post_param_lb must be a list of numbers'
+        assert len(post_param_lb)==len(post_param_names),\
+            'post_param_lb must be same length as post_param_names'
+        for p_lb in post_param_lb:
+            assert p_lb is None or isinstance(p_lb, [int, float]), \
+                'post_param_lb must contain ints or floats or None'
+        assert isinstance(post_param_ub, list), \
+            'post_param_ub must be a list of numbers'
+        assert len(post_param_ub)==len(post_param_names),\
+            'post_param_ub must be same length as post_param_names'
+        for p_ub in post_param_ub:
+            assert p_ub is None or isinstance(p_ub, [int, float]), \
+                'post_param_ub must contain ints or floats or None'
+        assert lb is None or isinstance(lb, [int, float]), \
+            'lb must be None, int, or float'
+        assert ub is None or isinstance(ub, [int, float]), \
+            'ub must be None, int, or float'
+        assert estimator is None or isinstance(estimator, str), \
+            'estimator must be None or a string'
 
         # Assign attributes
         self.shape = shape
@@ -121,6 +187,7 @@ class Variable(BaseVariable):
         self.lb = lb
         self.ub = ub
         self.seed = seed
+        self.estimator = estimator
 
 
     def _bound(self, data, lb, ub):
@@ -128,6 +195,19 @@ class Variable(BaseVariable):
 
         TODO: docs... explain exp for bound on one side, sigmoid for both lb+ub
 
+        Parameters
+        ----------
+        data : `tf.Tensor`
+            Data to bound between `lb` and `ub`.
+        lb : None, int, float, or `tf.Tensor` broadcastable with `data`
+            Lower bound.
+        ub : None, int, float, or `tf.Tensor` broadcastable with `data`
+            Upper bound.
+
+        Returns
+        -------
+        bounded_data : `tf.Tensor`
+            The data after being transformed.
         """
         if ub is None:
             if lb is None:
@@ -147,6 +227,10 @@ class Variable(BaseVariable):
 
         TODO: docs
 
+        Parameters
+        ----------
+        data : `tf.Tensor`
+            Data for this batch.
         """
 
         # Build the prior distribution
@@ -173,6 +257,14 @@ class Variable(BaseVariable):
     def sample(self, data):
         """Sample from the variational distribution.
         
+        TODO: docs
+        The `.build()` method must be called on an object of this class before 
+        calling this, the `.sample()`, method.
+
+        Parameters
+        ----------
+        data : `tf.Tensor`
+            Data for this batch.
         """
 
         # Compute shapes
@@ -191,17 +283,11 @@ class Variable(BaseVariable):
         elif self.estimator=='flipout':
 
             # Flipout only works w/ distributions symmetric around 0
-            if not isinstance(self.posterior, [tfd.Normal, tfd.StudentT, tfd.Cauchy])
+            if not isinstance(self.posterior, [tfd.Normal, 
+                                               tfd.StudentT,
+                                               tfd.Cauchy])
                 raise ValueError('flipout requires a symmetric posterior ' +
                                  'distribution in the location-scale family')
-
-            # TODO: should return a tensor generated w/ flipout w/ correct batch shape
-            # https://arxiv.org/pdf/1803.04386.pdf
-            # https://github.com/tensorflow/probability/blob/master/tensorflow_probability/python/layers/dense_variational.py#L687
-            # initial draws from posterior are shared across samples in the mini-batch 
-            #   and so should be of shape (1,?,?...)
-
-            # TODO:
 
             # Posterior mean
             w_mean = self._bound(self.posterior.mean(), lb, ub)
@@ -209,28 +295,15 @@ class Variable(BaseVariable):
             # Sample from centered posterior distribution
             w_sample = self.posterior.sample(seed=seed_stream()) - w_mean
 
-            # TODO: 
-            sign_in = random_rademacher(
-                self.shape,
-                dtype=data.dtype,
-                seed=seed_stream())
+            # Random sign matrixes
+            sign_r = random_rademacher(w_sample.shape, dtype=data.dtype,
+                                       seed=seed_stream())
+            sign_s = random_rademacher(batch_shape, dtype=data.dtype,
+                                       seed=seed_stream())
 
-            sign_out = random_rademacher(
-                tf.concat([batch_shape,
-                           tf.expand_dims(???, axis=0)], 0),
-                dtype=data.dtype,
-                seed=seed_stream())
-
-
-            samples = w_mean + _matmul(_matmul(w_sample, sign_out), sign_in)
-            # TODO: transpose sign_in?
-
-            perturbed_inputs = self._matmul(
-                inputs * sign_input, self.kernel_posterior_affine_tensor) * sign_output
-
-            outputs = self._matmul(inputs, self.kernel_posterior.distribution.loc)
-
-            outputs += perturbed_inputs
+            # Flipout-generated samples for this batch
+            samples = tf.multiply(tf.expand_dims(w_sample*sign_r, 0), sign_s)
+            samples += tf.expand_dims(w_mean, 0)
 
         # No other estimators supported at the moment
         else:
@@ -244,7 +317,13 @@ class Variable(BaseVariable):
         """Mean of the variational distribution.
 
         TODO: docs
+        The `.build()` method must be called on an object of this class before 
+        calling this, the `.mean()`, method.        
 
+        Parameters
+        ----------
+        data : `tf.Tensor`
+            Data for this batch.
         """
         return self._bound(self.posterior.mean(), lb, ub)
 
@@ -253,7 +332,13 @@ class Variable(BaseVariable):
         """Loss due to prior.
 
         TODO: docs
+        The `.build()` method must be called on an object of this class before 
+        calling this, the `.log_loss()`, method.
 
+        Parameters
+        ----------
+        vals : `tf.Tensor`
+            Values which were sampled from the variational distribution.
         """
         return tf.reduce_sum(self.prior.log_prob(vals))
         # TODO: have to add KL term?
