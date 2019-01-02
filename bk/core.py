@@ -14,6 +14,7 @@ import tensorflow_probability as tfp
 
 
 class BaseVariable(ABC):
+    """Abstract Variable class (used as an implementation base)"""
     pass
 
 
@@ -29,9 +30,9 @@ class BaseLayer(ABC):
     Required attributes and methods
     -------------------------------
     An inheriting class must define the following properties and methods:
-    - `default_args` (attribute)
-    - `_build` (method)
-    - `_log_loss` (method)
+    * `default_args` (attribute)
+    * `_build` (method)
+    * `_log_loss` (method)
 
     The `default_args` attribute should contain a dict whose keys are the names
     of the layer's arguments, and whose values are the default value of each 
@@ -342,16 +343,6 @@ class BaseModel(BaseLayer):
         pass
 
 
-    def confidence_intervals(self, x, prcs=[2.5, 97.5], num_samples=1000):
-        """Compute confidence intervals on predictions for x.
-
-        TODO: docs, prcs contains percentiles of predictive_distribution to use
-
-        """
-        pred_dist = self.predictive_distribution(x, num_samples=num_samples)
-        return np.percentile(pred_dist, prcs)
-
-
     def predict(self, x):
         """Predict dependent variable for samples in x.
 
@@ -602,18 +593,52 @@ class ContinuousModel(BaseModel):
 
 
     def predictive_prc(self, x, y):
-        """Compute the percentile of each observation along the 
-        posterior predictive distribution.
+        """Compute the percentile of each observation along the posterior 
+        predictive distribution.
 
         TODO: Docs...
 
         """
 
+        #TODO
+        pass
+
+
+    def confidence_intervals(self, x, prcs=[2.5, 97.5], num_samples=1000):
+        """Compute confidence intervals on predictions for `x`.
+
+        TODO: docs, prcs contains percentiles of predictive_distribution to use
+
+        Parameters
+        ----------
+        x : np.ndarray
+            Input array of independent variable values.  Should be of shape 
+            (N,D), where N is the number of samples and D is the number of 
+            dimensions of the independent variable.
+        prcs : list of float, or np.ndarray
+            Percentiles to use as bounds of the confidence interval, between 0 
+            and 100. 
+            Default = [2.5, 97.5]
+        num_samples : int
+            Number of samples from the posterior predictive distribution to
+            take to compute the confidence intervals.
+            Default = 1000
+
+        Returns
+        -------
+        conf_intervals : np.ndarray
+            Confidence intervals on the predictions for samples in `x`.
+        """
+
+        # Check types
+        # TODO
+
         # Check model has been fit
         self.ensure_is_fit()
 
-        #TODO
-        pass
+        # Compute percentiles of the predictive distribution
+        pred_dist = self.predictive_distribution(x, num_samples=num_samples)
+        return np.percentile(pred_dist, prcs)
 
         
     def pred_dist_covered(self, x, y, prc):

@@ -18,7 +18,7 @@ from .core import BaseVariable
 
 
 class Variable(BaseVariable):
-    """TODO Variational variable
+    """Variable(s) drawn from variational distribution(s).
 
     TODO: More info...
 
