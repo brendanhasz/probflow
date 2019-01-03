@@ -95,4 +95,50 @@ class HalfNormal(ContinuousDistribution):
 
 
 
+class StudentT(ContinuousDistribution):
+    """TODO
+
+
+    TODO: More info...
+
+
+    """
+
+
+    # Distribution parameters and their default values
+    default_args = {
+        'df': 1,
+        'loc': 0,
+        'scale': 1
+    }
+    
+
+    def _build(self, args, data):
+        """Build the distribution model."""
+        return tfd.StudentT(args['df'], args['loc'], args['scale'])
+
+
+
+class Cauchy(ContinuousDistribution):
+    """TODO
+
+
+    TODO: More info...
+
+
+    """
+
+
+    # Distribution parameters and their default values
+    default_args = {
+        'loc': 0,
+        'scale': 1
+    }
+    
+
+    def _build(self, args, data):
+        """Build the distribution model."""
+        return tfd.Cauchy(args['loc'], args['scale'])
+
+
 # TODO: other common distributions, esp Bernoulli and Poisson

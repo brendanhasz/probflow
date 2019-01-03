@@ -23,8 +23,10 @@ class BaseLayer(ABC):
     """Abstract layer class (used as an implementation base)
 
     This is an abstract base class for a layer.  Layers are objects which take 
-    other objects as input (can be either other layers or tensors) and output a
-    tensor.  A layer's inputs 
+    other objects as input (other layers, variables, or tensors) and output a
+    tensor. 
+
+    TODO: more...
 
 
     Required attributes and methods
@@ -269,7 +271,7 @@ class BaseLayer(ABC):
 
 
 class BaseModel(BaseLayer):
-    """Abstract model class (just used as an implementation base)
+    """Abstract model class (used as an implementation base)
 
     TODO: More info...
     talk about how a model defines a parameterized probability distribution which
@@ -307,7 +309,7 @@ class BaseModel(BaseLayer):
         pass
 
 
-    def ensure_is_fit(self):
+    def _ensure_is_fit(self):
         """Raises a RuntimeError if model has not yet been fit."""
         if not self.is_fit:
             raise RuntimeError('model must first be fit') 
@@ -321,7 +323,7 @@ class BaseModel(BaseLayer):
         """
 
         # Check model has been fit
-        self.ensure_is_fit()
+        self._ensure_is_fit()
 
         #TODO
         pass
@@ -337,7 +339,7 @@ class BaseModel(BaseLayer):
         """
 
         # Check model has been fit
-        self.ensure_is_fit()
+        self._ensure_is_fit()
 
         #TODO: actually compute the samples
         pass
@@ -401,7 +403,7 @@ class BaseModel(BaseLayer):
         """
 
         # Check model has been fit
-        self.ensure_is_fit()
+        self._ensure_is_fit()
 
         # Compute predictive distribution
         pred_dist = self.predictive_distribution(x, num_samples)
@@ -466,7 +468,7 @@ class BaseModel(BaseLayer):
         """
 
         # Check model has been fit
-        self.ensure_is_fit()
+        self._ensure_is_fit()
 
         # TODO: make dataset/iterator/feed_dict of x and y
 
@@ -634,7 +636,7 @@ class ContinuousModel(BaseModel):
         # TODO
 
         # Check model has been fit
-        self.ensure_is_fit()
+        self._ensure_is_fit()
 
         # Compute percentiles of the predictive distribution
         pred_dist = self.predictive_distribution(x, num_samples=num_samples)
@@ -651,7 +653,7 @@ class ContinuousModel(BaseModel):
         """
 
         # Check model has been fit
-        self.ensure_is_fit()
+        self._ensure_is_fit()
 
         #TODO
         pass
@@ -667,7 +669,7 @@ class ContinuousModel(BaseModel):
         """
 
         # Check model has been fit
-        self.ensure_is_fit()
+        self._ensure_is_fit()
 
         #TODO
         pass
@@ -749,7 +751,7 @@ class ContinuousModel(BaseModel):
         """
 
         # Check model has been fit
-        self.ensure_is_fit()
+        self._ensure_is_fit()
 
         #TODO
         pass
@@ -788,7 +790,7 @@ class CategoricalModel(BaseModel):
         """
 
         # Check model has been fit
-        self.ensure_is_fit()
+        self._ensure_is_fit()
 
         #TODO
         pass

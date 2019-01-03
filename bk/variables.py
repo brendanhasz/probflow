@@ -18,13 +18,96 @@ from .core import BaseVariable
 
 
 class Variable(BaseVariable):
-    """Variable(s) drawn from variational distribution(s).
+    r"""Variable(s) drawn from variational distribution(s).
 
-    TODO: More info...
+    TODO: more... This is an :math:`\alpha=3` inline alpha
+
+    And here is a:
+
+    .. math::
+
+        y \sim \mathcal{N}(0, 1)
+
+    non-inline math
+
+    Parameters
+    ----------
+    shape : int, list of ints, or 1D np.ndarray, optional
+        Shape of the array containing the variables. 
+        Default = 1
+    name : str, optional
+        Name of the variable(s).  
+        Default = 'Variable'
+    prior_fn : None or `bk.distribution`
+        Prior probability distribution function.  
+        Default = Normal
+    prior_params : np.ndarray, list of ints, floats, or `np.ndarray`s, optional
+        Parameters of the prior distribution.  To use different prior parameter
+        values for each element of the variable array, pass a list of 
+        np.ndarrays, where each has shape matching the `shape` arg.
+        Default = [0, 1] (assumes `prior_fn` = `Normal`)
+    posterior_fn : `bk.distribution`, optional
+        Probability distribution function to use to approximate the posterior.
+        Must be a distribution from the location-scale family (such as Normal, 
+        StudentT, Cauchy).
+        Default = Normal
+    post_param_names : list of strings, optional
+        List of posterior distribution parameter names.  Elements in this 
+        list should correspond to elements of `post_param_lb` and 
+        `post_param_ub`.
+        Default = ['loc', 'scale'] (assumes `posterior_fn` = `Normal`)
+    post_param_lb : list of ints or floats or `None`s, optional
+        List of posterior distribution parameter lower bounds.  The 
+        variational distribution's i-th unconstrained parameter value will 
+        be transformed to fall between `post_param_lb[i]` and 
+        `post_param_ub[i]`. Elements of this list should correspond to 
+        elements of `post_param_names` and `post_param_ub`.
+        Default = [None, 0] (assumes `posterior_fn` = `Normal`)
+    post_param_ub : list of ints or floats or `None`s, optional
+        List of posterior distribution parameter upper bounds.  The 
+        variational distribution's i-th unconstrained parameter value will 
+        be transformed to fall between `post_param_lb[i]` and 
+        `post_param_ub[i]`. Elements of this list should correspond to 
+        elements of `post_param_names` and `post_param_ub`.
+        Default = [None, None] (assumes `posterior_fn` = `Normal`)
+    lb : int, float, or None, optional
+        Lower bound for the variable(s).  The unconstrained posterior 
+        distribution(s) will be transformed to lie between `lb` and `ub`.
+        Default = None
+    ub : int, float, or None, optional
+        Upper bound for the variable(s).  The unconstrained posterior 
+        distribution(s) will be transformed to lie between `lb` and `ub`.
+        Default = None
+    seed : int, float, or None, optional
+        Seed for the random number generator (a `tfd.SeedStream`).  Set to 
+        `None` to use the global seed.
+        Default = None
+    estimator : {'flipout' or None}, optional
+        Method of posterior estimator to use. Valid methods:
+
+        * None: Generate random samples from the variational distribution 
+          for each batch independently.
+        * 'flipout': Use the Flipout estimator [1]_ to more efficiently 
+          generate samples from the variational distribution.
+
+        Default = 'flipout'
+
+    Examples
+    --------
+    TODO
+
+    Notes
+    -----
+    When using the flipout estimator (`estimator='flipout'`), `posterior_fn` 
+    must be a symmetric distribution of the location-scale family - one of:
+
+    * `bk.Normal`
+    * `bk.StudentT`
+    * `bk.Cauchy`
 
     References
     ----------
-    [1]: Yeming Wen, Paul Vicol, Jimmy Ba, Dustin Tran, and Roger Grosse. 
+    .. [1] Yeming Wen, Paul Vicol, Jimmy Ba, Dustin Tran, and Roger Grosse. 
          Flipout: Efficient Pseudo-Independent Weight Perturbations on 
          Mini-Batches. _International Conference on Learning Representations_, 
          2018. https://arxiv.org/abs/1803.04386
@@ -43,82 +126,7 @@ class Variable(BaseVariable):
                  ub=None,
                  seed=None,
                  estimator='flipout'):
-        """Construct an array of variable(s).
-
-        Parameters
-        ----------
-        shape : int, list of ints, or 1D np.ndarray
-            Shape of the array containing the variables. 
-            Default = 1
-        name : str
-            Name of the variable(s).  
-            Default = 'Variable'
-        prior_fn : None or `bk.distribution`
-            Prior probability distribution function.  
-            Default = Normal
-        prior_params : np.ndarray, list of ints, floats, or `np.ndarray`s
-            Parameters of the prior distribution.  To use different prior
-            parameter values for each element of the variable array, pass a 
-            list of np.ndarrays, where each has shape matching the `shape` arg.
-            Default = [0, 1] (assumes `prior_fn` = `Normal`)
-        posterior_fn : `bk.distribution`
-            Probability distribution function to use to approximate the 
-            posterior. Must be a distribution from the location-scale family 
-            (such as Normal, StudentT, Cauchy)
-            Default = Normal
-        post_param_names : list of strings
-            List of posterior distribution parameter names.  Elements in this 
-            list should correspond to elements of `post_param_lb` and 
-            `post_param_ub`.
-            Default = ['loc', 'scale'] (assumes `posterior_fn` = `Normal`)
-        post_param_lb : list of ints or floats or `None`s
-            List of posterior distribution parameter lower bounds.  The 
-            variational distribution's i-th unconstrained parameter value will 
-            be transformed to fall between `post_param_lb[i]` and 
-            `post_param_ub[i]`. Elements of this list should correspond to 
-            elements of `post_param_names` and `post_param_ub`.
-            Default = [None, 0] (assumes `posterior_fn` = `Normal`)
-        post_param_ub : list of ints or floats or `None`s
-            List of posterior distribution parameter upper bounds.  The 
-            variational distribution's i-th unconstrained parameter value will 
-            be transformed to fall between `post_param_lb[i]` and 
-            `post_param_ub[i]`. Elements of this list should correspond to 
-            elements of `post_param_names` and `post_param_ub`.
-            Default = [None, None] (assumes `posterior_fn` = `Normal`)
-        lb : int, float, or None
-            Lower bound for the variable(s).  The unconstrained posterior 
-            distribution(s) will be transformed to lie between `lb` and `ub`.
-            Default = None
-        ub : int, float, or None
-            Upper bound for the variable(s).  The unconstrained posterior 
-            distribution(s) will be transformed to lie between `lb` and `ub`.
-            Default = None
-        seed : int, float, or None
-            Seed for the random number generator (a `tfd.SeedStream`).  Set to 
-            `None` to use the global seed.
-            Default = None
-        estimator : {'flipout' or None}
-            Method of posterior estimator to use. Valid methods:
-
-            * None: Generate random samples from the variational distribution 
-              for each batch independently.
-            * 'flipout': Use the Flipout estimator [1] to more efficiently 
-              generate samples from the variational distribution.
-
-            Default = 'flipout'
-
-        Examples
-        --------
-        TODO
-
-        References
-        ----------
-        [1]: Yeming Wen, Paul Vicol, Jimmy Ba, Dustin Tran, and Roger Grosse. 
-             Flipout: Efficient Pseudo-Independent Weight Perturbations on 
-             Mini-Batches. 
-             _International Conference on Learning Representations_, 2018.
-             https://arxiv.org/abs/1803.04386
-        """
+        """Construct an array of variable(s)."""
 
         # Check types
         assert isinstance(shape, [int, list, np.ndarray]), \
@@ -146,7 +154,7 @@ class Variable(BaseVariable):
                 if isinstance(t_param, np.ndarray):
                     assert all((m==n) or (m==1) or (n==1) for m, n in
                                zip(t_param.shape[::-1], 
-                                   np.zeros(shape).shape[::-1])) \
+                                   np.zeros(shape).shape[::-1])), \
                         'prior_params must be broadcastable to shape'
         assert isinstance(posterior_fn, BaseDistribution), \
             'posterior_fn must be a bk distribution'
@@ -188,6 +196,7 @@ class Variable(BaseVariable):
         self.ub = ub
         self.seed = seed
         self.estimator = estimator
+        self.posterior = None
 
 
     def _bound(self, data, lb, ub):
@@ -220,6 +229,12 @@ class Variable(BaseVariable):
                 return tf.exp(-data)
             else: 
                 return lb + (ub-lb)*tf.sigmoid(data) # [lb, ub]
+
+
+    def _ensure_is_built(self):
+        """Raises a RuntimeError if variable has not yet been built."""
+        if self.posterior is None:
+            raise RuntimeError('variable must first be built')
     
 
     def build(self, data):
@@ -261,8 +276,6 @@ class Variable(BaseVariable):
         """Sample from the variational distribution.
         
         TODO: docs
-        The `.build()` method must be called on an object of this class before 
-        calling this, the `.sample()`, method.
 
         Parameters
         ----------
@@ -270,8 +283,10 @@ class Variable(BaseVariable):
             Data for this batch.
         """
 
-        # Compute shapes
-        # TODO
+        # Ensure variable has been built
+        self._ensure_is_built()
+
+        # Compute batch shape
         batch_shape = data.shape[0]
 
         # Seed generator
@@ -288,7 +303,7 @@ class Variable(BaseVariable):
             # Flipout only works w/ distributions symmetric around 0
             if not isinstance(self.posterior, [tfd.Normal, 
                                                tfd.StudentT,
-                                               tfd.Cauchy])
+                                               tfd.Cauchy]):
                 raise ValueError('flipout requires a symmetric posterior ' +
                                  'distribution in the location-scale family')
 
@@ -320,14 +335,13 @@ class Variable(BaseVariable):
         """Mean of the variational distribution.
 
         TODO: docs
-        The `.build()` method must be called on an object of this class before 
-        calling this, the `.mean()`, method.        
 
         Parameters
         ----------
         data : `tf.Tensor`
             Data for this batch.
         """
+        self._ensure_is_built()
         return self._bound(self.posterior.mean(), lb, ub)
 
 
@@ -335,16 +349,20 @@ class Variable(BaseVariable):
         """Loss due to prior.
 
         TODO: docs
-        The `.build()` method must be called on an object of this class before 
-        calling this, the `.log_loss()`, method.
 
         Parameters
         ----------
         vals : `tf.Tensor`
             Values which were sampled from the variational distribution.
         """
+        self._ensure_is_built()
         if self.prior is not None:
             return tf.reduce_sum(self.prior.log_prob(vals))
             # TODO: have to add KL term?
         else:
             return 0 #no prior, no loss
+
+
+# TODO: above assumes a continuous variable, should add support for
+# discrete variables.  In theory can just set posterior_fn to 
+# Bernoulli or Categorical, and make mean() return the mode?
