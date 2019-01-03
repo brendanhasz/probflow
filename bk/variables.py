@@ -53,7 +53,7 @@ class Variable(BaseVariable):
         name : str
             Name of the variable(s).  
             Default = 'Variable'
-        prior_fn : bk distribution
+        prior_fn : None or `bk.distribution`
             Prior probability distribution function.  
             Default = Normal
         prior_params : np.ndarray, list of ints, floats, or `np.ndarray`s
@@ -61,7 +61,7 @@ class Variable(BaseVariable):
             parameter values for each element of the variable array, pass a 
             list of np.ndarrays, where each has shape matching the `shape` arg.
             Default = [0, 1] (assumes `prior_fn` = `Normal`)
-        posterior_fn : bk distribution
+        posterior_fn : `bk.distribution`
             Probability distribution function to use to approximate the 
             posterior. Must be a distribution from the location-scale family 
             (such as Normal, StudentT, Cauchy)
@@ -133,8 +133,8 @@ class Variable(BaseVariable):
                 'shape must be integer(s)'
             assert np.all(shape>=0), 'shape must be positive'
         assert isinstance(name, str), 'name must be a string'
-        assert isinstance(prior_fn, BaseDistribution), \
-            'prior_fn must be a bk distribution'
+        assert prior_fn is None or isinstance(prior_fn, BaseDistribution), \
+            'prior_fn must be a bk distribution or None'
         assert isinstance(prior_params, [int, float, list, np.ndarray]), \
             ('prior_params must be a np.ndarray, a list of ints, a list of' + 
              'floats, or a list of np.ndarray s')
@@ -234,9 +234,12 @@ class Variable(BaseVariable):
         """
 
         # Build the prior distribution
-        prior = self.prior_fn(*self.prior_params)
-        prior.build(data)
-        self.prior = prior.built_obj
+        if self.prior_fn is not None:
+            prior = self.prior_fn(*self.prior_params)
+            prior.build(data)
+            self.prior = prior.built_obj
+        else:
+            self.prior = None
 
         # Create posterior parameter variables
         params = dict()
@@ -340,5 +343,8 @@ class Variable(BaseVariable):
         vals : `tf.Tensor`
             Values which were sampled from the variational distribution.
         """
-        return tf.reduce_sum(self.prior.log_prob(vals))
-        # TODO: have to add KL term?
+        if self.prior is not None:
+            return tf.reduce_sum(self.prior.log_prob(vals))
+            # TODO: have to add KL term?
+        else:
+            return 0 #no prior, no loss
