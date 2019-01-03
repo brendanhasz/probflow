@@ -10,7 +10,7 @@ whereas a model returns a probability distribution!
 import numpy as np
 
 from .distributions import Normal
-from .core import BaseLayer
+from .core import BaseLayer, REQUIRED
 
 
 
@@ -25,7 +25,7 @@ class Input(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'cols': np.array([]) #indexes of columns to use
+        'cols': None #indexes of columns to use
     }
     
 
@@ -55,8 +55,8 @@ class Add(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'a': None,
-        'b': None
+        'a': REQUIRED,
+        'b': REQUIRED
     }
     
 
@@ -82,8 +82,8 @@ class Sub(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'a': None,
-        'b': None
+        'a': REQUIRED,
+        'b': REQUIRED
     }
     
 
@@ -109,8 +109,8 @@ class Mul(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'a': None,
-        'b': None
+        'a': REQUIRED,
+        'b': REQUIRED
     }
     
 
@@ -136,8 +136,8 @@ class Div(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'a': None,
-        'b': None
+        'a': REQUIRED,
+        'b': REQUIRED
     }
     
 
@@ -163,7 +163,7 @@ class Abs(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'val': None
+        'val': REQUIRED
     }
     
 
@@ -189,7 +189,7 @@ class Exp(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'val': None
+        'val': REQUIRED
     }
     
 
@@ -221,7 +221,7 @@ class Log(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'val': None
+        'val': REQUIRED
     }
     
 
@@ -259,9 +259,9 @@ class Dense(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'input': np.array([]), 
+        'input': None, 
         'units': 1, 
-        'activation': np.array([]), 
+        'activation': None, 
         'use_bias': True,
         'weight_initializer': None, #TODO: glorot or something as default?
         'bias_initializer': None,   #TODO: glorot or something as default?

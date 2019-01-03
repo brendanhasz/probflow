@@ -13,6 +13,12 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 
+
+# Sentinel object for required arguments
+REQUIRED = object()
+
+
+
 class BaseVariable(ABC):
     """Abstract Variable class (used as an implementation base)"""
     pass
@@ -120,7 +126,7 @@ class BaseLayer(ABC):
                 self.args[arg] = self._default_args[arg]
 
         # Ensure all required arguments have been set
-        if None in self.args.values():
+        if REQUIRED in self.args.values():
             raise TypeError('required arg(s) were not set. '+
                             type(self).__name__+' requires args: '+
                             ', '.join(self._default_args.keys())) 
