@@ -116,8 +116,7 @@ class Variable(BaseVariable):
     def __init__(self, 
                  shape=1,
                  name='Variable',
-                 prior_fn=Normal,
-                 prior_params=[0, 1],
+                 prior=Normal(0, 1),
                  posterior_fn=Normal,
                  post_param_names=['loc', 'scale'],
                  post_param_lb=[None, 0],
@@ -141,21 +140,8 @@ class Variable(BaseVariable):
                 'shape must be integer(s)'
             assert np.all(shape>=0), 'shape must be positive'
         assert isinstance(name, str), 'name must be a string'
-        assert prior_fn is None or isinstance(prior_fn, BaseDistribution), \
-            'prior_fn must be a bk distribution or None'
-        assert isinstance(prior_params, [int, float, list, np.ndarray]), \
-            ('prior_params must be a np.ndarray, a list of ints, a list of' + 
-             'floats, or a list of np.ndarray s')
-        if isinstance(prior_params, list):
-            for t_param in prior_params:
-                assert isinstance(t_param, [int, float, np.ndarray]), \
-                    ('prior_params must be a list of ints, floats, or' + 
-                     'np.ndarray s')
-                if isinstance(t_param, np.ndarray):
-                    assert all((m==n) or (m==1) or (n==1) for m, n in
-                               zip(t_param.shape[::-1], 
-                                   np.zeros(shape).shape[::-1])), \
-                        'prior_params must be broadcastable to shape'
+        assert prior is None or isinstance(prior, BaseDistribution), \
+            'prior must be a bk distribution or None'
         assert isinstance(posterior_fn, BaseDistribution), \
             'posterior_fn must be a bk distribution'
         assert isinstance(post_param_names, list), \
@@ -186,7 +172,7 @@ class Variable(BaseVariable):
         # Assign attributes
         self.shape = shape
         self.name = name
-        self.prior_fn = prior_fn
+        self.prior = prior
         self.prior_params = prior_params
         self.posterior_fn = posterior_fn
         self.post_param_names = post_param_names
@@ -249,12 +235,9 @@ class Variable(BaseVariable):
         """
 
         # Build the prior distribution
-        if self.prior_fn is not None:
-            prior = self.prior_fn(*self.prior_params)
-            prior.build(data)
-            self.prior = prior.built_obj
-        else:
-            self.prior = None
+        if self.prior is not None:
+            self.prior.build(data)
+            # TODO: Check that the built prior shape is broadcastable w/ self.shape
 
         # Create posterior parameter variables
         params = dict()
@@ -357,7 +340,7 @@ class Variable(BaseVariable):
         """
         self._ensure_is_built()
         if self.prior is not None:
-            return tf.reduce_sum(self.prior.log_prob(vals))
+            return tf.reduce_sum(self.prior.built_obj.log_prob(vals))
             # TODO: have to add KL term?
         else:
             return 0 #no prior, no loss
