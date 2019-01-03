@@ -51,17 +51,35 @@ class CategoricalDistribution(BaseDistribution, CategoricalModel):
 
 
 class Normal(ContinuousDistribution):
-    """TODO
+    r"""The Normal distribution.
 
+    TODO: more... This is an :math:`\alpha=3` inline alpha
 
-    TODO: More info...
+    .. math::
 
+        y \sim \mathcal{N}(0, 1)
+
+    .. math::
+
+        p(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} \\
+               \exp (-\frac{(x-\mu)^2}{2 \sigma^2})
+
+    non-inline math
+
+    Parameters
+    ----------
+    loc : int, float, np.ndarray, or tf.Tensor, optional
+        Mean of the normal distribution (:math:`\mu`). 
+        Default = 0
+    scale : int, float, np.ndarray, or tf.Tensor, optional
+        Standard deviation of the normal distribution (:math:`\sigma^2`). 
+        Default = 1
 
     """
 
 
     # Distribution parameters and their default values
-    default_args = {
+    _default_args = {
         'loc': 0,
         'scale': 1
     }
@@ -74,7 +92,7 @@ class Normal(ContinuousDistribution):
 
 
 class HalfNormal(ContinuousDistribution):
-    """TODO
+    r"""The Half-normal distribution.
 
 
     TODO: More info...
@@ -84,7 +102,7 @@ class HalfNormal(ContinuousDistribution):
 
 
     # Distribution parameters and their default values
-    default_args = {
+    _default_args = {
         'scale': 1
     }
     
@@ -96,7 +114,7 @@ class HalfNormal(ContinuousDistribution):
 
 
 class StudentT(ContinuousDistribution):
-    """TODO
+    r"""The Student-t distribution.
 
 
     TODO: More info...
@@ -106,7 +124,7 @@ class StudentT(ContinuousDistribution):
 
 
     # Distribution parameters and their default values
-    default_args = {
+    _default_args = {
         'df': 1,
         'loc': 0,
         'scale': 1
@@ -120,7 +138,7 @@ class StudentT(ContinuousDistribution):
 
 
 class Cauchy(ContinuousDistribution):
-    """TODO
+    r"""The Cauchy distribution.
 
 
     TODO: More info...
@@ -130,7 +148,7 @@ class Cauchy(ContinuousDistribution):
 
 
     # Distribution parameters and their default values
-    default_args = {
+    _default_args = {
         'loc': 0,
         'scale': 1
     }

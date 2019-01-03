@@ -32,20 +32,22 @@ class BaseLayer(ABC):
     Required attributes and methods
     -------------------------------
     An inheriting class must define the following properties and methods:
-    * `default_args` (attribute)
+    * `_default_args` (attribute)
     * `_build` (method)
     * `_log_loss` (method)
 
-    The `default_args` attribute should contain a dict whose keys are the names
+    The `_default_args` attribute should contain a dict whose keys are the names
     of the layer's arguments, and whose values are the default value of each 
-    argument.  Setting an argument's value in `default_args` to `None` causes
+    argument.  Setting an argument's value in `_default_args` to `None` causes
     that argument to be mandatory (TypeError if that argument's value is not 
     specified when instantiating the class).
 
     The `_build` method should return a `Tensor` which was built from this 
     layer's arguments. TODO: more details...
 
-    The `_log_loss` method should return the log loss incurred by this layer. TODO: more...
+    The `_log_loss` method should return the log loss incurred by this layer. 
+
+    TODO: more...
 
 
     See Also
@@ -60,29 +62,27 @@ class BaseLayer(ABC):
 
     Examples
     --------
-    We can define a layer which adds two arguments like so:
-    ```
-    class Add(BaseLayer):
 
-        self.default_args = {
-            'a': None,
-            'b': None
-        }
+    We can define a layer which adds two arguments like so::
+    
+        class Add(BaseLayer):
 
-        def _build(self, args, data):
-            return args['a'] + args['b']
+            self._default_args = {
+                'a': None,
+                'b': None
+            }
 
-        def _log_loss(self, obj, vals):
-            return 0
-    ```
+            def _build(self, args, data):
+                return args['a'] + args['b']
 
-    then we can use that layer to add two other layers or tensors:
+            def _log_loss(self, obj, vals):
+                return 0
+    
+    then we can use that layer to add two other layers or tensors::
 
-    ```
-    x = Input()
-    b = Variable()
-    mu = Add(x, b)
-    ```
+        x = Input()
+        b = Variable()
+        mu = Add(x, b)
 
     For more examples, see Add, Sub, Mul, Div, Abs, Exp, and Log in layers.py
 
@@ -91,12 +91,12 @@ class BaseLayer(ABC):
 
     @property
     @abstractmethod
-    def default_args(self):
+    def _default_args(self):
         """Layer parameters and their default values.
 
         Inheriting class must define this attribute as a dict whose keys are 
         the names of the layer's arguments, and whose values are the default 
-        value of each argument.  Setting an argument's value in `default_args` 
+        value of each argument.  Setting an argument's value in `_default_args` 
         to `None` causes that argument to be mandatory (TypeError if that 
         argument's value is not specified when instantiating the class).
         """
@@ -111,19 +111,19 @@ class BaseLayer(ABC):
         """
 
         # Set layer arguments, using args, kwargs, and defaults 
-        for ix, arg in enumerate(self.default_args):
+        for ix, arg in enumerate(self._default_args):
             if ix<len(args):
                 self.args[arg] = args[ix]
             elif arg in kwargs:
                 self.args[arg] = kwargs[arg]
             else:
-                self.args[arg] = self.default_args[arg]
+                self.args[arg] = self._default_args[arg]
 
         # Ensure all required arguments have been set
         if None in self.args.values():
             raise TypeError('required arg(s) were not set. '+
                             type(self).__name__+' requires args: '+
-                            ', '.join(self.default_args.keys())) 
+                            ', '.join(self._default_args.keys())) 
 
         # Ensure all arguments are of correct type
         for arg in self.args:

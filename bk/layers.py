@@ -24,7 +24,7 @@ class Input(BaseLayer):
     """
 
     # Layer arguments and their default values
-    default_args = {
+    _default_args = {
         'cols': np.array([]) #indexes of columns to use
     }
     
@@ -54,7 +54,7 @@ class Add(BaseLayer):
     """
 
     # Layer arguments and their default values
-    default_args = {
+    _default_args = {
         'a': None,
         'b': None
     }
@@ -81,7 +81,7 @@ class Sub(BaseLayer):
     """
 
     # Layer arguments and their default values
-    default_args = {
+    _default_args = {
         'a': None,
         'b': None
     }
@@ -108,7 +108,7 @@ class Mul(BaseLayer):
     """
 
     # Layer arguments and their default values
-    default_args = {
+    _default_args = {
         'a': None,
         'b': None
     }
@@ -135,7 +135,7 @@ class Div(BaseLayer):
     """
 
     # Layer arguments and their default values
-    default_args = {
+    _default_args = {
         'a': None,
         'b': None
     }
@@ -162,7 +162,7 @@ class Abs(BaseLayer):
     """
 
     # Layer arguments and their default values
-    default_args = {
+    _default_args = {
         'val': None
     }
     
@@ -188,7 +188,7 @@ class Exp(BaseLayer):
     """
 
     # Layer arguments and their default values
-    default_args = {
+    _default_args = {
         'val': None
     }
     
@@ -220,7 +220,7 @@ class Log(BaseLayer):
     """
 
     # Layer arguments and their default values
-    default_args = {
+    _default_args = {
         'val': None
     }
     
@@ -258,7 +258,7 @@ class Dense(BaseLayer):
     """
 
     # Layer arguments and their default values
-    default_args = {
+    _default_args = {
         'input': np.array([]), 
         'units': 1, 
         'activation': np.array([]), 
@@ -286,6 +286,10 @@ class Dense(BaseLayer):
         # NOTE: may have to implement manually w/ bk.Variable? in order to let the mean_model work...
 
 
+# TODO: _default_args should really only be for *tensor* (or tensor-generating)
+# args, may have to have a separate _default_kwargs or something for, eg, 
+# units, activation, etc... (everything except input, really...)
+# cols arg to Input - same idea, that's not a tensor, thats a list of ints
 
 
 class Sequential(BaseLayer):
