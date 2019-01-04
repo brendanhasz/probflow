@@ -117,6 +117,7 @@ class BaseLayer(ABC):
         """
 
         # Set layer arguments, using args, kwargs, and defaults 
+        self.args = dict()
         for ix, arg in enumerate(self._default_args):
             if ix<len(args):
                 self.args[arg] = args[ix]
@@ -133,9 +134,9 @@ class BaseLayer(ABC):
 
         # Ensure all arguments are of correct type
         for arg in self.args:
-            if not self._arg_is('valid', arg):
+            if not self._arg_is('valid', self.args[arg]):
                 msg = ('Invalid type for ' + type(self).__name__ + 
-                       'argument ' + arg + '. Must be one of: int, float, ' + 
+                       ' argument ' + arg + '. Must be one of: int, float, ' + 
                        'np.ndarray, tf.Tensor, or a bk layer, model, ' +
                        'or distribution.')
                 raise TypeError(msg)
@@ -191,8 +192,8 @@ class BaseLayer(ABC):
         elif type_str=='variable':
             return isinstance(arg, BaseVariable)
         elif type_str=='valid':
-            return isinstance(arg, (int, float, np.ndarray,
-                                    tf.Tensor, BaseModel, BaseLayer))
+            return isinstance(arg, (int, float, np.ndarray, 
+                                    tf.Tensor, BaseLayer))
         else:
             raise TypeError('type_str must a string, one of: number, tensor,' +
                             ' tensor_like, model, layer, or valid')

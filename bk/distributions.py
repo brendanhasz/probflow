@@ -61,7 +61,7 @@ class Normal(ContinuousDistribution):
 
     .. math::
 
-        p(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} \\
+        p(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} 
                \exp (-\frac{(x-\mu)^2}{2 \sigma^2})
 
     non-inline math

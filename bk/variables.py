@@ -22,6 +22,12 @@ class Variable(BaseVariable):
 
     TODO: more... This is an :math:`\alpha=3` inline alpha
 
+    This should reference BaseLayer :class:`.BaseLayer`
+
+    This should reference Normal :class:`.Normal`
+
+    This should link to section :ref:`some-label-name`
+
     And here is a:
 
     .. math::
@@ -38,7 +44,7 @@ class Variable(BaseVariable):
     name : str, optional
         Name of the variable(s).  
         Default = 'Variable'
-    prior_fn : None or `bk.distribution`
+    prior_fn : None or a :doc:`distribution </api_distributions>`
         Prior probability distribution function.  
         Default = Normal
     prior_params : np.ndarray, list of ints, floats, or `np.ndarray`s, optional
@@ -51,7 +57,7 @@ class Variable(BaseVariable):
         Must be a distribution from the location-scale family (such as Normal, 
         StudentT, Cauchy).
         Default = Normal
-    post_param_names : list of strings, optional
+    post_param_names : list of str, optional
         List of posterior distribution parameter names.  Elements in this 
         list should correspond to elements of `post_param_lb` and 
         `post_param_ub`.
