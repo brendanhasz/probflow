@@ -6,13 +6,7 @@ bayesian_keras
    :caption: Contents:
    :hidden:
 
-   variables
-   layers
-   distributions
-   fitting
-   criticizing
-   ready_made_models
-   examples
+   user-guide
    api
 
 TODO: introduction, getting started (a few simple examples), installation, etc
