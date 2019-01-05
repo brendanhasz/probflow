@@ -51,14 +51,14 @@ class Variable(BaseVariable):
         Default = ``['loc', 'scale']`` (assumes ``posterior_fn = Normal``)
     post_param_lb : list of {int or float or |None|}
         List of posterior distribution parameter lower bounds.  The 
-        variational distribution's `i`-th unconstrained parameter value will 
+        variational distribution's ``i``-th unconstrained parameter value will 
         be transformed to fall between ``post_param_lb[i]`` and 
         ``post_param_ub[i]``. Elements of this list should correspond to 
         elements of ``post_param_names`` and ``post_param_ub``.
         Default = ``[None, 0]`` (assumes ``posterior_fn = Normal``)
     post_param_ub : list of {int or float or |None|}
         List of posterior distribution parameter upper bounds.  The 
-        variational distribution's `i`-th unconstrained parameter value will 
+        variational distribution's ``i``-th unconstrained parameter value will 
         be transformed to fall between ``post_param_lb[i]`` and 
         ``post_param_ub[i]``. Elements of this list should correspond to 
         elements of ``post_param_names`` and ``post_param_ub``.
@@ -72,10 +72,10 @@ class Variable(BaseVariable):
         distribution(s) will be transformed to lie between ``lb`` and ``ub``.
         Default = |None|
     seed : int, float, or |None|
-        Seed for the random number generator (a |tfd.SeedStream|).  Set to 
-        |None| to use the global seed.
+        Seed for the random number generator.  
+        Set to |None| to use the global seed.
         Default = |None|
-    estimator : {`'flipout'` or |None|}
+    estimator : {``'flipout'`` or |None|}
         Method of posterior estimator to use. Valid values:
 
         * |None|: Generate random samples from the variational distribution 
@@ -83,7 +83,7 @@ class Variable(BaseVariable):
         * `'flipout'`: Use the Flipout estimator [1]_ to more efficiently 
           generate samples from the variational distribution.
 
-        Default = `'flipout'`
+        Default = ``'flipout'``
 
     Examples
     --------

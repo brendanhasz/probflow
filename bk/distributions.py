@@ -79,16 +79,16 @@ class Normal(ContinuousDistribution):
     .. math::
 
         p(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} 
-               \exp (-\frac{(x-\mu)^2}{2 \sigma^2})
+               \exp \left( -\frac{(x-\mu)^2}{2 \sigma^2} \right)
 
     non-inline math
 
     Parameters
     ----------
-    loc : int, float, np.ndarray, or tf.Tensor, optional
+    loc : int, float, |ndarray|, or |Tensor|
         Mean of the normal distribution (:math:`\mu`). 
         Default = 0
-    scale : int, float, np.ndarray, or tf.Tensor, optional
+    scale : int, float, |ndarray|, or |Tensor|
         Standard deviation of the normal distribution (:math:`\sigma^2`). 
         Default = 1
 

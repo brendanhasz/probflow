@@ -5,5 +5,7 @@
 .. |None| replace:: :obj:`None`
 .. |ndarray| replace:: :class:`ndarray <numpy.ndarray>`
 
-.. |Tensor| replace:: `Tensor <http://www.tensorflow.org/api_docs/python/tf/Tensor>`__
-.. |tfd.SeedStream| replace:: `tfd.SeedStream <http://www.tensorflow.org/probability/api_docs/python/tfp/distributions/SeedStream>`__
+.. yuck
+.. |Tensor| replace:: |TensorFmt|_
+.. |TensorFmt| replace:: ``Tensor``
+.. _TensorFmt: http://www.tensorflow.org/api_docs/python/tf/Tensor
