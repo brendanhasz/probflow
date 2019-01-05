@@ -329,6 +329,11 @@ class BaseModel(BaseLayer):
 
         TODO: Docs...
 
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.posterior` on a |Model|, you must first 
+            :meth:`.fit` it to some data.
+
         """
 
         # Check model has been fit
@@ -342,6 +347,11 @@ class BaseModel(BaseLayer):
         """Draw samples from the model given x.
 
         TODO: Docs...
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.predictive_distribution` on a |Model|, you 
+            must first :meth:`.fit` it to some data.
 
         Returns array of shape (x.shape[0],y.shape[1],num_samples)
 
@@ -360,6 +370,11 @@ class BaseModel(BaseLayer):
         TODO: explain how predictions are generated using the mean of each
         variational distribution
 
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.predict` on a |Model|, you must first 
+            :meth:`.fit` it to some data.
+
         TODO: update parameters list below which is wrong
 
         Parameters
@@ -371,6 +386,7 @@ class BaseModel(BaseLayer):
         method : {'mean', 'median', 'mode', 'min', 'max', 'prc'}
             Method to use to convert the predictive distribution 
             into a single prediction.
+
             * 'mean': Use the mean of the predictive distribution
               (the default).
             * 'median': Use the median of the predictive dist.
@@ -380,9 +396,10 @@ class BaseModel(BaseLayer):
             * 'prc': Use a specified percentile of the predictive 
               dist.  The `prc` arg sets what percentile value to 
               use.
+
         prc : float
             Percentile of the predictive distribution to use as 
-            a prediction when ``method=='prc'`. Between 0 and 100
+            a prediction when ``method=='prc'``. Between 0 and 100
             inclusive (default=50).
         num_samples : int
             Number of samples to draw from the posterior predictive
@@ -390,7 +407,7 @@ class BaseModel(BaseLayer):
 
         Returns
         -------
-        predictions : np.ndarray
+        |ndarray|
             Predicted y-value for each sample in `x`.  Will be of
             size (N,D_out), where N is the number of samples (equal
             to `x.shape[0]`) and D_out is the number of output 
@@ -460,8 +477,12 @@ class BaseModel(BaseLayer):
     def log_prob(self, x, y, individually=True, dist=False, num_samples=1000):
         """Compute the log probability of `y` given `x` and the model.
 
+        TODO: Docs...
 
-        TODO: docs...
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.log_prob` on a |Model|, you must first 
+            :meth:`.fit` it to some data.
 
         if individually is True, returns prob for each sample individually
             so return shape is (x.shape[0],?)
@@ -507,6 +528,11 @@ class BaseModel(BaseLayer):
 
         TODO: docs...
 
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.log_prob_by` on a |Model|, you must first 
+            :meth:`.fit` it to some data.
+
         """
 
         # TODO: check types of x, y, and x_by.
@@ -529,6 +555,11 @@ class BaseModel(BaseLayer):
 
         TODO: docs...
 
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.prob` on a |Model|, you must first 
+            :meth:`.fit` it to some data.
+
         also, this should probably use log_prob, above, then exp it...
         """
 
@@ -541,7 +572,12 @@ class BaseModel(BaseLayer):
         as a function of independent variable(s) `x_by`.
 
         TODO: docs...
-        
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.prob_by` on a |Model|, you must first 
+            :meth:`.fit` it to some data.
+
         """
         
         # TODO: same idea as log_prob_by above
@@ -552,6 +588,11 @@ class BaseModel(BaseLayer):
         """Compute the cumulative probability of `y` given `x` and the model.
 
         TODO: docs...
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.cdf` on a |Model|, you must first 
+            :meth:`.fit` it to some data.
 
         """
 
@@ -564,7 +605,12 @@ class BaseModel(BaseLayer):
         the model as a function of independent variable(s) `x_by`.
 
         TODO: docs...
-        
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.cdf_by` on a |Model|, you must first 
+            :meth:`.fit` it to some data.
+
         """
 
         # TODO: same idea as log_prob_by above
@@ -575,6 +621,11 @@ class BaseModel(BaseLayer):
         """Compute the log cumulative probability of `y` given `x` and the model.
 
         TODO: docs...
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.log_cdf` on a |Model|, you must first 
+            :meth:`.fit` it to some data.
 
         """
 
@@ -587,7 +638,12 @@ class BaseModel(BaseLayer):
         and the model as a function of independent variable(s) `x_by`.
 
         TODO: docs...
-        
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.log_cdf_by` on a |Model|, you must first 
+            :meth:`.fit` it to some data.
+
         """
 
         # TODO: same idea as log_prob_by above
@@ -600,6 +656,12 @@ class ContinuousModel(BaseModel):
 
     TODO: More info...
 
+    Does this only work in class docs [2]_
+
+    .. [2] Andrew Gelman, Ben Goodrich, Jonah Gabry, & Aki Vehtari.  
+        R-squared for Bayesian regression models. 
+        *The American Statistician*, 2018.
+        https://doi.org/10.1080/00031305.2018.1549100
     """
 
 
@@ -608,6 +670,11 @@ class ContinuousModel(BaseModel):
         predictive distribution.
 
         TODO: Docs...
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.predictive_prc` on a |Model|, you must first 
+            :meth:`.fit` it to some data.
 
         """
 
@@ -619,6 +686,11 @@ class ContinuousModel(BaseModel):
         """Compute confidence intervals on predictions for `x`.
 
         TODO: docs, prcs contains percentiles of predictive_distribution to use
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.confidence_intervals` on a |Model|, you must  
+            first :meth:`.fit` it to some data.
 
         Parameters
         ----------
@@ -659,6 +731,11 @@ class ContinuousModel(BaseModel):
 
         TODO: Docs...
 
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.pred_dist_covered` on a |Model|, you must  
+            first :meth:`.fit` it to some data.
+
         """
 
         # Check model has been fit
@@ -674,6 +751,11 @@ class ContinuousModel(BaseModel):
 
         TODO: Docs...
         returns a scalar (from 0 to 100)
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.pred_dist_coverage` on a |Model|, you must  
+            first :meth:`.fit` it to some data.
 
         """
 
@@ -692,6 +774,12 @@ class ContinuousModel(BaseModel):
         TODO: Docs...
         x_by should be int or length-2 list of ints which specifies what column of x to plot by
         returns x and coverage matrix
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.coverage_by` on a |Model|, you must first 
+            :meth:`.fit` it to some data.
+
         """
 
         # Compute whether each sample was covered by the interval
@@ -707,13 +795,17 @@ class ContinuousModel(BaseModel):
         return px, py
 
 
-    def calibration_curve(self, x, y, split_by=None, bins=10):
+    def calibration_curve(self, x=None, y=None, split_by=None, bins=10):
         """Plot and return calibration curve.
 
-        Plots and returns the calibration curve (the percentile of 
-        the posterior predictive distribution on the x-axis, and the
-        percent of samples which actually fall into that range on
-        the y-axis).
+        Plots and returns the calibration curve (the percentile of the posterior
+        predictive distribution on the x-axis, and the percent of samples which
+        actually fall into that range on the y-axis).
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.ContinuousModel.calibration_curve` on a 
+            |Model|, you must first :meth:`.fit` it to some data.
 
         Parameters
         ----------
@@ -766,6 +858,67 @@ class ContinuousModel(BaseModel):
         pass
 
 
+    def r_squared(self, x=None, y=None, num_samples=1000, plot=False):
+        """Compute the Bayesian R-squared value.
+
+        Compute the Bayesian R-squared distribution :ref:`[1] <ref_r_squared>`.
+        TODO: more info and docs...
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.r_squared` on a |Model|, you must  
+            first :meth:`.fit` it to some data.
+
+        Parameters
+        ----------
+        x : |None| or |ndarray|
+            Input array of independent variable values.  If |None|, will use
+            the data the model was trained on (the default).
+        y : |None| or |ndarray|
+            Array of dependent variable values.  If |None|, will use
+            the data the model was trained on (the default).
+        num_samples : int
+            Number of posterior draws to use for computing the r-squared 
+            distribution.  Default = `1000`.
+        plot : bool
+            Whether to plot the r-squared distribution   
+
+        Returns
+        -------
+        |ndarray|
+            Samples from the r-squared distribution.  Size: ``(num_samples,)``.
+
+        Notes
+        -----
+        TODO: Docs...
+
+        Examples
+        --------
+        TODO: Docs...
+
+        References
+        ----------
+        .. _ref_r_squared:
+        .. [1] Andrew Gelman, Ben Goodrich, Jonah Gabry, & Aki Vehtari.  
+            R-squared for Bayesian regression models. 
+            *The American Statistician*, 2018.
+            https://doi.org/10.1080/00031305.2018.1549100
+        """
+        #TODO
+        pass
+
+
+    def residuals(self, x=None, y=None):
+        """Compute the residuals of the model's predictions.
+
+        TODO: docs...
+        if x and y are none uses training data
+
+        """
+        # TODO
+        pass
+
+
 
 class CategoricalModel(BaseModel):
     """Abstract categorical model class (used as implementation base)
@@ -781,6 +934,11 @@ class CategoricalModel(BaseModel):
         Plots and returns the calibration curve (estimated 
         probability of outcome vs the true probability of that 
         outcome).
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.CategoricalModel.calibration_curve` on a 
+            |Model|, you must first :meth:`.fit` it to some data.
 
         Parameters
         ----------
@@ -807,6 +965,8 @@ class CategoricalModel(BaseModel):
 
     # TODO: are there categorical equivalents of predictive_prc, 
     # pred_dist_covered, pred_dist_coverage, and coverage_by?
+
+    # TODO: confusion_matrix (plot/return the confusion matrix of predictions)
 
 
 # TODO: DiscreteModel (for poisson etc)

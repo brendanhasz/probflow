@@ -1,6 +1,9 @@
 .. Macros
 
-.. |distribution| replace:: :doc:`distribution </api_distributions>`
+.. |Distribution| replace:: :doc:`distribution </api_distributions>`
+.. |Variable| replace:: :class:`.Variable`
+.. |Layer| replace:: :doc:`layer </api_layers>`
+.. |Model| replace:: :class:`Model <.BaseModel>`
 
 .. |None| replace:: :obj:`None`
 .. |ndarray| replace:: :class:`ndarray <numpy.ndarray>`

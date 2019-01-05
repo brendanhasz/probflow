@@ -37,11 +37,11 @@ class Variable(BaseVariable):
     name : str
         Name of the variable(s).  
         Default = ``'Variable'``
-    prior : |None| or a |distribution| object
+    prior : |None| or a |Distribution| object
         Prior probability distribution function which has been instantiated
         with parameters.
         Default = :class:`.Normal` ``(0,1)``
-    posterior_fn : |distribution|
+    posterior_fn : |Distribution|
         Probability distribution class to use to approximate the posterior.
         Default = :class:`.Normal`
     post_param_names : list of str
@@ -80,14 +80,10 @@ class Variable(BaseVariable):
 
         * |None|: Generate random samples from the variational distribution 
           for each batch independently.
-        * `'flipout'`: Use the Flipout estimator [1]_ to more efficiently 
-          generate samples from the variational distribution.
+        * `'flipout'`: Use the Flipout estimator :ref:`[1] <ref_flipout>` to 
+          more efficiently generate samples from the variational distribution.
 
         Default = ``'flipout'``
-
-    Examples
-    --------
-    TODO
 
     Notes
     -----
@@ -98,12 +94,17 @@ class Variable(BaseVariable):
     * :class:`.StudentT`
     * :class:`.Cauchy`
 
+    Examples
+    --------
+    TODO
+
     References
     ----------
+    .. _ref_flipout:
     .. [1] Yeming Wen, Paul Vicol, Jimmy Ba, Dustin Tran, and Roger Grosse. 
-         Flipout: Efficient Pseudo-Independent Weight Perturbations on 
-         Mini-Batches. _International Conference on Learning Representations_, 
-         2018. https://arxiv.org/abs/1803.04386
+        Flipout: Efficient Pseudo-Independent Weight Perturbations on 
+        Mini-Batches. *International Conference on Learning Representations*, 
+        2018. https://arxiv.org/abs/1803.04386
     """
 
     def __init__(self, 
@@ -185,16 +186,16 @@ class Variable(BaseVariable):
 
         Parameters
         ----------
-        data : `tf.Tensor`
-            Data to bound between `lb` and `ub`.
-        lb : None, int, float, or `tf.Tensor` broadcastable with `data`
+        data : |Tensor|
+            Data to bound between ``lb`` and ``ub``.
+        lb : |None|, int, float, or |Tensor| broadcastable with ``data``
             Lower bound.
-        ub : None, int, float, or `tf.Tensor` broadcastable with `data`
+        ub : |None|, int, float, or |Tensor| broadcastable with ``data``
             Upper bound.
 
         Returns
         -------
-        bounded_data : `tf.Tensor`
+        bounded_data : |Tensor|
             The data after being transformed.
         """
         if ub is None:
@@ -223,7 +224,7 @@ class Variable(BaseVariable):
 
         Parameters
         ----------
-        data : `tf.Tensor`
+        data : |Tensor|
             Data for this batch.
         """
 
@@ -253,10 +254,16 @@ class Variable(BaseVariable):
         
         TODO: docs
 
+        .. admonition:: Variable must be built first!
+
+            Before calling :meth:`.sample` on a |Variable|, you must first 
+            :meth:`.build` it, or :meth:`.fit` a model it belongs to.
+
         Parameters
         ----------
-        data : `tf.Tensor`
+        data : |Tensor|
             Data for this batch.
+
         """
 
         # Ensure variable has been built
@@ -312,9 +319,14 @@ class Variable(BaseVariable):
 
         TODO: docs
 
+        .. admonition:: Variable must be built first!
+
+            Before calling :meth:`.mean` on a |Variable|, you must first 
+            :meth:`.build` it, or :meth:`.fit` a model it belongs to.
+
         Parameters
         ----------
-        data : `tf.Tensor`
+        data : |Tensor|
             Data for this batch.
         """
         self._ensure_is_built()
@@ -326,9 +338,14 @@ class Variable(BaseVariable):
 
         TODO: docs
 
+        .. admonition:: Variable must be built first!
+
+            Before calling :meth:`.log_loss` on a |Variable|, you must first 
+            :meth:`.build` it, or :meth:`.fit` a model it belongs to.
+
         Parameters
         ----------
-        vals : `tf.Tensor`
+        vals : |Tensor|
             Values which were sampled from the variational distribution.
         """
         self._ensure_is_built()

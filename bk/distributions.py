@@ -85,10 +85,10 @@ class Normal(ContinuousDistribution):
 
     Parameters
     ----------
-    loc : int, float, |ndarray|, or |Tensor|
+    loc : int, float, |ndarray|, |Tensor|, |Variable|, or |Layer|
         Mean of the normal distribution (:math:`\mu`). 
         Default = 0
-    scale : int, float, |ndarray|, or |Tensor|
+    scale : int, float, |ndarray|, |Tensor|, |Variable|, or |Layer|
         Standard deviation of the normal distribution (:math:`\sigma^2`). 
         Default = 1
 
