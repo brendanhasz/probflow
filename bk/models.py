@@ -2,6 +2,13 @@
 
 TODO: more info...
 
+* :class:`.LinearRegression`
+* :class:`.LogisticRegression`
+* :class:`.DenseRegression`
+* :class:`.DenseClassifier`
+
+----------
+
 """
 
 

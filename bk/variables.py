@@ -2,6 +2,8 @@
 
 TODO: more info...
 
+----------
+
 """
 
 
@@ -20,83 +22,68 @@ from .core import BaseVariable
 class Variable(BaseVariable):
     r"""Variable(s) drawn from variational distribution(s).
 
-    TODO: more... This is an :math:`\alpha=3` inline alpha
-
-    This should reference BaseLayer :class:`.BaseLayer`
-
-    This should reference Normal :class:`.Normal`
-
-    This should link to section :ref:`some-label-name`
-
-    And here is a:
+    TODO: describe...
 
     .. math::
 
         y \sim \mathcal{N}(0, 1)
 
-    non-inline math
 
     Parameters
     ----------
-    shape : int, list of ints, or 1D np.ndarray, optional
+    shape : int, list of int, or 1D |ndarray|
         Shape of the array containing the variables. 
-        Default = 1
-    name : str, optional
+        Default = ``1``
+    name : str
         Name of the variable(s).  
-        Default = 'Variable'
-    prior_fn : None or a :doc:`distribution </api_distributions>`
-        Prior probability distribution function.  
-        Default = Normal
-    prior_params : np.ndarray, list of ints, floats, or `np.ndarray`s, optional
-        Parameters of the prior distribution.  To use different prior parameter
-        values for each element of the variable array, pass a list of 
-        np.ndarrays, where each has shape matching the `shape` arg.
-        Default = [0, 1] (assumes `prior_fn` = `Normal`)
-    posterior_fn : `bk.distribution`, optional
-        Probability distribution function to use to approximate the posterior.
-        Must be a distribution from the location-scale family (such as Normal, 
-        StudentT, Cauchy).
-        Default = Normal
-    post_param_names : list of str, optional
+        Default = ``'Variable'``
+    prior : |None| or a |distribution| object
+        Prior probability distribution function which has been instantiated
+        with parameters.
+        Default = :class:`.Normal` ``(0,1)``
+    posterior_fn : |distribution|
+        Probability distribution class to use to approximate the posterior.
+        Default = :class:`.Normal`
+    post_param_names : list of str
         List of posterior distribution parameter names.  Elements in this 
-        list should correspond to elements of `post_param_lb` and 
-        `post_param_ub`.
-        Default = ['loc', 'scale'] (assumes `posterior_fn` = `Normal`)
-    post_param_lb : list of ints or floats or `None`s, optional
+        list should correspond to elements of ``post_param_lb`` and 
+        ``post_param_ub``.
+        Default = ``['loc', 'scale']`` (assumes ``posterior_fn = Normal``)
+    post_param_lb : list of {int or float or |None|}
         List of posterior distribution parameter lower bounds.  The 
-        variational distribution's i-th unconstrained parameter value will 
-        be transformed to fall between `post_param_lb[i]` and 
-        `post_param_ub[i]`. Elements of this list should correspond to 
-        elements of `post_param_names` and `post_param_ub`.
-        Default = [None, 0] (assumes `posterior_fn` = `Normal`)
-    post_param_ub : list of ints or floats or `None`s, optional
+        variational distribution's `i`-th unconstrained parameter value will 
+        be transformed to fall between ``post_param_lb[i]`` and 
+        ``post_param_ub[i]``. Elements of this list should correspond to 
+        elements of ``post_param_names`` and ``post_param_ub``.
+        Default = ``[None, 0]`` (assumes ``posterior_fn = Normal``)
+    post_param_ub : list of {int or float or |None|}
         List of posterior distribution parameter upper bounds.  The 
-        variational distribution's i-th unconstrained parameter value will 
-        be transformed to fall between `post_param_lb[i]` and 
-        `post_param_ub[i]`. Elements of this list should correspond to 
-        elements of `post_param_names` and `post_param_ub`.
-        Default = [None, None] (assumes `posterior_fn` = `Normal`)
-    lb : int, float, or None, optional
+        variational distribution's `i`-th unconstrained parameter value will 
+        be transformed to fall between ``post_param_lb[i]`` and 
+        ``post_param_ub[i]``. Elements of this list should correspond to 
+        elements of ``post_param_names`` and ``post_param_ub``.
+        Default = ``[None, None]`` (assumes ``posterior_fn = Normal``)
+    lb : int, float, or |None|
         Lower bound for the variable(s).  The unconstrained posterior 
-        distribution(s) will be transformed to lie between `lb` and `ub`.
-        Default = None
-    ub : int, float, or None, optional
+        distribution(s) will be transformed to lie between ``lb`` and ``ub``.
+        Default = |None|
+    ub : int, float, or |None|
         Upper bound for the variable(s).  The unconstrained posterior 
-        distribution(s) will be transformed to lie between `lb` and `ub`.
-        Default = None
-    seed : int, float, or None, optional
-        Seed for the random number generator (a `tfd.SeedStream`).  Set to 
-        `None` to use the global seed.
-        Default = None
-    estimator : {'flipout' or None}, optional
-        Method of posterior estimator to use. Valid methods:
+        distribution(s) will be transformed to lie between ``lb`` and ``ub``.
+        Default = |None|
+    seed : int, float, or |None|
+        Seed for the random number generator (a |tfd.SeedStream|).  Set to 
+        |None| to use the global seed.
+        Default = |None|
+    estimator : {`'flipout'` or |None|}
+        Method of posterior estimator to use. Valid values:
 
-        * None: Generate random samples from the variational distribution 
+        * |None|: Generate random samples from the variational distribution 
           for each batch independently.
-        * 'flipout': Use the Flipout estimator [1]_ to more efficiently 
+        * `'flipout'`: Use the Flipout estimator [1]_ to more efficiently 
           generate samples from the variational distribution.
 
-        Default = 'flipout'
+        Default = `'flipout'`
 
     Examples
     --------
@@ -104,12 +91,12 @@ class Variable(BaseVariable):
 
     Notes
     -----
-    When using the flipout estimator (`estimator='flipout'`), `posterior_fn` 
+    When using the flipout estimator (``estimator='flipout'``), ``posterior_fn`` 
     must be a symmetric distribution of the location-scale family - one of:
 
-    * `bk.Normal`
-    * `bk.StudentT`
-    * `bk.Cauchy`
+    * :class:`.Normal`
+    * :class:`.StudentT`
+    * :class:`.Cauchy`
 
     References
     ----------

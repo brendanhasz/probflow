@@ -1,6 +1,23 @@
 """Probability distributions.
 
-TODO: more info...
+TODO: more info
+
+TODO: list the distributions by type (continuous, categorical, etc), linking to api refs below
+
+Continuous Distributions
+------------------------
+
+* :class:`.Normal`
+* :class:`.HalfNormal`
+* :class:`.StudentT`
+* :class:`.Cauchy`
+
+Discrete Distributions
+----------------------
+
+TODO: Bernoulli, Categorical, etc
+
+----------
 
 """
 

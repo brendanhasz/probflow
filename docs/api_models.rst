@@ -1,12 +1,7 @@
 Ready-made Models API
 =====================
 
-
-* :class:`.LinearRegression`
-* :class:`.LogisticRegression`
-* :class:`.DenseRegression`
-* :class:`.DenseClassifier`
-
+.. include:: macros.hrst
 
 .. automodule:: bk.models
    :members:
