@@ -1,7 +1,7 @@
+# ProbFlow
+
 Would be ideal to have, basically, Keras for Bayesian models, built on tfp
 With added support for viewing/drawing from posteriors, computing predictive distributions, viewing uncertainty calibration metrics, etc
-
-Let's call it bk for now ("bayesian keras"... that'll have to change, obvi)
 
 TODO short term:
 - docs for BaseLayer
@@ -35,7 +35,9 @@ TODO long term:
 - Model comparison
 - Mixture distribution
 
-## bk.variables
+
+
+## probflow.variables
 Just a way go get raw variational variables
 - Variable (returns a tfp.normal, shape can be >1)
 - PositiveVariable
@@ -43,7 +45,7 @@ Just a way go get raw variational variables
 alternatively, just do Variable(..., lb=0) or Variable(..., lb=0, ub=1)
 and should be able to set the estimator: Variable(..., estimator='flipout') #or 'random'?
 
-## bk.layers
+## probflow.layers
 Layers output a tf.Tensor, whereas variables, distributions, and models output a tfd.distribution
 (Built with tfp's flipout estimators)
 - BaseLayer (from which all other layers inherit)
@@ -55,12 +57,12 @@ Layers output a tf.Tensor, whereas variables, distributions, and models output a
 - LSTM? Maybe put that on the Todo list...
 All should have an in=... arg which specifies their input(s)
 
-## bk.distributions
+## probflow.distributions
 (Basically aliases tfp distributions, also add LogNormal and LogitNormal?)
 -  Normal (defaults are loc=0, scale=1)
 -  Bernoulli
 
-## bk.models
+## probflow.models
 (Pre built models)
 - BaseModel (has code for fit() methods, _init_(), etc and everything that's the same which variables, distributions, and models inherit)
 - LinearRegression   #Regressors infer dim of outputs from dim of y
@@ -149,7 +151,7 @@ So they'll all have a .build() method (even the layers - BaseL
     so will have to have .built and .built_model attribs which are None until build() is called
 Each class will also have to have a .fit() method too (maybe can be implemented in BaseModel class which all inherit from)
     
-Behind the scenes bk turns stuff like
+Behind the scenes probflow turns stuff like
     Normal(Dense(...), Normal(...))
 into
     tfd.Normal(tfp.DenseFlipout(...)(x_in), tfd.Normal(...).sample())
@@ -227,7 +229,7 @@ logits = Dense(1)
 model = Bernoulli(logits)
 model.fit(x,y)
 ```
-or, using the bk.model,
+or, using the probflow.model,
 ```python
 model = LogisticRegression()
 model.fit(x,y)
@@ -245,7 +247,7 @@ noise_std = Variable(lb=0)
 model = Normal(predictions, noise_std)
 model.fit(x,y)
 ```
-or, with the bk.model,
+or, with the probflow.model,
 ```python
 model = DenseRegression([128, 64, 32])
 model.fit(x,y)

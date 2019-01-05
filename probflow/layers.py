@@ -308,7 +308,7 @@ class Dense(BaseLayer):
 
         # TODO
 
-        # NOTE: may have to implement manually w/ bk.Variable? in order to let the mean_model work...
+        # NOTE: may have to implement manually w/ probflow.Variable? in order to let the mean_model work...
 
 
 # TODO: _default_args should really only be for *tensor* (or tensor-generating)

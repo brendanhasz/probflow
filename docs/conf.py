@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'bayesian_keras'
+project = 'probflow'
 copyright = '2018, Brendan Hasz'
 author = 'Brendan Hasz'
 
@@ -117,7 +117,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'bayesian_kerasdoc'
+htmlhelp_basename = 'probflowdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -144,7 +144,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'bayesian_keras.tex', 'bayesian\\_keras Documentation',
+    (master_doc, 'probflow.tex', 'probflow Documentation',
      'Brendan Hasz', 'manual'),
 ]
 
@@ -154,7 +154,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'bayesian_keras', 'bayesian_keras Documentation',
+    (master_doc, 'probflow', 'probflow Documentation',
      [author], 1)
 ]
 
@@ -165,8 +165,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'bayesian_keras', 'bayesian_keras Documentation',
-     author, 'bayesian_keras', 'One line description of project.',
+    (master_doc, 'probflow', 'probflow Documentation',
+     author, 'probflow', 'One line description of project.',
      'Miscellaneous'),
 ]
 

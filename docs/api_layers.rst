@@ -3,7 +3,7 @@ Layers API
 
 .. include:: macros.hrst
 
-.. automodule:: bk.layers
+.. automodule:: probflow.layers
    :members:
    :inherited-members:
    :show-inheritance:

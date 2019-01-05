@@ -3,7 +3,7 @@ Ready-made Models API
 
 .. include:: macros.hrst
 
-.. automodule:: bk.models
+.. automodule:: probflow.models
    :members:
    :inherited-members:
    :show-inheritance:

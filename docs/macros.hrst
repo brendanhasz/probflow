@@ -1,5 +1,9 @@
 .. Macros
 
+.. |Keras| replace:: `Keras <https://keras.io>`__
+.. |TensorFlow| replace:: `TensorFlow <https://www.tensorflow.org/>`__
+.. |TensorFlow Probability| replace:: `TensorFlow Probability <https://www.tensorflow.org/probability/>`__
+
 .. |Distribution| replace:: :doc:`distribution </api_distributions>`
 .. |Variable| replace:: :class:`.Variable`
 .. |Layer| replace:: :doc:`layer </api_layers>`
@@ -8,7 +12,9 @@
 .. |None| replace:: :obj:`None`
 .. |ndarray| replace:: :class:`ndarray <numpy.ndarray>`
 
-.. yuck
+.. Format tf.Tensor like a class.  Yuck.
 .. |Tensor| replace:: |TensorFmt|_
 .. |TensorFmt| replace:: ``Tensor``
 .. _TensorFmt: http://www.tensorflow.org/api_docs/python/tf/Tensor
+
+

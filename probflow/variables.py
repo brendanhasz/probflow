@@ -135,9 +135,9 @@ class Variable(BaseVariable):
             assert np.all(shape>=0), 'shape must be positive'
         assert isinstance(name, str), 'name must be a string'
         assert prior is None or isinstance(prior, BaseDistribution), \
-            'prior must be a bk distribution or None'
+            'prior must be a probflow distribution or None'
         assert isinstance(posterior_fn, BaseDistribution), \
-            'posterior_fn must be a bk distribution'
+            'posterior_fn must be a probflow distribution'
         assert isinstance(post_param_names, list), \
             'post_param_names must be a list of strings'        
         assert all(isinstance(n, str) for n in post_param_names), \

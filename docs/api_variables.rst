@@ -3,7 +3,7 @@ Variables API
 
 .. include:: macros.hrst
 
-.. automodule:: bk.variables
+.. automodule:: probflow.variables
    :members:
    :inherited-members:
    :show-inheritance:

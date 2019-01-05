@@ -3,7 +3,7 @@ Distributions API
 
 .. include:: macros.hrst
 
-.. automodule:: bk.distributions
+.. automodule:: probflow.distributions
    :members:
    :inherited-members:
    :show-inheritance:

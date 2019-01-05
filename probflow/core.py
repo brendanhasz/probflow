@@ -92,7 +92,8 @@ class BaseLayer(ABC):
         b = Variable()
         mu = Add(x, b)
 
-    For more examples, see Add, Sub, Mul, Div, Abs, Exp, and Log in layers.py
+    For more examples, see :class:`.Add`, :class:`.Sub`, :class:`.Mul`, 
+    :class:`.Div`, :class:`.Abs`, :class:`.Exp`, and :class:`.Log`.
 
     """
 
@@ -139,7 +140,7 @@ class BaseLayer(ABC):
             if not self._arg_is('valid', self.args[arg]):
                 msg = ('Invalid type for ' + type(self).__name__ + 
                        ' argument ' + arg + '. Must be one of: int, float, ' + 
-                       'np.ndarray, tf.Tensor, or a bk layer, model, ' +
+                       'np.ndarray, tf.Tensor, or a probflow layer, model, ' +
                        'or distribution.')
                 raise TypeError(msg)
 
@@ -804,35 +805,38 @@ class ContinuousModel(BaseModel):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.ContinuousModel.calibration_curve` on a 
-            |Model|, you must first :meth:`.fit` it to some data.
+            Before calling 
+            :meth:`calibration_curve() <.ContinuousModel.calibration_curve>` on
+            a |Model|, you must first :meth:`.fit` it to some data.
 
         Parameters
         ----------
-        x : np.ndarray
+        x : |None| or |ndarray|
             Input array of independent variable values.  Should be
             of shape (N,D), where N is the number of samples and D
             is the number of dimensions of the independent variable.
-        y : np.ndarray
+            If |None|, will use the data the model was trained on (the default).
+        y : |None| or |ndarray|
             Array of dependent variable values.  Should be of shape
             (N,D_out), where N is the number of samples (equal to
             `x.shape[0]) and D_out is the number of dimensions of
             the dependent variable.
+            If |None|, will use the data the model was trained on (the default).
         split_by : int
             Draw the calibration curve independently for datapoints
             with each unique value in `x[:,split_by]` (a categorical
             column).
-        bins : int or vector_like
+        bins : int, list of float, or |ndarray|
             Bins used to compute the curve.  If an integer, will use
             `bins` evenly-spaced bins from 0 to 1.  If a vector,
-            `bins` is the vector of bin edges.          
+            `bins` is the vector of bin edges.
 
         Returns
         -------
-        cx : np.ndarray
+        cx : |ndarray|
             Vector of percentiles (the middle of each percentile
             bin).  Length is determined by `bins`.
-        cy : np.ndarray
+        cy : |ndarray|
             Vector of percentages of samples which fell within each
             percentile bin of the posterior predictive distribution.
 
@@ -937,8 +941,9 @@ class CategoricalModel(BaseModel):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.CategoricalModel.calibration_curve` on a 
-            |Model|, you must first :meth:`.fit` it to some data.
+            Before calling 
+            :meth:`calibration_curve() <.CategoricalModel.calibration_curve>` 
+            on a |Model|, you must first :meth:`.fit` it to some data.
 
         Parameters
         ----------
