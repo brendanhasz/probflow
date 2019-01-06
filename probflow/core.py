@@ -296,6 +296,22 @@ class BaseModel(BaseLayer):
 
         TODO: Docs...
 
+        x and y should be able to be numpy arrays (in which case will set up as tf.Dataset automatically)
+        or pandas dfs
+        but they should also be able to be passed as tf.Datasets directly
+        how to get that to work with Input tho?
+
+        metrics='mae' or 'accuracy' or something
+
+        Fit func should also have a validation_split arg (which defines what percentage of the data to use as validation data, along w/ shuffle arg, etc)
+        Fit func should automatically normalize the input data and try to transform it (but can disable that w/ auto_normalize=False, auto_transform=False)
+        And convert to float32s (but can change w/ dtype=tf.float64 or something)
+        Also should have callbacks like let's to do early stopping etc
+        Also have a monitor param which somehow lets you monitor the value of parameters over training?
+        And make sure to make it sklearn-compatible (ie you can put it in a pipeline and everything)
+        should have a show_tensorboard option (default is False) https://www.tensorflow.org/guide/summaries_and_tensorboard
+
+
         """
 
         # Set up the data for fitting
@@ -650,6 +666,28 @@ class BaseModel(BaseLayer):
         # TODO: same idea as log_prob_by above
         pass
 
+    def metrics(self, x=None, y=None, metric_list=[]):
+        """Compute metrics of model performance on data
+
+        TODO: docs, metric_list can contain 'mse', 'mae', 'accuracy', etc
+
+        TODO: methods which just call this w/ a specific metric? for shorthand
+
+        Parameters
+        ----------
+        x : |None| or |ndarray|
+            Input array of independent variable values of data on which to 
+            evalutate the model.  First dimension should be equal to the number
+            of samples.
+            If |None|, will use the data the model was trained on (the default).
+        y : |None| or |ndarray|
+            Input array of dependent variable values of data on which to 
+            evalutate the model.  First dimension should be equal to the number
+            of samples.
+            If |None|, will use the data the model was trained on (the default).
+
+        """
+
 
 
 class ContinuousModel(BaseModel):
@@ -666,7 +704,7 @@ class ContinuousModel(BaseModel):
     """
 
 
-    def predictive_prc(self, x, y):
+    def predictive_prc(self, x=None, y=None):
         """Compute the percentile of each observation along the posterior 
         predictive distribution.
 
@@ -677,13 +715,26 @@ class ContinuousModel(BaseModel):
             Before calling :meth:`.predictive_prc` on a |Model|, you must first 
             :meth:`.fit` it to some data.
 
+        Parameters
+        ----------
+        x : |None| or |ndarray|
+            Input array of independent variable values.  Should be
+            of shape (N,D), where N is the number of samples and D
+            is the number of dimensions of the independent variable.
+            If |None|, will use the data the model was trained on (the default).
+        y : |None| or |ndarray|
+            Array of dependent variable values.  Should be of shape
+            (N,D_out), where N is the number of samples (equal to
+            `x.shape[0]) and D_out is the number of dimensions of
+            the dependent variable.
+            If |None|, will use the data the model was trained on (the default).
         """
 
         #TODO
         pass
 
 
-    def confidence_intervals(self, x, prcs=[2.5, 97.5], num_samples=1000):
+    def confidence_intervals(self, x=None, prcs=[2.5, 97.5], num_samples=1000):
         """Compute confidence intervals on predictions for `x`.
 
         TODO: docs, prcs contains percentiles of predictive_distribution to use
@@ -699,6 +750,7 @@ class ContinuousModel(BaseModel):
             Input array of independent variable values.  Should be of shape 
             (N,D), where N is the number of samples and D is the number of 
             dimensions of the independent variable.
+            If |None|, will use the data the model was trained on (the default).
         prcs : list of float, or np.ndarray
             Percentiles to use as bounds of the confidence interval, between 0 
             and 100. 
@@ -725,7 +777,7 @@ class ContinuousModel(BaseModel):
         return np.percentile(pred_dist, prcs)
 
         
-    def pred_dist_covered(self, x, y, prc):
+    def pred_dist_covered(self, x=None, y=None, prc):
         """Compute whether each observation was covered by the 
         inner `prc` percentile of the posterior predictive 
         distribution.
@@ -737,6 +789,19 @@ class ContinuousModel(BaseModel):
             Before calling :meth:`.pred_dist_covered` on a |Model|, you must  
             first :meth:`.fit` it to some data.
 
+        Parameters
+        ----------
+        x : |None| or |ndarray|
+            Input array of independent variable values.  Should be
+            of shape (N,D), where N is the number of samples and D
+            is the number of dimensions of the independent variable.
+            If |None|, will use the data the model was trained on (the default).
+        y : |None| or |ndarray|
+            Array of dependent variable values.  Should be of shape
+            (N,D_out), where N is the number of samples (equal to
+            `x.shape[0]) and D_out is the number of dimensions of
+            the dependent variable.
+            If |None|, will use the data the model was trained on (the default).
         """
 
         # Check model has been fit
@@ -746,7 +811,7 @@ class ContinuousModel(BaseModel):
         pass
 
         
-    def pred_dist_coverage(self, x, y, prc):
+    def pred_dist_coverage(self, x=None, y=None, prc):
         """Compute the coverage of the inner `prc` percentile of the
         posterior predictive distribution.
 
@@ -758,6 +823,19 @@ class ContinuousModel(BaseModel):
             Before calling :meth:`.pred_dist_coverage` on a |Model|, you must  
             first :meth:`.fit` it to some data.
 
+        Parameters
+        ----------
+        x : |None| or |ndarray|
+            Input array of independent variable values.  Should be
+            of shape (N,D), where N is the number of samples and D
+            is the number of dimensions of the independent variable.
+            If |None|, will use the data the model was trained on (the default).
+        y : |None| or |ndarray|
+            Array of dependent variable values.  Should be of shape
+            (N,D_out), where N is the number of samples (equal to
+            `x.shape[0]) and D_out is the number of dimensions of
+            the dependent variable.
+            If |None|, will use the data the model was trained on (the default).
         """
 
         # Check model has been fit
@@ -767,7 +845,7 @@ class ContinuousModel(BaseModel):
         pass
 
 
-    def coverage_by(self, x, y, x_by, prc, bins=100, plot=True):
+    def coverage_by(self, x=None, y=None, x_by, prc, bins=100, plot=True):
         """Compute and plot the coverage of the inner `prc` 
         percentile of the posterior predictive distribution as a 
         function of specified independent variables.
@@ -781,6 +859,19 @@ class ContinuousModel(BaseModel):
             Before calling :meth:`.coverage_by` on a |Model|, you must first 
             :meth:`.fit` it to some data.
 
+        Parameters
+        ----------
+        x : |None| or |ndarray|
+            Input array of independent variable values.  Should be
+            of shape (N,D), where N is the number of samples and D
+            is the number of dimensions of the independent variable.
+            If |None|, will use the data the model was trained on (the default).
+        y : |None| or |ndarray|
+            Array of dependent variable values.  Should be of shape
+            (N,D_out), where N is the number of samples (equal to
+            `x.shape[0]) and D_out is the number of dimensions of
+            the dependent variable.
+            If |None|, will use the data the model was trained on (the default).
         """
 
         # Compute whether each sample was covered by the interval
@@ -796,8 +887,9 @@ class ContinuousModel(BaseModel):
         return px, py
 
 
-    def calibration_curve(self, x=None, y=None, split_by=None, bins=10):
-        """Plot and return calibration curve.
+    def calibration_curve(self, x=None, y=None, split_by=None, 
+                          bins=10, plot=False):
+        """Plot and/or return calibration curve.
 
         Plots and returns the calibration curve (the percentile of the posterior
         predictive distribution on the x-axis, and the percent of samples which
@@ -912,11 +1004,24 @@ class ContinuousModel(BaseModel):
         pass
 
 
-    def residuals(self, x=None, y=None):
+    def residuals(self, x=None, y=None, plot=False):
         """Compute the residuals of the model's predictions.
 
         TODO: docs...
-        if x and y are none uses training data
+
+        Parameters
+        ----------
+        x : |None| or |ndarray|
+            Input array of independent variable values.  Should be
+            of shape (N,D), where N is the number of samples and D
+            is the number of dimensions of the independent variable.
+            If |None|, will use the data the model was trained on (the default).
+        y : |None| or |ndarray|
+            Array of dependent variable values.  Should be of shape
+            (N,D_out), where N is the number of samples (equal to
+            `x.shape[0]) and D_out is the number of dimensions of
+            the dependent variable.
+            If |None|, will use the data the model was trained on (the default).
 
         """
         # TODO

@@ -5,4 +5,7 @@ A Keras-like interface for building variational Bayesian models with TensorFlow 
 
 |Docs Badge|
 
-.. |Docs Badge| image:: https://readthedocs.org/projects/probflow/badge/?version=latest
+.. |Docs Badge| image:: https://readthedocs.org/projects/probflow/badge/
+    :alt: Documentation Status
+    :scale: 100%
+    :target: http://probflow.readthedocs.io

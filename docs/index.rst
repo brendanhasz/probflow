@@ -8,10 +8,11 @@ ProbFlow
 
    user-guide
    api
+   todo
 
 .. include:: macros.hrst
 
-ProbFlow is a |Keras|-like interface for building Bayesian models with |TensorFlow Probability|, which are fit using variational inference.
+ProbFlow is a |Keras|-like interface for building Bayesian models with |TensorFlow Probability|, performing variational inference, and diagnosing those models.
 
 It's very much a work in progress.
 
