@@ -777,7 +777,7 @@ class ContinuousModel(BaseModel):
         return np.percentile(pred_dist, prcs)
 
         
-    def pred_dist_covered(self, x=None, y=None, prc):
+    def pred_dist_covered(self, x=None, y=None, prc=95.0):
         """Compute whether each observation was covered by the 
         inner `prc` percentile of the posterior predictive 
         distribution.
@@ -811,7 +811,7 @@ class ContinuousModel(BaseModel):
         pass
 
         
-    def pred_dist_coverage(self, x=None, y=None, prc):
+    def pred_dist_coverage(self, x=None, y=None, prc=95.0):
         """Compute the coverage of the inner `prc` percentile of the
         posterior predictive distribution.
 
@@ -845,7 +845,7 @@ class ContinuousModel(BaseModel):
         pass
 
 
-    def coverage_by(self, x=None, y=None, x_by, prc, bins=100, plot=True):
+    def coverage_by(self, x_by, x=None, y=None, prc=95.0, bins=100, plot=True):
         """Compute and plot the coverage of the inner `prc` 
         percentile of the posterior predictive distribution as a 
         function of specified independent variables.
