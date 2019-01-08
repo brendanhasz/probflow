@@ -8,12 +8,12 @@ Examples
 
 TODO: intro
 
+TODO: make sure to have diagrams for each model
+
 .. contents:: Outline
 
 Linear Regression
 -----------------
-
-TODO: 1-variable, then w/ Dense, then w/ ready-made model
 
 TODO: manually:
 
@@ -53,7 +53,7 @@ TODO: with ready-made model:
 
     from probflow import LinearRegression
 
-    model = LinearRegression
+    model = LinearRegression()
     model.fit(x,y)
 
 TODO: how to access posterior elements from within the LinearRegression model

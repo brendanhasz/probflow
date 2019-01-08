@@ -6,6 +6,9 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
+* Make layers have a `default_kwargs attribute`_
+* Layers w/ multiple args should ensure their args are broadcastable
+* Variable should have a record=False arg to init (record posterior values over training)
 * Finish BaseLayer, BaseModel.fit, Variable, and Input
 * Tests and debug a simple 1d linear model
 * Docs for BaseLayer, BaseModel.fit, Variable, and Input
@@ -21,8 +24,11 @@ Backlog (short term):
 * Models which only use Dense
 * Tests
 * Bernoulli and Poisson dists
+* `Mean alias for discrete dists`_
 * Models which use them (Classifiers)
 * Tests
+* `Reset method`_
+* `Sklearn support`_
 
 Backlog (long term):
 --------------------
@@ -31,6 +37,9 @@ Backlog (long term):
 * `Tensorflow dashboard`_
 * `Embedding layer`_
 * Neural Matrix Factorization
+* MultivariateNormal, StudentT, and Cauchy dists
+* Examples and ready-made gaussian process models
+* Examples and ready-made hidden markov models
 * Conv layers
 * Pooling layers
 * Ready-made Conv models
@@ -39,10 +48,41 @@ Backlog (long term):
 * `Mixture distribution`_
 * LSTM Layer
 
+Issues
+------
+
+Transformed mean does not return mean
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Currently mean() won't actually return the mean of a variable if that variable is transformed/bounded, bc mean(exp(x)) isn't the same as exp(mean(x)) ; currently you do the second one in Variable.mean(), and also in Exp(Variable()).
+It's not exactly the end of the world: if the variatinional dist used is Normal, it'll return the mode.
+But, it's technically not correct.
 
 
 Notes
 -----
+
+default_kwargs attribute
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Layers should have a _default_kwargs attribute (default is {} in BaseLayer). 
+That way the only arg to the Dense layer will be its input, but all the options can be specified with kwargs and build won't try to build_args them bc they're not in the args list.
+
+Mean alias for discrete dists
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Categorical distributions should have a mean function (for convenience) which actually returns the mode (also have a mode func). That way if you call predict on a model which involves a categorical dist it'll work just fine (by recursively evaluating mean())
+
+Reset method
+^^^^^^^^^^^^
+Models should have a reset() method which sets is_fit to false and clears the tf graph. Then, in fit, only builds the model if is_fit is false. That way you can do transfer learning or snapshot ensembling easily: fit to one set of data, then fit to another, and for the second fit the parameters start where they were at the end of the first fit. But if you want to explicitly re fit from scratch call model.reset()
+Ideally calling reset on a model would *only* reset the variables contained in that model, and not the entire TF graph...
+
+Sklearn support
+^^^^^^^^^^^^^^^
+
+Model classes should be consistent with a sklearn estimator. 
+Or if that won't work, include a sklearn Estimator which takes a model obj.
+https://scikit-learn.org/dev/developers/contributing.html#rolling-your-own-estimator
 
 Embedding layer
 ^^^^^^^^^^^^^^^
