@@ -36,9 +36,8 @@ Backlog (long term):
 * `Tensorflow dashboard`_
 * `Embedding layer`_
 * Neural Matrix Factorization
-* MultivariateNormal, StudentT, and Cauchy dists
-* Examples and ready-made gaussian process models
-* Examples and ready-made hidden markov models
+* Multivariate Normal, StudentT, and Cauchy dists
+* Bayesian correlation example and Model
 * Conv layers
 * Pooling layers
 * Ready-made Conv models
