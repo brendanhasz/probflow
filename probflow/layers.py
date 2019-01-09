@@ -48,11 +48,16 @@ class Input(BaseLayer):
 
     """
 
-    # Layer arguments and their default values
-    _default_args = {
+
+    # Input layer takes no parameters
+    _default_args = dict()
+ 
+
+    # Default kwargs
+    _default_kwargs = {
         'cols': None #indexes of columns to use
     }
-    
+   
 
     def _build(self, args, data):
         """Build the layer."""
@@ -282,18 +287,22 @@ class Dense(BaseLayer):
 
     """
 
+
     # Layer arguments and their default values
     _default_args = {
         'input': None, 
+    }
+
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
         'units': 1, 
         'activation': None, 
         'use_bias': True,
         'weight_initializer': None, #TODO: glorot or something as default?
         'bias_initializer': None,   #TODO: glorot or something as default?
-        'weight_prior_fn': Normal,
-        'weight_prior_args': [0, 1],
-        'bias_prior_fn': Normal,
-        'bias_prior_args': [0, 1]
+        'weight_prior': Normal(0, 1),
+        'bias_prior': Normal(0,1),
     }
     
 
@@ -310,11 +319,6 @@ class Dense(BaseLayer):
 
         # NOTE: may have to implement manually w/ probflow.Variable? in order to let the mean_model work...
 
-
-# TODO: _default_args should really only be for *tensor* (or tensor-generating)
-# args, may have to have a separate _default_kwargs or something for, eg, 
-# units, activation, etc... (everything except input, really...)
-# cols arg to Input - same idea, that's not a tensor, thats a list of ints
 
 
 class Sequential(BaseLayer):

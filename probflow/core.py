@@ -95,7 +95,11 @@ class BaseLayer(ABC):
     For more examples, see :class:`.Add`, :class:`.Sub`, :class:`.Mul`, 
     :class:`.Div`, :class:`.Abs`, :class:`.Exp`, and :class:`.Log`.
 
-    """
+    """ 
+    
+
+    # Default keyword arguments for a layer
+    _default_kwargs = dict()
 
 
     @property
@@ -143,6 +147,16 @@ class BaseLayer(ABC):
                        'np.ndarray, tf.Tensor, or a probflow layer, model, ' +
                        'or distribution.')
                 raise TypeError(msg)
+
+        # Set layer kwargs
+        self.kwargs = dict()
+        for ix, kwarg in enumerate(self._default_kwargs):
+            if len(args)>(len(self._default_args)+ix): #leftover args!
+                self.kwargs[kwarg] = args[len(args)+ix]
+            elif kwarg in kwargs:
+                self.kwargs[kwarg] = kwargs[kwarg]
+            else:
+                self.kwargs[kwarg] = self._default_kwargs[kwarg]
 
         # Set attribs for the built layer and fit state
         self.built_obj = None

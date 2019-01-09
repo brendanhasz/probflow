@@ -6,7 +6,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Make layers have a `default_kwargs attribute`_
 * Layers w/ multiple args should ensure their args are broadcastable
 * Variable should have a record=False arg to init (record posterior values over training)
 * Finish BaseLayer, BaseModel.fit, Variable, and Input
@@ -60,12 +59,6 @@ But, it's technically not correct.
 
 Notes
 -----
-
-default_kwargs attribute
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-Layers should have a _default_kwargs attribute (default is {} in BaseLayer). 
-That way the only arg to the Dense layer will be its input, but all the options can be specified with kwargs and build won't try to build_args them bc they're not in the args list.
 
 Mean alias for discrete dists
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
