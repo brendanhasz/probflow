@@ -350,10 +350,23 @@ class Variable(BaseVariable):
         """
         self._ensure_is_built()
         if self.prior is not None:
-            return tf.reduce_sum(self.prior.built_obj.log_prob(vals))
+            return self.prior.built_obj.log_prob(vals)
             # TODO: have to add KL term?
         else:
             return 0 #no prior, no loss
+
+
+    def kl_loss(self):
+        """Loss due to divergence between posterior and prior.
+
+        TODO: docs...
+
+        """
+        self._ensure_is_built()
+        return tfd.kl_divergence(self.posterior, self.prior)
+        # TODO: make sure that the broadcasting occurs correctly here
+        # eg if posterior shape is [2,1], should return 
+        # (kl_div(post_1,prior_1) + kl_div(Post_2,prior_2))
 
 
 # TODO: above assumes a continuous variable, should add support for

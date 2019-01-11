@@ -39,7 +39,7 @@ class BaseDistribution():
 
     def _log_loss(self, obj, vals):
         """Compute the log loss ."""
-        return tf.reduce_mean(obj.log_prob(vals))
+        return obj.log_prob(vals)
 
 
 

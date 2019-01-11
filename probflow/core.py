@@ -194,6 +194,16 @@ class BaseLayer(ABC):
         pass
 
 
+    @abstractmethod
+    def _kl_loss(self):
+        """Compute the loss due to posterior divergence from priors.
+
+        TODO: docs...
+
+        """
+        pass
+
+
     def _arg_is(self, type_str, arg):
         """Return true if arg is of type type_str."""
         if type_str=='number':
@@ -240,6 +250,7 @@ class BaseLayer(ABC):
         """Sum the loss of all this layer's arguments."""
         self.arg_loss_sum = 0
         self.mean_arg_loss_sum = 0
+        self.kl_loss_sum = 0
         for arg, arg_name in self.args.items():
             if _arg_is('tensor_like', arg):
                 pass #no loss incurred by tensors
@@ -250,9 +261,13 @@ class BaseLayer(ABC):
                 self.mean_arg_loss_sum += (
                     arg.mean_arg_loss_sum + 
                     arg._log_loss(arg.mean_obj, self.mean_args[arg_name]))
+                self.kl_loss_sum += (
+                    arg.kl_loss_sum + 
+                    arg._kl_loss())
             elif _arg_is('variable', arg):
                 self.arg_loss_sum += arg.log_loss(self.built_args[arg_name])
                 self.mean_arg_loss_sum += arg.log_loss(self.mean_args[arg_name])
+                self.kl_loss_sum += arg.kl_loss()
 
 
     def build(self, data):
@@ -310,6 +325,8 @@ class BaseModel(BaseLayer):
 
         TODO: Docs...
 
+        TODO: add math about variational inference + elbo loss func
+
         x and y should be able to be numpy arrays (in which case will set up as tf.Dataset automatically)
         or pandas dfs
         but they should also be able to be passed as tf.Datasets directly
@@ -332,6 +349,7 @@ class BaseModel(BaseLayer):
         # TODO
         #y_vals = iterator...
         #x_vals = iterator...
+        # N = number of datapoints (x.shape[0])
 
         # Recursively build this model and its args
         self.build(data)
@@ -342,6 +360,13 @@ class BaseModel(BaseLayer):
                          self._log_loss(self.built_obj, y_vals))
         self.mean_log_loss = (self.mean_arg_loss_sum + 
                               self._log_loss(self.mean_obj, y_vals))
+        self.kl_loss = (self.kl_loss_sum + 
+                        self._kl_loss())  #TODO: tho a layer shouldn't really have priors?
+
+        # Loss functions
+        log_likelihood = tf.reduce_mean(model.log_prob(y_vals))
+        kl_loss = self.kl_loss / N
+        elbo_loss = kl_loss - log_likelihood
 
         # TODO: fit the model
 
