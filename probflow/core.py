@@ -9,7 +9,6 @@ TODO: more info...
 
 
 from abc import ABC, abstractmethod
-from scipy import stats
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
@@ -486,29 +485,8 @@ class BaseModel(BaseLayer):
         # Check model has been fit
         self._ensure_is_fit()
 
-        # Compute predictive distribution
-        pred_dist = self.predictive_distribution(x, num_samples)
+        # TODO: run tf session + predict using mean model
 
-        #TODO: should really do straight in tf, 
-        # not tf->numpy->sample
-
-        # TODO: and should use mean model, not sampling
-
-        # Compute prediction based on the predictive distribution
-        if method=='mean':
-            return np.mean(pred_dist, axis=2)
-        elif method=='median':
-            return np.median(pred_dist, axis=2)
-        elif method=='mode':
-            return stats.mode(pred_dist, axis=2)
-        elif method=='min':
-            return np.amin(pred_dist, axis=2)
-        elif method=='max':
-            return np.amax(pred_dist, axis=2)
-        elif method=='prc':
-            return np.percentile(pred_dist, prc, axis=2)
-        else:
-            raise ValueError('method '+str(method)+' is invalid')
 
 
     def plot_by(self, x, data, bins=100, what='mean'):

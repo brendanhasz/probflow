@@ -79,7 +79,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 pygments_style = None
 
 # Packages to mock import
-autodoc_mock_imports = ['scipy', 'tensorflow', 'tensorflow_probability']
+autodoc_mock_imports = ['tensorflow', 'tensorflow_probability']
 
 # Set the member order
 autodoc_member_order = 'bysource'
