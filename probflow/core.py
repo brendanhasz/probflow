@@ -288,7 +288,7 @@ class BaseLayer(ABC):
 
 
     def __mul__(self, other):
-       """Multiply this layer by another layer, variable, or value."""
+        """Multiply this layer by another layer, variable, or value."""
         from .layers import Mul
         return Mul(self, other)
 
@@ -324,6 +324,7 @@ class BaseModel(BaseLayer):
 
         TODO: add math about variational inference + elbo loss func
         TODO: and make sure to reference: https://arxiv.org/pdf/1505.05424.pdf
+        (just to say that the loss used is -ELBO + log_likelihood)
 
         x and y should be able to be numpy arrays (in which case will set up as tf.Dataset automatically)
         or pandas dfs
