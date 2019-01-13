@@ -68,11 +68,6 @@ class Input(BaseLayer):
             pass
 
 
-    def _log_loss(self, obj, vals):
-        """Data incurrs no loss."""
-        return 0
-
-
 
 class Add(BaseLayer):
     """A layer which adds two inputs.
@@ -93,11 +88,6 @@ class Add(BaseLayer):
     def _build(self, args, data):
         """Build the layer."""
         return args['a'] + args['b']
-
-
-    def _log_loss(self, obj, vals):
-        """Addition incurrs no loss."""
-        return 0
 
 
 
@@ -122,11 +112,6 @@ class Sub(BaseLayer):
         return args['a'] - args['b']
 
 
-    def _log_loss(self, obj, vals):
-        """Subtraction incurrs no loss."""
-        return 0
-
-
 
 class Mul(BaseLayer):
     """A layer which multiplies two inputs.
@@ -147,11 +132,6 @@ class Mul(BaseLayer):
     def _build(self, args, data):
         """Build the layer."""
         return args['a'] * args['b']
-
-
-    def _log_loss(self, obj, vals):
-        """Multiplication incurrs no loss."""
-        return 0
 
 
 
@@ -176,11 +156,6 @@ class Div(BaseLayer):
         return args['a'] / args['b']
 
 
-    def _log_loss(self, obj, vals):
-        """Division incurrs no loss."""
-        return 0
-
-
 
 class Abs(BaseLayer):
     """A layer which outputs the absolute value of its input.
@@ -200,11 +175,6 @@ class Abs(BaseLayer):
     def _build(self, args, data):
         """Build the layer."""
         return tf.abs(args['val'])
-
-
-    def _log_loss(self, obj, vals):
-        """Absolute value incurrs no loss."""
-        return 0
 
 
 
@@ -314,10 +284,21 @@ class Dense(BaseLayer):
         if isinstance(args['input'], np.ndarray) and len(args['input'])==0:
             self.input = data
 
-
         # TODO
 
         # NOTE: may have to implement manually w/ probflow.Variable? in order to let the mean_model work...
+
+
+    def _log_loss(self, obj, vals):
+        """Log loss incurred by this layer."""
+        # TODO
+        pass
+
+
+    def _kl_loss(self, obj, vals):
+        """The sum of divergences of variational posteriors from priors."""
+        # TODO
+        pass
 
 
 

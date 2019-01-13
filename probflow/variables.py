@@ -217,7 +217,7 @@ class Variable(BaseVariable):
             raise RuntimeError('variable must first be built')
     
 
-    def build(self, data):
+    def _build(self, data):
         """Build the layer.
 
         TODO: docs
@@ -249,7 +249,7 @@ class Variable(BaseVariable):
         self.posterior = posterior.built_obj
 
 
-    def sample(self, data):
+    def _sample(self, data):
         """Sample from the variational distribution.
         
         TODO: docs
@@ -263,6 +263,11 @@ class Variable(BaseVariable):
         ----------
         data : |Tensor|
             Data for this batch.
+
+        Returns
+        -------
+        |Tensor|
+            An (unevaluated) tensor with samples from the variational dist.
 
         """
 
@@ -314,7 +319,7 @@ class Variable(BaseVariable):
         return self._bound(samples, lb, ub)
 
 
-    def mean(self, data):
+    def _mean(self, data):
         """Mean of the variational distribution.
 
         TODO: docs
@@ -333,7 +338,7 @@ class Variable(BaseVariable):
         return self._bound(self.posterior.mean(), lb, ub)
 
 
-    def log_loss(self, vals):
+    def _log_loss(self, vals):
         """Loss due to prior.
 
         TODO: docs
@@ -356,18 +361,29 @@ class Variable(BaseVariable):
             return 0 #no prior, no loss
 
 
-    def kl_loss(self):
+    def _kl_loss(self):
         """Loss due to divergence between posterior and prior.
 
         TODO: docs...
 
         """
         self._ensure_is_built()
-        return tfd.kl_divergence(self.posterior, self.prior)
+        return tf.reduce_sum(tfd.kl_divergence(self.posterior, self.prior))
         # TODO: make sure that the broadcasting occurs correctly here
         # eg if posterior shape is [2,1], should return 
         # (kl_div(post_1,prior_1) + kl_div(Post_2,prior_2))
 
+
+    def posterior(self, num_samples=1000):
+        """Sample from the posterior distribution.
+
+        TODO: this is similar to _sample(), but returns a numpy array
+        (meant to be used by the user to examine the posterior dist)
+
+        """
+        # TODO: run a tf sess and return a np array
+        pass
+        
 
 # TODO: above assumes a continuous variable, should add support for
 # discrete variables.  In theory can just set posterior_fn to 

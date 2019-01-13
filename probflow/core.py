@@ -181,27 +181,23 @@ class BaseLayer(ABC):
         pass
 
 
-    @abstractmethod
     def _log_loss(self, obj, vals):
         """Compute the log loss incurred by this layer.
         
-        Inheriting class must define this method by computing the loss of this
-        layer (and only this layer, not its args!).
 
-        TODO: docs...
+        TODO: docs... default is no loss but can override when there is
 
         """
-        pass
+        return 0
 
 
-    @abstractmethod
     def _kl_loss(self):
         """Compute the loss due to posterior divergence from priors.
 
-        TODO: docs...
+        TODO: docs... default is no loss but can override when there is
 
         """
-        pass
+        return 0
 
 
     def _arg_is(self, type_str, arg):
@@ -226,8 +222,14 @@ class BaseLayer(ABC):
                             ' tensor_like, model, layer, or valid')
 
 
-    def build_args(self, data):
-        """Build each of this layer's arguments."""
+    def build(self, data):
+        """Build this layer's arguments and loss, and then build the layer.
+
+        TODO: actually do docs for this one...
+
+        """
+
+        # Build each of this layer's arguments.
         for arg, arg_name in self.args.items():
             if _arg_is('tensor_like', arg):
                 self.built_args[arg_name] = arg
@@ -242,18 +244,16 @@ class BaseLayer(ABC):
                 self.mean_args[arg_name] = arg.mean_obj
             elif _arg_is('variable', arg):
                 arg.build(data)
-                self.built_args[arg_name] = arg.sample()
-                self.mean_args[arg_name] = arg.mean()
+                self.built_args[arg_name] = arg._sample(data)
+                self.mean_args[arg_name] = arg._mean()
 
-
-    def sum_arg_losses(self):
-        """Sum the loss of all this layer's arguments."""
-        self.arg_loss_sum = 0
-        self.mean_arg_loss_sum = 0
-        self.kl_loss_sum = 0
+        # Sum the losses of this layer's arguments
+        self.arg_loss_sum = 0       # log posterior probability of sample model
+        self.mean_arg_loss_sum = 0  # log posterior probability of mean model
+        self.kl_loss_sum = 0 # sum of KL div between variational post and priors
         for arg, arg_name in self.args.items():
             if _arg_is('tensor_like', arg):
-                pass #no loss incurred by tensors
+                pass #no loss incurred by data
             elif _arg_is('layer', arg):
                 self.arg_loss_sum += (
                     arg.arg_loss_sum + 
@@ -265,47 +265,44 @@ class BaseLayer(ABC):
                     arg.kl_loss_sum + 
                     arg._kl_loss())
             elif _arg_is('variable', arg):
-                self.arg_loss_sum += arg.log_loss(self.built_args[arg_name])
-                self.mean_arg_loss_sum += arg.log_loss(self.mean_args[arg_name])
-                self.kl_loss_sum += arg.kl_loss()
+                self.arg_loss_sum += arg._log_loss(self.built_args[arg_name])
+                self.mean_arg_loss_sum += arg._log_loss(self.mean_args[arg_name])
+                self.kl_loss_sum += arg._kl_loss()
 
 
-    def build(self, data):
-        """Build this layer's arguments and loss, and then build the layer.
-
-        TODO: actually do docs for this one...
-
-        """
-        self.build_args(data)
-        self.sum_arg_losses()
+        # Build this layer's sample model and mean model
         self.built_obj = self._build(self.built_args, self.data)
         self.mean_obj = self._build(self.mean_args, self.data)
 
 
-    # TODO: fix the circular imports so these can work:
-    #def __add__(self, other):
-    #    """Add this layer to another layer, variable, or value."""
-    #    return Add(self, other)
+    def __add__(self, other):
+        """Add this layer to another layer, variable, or value."""
+        from .layers import Add
+        return Add(self, other)
 
 
-    #def __sub__(self, other):
-    #    """Subtract from this layer another layer, variable, or value."""
-    #    return Sub(self, other)
+    def __sub__(self, other):
+        """Subtract from this layer another layer, variable, or value."""
+        from .layers import Sub
+        return Sub(self, other)
 
 
-    #def __mul__(self, other):
-    #   """Multiply this layer by another layer, variable, or value."""
-    #    return Mul(self, other)
+    def __mul__(self, other):
+       """Multiply this layer by another layer, variable, or value."""
+        from .layers import Mul
+        return Mul(self, other)
 
 
-    #def __div__(self, other):
-    #    """Divide this layer by another layer, variable, or value."""
-    #    return Div(self, other)
+    def __div__(self, other):
+        """Divide this layer by another layer, variable, or value."""
+        from .layers import Div        
+        return Div(self, other)
 
 
-    #def __abs__(self, other):
-    #    """Take the absolute value of the input to this layer."""
-    #    return Abs(self)
+    def __abs__(self, other):
+        """Take the absolute value of the input to this layer."""
+        from .layers import Abs
+        return Abs(self)
 
 
 
@@ -326,6 +323,7 @@ class BaseModel(BaseLayer):
         TODO: Docs...
 
         TODO: add math about variational inference + elbo loss func
+        TODO: and make sure to reference: https://arxiv.org/pdf/1505.05424.pdf
 
         x and y should be able to be numpy arrays (in which case will set up as tf.Dataset automatically)
         or pandas dfs
