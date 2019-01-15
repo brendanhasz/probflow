@@ -230,6 +230,7 @@ class Variable(BaseVariable):
         # Build the prior distribution
         if self.prior is not None:
             self.prior.build(data)
+            self.prior = self.prior.built_obj
             # TODO: Check that the built prior shape is broadcastable w/ self.shape
 
         # Create posterior parameter variables
@@ -356,7 +357,7 @@ class Variable(BaseVariable):
         """
         self._ensure_is_built()
         if self.prior is not None:
-            return self.prior.built_obj.log_prob(vals)
+            return self.prior.log_prob(vals)
             # TODO: have to add KL term?
         else:
             return 0 #no prior, no loss

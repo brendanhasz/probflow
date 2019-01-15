@@ -133,18 +133,19 @@ class BaseLayer(ABC):
                 self.args[arg] = self._default_args[arg]
 
         # Ensure all required arguments have been set
-        if REQUIRED in self.args.values():
-            raise TypeError('required arg(s) were not set. '+
-                            type(self).__name__+' requires args: '+
-                            ', '.join(self._default_args.keys())) 
+        for val in self.args.values():
+            if val is REQUIRED:
+                raise TypeError('required arg(s) were not set. '+
+                                type(self).__name__+' requires args: '+
+                                ', '.join(self._default_args.keys())) 
 
         # Ensure all arguments are of correct type
         for arg in self.args:
             if not self._arg_is('valid', self.args[arg]):
                 msg = ('Invalid type for ' + type(self).__name__ + 
                        ' argument ' + arg + '. Must be one of: int, float, ' + 
-                       'np.ndarray, tf.Tensor, or a probflow layer, model, ' +
-                       'or distribution.')
+                       'np.ndarray, tf.Tensor, tf.Variable, ' +
+                        'or a probflow layer, model, or distribution.')
                 raise TypeError(msg)
 
         # Set layer kwargs
@@ -204,9 +205,10 @@ class BaseLayer(ABC):
         if type_str=='number':
             return isinstance(arg, (int, float, np.ndarray))
         elif type_str=='tensor':
-            return isinstance(arg, tf.Tensor)
+            return isinstance(arg, (tf.Tensor, tf.Variable))
         elif type_str=='tensor_like':
-            return isinstance(arg, (int,float,np.ndarray,tf.Tensor))
+            return isinstance(arg, (int,float, np.ndarray,
+                                    tf.Tensor, tf.Variable))
         elif type_str=='model':
             return isinstance(arg, BaseModel)
         elif type_str=='layer':
@@ -215,13 +217,13 @@ class BaseLayer(ABC):
             return isinstance(arg, BaseVariable)
         elif type_str=='valid':
             return isinstance(arg, (int, float, np.ndarray, 
-                                    tf.Tensor, BaseLayer))
+                                    tf.Tensor, tf.Variable, BaseLayer))
         else:
             raise TypeError('type_str must a string, one of: number, tensor,' +
                             ' tensor_like, model, layer, or valid')
 
 
-    def build(self, data):
+    def build(self, data=None):
         """Build this layer's arguments and loss, and then build the layer.
 
         TODO: actually do docs for this one...
@@ -270,7 +272,6 @@ class BaseLayer(ABC):
                 self.mean_arg_loss_sum += arg._log_loss(self.mean_args[arg_name])
                 self.kl_loss_sum += arg._kl_loss()
 
-
         # Build this layer's sample model and mean model
         self.built_obj = self._build(self.built_args, data)
         self.mean_obj = self._build(self.mean_args, data)
@@ -294,13 +295,13 @@ class BaseLayer(ABC):
         return Mul(self, other)
 
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         """Divide this layer by another layer, variable, or value."""
         from .layers import Div        
         return Div(self, other)
 
 
-    def __abs__(self, other):
+    def __abs__(self):
         """Take the absolute value of the input to this layer."""
         from .layers import Abs
         return Abs(self)

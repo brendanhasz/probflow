@@ -131,6 +131,7 @@ class Mul(BaseLayer):
 
     def _build(self, args, data):
         """Build the layer."""
+        # TODO: have to distinguish between matrix and elementwise mult somehow?
         return args['a'] * args['b']
 
 
@@ -245,6 +246,10 @@ class Log(BaseLayer):
 
 
 # TODO: Probit
+
+
+
+# TODO: Softmax (?)
 
 
 
