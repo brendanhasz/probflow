@@ -107,6 +107,21 @@ TODO: dual-module net which estimates predictions and uncertainty separately, an
     model = Cauchy(predictions, noise_std)
     model.fit(x,y)
 
+
+Poisson Regression (GLM)
+------------------------
+
+TODO: description...
+
+.. code-block:: python
+
+    from probflow import Dense, Exp, Poisson
+
+    predictions = Exp(Dense())
+    model = Poisson(predictions)
+    model.fit(x,y)
+
+
 Variational Autoencoder
 -----------------------
 
