@@ -229,19 +229,21 @@ class BaseLayer(ABC):
         """
 
         # Build each of this layer's arguments.
-        for arg, arg_name in self.args.items():
-            if _arg_is('tensor_like', arg):
+        self.built_args = dict()
+        self.mean_args = dict()
+        for arg_name, arg in self.args.items():
+            if self._arg_is('tensor_like', arg):
                 self.built_args[arg_name] = arg
                 self.mean_args[arg_name] = arg
-            elif _arg_is('model', arg):
+            elif self._arg_is('model', arg):
                 arg.build(data)
                 self.built_args[arg_name] = arg.built_obj.sample()
                 self.mean_args[arg_name] = arg.mean_obj.mean()
-            elif _arg_is('layer', arg):
+            elif self._arg_is('layer', arg):
                 arg.build(data)
                 self.built_args[arg_name] = arg.built_obj
                 self.mean_args[arg_name] = arg.mean_obj
-            elif _arg_is('variable', arg):
+            elif self._arg_is('variable', arg):
                 arg.build(data)
                 self.built_args[arg_name] = arg._sample(data)
                 self.mean_args[arg_name] = arg._mean()
@@ -251,9 +253,9 @@ class BaseLayer(ABC):
         self.mean_arg_loss_sum = 0  # log posterior probability of mean model
         self.kl_loss_sum = 0 # sum of KL div between variational post and priors
         for arg, arg_name in self.args.items():
-            if _arg_is('tensor_like', arg):
+            if self._arg_is('tensor_like', arg):
                 pass #no loss incurred by data
-            elif _arg_is('layer', arg):
+            elif self._arg_is('layer', arg):
                 self.arg_loss_sum += (
                     arg.arg_loss_sum + 
                     arg._log_loss(arg.built_obj, self.built_args[arg_name]))
@@ -263,15 +265,15 @@ class BaseLayer(ABC):
                 self.kl_loss_sum += (
                     arg.kl_loss_sum + 
                     arg._kl_loss())
-            elif _arg_is('variable', arg):
+            elif self._arg_is('variable', arg):
                 self.arg_loss_sum += arg._log_loss(self.built_args[arg_name])
                 self.mean_arg_loss_sum += arg._log_loss(self.mean_args[arg_name])
                 self.kl_loss_sum += arg._kl_loss()
 
 
         # Build this layer's sample model and mean model
-        self.built_obj = self._build(self.built_args, self.data)
-        self.mean_obj = self._build(self.mean_args, self.data)
+        self.built_obj = self._build(self.built_args, data)
+        self.mean_obj = self._build(self.mean_args, data)
 
 
     def __add__(self, other):

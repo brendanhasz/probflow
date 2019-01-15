@@ -122,7 +122,7 @@ class Variable(BaseVariable):
         """Construct an array of variable(s)."""
 
         # Check types
-        assert isinstance(shape, [int, list, np.ndarray]), \
+        assert isinstance(shape, (int, list, np.ndarray)), \
             ('shape must be an int, list of ints, or a numpy ndarray')
         if isinstance(shape, int):
             assert shape>0, 'shape must be positive'
@@ -136,7 +136,7 @@ class Variable(BaseVariable):
         assert isinstance(name, str), 'name must be a string'
         assert prior is None or isinstance(prior, BaseDistribution), \
             'prior must be a probflow distribution or None'
-        assert isinstance(posterior_fn, BaseDistribution), \
+        assert issubclass(posterior_fn, BaseDistribution), \
             'posterior_fn must be a probflow distribution'
         assert isinstance(post_param_names, list), \
             'post_param_names must be a list of strings'        
@@ -147,18 +147,18 @@ class Variable(BaseVariable):
         assert len(post_param_lb)==len(post_param_names),\
             'post_param_lb must be same length as post_param_names'
         for p_lb in post_param_lb:
-            assert p_lb is None or isinstance(p_lb, [int, float]), \
+            assert p_lb is None or isinstance(p_lb, (int, float)), \
                 'post_param_lb must contain ints or floats or None'
         assert isinstance(post_param_ub, list), \
             'post_param_ub must be a list of numbers'
         assert len(post_param_ub)==len(post_param_names),\
             'post_param_ub must be same length as post_param_names'
         for p_ub in post_param_ub:
-            assert p_ub is None or isinstance(p_ub, [int, float]), \
+            assert p_ub is None or isinstance(p_ub, (int, float)), \
                 'post_param_ub must contain ints or floats or None'
-        assert lb is None or isinstance(lb, [int, float]), \
+        assert lb is None or isinstance(lb, (int, float)), \
             'lb must be None, int, or float'
-        assert ub is None or isinstance(ub, [int, float]), \
+        assert ub is None or isinstance(ub, (int, float)), \
             'ub must be None, int, or float'
         assert estimator is None or isinstance(estimator, str), \
             'estimator must be None or a string'
@@ -167,7 +167,6 @@ class Variable(BaseVariable):
         self.shape = shape
         self.name = name
         self.prior = prior
-        self.prior_params = prior_params
         self.posterior_fn = posterior_fn
         self.post_param_names = post_param_names
         self.post_param_lb = post_param_lb
@@ -236,11 +235,13 @@ class Variable(BaseVariable):
         # Create posterior parameter variables
         params = dict()
         with tf.variable_scope(self.name):
-            for arg in post_param_names:
+            for arg in self.post_param_names:
                 params[arg] = tf.get_variable(arg, shape=self.shape)
 
         # Transform posterior parameters
-        for arg, lb, ub in zip(post_param_names, post_param_lb, post_param_ub):
+        for arg, lb, ub in zip(self.post_param_names, 
+                               self.post_param_lb, 
+                               self.post_param_ub):
             params[arg] = self._bound(params[arg], lb, ub)
 
         # Create variational posterior distribution

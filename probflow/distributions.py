@@ -65,6 +65,7 @@ class CategoricalDistribution(BaseDistribution, CategoricalModel):
     """
     pass
 
+# TODO: change to DiscreteDistribution and move above 3 ABCs to core?
 
 
 class Normal(ContinuousDistribution):
@@ -176,6 +177,6 @@ class Cauchy(ContinuousDistribution):
         return tfd.Cauchy(args['loc'], args['scale'])
 
 
-# TODO: other common distributions, esp Bernoulli and Poisson
+# TODO: other common distributions, esp Bernoulli and Poisson and categorical
 # and really there's Discrete models but then there's Categorical models...
 # ie you can get the cum prob value on a poisson but not on a categorical...
