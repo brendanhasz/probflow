@@ -177,6 +177,15 @@ class Cauchy(ContinuousDistribution):
         return tfd.Cauchy(args['loc'], args['scale'])
 
 
-# TODO: other common distributions, esp Bernoulli and Poisson and categorical
+# TODO: will have to be some way to distinguish batch_size from dimensions from number of independent dists?
+# e.g. a MultivariateNormal dist w/ shape (3, 4, 5). Is that batch_size=3, dimensions=4, and 5 independent dists? 
+# or should the last 2 be flipped?  TFP handles this w/ batch_shape and event_shape
+# will have the same problem w/ any multidim prob dist, e.g. Dirichlet, Multinomial
+
+# TODO: other common distributions, esp Bernoulli and Poisson and Categorical
 # and really there's Discrete models but then there's Categorical models...
 # ie you can get the cum prob value on a poisson but not on a categorical...
+
+# also at some point: 
+# MultivariateNormal, mvt, mvc, Exponential, Beta, Gamma
+# Binomial, BetaBinomial

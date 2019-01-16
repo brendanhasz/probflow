@@ -91,7 +91,7 @@ TODO: then w/ DenseRegression or DenseClassifier. (automatically sets the size o
 
     from probflow import Sequential, Dense, Variable, Normal
 
-    model = DenseRegression([128, 64])
+    model = DenseRegression(units=[128, 64])
     model.fit(x,y)
 
 
@@ -102,8 +102,8 @@ TODO: dual-module net which estimates predictions and uncertainty separately, an
 
 .. code-block:: python
 
-    predictions = DenseRegression([128, 64, 32])
-    noise_std = DenseRegression([128, 64, 32])
+    predictions = DenseRegression(units=[128, 64, 32])
+    noise_std = DenseRegression(units=[128, 64, 32])
     model = Cauchy(predictions, noise_std)
     model.fit(x,y)
 
@@ -131,6 +131,59 @@ TODO: w/ Dense, then w/ DenseAutoencoderRegression
 Neural Matrix Factorization
 ---------------------------
 
+TODO: description...
+
+TODO: for a vanilla matrix factorization
+
+.. code-block:: python
+
+    from probflow import *
+
+    x = df w/ 1st column user ids, 2nd col item ids
+    y = scores
+
+    users = Input(0)
+    items = Input(1)
+
+    user_vec = Embedding(users, dims=50)
+    item_vec = Embedding(items, dims=50)
+    predictions = Dot(user_vec, item_vec)
+    error = ScaleParameter()
+
+    model = Normal(predictions, error)
+    model.fit(x,y)
+
+or for neural matrix factorization https://arxiv.org/abs/1708.05031
+
+.. code-block:: python
+
+    from probflow import *
+
+    x = df w/ 1st column user ids, 2nd col item ids
+    y = scores
+
+    users = Input(0)
+    items = Input(1)
+
+    # Matrix Factorization
+    user_vec_mf = Embedding(users, dims=50)
+    item_vec_mf = Embedding(items, dims=50)
+    predictions_mf = Dot(user_vec_mf, item_vec_mf)
+
+    # Neural Collaborative Filtering
+    user_vec_ncf = Embedding(users, dims=50)
+    item_vec_ncf = Embedding(items, dims=50)
+    ncf_in = Concatenate([user_vec_ncf, item_vec_ncf])
+    predictions_ncf = DenseRegression(ncf_in, units=[128, 64, 32])
+    
+    # Combination of the two methods
+    predictions = Dense(Concatenate([predictions_mf, predictions_ncf]))
+    error = ScaleParameter()
+
+    model = Normal(predictions, error)
+    model.fit(x,y)
+
+Or if there are discrete scores (e.g. 1-10), then use a BetaBinomial 
 TODO: w/ Dense and Embedding layers, then w/ NeuralMatrixFactorization
 
 
