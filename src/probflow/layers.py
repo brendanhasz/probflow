@@ -32,7 +32,9 @@ Neural Network Layers
 
 """
 
+from collections import OrderedDict
 import numpy as np
+import tensorflow as tf
 
 from .distributions import Normal
 from .core import BaseLayer, REQUIRED
@@ -79,10 +81,10 @@ class Add(BaseLayer):
     """
 
     # Layer arguments and their default values
-    _default_args = {
-        'a': REQUIRED,
-        'b': REQUIRED
-    }
+    _default_args = OrderedDict([
+        ('a', REQUIRED),
+        ('b', REQUIRED)
+    ])
     
 
     def _build(self, args, data):
@@ -101,10 +103,10 @@ class Sub(BaseLayer):
     """
 
     # Layer arguments and their default values
-    _default_args = {
-        'a': REQUIRED,
-        'b': REQUIRED
-    }
+    _default_args = OrderedDict([
+        ('a', REQUIRED),
+        ('b', REQUIRED)
+    ])
     
 
     def _build(self, args, data):
@@ -123,10 +125,10 @@ class Mul(BaseLayer):
     """
 
     # Layer arguments and their default values
-    _default_args = {
-        'a': REQUIRED,
-        'b': REQUIRED
-    }
+    _default_args = OrderedDict([
+        ('a', REQUIRED),
+        ('b', REQUIRED)
+    ])
     
 
     def _build(self, args, data):
@@ -146,15 +148,36 @@ class Div(BaseLayer):
     """
 
     # Layer arguments and their default values
-    _default_args = {
-        'a': REQUIRED,
-        'b': REQUIRED
-    }
+    _default_args = OrderedDict([
+        ('a', REQUIRED),
+        ('b', REQUIRED)
+    ])
     
 
     def _build(self, args, data):
         """Build the layer."""
         return args['a'] / args['b']
+
+
+
+class Neg(BaseLayer):
+    """A layer which outputs the negative of its input.
+
+
+    TODO: More info...
+
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = {
+        'input': REQUIRED
+    }
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return -args['input']
 
 
 
@@ -169,13 +192,13 @@ class Abs(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'val': REQUIRED
+        'input': REQUIRED
     }
     
 
     def _build(self, args, data):
         """Build the layer."""
-        return tf.abs(args['val'])
+        return abs(args['input'])
 
 
 
@@ -190,18 +213,18 @@ class Exp(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'val': REQUIRED
+        'input': REQUIRED
     }
     
 
     def _build(self, args, data):
         """Build the layer."""
-        return tf.exp(args['val'])
+        return tf.exp(args['input'])
 
 
     def _log_loss(self, args, vals):
         """Add the Jacobian adjustment if input is a distribution."""
-        if isinstance(self.arg['val'], BaseModel):
+        if isinstance(self.arg['input'], BaseModel):
             # TODO: compute the jacobian adjustment
             pass
         else:
@@ -222,18 +245,18 @@ class Log(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'val': REQUIRED
+        'input': REQUIRED
     }
     
 
     def _build(self, args, data):
         """Build the layer."""
-        return tf.log(args['val'])
+        return tf.log(args['input'])
 
 
     def _log_loss(self, obj, vals):
         """The loss is a Jacobian adjustment if input is a distribution."""
-        if isinstance(self.arg['val'], BaseModel):
+        if isinstance(self.arg['input'], BaseModel):
             # TODO: compute the jacobian adjustment
             pass
         else:

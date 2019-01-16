@@ -307,6 +307,12 @@ class BaseLayer(ABC):
         return Abs(self)
 
 
+    def __neg__(self):
+        """Take the negative of the input to this layer."""
+        from .layers import Neg
+        return Neg(self)
+
+
 
 class BaseModel(BaseLayer):
     """Abstract model class (used as an implementation base)

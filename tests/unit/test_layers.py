@@ -1,10 +1,12 @@
 
 # TODO: import as module and use absolute imports
 import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
-import numpy as np
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../src'))
 
-from probflow import Add, Sub, Mul, Div, Abs, Exp, Log
+import numpy as np
+import tensorflow as tf
+
+from probflow import Add, Sub, Mul, Div, Neg, Abs, Exp, Log
 
 
 def test_add_layer():
@@ -25,8 +27,8 @@ def test_add_layer():
     assert l2.built_obj.ndim == 2
     assert l2.built_obj.shape[0] == 2
     assert l2.built_obj.shape[1] == 1
-    assert l2.built_obj[0] == 4.0
-    assert l2.built_obj[1] == 6.0
+    assert l2.built_obj[0][0] == 4.0
+    assert l2.built_obj[1][0] == 6.0
 
     # With another Layer as input
     l3 = Add(Add(3.0, 4), Add(a, b))
@@ -38,7 +40,25 @@ def test_add_layer():
     assert l3.built_obj[0] == 11.0
     assert l3.built_obj[1] == 13.0
 
-    # With a tf.Tensor or tf.Variable as input
+    # With a tf.Tensor as input
+    a = tf.constant([[1], [2]], dtype=tf.float32)
+    b = tf.constant([[3], [4]], dtype=tf.float32)
+    l2 = Add(a, b)
+    l2.build()
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert l2_out[0][0] == 4.0
+    assert l2_out[1][0] == 6.0
+
+    # With a tf.Variable as input
     # TODO
 
     # With a Variable as input
@@ -73,8 +93,8 @@ def test_sub_layer():
     assert l3.built_obj.ndim == 2
     assert l3.built_obj.shape[0] == 2
     assert l3.built_obj.shape[1] == 1
-    assert l3.built_obj[0] == -4.0
-    assert l3.built_obj[1] == -1.0
+    assert l3.built_obj[0][0] == 4.0
+    assert l3.built_obj[1][0] == 1.0
 
     # With a tf.Tensor or tf.Variable as input
     # TODO
@@ -159,6 +179,9 @@ def test_div_layer():
     # TODO
 
 
+# TODO: Neg
+
+
 # TODO: Abs
 
 
@@ -199,9 +222,17 @@ def test_layer_ops_overloading():
     assert isinstance(l3.built_obj, float)
     assert l3.built_obj == 3.0/2.0
 
+    # Neg
+    l3 = -l1
+    l3.build()
+    assert isinstance(l3.built_obj, float)
+    assert l3.built_obj == -3.0
 
-# TODO: don't need this w/ py.test
-if __name__ == '__main__':
-    test_add_layer()
-    #test_sub_layer()
-    test_layer_ops_overloading()
+    # Abs
+    l3 = abs(Sub(3.0, 4))
+    l3.build()
+    assert isinstance(l3.built_obj, float)
+    assert l3.built_obj == 1.0
+
+
+# TODO: check broadcasting works correctly
