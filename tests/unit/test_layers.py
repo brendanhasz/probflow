@@ -59,7 +59,24 @@ def test_add_layer():
     assert l2_out[1][0] == 6.0
 
     # With a tf.Variable as input
-    # TODO
+    a = tf.Variable([[1], [2]], dtype=tf.float32)
+    b = tf.Variable([[3], [4]], dtype=tf.float32)
+    l2 = Add(a, b)
+    l2.build()
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    init_op = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init_op)
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert l2_out[0][0] == 4.0
+    assert l2_out[1][0] == 6.0
 
     # With a Variable as input
     # TODO
@@ -96,7 +113,10 @@ def test_sub_layer():
     assert l3.built_obj[0][0] == 4.0
     assert l3.built_obj[1][0] == 1.0
 
-    # With a tf.Tensor or tf.Variable as input
+    # With a tf.Tensor as input
+    # TODO
+
+    # With a tf.Variable as input
     # TODO
 
     # With a Variable as input
@@ -134,7 +154,10 @@ def test_mul_layer():
     assert l3.built_obj[0] == 28.0
     assert l3.built_obj[1] == 42.0
 
-    # With a tf.Tensor or tf.Variable as input
+    # With a tf.Tensor as input
+    # TODO
+
+    # With a tf.Variable as input
     # TODO
 
     # With a Variable as input
@@ -172,7 +195,10 @@ def test_div_layer():
     assert l3.built_obj[0] == 7.0/4
     assert l3.built_obj[1] == 7.0/6
 
-    # With a tf.Tensor or tf.Variable as input
+    # With a tf.Tensor as input
+    # TODO
+
+    # With a tf.Variable as input
     # TODO
 
     # With a Variable as input

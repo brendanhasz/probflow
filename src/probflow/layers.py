@@ -17,6 +17,7 @@ Basic Arithmetic Layers
 * :class:`.Sub`
 * :class:`.Mul`
 * :class:`.Div`
+* :class:`.Neg`
 * :class:`.Abs`
 * :class:`.Exp`
 * :class:`.Log`
