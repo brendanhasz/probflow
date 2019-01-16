@@ -383,6 +383,15 @@ class Embedding(BaseLayer):
 
     TODO: More info...
 
+    TODO: prior/regularization for the embedding layer might be difficult b/c
+    we're not including the log posterior in the loss (just the divergence and
+    the likelihood).  We just want point estimates for the embeddings (not 
+    variational posterior dist estimates) b/c of the rotational/multimodal 
+    posterior problem.  But w/o a distribution, can't compute the divergence
+    between a point and a distribution.  May have to pretend that there are
+    variance-1 normal dists around the embedding points and compute the KL div 
+    using that.
+
 
     """
 

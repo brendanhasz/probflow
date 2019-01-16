@@ -202,12 +202,8 @@ class BaseLayer(ABC):
 
     def _arg_is(self, type_str, arg):
         """Return true if arg is of type type_str."""
-        if type_str=='number':
-            return isinstance(arg, (int, float, np.ndarray))
-        elif type_str=='tensor':
-            return isinstance(arg, (tf.Tensor, tf.Variable))
-        elif type_str=='tensor_like':
-            return isinstance(arg, (int,float, np.ndarray,
+        if type_str=='tensor_like':
+            return isinstance(arg, (int, float, np.ndarray,
                                     tf.Tensor, tf.Variable))
         elif type_str=='model':
             return isinstance(arg, BaseModel)
@@ -235,7 +231,10 @@ class BaseLayer(ABC):
         self.built_args = dict()
         self.mean_args = dict()
         for arg_name, arg in self.args.items():
-            if self._arg_is('tensor_like', arg):
+            if isinstance(arg, int):
+                self.built_args[arg_name] = float(arg)
+                self.mean_args[arg_name] = float(arg)
+            elif self._arg_is('tensor_like', arg):
                 self.built_args[arg_name] = arg
                 self.mean_args[arg_name] = arg
             elif self._arg_is('model', arg):
