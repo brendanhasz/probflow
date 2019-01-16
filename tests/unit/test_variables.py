@@ -1,12 +1,29 @@
+"""Tests probflow.variables modules"""
 
-# TODO: import as module and use absolute imports
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../src'))
+import pytest
 
-from probflow import Variable
+from probflow.variables import Variable
 
 
 def test_variable_build():
-    """Tests building a variable"""
-    lala = Variable()
-    lala._build(3)
+    """Tests probflow.variables.Variable._build"""
+    v1 = Variable(name='test_variable_build')
+    v1._build(None)
+
+def test_variable_ensure_is_built():
+    """Tests probflow.variables.Variable._ensure_is_built"""
+    v1 = Variable(name='test_variable_ensure_is_built')
+    with pytest.raises(RuntimeError):
+        v1._ensure_is_built()
+    v1._build(None)
+    v1._ensure_is_built()
+
+# TODO: _sample
+
+# TODO: _mean
+
+# TODO: _log_loss
+
+# TODO: _kl_loss
+
+# TODO: posterior

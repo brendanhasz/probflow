@@ -54,17 +54,17 @@ class Input(BaseLayer):
 
     # Input layer takes no parameters
     _default_args = dict()
- 
+
 
     # Default kwargs
     _default_kwargs = {
         'cols': None #indexes of columns to use
     }
-   
+
 
     def _build(self, args, data):
         """Build the layer."""
-        if isinstance(args['cols'], np.ndarray) and len(args['cols'])==0:
+        if isinstance(args['cols'], np.ndarray) and len(args['cols']) == 0:
             return data
         else:
             # TODO: slice data by cols
@@ -301,7 +301,7 @@ class Dense(BaseLayer):
         'weight_initializer': None, #TODO: glorot or something as default?
         'bias_initializer': None,   #TODO: glorot or something as default?
         'weight_prior': Normal(0, 1),
-        'bias_prior': Normal(0,1),
+        'bias_prior': Normal(0, 1),
     }
     
 

@@ -1,12 +1,11 @@
+"""Tests probflow.layers modules"""
 
-# TODO: import as module and use absolute imports
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../src'))
 
 import numpy as np
 import tensorflow as tf
 
-from probflow import Add, Sub, Mul, Div, Neg, Abs, Exp, Log
+from probflow.layers import Add, Sub, Mul, Div, Neg, Abs, Exp, Log
+from probflow.variables import Variable
 
 
 def test_add_layer():
@@ -79,7 +78,11 @@ def test_add_layer():
     assert l2_out[1][0] == 6.0
 
     # With a Variable as input
-    # TODO
+    #a = Variable()
+    #b = Variable()
+    #l2 = Add(a, b)
+    # TODO: although maybe that should go in the integration tests?
+    # TODO (first do test_variables and finish debugging that)
 
 
 def test_sub_layer():
@@ -114,10 +117,42 @@ def test_sub_layer():
     assert l3.built_obj[1][0] == 1.0
 
     # With a tf.Tensor as input
-    # TODO
+    a = tf.constant([[0], [2]], dtype=tf.float32)
+    b = tf.constant([[3], [4]], dtype=tf.float32)
+    l2 = Sub(b, a)
+    l2.build()
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert l2_out[0][0] == 3.0
+    assert l2_out[1][0] == 2.0
 
     # With a tf.Variable as input
-    # TODO
+    a = tf.Variable([[0], [2]], dtype=tf.float32)
+    b = tf.Variable([[3], [4]], dtype=tf.float32)
+    l2 = Sub(b, a)
+    l2.build()
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    init_op = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init_op)
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert l2_out[0][0] == 3.0
+    assert l2_out[1][0] == 2.0
 
     # With a Variable as input
     # TODO
@@ -155,10 +190,42 @@ def test_mul_layer():
     assert l3.built_obj[1] == 42.0
 
     # With a tf.Tensor as input
-    # TODO
+    a = tf.constant([[1], [2]], dtype=tf.float32)
+    b = tf.constant([[3], [4]], dtype=tf.float32)
+    l2 = Mul(a, b)
+    l2.build()
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert l2_out[0][0] == 3.0
+    assert l2_out[1][0] == 8.0
 
     # With a tf.Variable as input
-    # TODO
+    a = tf.Variable([[1], [2]], dtype=tf.float32)
+    b = tf.Variable([[3], [4]], dtype=tf.float32)
+    l2 = Mul(a, b)
+    l2.build()
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    init_op = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init_op)
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert l2_out[0][0] == 3.0
+    assert l2_out[1][0] == 8.0
 
     # With a Variable as input
     # TODO
@@ -196,10 +263,42 @@ def test_div_layer():
     assert l3.built_obj[1] == 7.0/6
 
     # With a tf.Tensor as input
-    # TODO
+    a = tf.constant([[1], [2]], dtype=tf.float32)
+    b = tf.constant([[3], [4]], dtype=tf.float32)
+    l2 = Div(a, b)
+    l2.build()
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert abs(l2_out[0][0] - 1.0/3.0) < 1e-8 #float32 vs 64...
+    assert l2_out[1][0] == 0.5
 
     # With a tf.Variable as input
-    # TODO
+    a = tf.Variable([[1], [2]], dtype=tf.float32)
+    b = tf.Variable([[3], [4]], dtype=tf.float32)
+    l2 = Div(a, b)
+    l2.build()
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    init_op = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init_op)
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert abs(l2_out[0][0] - 1.0/3.0) < 1e-8 #float32 vs 64...
+    assert l2_out[1][0] == 0.5
 
     # With a Variable as input
     # TODO
@@ -218,7 +317,7 @@ def test_div_layer():
 
 
 def test_layer_ops_overloading():
-    """Tests that the basic arithmetic ops (__add__, etc) are overloaded"""
+    """Tests the basic arithmetic ops (__add__, etc) are overloaded"""
 
     # Two layers to work with
     l1 = Add(1.0, 2.0)
@@ -262,3 +361,7 @@ def test_layer_ops_overloading():
 
 
 # TODO: check broadcasting works correctly
+
+# TODO: Input layer
+
+# TODO: Dense layer

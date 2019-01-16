@@ -144,8 +144,8 @@ class BaseLayer(ABC):
             if not self._arg_is('valid', self.args[arg]):
                 msg = ('Invalid type for ' + type(self).__name__ + 
                        ' argument ' + arg + '. Must be one of: int, float, ' + 
-                       'np.ndarray, tf.Tensor, tf.Variable, ' +
-                        'or a probflow layer, model, or distribution.')
+                       'np.ndarray, tf.Tensor, tf.Variable, or a probflow' +
+                        'layer, model, variable, or distribution.')
                 raise TypeError(msg)
 
         # Set layer kwargs
@@ -217,7 +217,8 @@ class BaseLayer(ABC):
             return isinstance(arg, BaseVariable)
         elif type_str=='valid':
             return isinstance(arg, (int, float, np.ndarray, 
-                                    tf.Tensor, tf.Variable, BaseLayer))
+                                    tf.Tensor, tf.Variable, 
+                                    BaseLayer, BaseVariable))
         else:
             raise TypeError('type_str must a string, one of: number, tensor,' +
                             ' tensor_like, model, layer, or valid')
@@ -246,7 +247,7 @@ class BaseLayer(ABC):
                 self.built_args[arg_name] = arg.built_obj
                 self.mean_args[arg_name] = arg.mean_obj
             elif self._arg_is('variable', arg):
-                arg.build(data)
+                arg._build(data)
                 self.built_args[arg_name] = arg._sample(data)
                 self.mean_args[arg_name] = arg._mean()
 
