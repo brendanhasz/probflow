@@ -271,6 +271,32 @@ class Sigmoid(BaseLayer):
 
 
 
+class Relu(BaseLayer):
+    r"""A layer which linearly rectifies its input.
+
+
+    TODO: More info...
+
+    Given :math:`x`, this layer returns:
+
+    .. math::
+
+        \text{Relu}(x) = \max (x, 0)
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = {
+        'input': REQUIRED
+    }
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.nn.relu(args['input'])
+
+
+
 class Softmax(BaseLayer):
     r"""A layer which outputs the softmax of its input.
 
