@@ -173,15 +173,18 @@ or for neural matrix factorization https://arxiv.org/abs/1708.05031
     # Neural Collaborative Filtering
     user_vec_ncf = Embedding(users, dims=50)
     item_vec_ncf = Embedding(items, dims=50)
-    ncf_in = Concatenate([user_vec_ncf, item_vec_ncf])
+    ncf_in = Cat([user_vec_ncf, item_vec_ncf])
     predictions_ncf = DenseRegression(ncf_in, units=[128, 64, 32])
     
     # Combination of the two methods
-    predictions = Dense(Concatenate([predictions_mf, predictions_ncf]))
+    predictions = Dense(Cat([predictions_mf, predictions_ncf]))
     error = ScaleParameter()
 
     model = Normal(predictions, error)
     model.fit(x,y)
+
+Or if you have implicit data (0 or 1 for whether the user has interacted with 
+the item), use model = Bernoulli(logits=predictions)
 
 Or if there are discrete scores (e.g. 1-10), then use a BetaBinomial 
 TODO: w/ Dense and Embedding layers, then w/ NeuralMatrixFactorization

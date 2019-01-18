@@ -265,6 +265,68 @@ class Log(BaseLayer):
 
 
 
+class Sigmoid(BaseLayer):
+    r"""A layer which passes its input through a sigmoid function, elementwise.
+
+
+    TODO: More info...
+
+    Given :math:`x`, this layer returns:
+
+    .. math::
+
+        \text{Sigmoid}(x) = \frac{1}{1 + \exp (-x)}
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = {
+        'input': REQUIRED
+    }
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.sigmoid(args['input'])
+
+
+
+class Softmax(BaseLayer):
+    r"""A layer which outputs the softmax of its input.
+
+
+    TODO: More info...
+
+    Given a vector :math:`\mathbf{x}`, this layer returns:
+
+    .. math::
+
+        \text{Softmax}(\mathbf{x}) = \mathbf{\sigma}
+
+    where
+
+    .. math::
+
+        \sigma_i = \frac{\exp (x_i)}{\sum_j \exp (x_j)}
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = {
+        'input': REQUIRED
+    }
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 1,
+    }    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.nn.softmax(args['input'], axis=self.kwargs['axis'])
+
+
+
 # TODO: Logit
 
 
@@ -432,7 +494,29 @@ class Dot(BaseLayer):
 
 
 
-# TODO: Concatenate
+class Cat(BaseLayer):
+    """A layer which Concatenates its two inputs.
+
+
+    TODO: More info...
+
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = OrderedDict([
+        ('a', REQUIRED),
+        ('b', REQUIRED)
+    ])
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 1,
+    }
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.concat(args['a'], args['b'], axis=self.kwargs['axis'])
 
 
 
@@ -482,7 +566,7 @@ class Dense(BaseLayer):
         self.bias._build(data)
 
         # Do the neural network things!
-        y_out = tf.matmul(x_in, self.weight._sample(data)) 
+        y_out = tf.matmul(x_in, self.weight._sample(data))
         y_out = y_out + self.bias._sample(data)
         return self.kwargs['activation'](y_out)
 
@@ -520,7 +604,6 @@ class Dense(BaseLayer):
 
     def _kl_loss(self, obj, vals):
         """The sum of divergences of variational posteriors from priors."""
-        # TODO
         return self.weight._kl_loss() + self.bias._kl_loss()
         pass
 
