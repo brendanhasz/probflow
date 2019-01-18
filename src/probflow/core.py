@@ -143,9 +143,11 @@ class BaseLayer(ABC):
         for arg in self.args:
             if not self._arg_is('valid', self.args[arg]):
                 msg = ('Invalid type for ' + type(self).__name__ + 
-                       ' argument ' + arg + '. Must be one of: int, float, ' + 
-                       'np.ndarray, tf.Tensor, tf.Variable, or a probflow' +
-                        'layer, model, variable, or distribution.')
+                       ' argument ' + arg + 
+                       '.  Arguments to a layer must be one of: ' +
+                       'int, float, np.ndarray, ' + 
+                       'tf.Tensor, tf.Variable, ' +
+                       'or a probflow layer or variable.')
                 raise TypeError(msg)
 
         # Set layer kwargs
@@ -200,12 +202,13 @@ class BaseLayer(ABC):
 
 
     def _mean_log_loss(self, obj, vals):
-        """Compute the log loss incurred by this layer.
+        """Compute the log loss incurred by this layer with mean parameters.
 
         TODO: docs... default is no loss but can override when there is
 
         """
         return 0
+
 
     def _kl_loss(self):
         """Compute the loss due to posterior divergence from priors.
@@ -227,10 +230,11 @@ class BaseLayer(ABC):
             return isinstance(arg, BaseLayer)
         elif type_str=='variable':
             return isinstance(arg, BaseVariable)
-        elif type_str=='valid':
-            return isinstance(arg, (int, float, np.ndarray, 
-                                    tf.Tensor, tf.Variable, 
-                                    BaseLayer, BaseVariable))
+        elif type_str=='valid': #valid input to a layer
+            return (not isinstance(arg, BaseModel) and
+                    isinstance(arg, (int, float, np.ndarray, 
+                                     tf.Tensor, tf.Variable, 
+                                     BaseLayer, BaseVariable)))
         else:
             raise TypeError('type_str must a string, one of: number, tensor,' +
                             ' tensor_like, model, layer, or valid')
@@ -253,10 +257,6 @@ class BaseLayer(ABC):
             elif self._arg_is('tensor_like', arg):
                 self.built_args[arg_name] = arg
                 self.mean_args[arg_name] = arg
-            elif self._arg_is('model', arg):
-                arg.build(data)
-                self.built_args[arg_name] = arg.built_obj.sample()
-                self.mean_args[arg_name] = arg.mean_obj.mean()
             elif self._arg_is('layer', arg):
                 arg.build(data)
                 self.built_args[arg_name] = arg.built_obj
@@ -264,7 +264,10 @@ class BaseLayer(ABC):
             elif self._arg_is('variable', arg):
                 arg._build(data)
                 self.built_args[arg_name] = arg._sample(data)
-                self.mean_args[arg_name] = arg._mean()
+                self.mean_args[arg_name] = arg._mean(data)
+
+        # TODO: could just make variable and layer have same interface, ie
+        # built_obj and mean_obj are created during call to .build()
 
         # Sum the losses of this layer's arguments
         self.arg_loss_sum = 0       # log posterior probability of sample model
@@ -287,6 +290,8 @@ class BaseLayer(ABC):
                 self.arg_loss_sum += arg._log_loss(self.built_args[arg_name])
                 self.mean_arg_loss_sum += arg._log_loss(self.mean_args[arg_name])
                 self.kl_loss_sum += arg._kl_loss()
+
+        # TODO: same idea - could make variable + layer have same interface
 
         # Build this layer's sample model and mean model
         self.built_obj = self._build(self.built_args, data)

@@ -223,17 +223,6 @@ class Exp(BaseLayer):
         return tf.exp(args['input'])
 
 
-    def _log_loss(self, args, vals):
-        """Add the Jacobian adjustment if input is a distribution."""
-        if isinstance(self.arg['input'], BaseModel):
-            # TODO: compute the jacobian adjustment
-            pass
-        else:
-            return 0
-
-    # TODO: hmm, well if you can compute the log loss of it then... maybe these 
-    # transformations CAN inherit from model instead of layer
-
 
 class Log(BaseLayer):
     """A layer which outputs the natural log of its input.
@@ -253,15 +242,6 @@ class Log(BaseLayer):
     def _build(self, args, data):
         """Build the layer."""
         return tf.log(args['input'])
-
-
-    def _log_loss(self, obj, vals):
-        """The loss is a Jacobian adjustment if input is a distribution."""
-        if isinstance(self.arg['input'], BaseModel):
-            # TODO: compute the jacobian adjustment
-            pass
-        else:
-            return 0
 
 
 

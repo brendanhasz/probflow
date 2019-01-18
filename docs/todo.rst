@@ -9,7 +9,7 @@ Backlog (short term):
 * Matrix multiply layer?
 * Implement @ operator for layers (see PEP 465)
 * Layers w/ multiple args should ensure their args are broadcastable
-* Variable should have a record=False arg to init (record posterior values over training)
+* fit should have a record=False arg (record posterior values over training)
 * Finish BaseLayer, BaseModel.fit, Variable, and Input
 * Tests and debug a simple 1d linear model
 * Docs for BaseLayer, BaseModel.fit, Variable, and Input
