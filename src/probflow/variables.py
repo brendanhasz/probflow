@@ -230,7 +230,7 @@ class Variable(BaseVariable):
         # Build the prior distribution
         if self.prior is not None:
             self.prior.build(data)
-            self.prior = self.prior.built_obj
+            self._built_prior = self.prior.built_obj
             # TODO: Check that the built prior shape is broadcastable w/ self.shape
 
         # Create posterior parameter variables
@@ -246,9 +246,9 @@ class Variable(BaseVariable):
             params[arg] = self._bound(params[arg], lb, ub)
 
         # Create variational posterior distribution
-        posterior = self.posterior_fn(**params)
-        posterior.build(data)
-        self.posterior = posterior.built_obj
+        self.posterior = self.posterior_fn(**params)
+        self.posterior.build(data)
+        self._built_posterior = self.posterior.built_obj
 
 
     def _sample(self, data):
@@ -284,24 +284,24 @@ class Variable(BaseVariable):
 
         # Draw random samples from the posterior
         if self.estimator is None:
-            samples = self.posterior.sample(sample_shape=batch_shape,
-                                            seed=seed_stream())
+            samples = self._built_posterior.sample(sample_shape=batch_shape,
+                                                   seed=seed_stream())
 
         # Use the Flipout estimator (https://arxiv.org/abs/1803.04386)
         elif self.estimator=='flipout':
 
             # Flipout only works w/ distributions symmetric around 0
-            if not isinstance(self.posterior, [tfd.Normal, 
-                                               tfd.StudentT,
-                                               tfd.Cauchy]):
+            if not isinstance(self._built_posterior, [tfd.Normal, 
+                                                      tfd.StudentT,
+                                                      tfd.Cauchy]):
                 raise ValueError('flipout requires a symmetric posterior ' +
                                  'distribution in the location-scale family')
 
             # Posterior mean
-            w_mean = self._bound(self.posterior.mean(), lb, ub)
+            w_mean = self._bound(self._built_posterior.mean(), lb, ub)
 
             # Sample from centered posterior distribution
-            w_sample = self.posterior.sample(seed=seed_stream()) - w_mean
+            w_sample = self._built_posterior.sample(seed=seed_stream()) - w_mean
 
             # Random sign matrixes
             sign_r = random_rademacher(w_sample.shape, dtype=data.dtype,
@@ -357,7 +357,8 @@ class Variable(BaseVariable):
         """
         self._ensure_is_built()
         if self.prior is not None:
-            return self.prior.log_prob(vals)
+            return (self._built_prior.log_prob(vals) + 
+                    self.prior.arg_loss_sum)
             # TODO: have to add KL term?
         else:
             return 0 #no prior, no loss
@@ -370,7 +371,10 @@ class Variable(BaseVariable):
 
         """
         self._ensure_is_built()
-        return tf.reduce_sum(tfd.kl_divergence(self.posterior, self.prior))
+        return (tf.reduce_sum(
+                    tfd.kl_divergence(self._built_posterior, 
+                                      self._built_prior))
+                + self.prior.kl_loss_sum)
         # TODO: make sure that the broadcasting occurs correctly here
         # eg if posterior shape is [2,1], should return 
         # (kl_div(post_1,prior_1) + kl_div(Post_2,prior_2))
