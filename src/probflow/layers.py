@@ -168,13 +168,7 @@ class Neg(BaseLayer):
     TODO: More info...
 
 
-    """
-
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
-    }
-    
+    """    
 
     def _build(self, args, data):
         """Build the layer."""
@@ -191,12 +185,6 @@ class Abs(BaseLayer):
 
     """
 
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
-    }
-    
-
     def _build(self, args, data):
         """Build the layer."""
         return abs(args['input'])
@@ -210,13 +198,7 @@ class Exp(BaseLayer):
     TODO: More info...
 
 
-    """
-
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
-    }
-    
+    """    
 
     def _build(self, args, data):
         """Build the layer."""
@@ -232,12 +214,6 @@ class Log(BaseLayer):
 
 
     """
-
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
-    }
-    
 
     def _build(self, args, data):
         """Build the layer."""
@@ -257,13 +233,7 @@ class Sigmoid(BaseLayer):
 
         \text{Sigmoid}(x) = \frac{1}{1 + \exp (-x)}
 
-    """
-
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
-    }
-    
+    """    
 
     def _build(self, args, data):
         """Build the layer."""
@@ -283,13 +253,7 @@ class Relu(BaseLayer):
 
         \text{Relu}(x) = \max (x, 0)
 
-    """
-
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
-    }
-    
+    """    
 
     def _build(self, args, data):
         """Build the layer."""
@@ -316,11 +280,6 @@ class Softmax(BaseLayer):
         \sigma_i = \frac{\exp (x_i)}{\sum_j \exp (x_j)}
 
     """
-
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
-    }
 
     # Layer keyword arguments and their default values
     _default_kwargs = {
@@ -354,15 +313,14 @@ class Sum(BaseLayer):
 
     """
 
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 1,
     }
-    
 
     def _build(self, args, data):
         """Build the layer."""
-        return tf.reduce_sum(args['input'])
+        return tf.reduce_sum(args['input'], axis=self.kwargs['axis'])
 
 
 
@@ -375,15 +333,15 @@ class Mean(BaseLayer):
 
     """
 
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 1,
     }
     
 
     def _build(self, args, data):
         """Build the layer."""
-        return tf.reduce_mean(args['input'])
+        return tf.reduce_mean(args['input'], axis=self.kwargs['axis'])
 
 
 
@@ -396,15 +354,15 @@ class Max(BaseLayer):
 
     """
 
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 1,
     }
     
 
     def _build(self, args, data):
         """Build the layer."""
-        return tf.reduce_max(args['input'])
+        return tf.reduce_max(args['input'], axis=self.kwargs['axis'])
 
 
 
@@ -417,15 +375,15 @@ class Min(BaseLayer):
 
     """
 
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 1,
     }
     
 
     def _build(self, args, data):
         """Build the layer."""
-        return tf.reduce_min(args['input'])
+        return tf.reduce_min(args['input'], axis=self.kwargs['axis'])
 
 
 
@@ -438,15 +396,15 @@ class Prod(BaseLayer):
 
     """
 
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 1,
     }
     
 
     def _build(self, args, data):
         """Build the layer."""
-        return tf.reduce_prod(args['input'])
+        return tf.reduce_prod(args['input'], axis=self.kwargs['axis'])
 
 
 
@@ -461,15 +419,15 @@ class LogSumExp(BaseLayer):
 
     """
 
-    # Layer arguments and their default values
-    _default_args = {
-        'input': REQUIRED
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 1,
     }
     
 
     def _build(self, args, data):
         """Build the layer."""
-        return tf.reduce_logsumexp(args['input'])
+        return tf.reduce_logsumexp(args['input'], axis=self.kwargs['axis'])
 
 
 
@@ -488,10 +446,14 @@ class Dot(BaseLayer):
         ('b', REQUIRED)
     ])
     
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 1,
+    }
 
     def _build(self, args, data):
         """Build the layer."""
-        return tf.reduce_sum(args['a'] * args['b'], axis=1)
+        return tf.reduce_sum(args['a'] * args['b'], axis=self.kwargs['axis'])
         # TODO: this will only work w/ vector inputs...
 
 

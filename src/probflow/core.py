@@ -101,18 +101,10 @@ class BaseLayer(ABC):
     _default_kwargs = dict()
 
 
-    @property
-    @abstractmethod
-    def _default_args(self):
-        """Layer parameters and their default values.
-
-        Inheriting class must define this attribute as a dict whose keys are 
-        the names of the layer's arguments, and whose values are the default 
-        value of each argument.  Setting an argument's value in `_default_args` 
-        to `None` causes that argument to be mandatory (TypeError if that 
-        argument's value is not specified when instantiating the class).
-        """
-        pass
+    # Layer arguments and their default values
+    _default_args = {
+        'input': REQUIRED
+    }
 
 
     def __init__(self, *args, **kwargs):
