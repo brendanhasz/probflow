@@ -181,6 +181,15 @@ class BaseLayer(ABC):
         pass
 
 
+    def _build_mean(self, args, data):
+        """Build the layer with mean parameters.
+
+        TODO: docs. default is to just do the same thing as _build
+
+        """
+        return self._build(args, data)
+
+
     def _log_loss(self, obj, vals):
         """Compute the log loss incurred by this layer.
         
@@ -274,7 +283,7 @@ class BaseLayer(ABC):
 
         # Build this layer's sample model and mean model
         self.built_obj = self._build(self.built_args, data)
-        self.mean_obj = self._build(self.mean_args, data)
+        self.mean_obj = self._build_mean(self.mean_args, data)
 
 
     def __add__(self, other):

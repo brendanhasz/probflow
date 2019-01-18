@@ -455,7 +455,7 @@ class Dense(BaseLayer):
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'units': 1, 
-        'activation': None, 
+        'activation': tf.nn.relu, 
         'use_bias': True,
         'weight_initializer': None, #TODO: glorot or something as default?
         'bias_initializer': None,   #TODO: glorot or something as default?
@@ -467,14 +467,24 @@ class Dense(BaseLayer):
     def _build(self, args, data):
         """Build the layer."""
 
-
         # If no input specified, assume data is input
-        if isinstance(args['input'], np.ndarray) and len(args['input'])==0:
-            self.input = data
+        if args['input'] is None:
+            x_in = data
+        else:
+            x_in = args['input']
 
-        # TODO
+        # Create weight and bias variables
+        self.weight = Variable(prior=self.kwargs['weight_prior'])
+        self.bias = Variable(prior=self.kwargs['bias_prior'])
 
-        # NOTE: may have to implement manually w/ probflow.Variable? in order to let the mean_model work...
+        # Build the weight and bias variables
+        self.weight._build(data)
+        self.bias._build(data)
+
+        # Do the neural network things!
+        y_out = tf.matmul(x_in, self.weight._sample(data)) 
+        y_out = y_out + self.bias._sample(data)
+        return self.kwargs['activation'](y_out)
 
         # NOTE: input should be batch_size-by-ndims
         # weight matrix then should be ndims-by-units
@@ -483,15 +493,35 @@ class Dense(BaseLayer):
         # and it'll broadcast bias across the batch
 
 
+    def _build_mean(self, args, data):
+        """Build the layer with mean parameters.
+
+        TODO: docs
+
+        """
+
+        # If no input specified, assume data is input
+        if args['input'] is None:
+            x_in = data
+        else:
+            x_in = args['input']
+
+        # Do the neural network things!
+        y_out = tf.matmul(x_in, self.weight._mean(data)) 
+        y_out = y_out + self.bias._mean(data)
+        return self.kwargs['activation'](y_out)
+
+
     def _log_loss(self, obj, vals):
         """Log loss incurred by this layer."""
-        # TODO
+        # TODO: uh how can you access the sampled values of weight and bias from here?
         pass
 
 
     def _kl_loss(self, obj, vals):
         """The sum of divergences of variational posteriors from priors."""
         # TODO
+        return self.weight._kl_loss() + self.bias._kl_loss()
         pass
 
 
