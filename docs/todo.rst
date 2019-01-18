@@ -6,7 +6,7 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Sum, Dot (dot product), and Concatenate layers?
+* Dot (dot product), matrix multiply, and Concatenate layers?
 * Layers w/ multiple args should ensure their args are broadcastable
 * Variable should have a record=False arg to init (record posterior values over training)
 * Finish BaseLayer, BaseModel.fit, Variable, and Input

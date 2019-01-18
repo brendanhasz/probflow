@@ -277,6 +277,146 @@ class Log(BaseLayer):
 
 
 
+class Sum(BaseLayer):
+    """A layer which outputs the sum of its inputs.
+
+
+    TODO: More info...
+
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = {
+        'input': REQUIRED
+    }
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.reduce_sum(args['input'])
+
+
+
+class Mean(BaseLayer):
+    """A layer which outputs the mean of its inputs.
+
+
+    TODO: More info...
+
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = {
+        'input': REQUIRED
+    }
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.reduce_mean(args['input'])
+
+
+
+class Max(BaseLayer):
+    """A layer which outputs the maximum of its inputs.
+
+
+    TODO: More info...
+
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = {
+        'input': REQUIRED
+    }
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.reduce_max(args['input'])
+
+
+
+class Min(BaseLayer):
+    """A layer which outputs the minimum of its inputs.
+
+
+    TODO: More info...
+
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = {
+        'input': REQUIRED
+    }
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.reduce_min(args['input'])
+
+
+
+class Prod(BaseLayer):
+    """A layer which outputs the product of its inputs.
+
+
+    TODO: More info...
+
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = {
+        'input': REQUIRED
+    }
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.reduce_prod(args['input'])
+
+
+
+class LogSumExp(BaseLayer):
+    """A layer which outputs the log(sum(exp(inputs))).
+
+
+    TODO: More info...
+
+    TODO: explain why this is useful when working in log space, numerical stability etc
+
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = {
+        'input': REQUIRED
+    }
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.reduce_logsumexp(args['input'])
+
+
+
+# TODO: Dot (dot product)
+
+
+
+# TODO: matrix multiplication?
+
+
+
+# TODO: Concatenate
+
+
+
 class Dense(BaseLayer):
     """A densely-connected neural network layer.
 
