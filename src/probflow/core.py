@@ -192,13 +192,20 @@ class BaseLayer(ABC):
 
     def _log_loss(self, obj, vals):
         """Compute the log loss incurred by this layer.
-        
 
         TODO: docs... default is no loss but can override when there is
 
         """
         return 0
 
+
+    def _mean_log_loss(self, obj, vals):
+        """Compute the log loss incurred by this layer.
+
+        TODO: docs... default is no loss but can override when there is
+
+        """
+        return 0
 
     def _kl_loss(self):
         """Compute the loss due to posterior divergence from priors.
@@ -272,7 +279,7 @@ class BaseLayer(ABC):
                     arg._log_loss(arg.built_obj, self.built_args[arg_name]))
                 self.mean_arg_loss_sum += (
                     arg.mean_arg_loss_sum + 
-                    arg._log_loss(arg.mean_obj, self.mean_args[arg_name]))
+                    arg._mean_log_loss(arg.mean_obj, self.mean_args[arg_name]))
                 self.kl_loss_sum += (
                     arg.kl_loss_sum +
                     arg._kl_loss())

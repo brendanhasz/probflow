@@ -540,7 +540,6 @@ class Dense(BaseLayer):
     _default_kwargs = {
         'units': 1, 
         'activation': tf.nn.relu, 
-        'use_bias': True,
         'weight_initializer': None, #TODO: glorot or something as default?
         'bias_initializer': None,   #TODO: glorot or something as default?
         'weight_prior': Normal(0, 1),
@@ -557,55 +556,67 @@ class Dense(BaseLayer):
         else:
             x_in = args['input']
 
+        # Compute dimensions
+        # batch_size = x_in.shape[0]
+        ndims = x_in.shape[1]
+        units = self.kwargs['units']
+
         # Create weight and bias variables
-        self.weight = Variable(prior=self.kwargs['weight_prior'])
-        self.bias = Variable(prior=self.kwargs['bias_prior'])
+        weight = Variable(shape=[ndims, units], 
+                          prior=self.kwargs['weight_prior'])
+        bias = Variable(shape=[1, units],
+                        prior=self.kwargs['bias_prior'])
 
         # Build the weight and bias variables
-        self.weight._build(data)
-        self.bias._build(data)
+        weight._build(data)
+        bias._build(data)
 
-        # Do the neural network things!
-        y_out = tf.matmul(x_in, self.weight._sample(data))
-        y_out = y_out + self.bias._sample(data)
-        return self.kwargs['activation'](y_out)
+        # Compute output using a sample from the variational posteriors
+        weight_samples = self.weight._sample(data)
+        bias_samples = self.bias._sample(data)
+        y_out = tf.matmul(x_in, weight_samples) + bias_samples
+        self._sample = self.kwargs['activation'](y_out)
 
-        # NOTE: input should be batch_size-by-ndims
-        # weight matrix then should be ndims-by-units
-        # and bias matrix should be 
-        # that way you can do: input @ weights + bias
-        # and it'll broadcast bias across the batch
+        # Compute the output using the means of the variational posteriors
+        weight_means = self.weight._mean(data)
+        bias_means = self.bias._mean(data)
+        mean_y_out = tf.matmul(x_in, weight_means) + bias_means
+        self._mean = self.kwargs['activation'](mean_y_out)
+
+        # Compute the losses
+        self._log_loss_sum = (weight._log_loss(weight_samples) +
+                              bias._log_loss(bias_samples))
+        self._mean_log_loss_sum = (weight._log_loss(weight_means) +
+                                   bias._log_loss(bias_means))
+        self._kl_loss_sum = weight._kl_loss() + bias._kl_loss()
+
+        # Return the sample
+        return self._sample
 
 
     def _build_mean(self, args, data):
         """Build the layer with mean parameters.
 
         TODO: docs
+        Note that this was done in _build()
 
         """
-
-        # If no input specified, assume data is input
-        if args['input'] is None:
-            x_in = data
-        else:
-            x_in = args['input']
-
-        # Do the neural network things!
-        y_out = tf.matmul(x_in, self.weight._mean(data)) 
-        y_out = y_out + self.bias._mean(data)
-        return self.kwargs['activation'](y_out)
+        return self._mean
 
 
     def _log_loss(self, obj, vals):
         """Log loss incurred by this layer."""
-        # TODO: uh how can you access the sampled values of weight and bias from here?
-        pass
+        return self._log_loss_sum
+
+
+    def _mean_log_loss(self, obj, vals):
+        """Log loss incurred by this layer w/ mean parameters."""
+        return self._mean_log_loss_sum
 
 
     def _kl_loss(self, obj, vals):
         """The sum of divergences of variational posteriors from priors."""
-        return self.weight._kl_loss() + self.bias._kl_loss()
-        pass
+        return self._kl_loss_sum
 
 
 

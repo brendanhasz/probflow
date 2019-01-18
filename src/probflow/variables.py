@@ -177,6 +177,8 @@ class Variable(BaseVariable):
         self.estimator = estimator
         self.posterior = None
 
+        # TODO: initializer?
+
 
     def _bound(self, data, lb, ub):
         """Bound data by applying a transformation.
@@ -359,7 +361,6 @@ class Variable(BaseVariable):
         if self.prior is not None:
             return (self._built_prior.log_prob(vals) + 
                     self.prior.arg_loss_sum)
-            # TODO: have to add KL term?
         else:
             return 0 #no prior, no loss
 
