@@ -265,7 +265,7 @@ class BaseLayer(ABC):
                     arg.mean_arg_loss_sum + 
                     arg._log_loss(arg.mean_obj, self.mean_args[arg_name]))
                 self.kl_loss_sum += (
-                    arg.kl_loss_sum + 
+                    arg.kl_loss_sum +
                     arg._kl_loss())
             elif self._arg_is('variable', arg):
                 self.arg_loss_sum += arg._log_loss(self.built_args[arg_name])

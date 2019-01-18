@@ -6,7 +6,8 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Dot (dot product), matrix multiply, and Concatenate layers?
+* Matrix multiply, and Concatenate layers?
+* Implement @ operator for layers (see PEP 465)
 * Layers w/ multiple args should ensure their args are broadcastable
 * Variable should have a record=False arg to init (record posterior values over training)
 * Finish BaseLayer, BaseModel.fit, Variable, and Input

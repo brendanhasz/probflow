@@ -405,11 +405,30 @@ class LogSumExp(BaseLayer):
 
 
 
-# TODO: Dot (dot product)
+class Dot(BaseLayer):
+    """A layer which outputs the dot product of its two inputs.
+
+
+    TODO: More info...
+
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = OrderedDict([
+        ('a', REQUIRED),
+        ('b', REQUIRED)
+    ])
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.reduce_sum(args['a'] * args['b'], axis=1)
+        # TODO: this will only work w/ vector inputs...
 
 
 
-# TODO: matrix multiplication?
+# TODO: MatMul? for stuff of size batch_size-by-dim1-by-dim2
 
 
 
@@ -456,6 +475,12 @@ class Dense(BaseLayer):
         # TODO
 
         # NOTE: may have to implement manually w/ probflow.Variable? in order to let the mean_model work...
+
+        # NOTE: input should be batch_size-by-ndims
+        # weight matrix then should be ndims-by-units
+        # and bias matrix should be 
+        # that way you can do: input @ weights + bias
+        # and it'll broadcast bias across the batch
 
 
     def _log_loss(self, obj, vals):
