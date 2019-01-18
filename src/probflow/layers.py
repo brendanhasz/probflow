@@ -470,7 +470,25 @@ class Dot(BaseLayer):
 
 
 
-# TODO: MatMul? for stuff of size batch_size-by-dim1-by-dim2
+class Matmul(BaseLayer):
+    """A layer which outputs the matrix multiplication of its two inputs.
+
+
+    TODO: More info...
+
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = OrderedDict([
+        ('a', REQUIRED),
+        ('b', REQUIRED)
+    ])
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.matmul(args['a'], args['b'])
 
 
 

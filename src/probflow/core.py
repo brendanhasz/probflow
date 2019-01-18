@@ -334,6 +334,12 @@ class BaseLayer(ABC):
         return Neg(self)
 
 
+    def __matmul__(self, other):
+        """Matrix multiply this layer by another, per PEP 465."""
+        from .layers import Matmul
+        return Matmul(self, other)
+
+
 
 class BaseModel(BaseLayer):
     """Abstract model class (used as an implementation base)
