@@ -15,7 +15,8 @@ tfd = tfp.distributions
 from tensorflow_probability.python.math import random_rademacher
 
 from .core import BaseParameter, BaseDistribution
-from .distributions import Normal
+from .distributions import Normal, InvGamma
+from .layers import Sqrt
 
 
 
@@ -380,12 +381,44 @@ class Parameter(BaseParameter):
 # Bernoulli or Categorical, and make mean() return the mode?
 
 
-class ScaleParameter(BaseParameter):
-    """TODO
 
-    just a regular Parameter but with a Gamma posterior on the precision and no prior
-    somehow will have to transform? ideally Normal can take this as its 2nd arg directly
+def ScaleParameter(self, 
+                   shape=1,
+                   prior=None,
+                   name='ScaleParameter',
+                   seed=None,
+                   estimator='flipout'):
+    r"""Standard deviation param whose variance has an InverseGamma posterior.
+
+    This is a convenience function for creating a standard deviation parameter
+    (\sigma).  It is created by first constructing a variance parameter 
+    (:math:`\sigma^2`) which uses an inverse gamma distribution as the
+    variational posterior.
+
+    .. math::
+
+        \sigma^2 \sim \text{InvGamma}(\alpha, \beta)
+
+    Then the variance is transformed into the standard deviation:
+
+    .. math::
+
+        \sigma = \sqrt{\sigma^2}
+
+    By default, a uniform prior is used.
 
     """
-    # TODO
-    pass
+
+    # Create the variance parameter
+    variance = Parameter(shape=shape,
+                         name=name,
+                         prior=prior,
+                         posterior_fn=InvGamma,
+                         post_param_names=['shape', 'rate'],
+                         post_param_lb=[0, 0],
+                         post_param_ub=[None, None],
+                         seed=seed,
+                         estimator=estimator)
+
+    # Return the transformed parameter
+    return Sqrt(variance)

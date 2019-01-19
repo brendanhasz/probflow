@@ -143,6 +143,82 @@ class Cauchy(ContinuousDistribution):
 
 
 
+class Gamma(ContinuousDistribution):
+    r"""The Gamma distribution.
+
+    TODO: more...
+
+    .. math::
+
+        y \sim \mathcal{Gamma}(\alpha, \beta)
+
+    .. math::
+
+        p(x) = \frac{\beta^\alpha}{\Gamma (\alpha)} x^{\alpha-1}
+               \exp (-\beta x)
+
+
+    Parameters
+    ----------
+    shape : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Shape parameter of the gamma distribution (:math:`\alpha`). 
+    rate : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Rate parameter of the gamma distribution (:math:`\beta`). 
+
+    """
+
+
+    # Distribution parameters and their default values
+    _default_args = OrderedDict([
+        ('shape', REQUIRED),
+        ('rate', REQUIRED)
+    ])    
+
+
+    def _build(self, args, data):
+        """Build the distribution model."""
+        return tfd.Gamma(concentration=args['shape'], rate=args['rate'])
+
+
+
+class InvGamma(ContinuousDistribution):
+    r"""The Inverse-gamma distribution.
+
+    TODO: more...
+
+    .. math::
+
+        y \sim \mathcal{InvGamma}(\alpha, \beta)
+
+    .. math::
+
+        p(x) = \frac{\beta^\alpha}{\Gamma (\alpha)} x^{-\alpha-1}
+               \exp (-\frac{\beta}{x})
+
+
+    Parameters
+    ----------
+    shape : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Shape parameter of the inverse gamma distribution (:math:`\alpha`). 
+    rate : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Rate parameter of the inverse gamma distribution (:math:`\beta`). 
+
+    """
+
+
+    # Distribution parameters and their default values
+    _default_args = OrderedDict([
+        ('shape', REQUIRED),
+        ('rate', REQUIRED)
+    ])    
+
+
+    def _build(self, args, data):
+        """Build the distribution model."""
+        return tfd.InverseGamma(concentration=args['shape'], rate=args['rate'])
+
+
+
 class Bernoulli(DiscreteDistribution):
     r"""The Bernoulli distribution.
 

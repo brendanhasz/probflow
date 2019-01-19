@@ -17,4 +17,9 @@
 .. |TensorFmt| replace:: ``Tensor``
 .. _TensorFmt: http://www.tensorflow.org/api_docs/python/tf/Tensor
 
+.. Format tf.Variable like a class.
+.. |Variable| replace:: |VariableFmt|_
+.. |VariableFmt| replace:: ``Tensor``
+.. _VariableFmt: http://www.tensorflow.org/api_docs/python/tf/Variable
+
 
