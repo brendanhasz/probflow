@@ -63,14 +63,6 @@ class Parameter(BaseParameter):
         ``post_param_ub[i]``. Elements of this list should correspond to 
         elements of ``post_param_names`` and ``post_param_ub``.
         Default = ``[None, None]`` (assumes ``posterior_fn = Normal``)
-    lb : int, float, or |None|
-        Lower bound for the Parameter(s).  The unconstrained posterior 
-        distribution(s) will be transformed to lie between ``lb`` and ``ub``.
-        Default = |None|
-    ub : int, float, or |None|
-        Upper bound for the Parameter(s).  The unconstrained posterior 
-        distribution(s) will be transformed to lie between ``lb`` and ``ub``.
-        Default = |None|
     seed : int, float, or |None|
         Seed for the random number generator.  
         Set to |None| to use the global seed.

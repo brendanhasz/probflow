@@ -2,14 +2,16 @@
 
 TODO: more info...
 
-* :class:`.LinearRegression`
-* :class:`.LogisticRegression`
-* :class:`.DenseRegression`
-* :class:`.DenseClassifier`
+* :func:`.LinearRegression`
+* :func:`.LogisticRegression`
+* :func:`.DenseNet`
+* :func:`.DenseRegression`
+* :func:`.DenseClassifier`
 
 ----------
 
 """
+
 
 
 from .parameters import Parameter, ScaleParameter
@@ -85,7 +87,7 @@ def DenseRegression(data=None, units=[1]):
 
 
 
-def DenseClassifier(data=None):
+def DenseClassifier(data=None, units=[1]):
     """Classifier model using a densely-connected multi-layer neural network.
     """
     predictions = DenseNet(data, units=units)
