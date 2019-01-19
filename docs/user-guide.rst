@@ -6,7 +6,7 @@ User Guide
    :caption: Contents:
    :hidden:
 
-   variables
+   parameters
    layers
    distributions
    fitting

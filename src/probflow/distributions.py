@@ -25,11 +25,11 @@ TODO: Categorical, etc
 """
 
 
-
+from collections import OrderedDict
 import tensorflow_probability as tfp
 tfd = tfp.distributions
 
-from .core import ContinuousDistribution, DiscreteDistribution
+from .core import ContinuousDistribution, DiscreteDistribution, REQUIRED
 
 
 
@@ -51,10 +51,10 @@ class Normal(ContinuousDistribution):
 
     Parameters
     ----------
-    loc : int, float, |ndarray|, |Tensor|, |Variable|, or |Layer|
+    loc : int, float, |ndarray|, |Tensor|, |Parameter|, or |Layer|
         Mean of the normal distribution (:math:`\mu`). 
         Default = 0
-    scale : int, float, |ndarray|, |Tensor|, |Variable|, or |Layer|
+    scale : int, float, |ndarray|, |Tensor|, |Parameter|, or |Layer|
         Standard deviation of the normal distribution (:math:`\sigma^2`). 
         Default = 1
 

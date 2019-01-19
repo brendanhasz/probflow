@@ -2,10 +2,10 @@ from . import core
 from . import distributions
 from . import layers
 from . import models
-from . import variables
+from . import parameters
 
 # Also importable from root
-from .variables import Variable
+from .parameters import Parameter, ScaleParameter
 from .distributions import *
 from .layers import *
 from .models import *

@@ -7,7 +7,7 @@ API
    :hidden:
    
    api_core
-   api_variables
+   api_parameters
    api_layers
    api_distributions
    api_models

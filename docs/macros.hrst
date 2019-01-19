@@ -5,7 +5,7 @@
 .. |TensorFlow Probability| replace:: `TensorFlow Probability <https://www.tensorflow.org/probability/>`__
 
 .. |Distribution| replace:: :doc:`distribution </api_distributions>`
-.. |Variable| replace:: :class:`.Variable`
+.. |Parameter| replace:: :class:`.Parameter`
 .. |Layer| replace:: :doc:`layer </api_layers>`
 .. |Model| replace:: :class:`Model <.BaseDistribution>`
 

@@ -5,7 +5,7 @@ import numpy as np
 import tensorflow as tf
 
 from probflow.layers import Add, Sub, Mul, Div, Neg, Abs, Exp, Log
-from probflow.variables import Variable
+from probflow.parameters import Parameter
 
 def isclose(a, b, tol=1e-7):
     """Returns true if a and b are w/i tol"""
@@ -81,12 +81,12 @@ def test_add_layer():
     assert l2_out[0][0] == 4.0
     assert l2_out[1][0] == 6.0
 
-    # With a Variable as input
-    #a = Variable()
-    #b = Variable()
+    # With a Parameter as input
+    #a = Parameter()
+    #b = Parameter()
     #l2 = Add(a, b)
     # TODO: although maybe that should go in the integration tests?
-    # TODO (first do test_variables and finish debugging that)
+    # TODO (first do test_parameters and finish debugging that)
 
 
 def test_sub_layer():
@@ -158,7 +158,7 @@ def test_sub_layer():
     assert l2_out[0][0] == 3.0
     assert l2_out[1][0] == 2.0
 
-    # With a Variable as input
+    # With a Parameter as input
     # TODO
 
 
@@ -231,7 +231,7 @@ def test_mul_layer():
     assert l2_out[0][0] == 3.0
     assert l2_out[1][0] == 8.0
 
-    # With a Variable as input
+    # With a Parameter as input
     # TODO
 
 
@@ -304,7 +304,7 @@ def test_div_layer():
     assert isclose(l2_out[0][0], 1.0/3.0) #float32 vs 64...
     assert l2_out[1][0] == 0.5
 
-    # With a Variable as input
+    # With a Parameter as input
     # TODO
 
 
@@ -376,7 +376,7 @@ def test_neg_layer():
     assert l2_out[0][0] == -1.0
     assert l2_out[1][0] == 2.0
 
-    # With a Variable as input
+    # With a Parameter as input
     # TODO
 
 
@@ -466,7 +466,7 @@ def test_abs_layer():
     assert l2_out[0][0] == 1.0
     assert l2_out[1][0] == 2.0
 
-    # With a Variable as input
+    # With a Parameter as input
     # TODO
 
 
@@ -547,7 +547,7 @@ def test_exp_layer():
     assert isclose(l2_out[0][0], 2.718281828459045)
     assert isclose(l2_out[1][0], 0.1353352832366127)
 
-    # With a Variable as input
+    # With a Parameter as input
     # TODO
 
 
@@ -628,7 +628,7 @@ def test_log_layer():
     assert isclose(l2_out[0][0], 0.0)
     assert isclose(l2_out[1][0], 1.0)
 
-    # With a Variable as input
+    # With a Parameter as input
     # TODO
 
 

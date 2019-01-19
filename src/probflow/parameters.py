@@ -1,4 +1,4 @@
-"""Variables.
+"""Parameters.
 
 TODO: more info...
 
@@ -14,13 +14,13 @@ import tensorflow_probability as tfp
 tfd = tfp.distributions
 from tensorflow_probability.python.math import random_rademacher
 
-from .distributions import BaseDistribution, Normal
-from .core import BaseVariable
+from .core import BaseParameter, BaseDistribution
+from .distributions import Normal
 
 
 
-class Variable(BaseVariable):
-    r"""Variable(s) drawn from variational distribution(s).
+class Parameter(BaseParameter):
+    r"""Parameter(s) drawn from variational distribution(s).
 
     TODO: describe...
 
@@ -32,11 +32,11 @@ class Variable(BaseVariable):
     Parameters
     ----------
     shape : int, list of int, or 1D |ndarray|
-        Shape of the array containing the variables. 
+        Shape of the array containing the parameters. 
         Default = ``1``
     name : str
-        Name of the variable(s).  
-        Default = ``'Variable'``
+        Name of the parameter(s).  
+        Default = ``'Parameter'``
     prior : |None| or a |Distribution| object
         Prior probability distribution function which has been instantiated
         with parameters.
@@ -64,11 +64,11 @@ class Variable(BaseVariable):
         elements of ``post_param_names`` and ``post_param_ub``.
         Default = ``[None, None]`` (assumes ``posterior_fn = Normal``)
     lb : int, float, or |None|
-        Lower bound for the variable(s).  The unconstrained posterior 
+        Lower bound for the Parameter(s).  The unconstrained posterior 
         distribution(s) will be transformed to lie between ``lb`` and ``ub``.
         Default = |None|
     ub : int, float, or |None|
-        Upper bound for the variable(s).  The unconstrained posterior 
+        Upper bound for the Parameter(s).  The unconstrained posterior 
         distribution(s) will be transformed to lie between ``lb`` and ``ub``.
         Default = |None|
     seed : int, float, or |None|
@@ -109,7 +109,7 @@ class Variable(BaseVariable):
 
     def __init__(self, 
                  shape=1,
-                 name='Variable',
+                 name='Parameter',
                  prior=Normal(0, 1),
                  posterior_fn=Normal,
                  post_param_names=['loc', 'scale'],
@@ -117,7 +117,7 @@ class Variable(BaseVariable):
                  post_param_ub=[None, None],
                  seed=None,
                  estimator='flipout'):
-        """Construct an array of variable(s)."""
+        """Construct an array of Parameter(s)."""
 
         # Check types
         assert isinstance(shape, (int, list, np.ndarray)), \
@@ -204,9 +204,9 @@ class Variable(BaseVariable):
 
 
     def _ensure_is_built(self):
-        """Raises a RuntimeError if variable has not yet been built."""
+        """Raises a RuntimeError if parameter has not yet been built."""
         if self.posterior is None:
-            raise RuntimeError('variable must first be built')
+            raise RuntimeError('parameter must first be built')
     
 
     def _build(self, data):
@@ -226,7 +226,7 @@ class Variable(BaseVariable):
             self._built_prior = self.prior.built_obj
             # TODO: Check that the built prior shape is broadcastable w/ self.shape
 
-        # Create posterior parameter variables
+        # Create posterior distribution parameters
         params = dict()
         with tf.variable_scope(self.name):
             for arg in self.post_param_names:
@@ -249,9 +249,9 @@ class Variable(BaseVariable):
         
         TODO: docs
 
-        .. admonition:: Variable must be built first!
+        .. admonition:: Parameter must be built first!
 
-            Before calling :meth:`.sample` on a |Variable|, you must first 
+            Before calling :meth:`.sample` on a |Parameter|, you must first 
             :meth:`.build` it, or :meth:`.fit` a model it belongs to.
 
         Parameters
@@ -266,7 +266,7 @@ class Variable(BaseVariable):
 
         """
 
-        # Ensure variable has been built
+        # Ensure parameter has been built
         self._ensure_is_built()
 
         # Compute batch shape
@@ -319,9 +319,9 @@ class Variable(BaseVariable):
 
         TODO: docs
 
-        .. admonition:: Variable must be built first!
+        .. admonition:: Parameter must be built first!
 
-            Before calling :meth:`.mean` on a |Variable|, you must first 
+            Before calling :meth:`.mean` on a |Parameter|, you must first 
             :meth:`.build` it, or :meth:`.fit` a model it belongs to.
 
         Parameters
@@ -338,9 +338,9 @@ class Variable(BaseVariable):
 
         TODO: docs
 
-        .. admonition:: Variable must be built first!
+        .. admonition:: Parameter must be built first!
 
-            Before calling :meth:`.log_loss` on a |Variable|, you must first 
+            Before calling :meth:`.log_loss` on a |Parameter|, you must first 
             :meth:`.build` it, or :meth:`.fit` a model it belongs to.
 
         Parameters
@@ -383,6 +383,17 @@ class Variable(BaseVariable):
         pass
         
 
-# TODO: above assumes a continuous variable, should add support for
-# discrete variables.  In theory can just set posterior_fn to 
+# TODO: above assumes a continuous Parameter, should add support for
+# discrete Parameters.  In theory can just set posterior_fn to 
 # Bernoulli or Categorical, and make mean() return the mode?
+
+
+class ScaleParameter(BaseParameter):
+    """TODO
+
+    just a regular Parameter but with a Gamma posterior on the precision and no prior
+    somehow will have to transform? ideally Normal can take this as its 2nd arg directly
+
+    """
+    # TODO
+    pass

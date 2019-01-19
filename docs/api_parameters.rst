@@ -1,9 +1,9 @@
-Variables API
-=============
+Parameters API
+==============
 
 .. include:: macros.hrst
 
-.. automodule:: probflow.variables
+.. automodule:: probflow.parameters
    :members:
    :inherited-members:
    :show-inheritance:

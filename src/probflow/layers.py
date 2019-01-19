@@ -72,8 +72,9 @@ from collections import OrderedDict
 import numpy as np
 import tensorflow as tf
 
-from .distributions import Normal
 from .core import BaseLayer, REQUIRED
+from .distributions import Normal
+from .parameters import Parameter
 
 
 
@@ -575,13 +576,13 @@ class Dense(BaseLayer):
         ndims = x_in.shape[1]
         units = self.kwargs['units']
 
-        # Create weight and bias variables
-        weight = Variable(shape=[ndims, units], 
+        # Create weight and bias parameters
+        weight = Parameter(shape=[ndims, units], 
                           prior=self.kwargs['weight_prior'])
-        bias = Variable(shape=[1, units],
+        bias = Parameter(shape=[1, units],
                         prior=self.kwargs['bias_prior'])
 
-        # Build the weight and bias variables
+        # Build the weight and bias parameter
         weight._build(data)
         bias._build(data)
 

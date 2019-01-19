@@ -20,8 +20,8 @@ REQUIRED = object()
 
 
 
-class BaseVariable(ABC):
-    """Abstract Variable class (used as an implementation base)"""
+class BaseParameter(ABC):
+    """Abstract parameter class (used as an implementation base)"""
     pass
 
 
@@ -30,7 +30,7 @@ class BaseLayer(ABC):
     """Abstract layer class (used as an implementation base)
 
     This is an abstract base class for a layer.  Layers are objects which take 
-    other objects as input (other layers, variables, or tensors) and output a
+    other objects as input (other layers, parameters, or tensors) and output a
     tensor. 
 
     TODO: more...
@@ -88,7 +88,7 @@ class BaseLayer(ABC):
     then we can use that layer to add two other layers or tensors::
 
         x = Input()
-        b = Variable()
+        b = Parameter()
         mu = Add(x, b)
 
     For more examples, see :class:`.Add`, :class:`.Sub`, :class:`.Mul`, 
@@ -139,7 +139,7 @@ class BaseLayer(ABC):
                        '.  Arguments to a layer must be one of: ' +
                        'int, float, np.ndarray, ' + 
                        'tf.Tensor, tf.Variable, ' +
-                       'or a probflow layer or variable.')
+                       'or a probflow layer or parameter.')
                 raise TypeError(msg)
 
         # Set layer kwargs
@@ -220,13 +220,13 @@ class BaseLayer(ABC):
             return isinstance(arg, BaseDistribution)
         elif type_str=='layer':
             return isinstance(arg, BaseLayer)
-        elif type_str=='variable':
-            return isinstance(arg, BaseVariable)
+        elif type_str=='parameter':
+            return isinstance(arg, BaseParameter)
         elif type_str=='valid': #valid input to a layer
             return (not isinstance(arg, BaseDistribution) and
                     isinstance(arg, (int, float, np.ndarray, 
                                      tf.Tensor, tf.Variable, 
-                                     BaseLayer, BaseVariable)))
+                                     BaseLayer, BaseParameter)))
         else:
             raise TypeError('type_str must a string, one of: number, tensor,' +
                             ' tensor_like, model, layer, or valid')
@@ -253,12 +253,12 @@ class BaseLayer(ABC):
                 arg.build(data)
                 self.built_args[arg_name] = arg.built_obj
                 self.mean_args[arg_name] = arg.mean_obj
-            elif self._arg_is('variable', arg):
+            elif self._arg_is('parameter', arg):
                 arg._build(data)
                 self.built_args[arg_name] = arg._sample(data)
                 self.mean_args[arg_name] = arg._mean(data)
 
-        # TODO: could just make variable and layer have same interface, ie
+        # TODO: could just make parameter and layer have same interface, ie
         # built_obj and mean_obj are created during call to .build()
 
         # Sum the losses of this layer's arguments
@@ -278,12 +278,12 @@ class BaseLayer(ABC):
                 self.kl_loss_sum += (
                     arg.kl_loss_sum +
                     arg._kl_loss())
-            elif self._arg_is('variable', arg):
+            elif self._arg_is('parameter', arg):
                 self.arg_loss_sum += arg._log_loss(self.built_args[arg_name])
                 self.mean_arg_loss_sum += arg._log_loss(self.mean_args[arg_name])
                 self.kl_loss_sum += arg._kl_loss()
 
-        # TODO: same idea - could make variable + layer have same interface
+        # TODO: same idea - could make parameter + layer have same interface
 
         # Build this layer's sample model and mean model
         self.built_obj = self._build(self.built_args, data)
@@ -291,25 +291,25 @@ class BaseLayer(ABC):
 
 
     def __add__(self, other):
-        """Add this layer to another layer, variable, or value."""
+        """Add this layer to another layer, parameter, or value."""
         from .layers import Add
         return Add(self, other)
 
 
     def __sub__(self, other):
-        """Subtract from this layer another layer, variable, or value."""
+        """Subtract from this layer another layer, parameter, or value."""
         from .layers import Sub
         return Sub(self, other)
 
 
     def __mul__(self, other):
-        """Multiply this layer by another layer, variable, or value."""
+        """Multiply this layer by another layer, parameter, or value."""
         from .layers import Mul
         return Mul(self, other)
 
 
     def __truediv__(self, other):
-        """Divide this layer by another layer, variable, or value."""
+        """Divide this layer by another layer, parameter, or value."""
         from .layers import Div        
         return Div(self, other)
 
@@ -557,7 +557,7 @@ class BaseDistribution(BaseLayer):
         if dist is True, returns log probability posterior distribution
             (distribution of probs for lots of samples from the model) 
             so return shape is (?,num_samples)
-        if dist is False, returns log posterior prob assuming each variable 
+        if dist is False, returns log posterior prob assuming each parameter 
             takes the mean value of its variational distribution
             so return shape iss (?,1)
 
