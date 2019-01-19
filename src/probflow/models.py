@@ -12,102 +12,151 @@ TODO: more info...
 """
 
 
-from .core import ContinuousModel, CategoricalModel
+from .parameters import Parameter, ScaleParameter
+from .layers import *
+from .distributions import *
 
-    
 
-class LinearRegression(ContinuousModel):
+
+def LinearRegression(data=None):
     """Linear regression model.
+
+    TODO: docs...
+
     """
-    #TODO
-    pass
+    
+    # Use default input if none specified
+    if data is None:
+        data = Input()
+
+    # A linear regression
+    error = ScaleParameter()
+    predictions = Dense(data)
+    return Normal(predictions, error)
 
 
-class LogisticRegression(CategoricalModel):
+
+def LogisticRegression(data=None):
     """Logistic regression model.
+
+    TODO: docs...
+
     """
-    #TODO
-    pass
+
+    # Use default input if none specified
+    if data is None:
+        data = Input()
+
+    # A logistic regression
+    predictions = Dense(data)
+    return Bernoulli(predictions)
 
 
-class DenseRegression(ContinuousModel):
+
+def DenseNet(data=None, units=[1]):
+    """Multiple dense layers in a row.
+
+    DOES NOT INCLUDE AN OBSERVATION DISTRIBUTION!
+
+    TODO: docs...
+
+    """
+
+    # Use default input if none specified
+    if data is None:
+        y_out = Input()
+    else:
+        y_out = data
+
+    # Send output of each layer into the following layer
+    for unit in units:
+        y_out = Dense(y_out, units=unit)
+
+    return y_out
+
+
+
+def DenseRegression(data=None, units=[1]):
     """Regression model using a densely-connected multi-layer neural network.
     """
-    #TODO
-    pass
+    error = ScaleParameter()
+    predictions = DenseNet(data, units=units)
+    return Normal(predictions, error)
 
 
-class DenseClassifier(CategoricalModel):
+
+def DenseClassifier(data=None):
     """Classifier model using a densely-connected multi-layer neural network.
     """
-    #TODO    
-    pass
+    predictions = DenseNet(data, units=units)
+    return Bernoulli(predictions)
 
 
-class Conv1dRegression(ContinuousModel):
+
+def Conv1dRegression(data=None):
     """TODO
     """
     #TODO    
     pass
 
 
-class Conv1dClassifier(CategoricalModel):
+def Conv1dClassifier(data=None):
     """TODO
     """
     #TODO    
     pass
 
 
-class Conv2dRegression(ContinuousModel):
+def Conv2dRegression(data=None):
     """TODO
     """
     #TODO    
     pass
 
 
-class Conv2dClassifier(CategoricalModel):
+def Conv2dClassifier(data=None):
     """TODO
     """
     #TODO    
     pass
 
 
-class DenseAutoencoderRegression(ContinuousModel):
+def DenseAutoencoderRegression(data=None):
     """TODO
     """
     #TODO    
     pass
 
 
-class DenseAutoencoderClassifier(CategoricalModel):
+def DenseAutoencoderClassifier(data=None):
     """TODO
     """
     #TODO    
     pass
 
 
-class Conv1dAutoencoderRegression(ContinuousModel):
+def Conv1dAutoencoderRegression(data=None):
     """TODO
     """
     #TODO    
     pass
 
 
-class Conv1dAutoencoderClassifier(CategoricalModel):
+def Conv1dAutoencoderClassifier(data=None):
     """TODO
     """
     #TODO    
     pass
 
 
-class Conv2dAutoencoderRegression(ContinuousModel):
+def Conv2dAutoencoderRegression(data=None):
     """TODO
     """
     #TODO    
     pass
 
 
-class Conv2dAutoencoderClassifier(CategoricalModel):
+def Conv2dAutoencoderClassifier(data=None):
     """TODO
     """
     #TODO    

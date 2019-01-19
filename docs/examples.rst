@@ -102,8 +102,8 @@ TODO: dual-module net which estimates predictions and uncertainty separately, an
 
 .. code-block:: python
 
-    predictions = DenseRegression(units=[128, 64, 32])
-    noise_std = DenseRegression(units=[128, 64, 32])
+    predictions = DenseNet(units=[128, 64, 32])
+    noise_std = DenseNet(units=[128, 64, 32])
     model = Cauchy(predictions, noise_std)
     model.fit(x,y)
 
@@ -174,7 +174,7 @@ or for neural matrix factorization https://arxiv.org/abs/1708.05031
     user_vec_ncf = Embedding(users, dims=50)
     item_vec_ncf = Embedding(items, dims=50)
     ncf_in = Cat([user_vec_ncf, item_vec_ncf])
-    predictions_ncf = DenseRegression(ncf_in, units=[128, 64, 32])
+    predictions_ncf = DenseNet(ncf_in, units=[128, 64, 32])
     
     # Combination of the two methods
     predictions = Dense(Cat([predictions_mf, predictions_ncf]))

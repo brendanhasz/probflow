@@ -216,14 +216,14 @@ class BaseLayer(ABC):
         if type_str=='tensor_like':
             return isinstance(arg, (int, float, np.ndarray,
                                     tf.Tensor, tf.Variable))
-        elif type_str=='model':
-            return isinstance(arg, BaseModel)
+        elif type_str=='distribution':
+            return isinstance(arg, BaseDistribution)
         elif type_str=='layer':
             return isinstance(arg, BaseLayer)
         elif type_str=='variable':
             return isinstance(arg, BaseVariable)
         elif type_str=='valid': #valid input to a layer
-            return (not isinstance(arg, BaseModel) and
+            return (not isinstance(arg, BaseDistribution) and
                     isinstance(arg, (int, float, np.ndarray, 
                                      tf.Tensor, tf.Variable, 
                                      BaseLayer, BaseVariable)))
@@ -333,14 +333,19 @@ class BaseLayer(ABC):
 
 
 
-class BaseModel(BaseLayer):
-    """Abstract model class (used as an implementation base)
+class BaseDistribution(BaseLayer):
+    """Abstract distribution class (used as an implementation base)
 
     TODO: More info...
     talk about how a model defines a parameterized probability distribution which
     you can call fit on
 
     """
+
+
+    def _log_loss(self, obj, vals):
+        """Compute the log loss ."""
+        return obj.log_prob(vals)
 
 
     def fit(self, x, y, batch_size=128, epochs=100, 
@@ -734,7 +739,7 @@ class BaseModel(BaseLayer):
 
 
 
-class ContinuousModel(BaseModel):
+class ContinuousDistribution(BaseDistribution):
     """Abstract continuous model class (used as implementation base)
 
     TODO: More info...
@@ -1073,7 +1078,7 @@ class ContinuousModel(BaseModel):
 
 
 
-class CategoricalModel(BaseModel):
+class DiscreteDistribution(BaseDistribution):
     """Abstract categorical model class (used as implementation base)
 
     TODO: More info...
@@ -1122,5 +1127,3 @@ class CategoricalModel(BaseModel):
 
     # TODO: confusion_matrix (plot/return the confusion matrix of predictions)
 
-
-# TODO: DiscreteModel (for poisson etc)

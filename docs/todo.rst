@@ -7,6 +7,7 @@ Backlog (short term):
 ---------------------
 
 * Change "variables" to "parameters"
+* Forget about "models" and just make BaseModel->BaseDistribution, ContinuousModel->ContinuousDistribution, and CategoricalModel->DiscreteDistribution, all in core
 * ScaleParameter - just a regular Parameter (nee Variable) but with a Gamma posterior on the precision and no prior
 * Layers w/ multiple args should ensure their args are broadcastable
 * fit should have a record=False arg (record posterior values over training)

@@ -7,7 +7,7 @@
 .. |Distribution| replace:: :doc:`distribution </api_distributions>`
 .. |Variable| replace:: :class:`.Variable`
 .. |Layer| replace:: :doc:`layer </api_layers>`
-.. |Model| replace:: :class:`Model <.BaseModel>`
+.. |Model| replace:: :class:`Model <.BaseDistribution>`
 
 .. |None| replace:: :obj:`None`
 .. |ndarray| replace:: :class:`ndarray <numpy.ndarray>`
