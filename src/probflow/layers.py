@@ -112,7 +112,7 @@ class Add(BaseLayer):
     """A layer which adds two inputs.
 
 
-    TODO: More info...
+    TODO: More info... (elementwise)
 
 
     """
@@ -134,7 +134,7 @@ class Sub(BaseLayer):
     """A layer which subtracts one input from another.
 
 
-    TODO: More info...
+    TODO: More info... (elementwise)
 
 
     """
@@ -156,7 +156,7 @@ class Mul(BaseLayer):
     """A layer which multiplies two inputs.
 
 
-    TODO: More info...
+    TODO: More info... (elementwise)
 
 
     """
@@ -179,7 +179,7 @@ class Div(BaseLayer):
     """A layer which divides one input by another.
 
 
-    TODO: More info...
+    TODO: More info... (elementwise)
 
 
     """
@@ -201,7 +201,7 @@ class Neg(BaseLayer):
     """A layer which outputs the negative of its input.
 
 
-    TODO: More info...
+    TODO: More info... (elementwise)
 
 
     """    
@@ -216,7 +216,7 @@ class Abs(BaseLayer):
     """A layer which outputs the absolute value of its input.
 
 
-    TODO: More info...
+    TODO: More info... (elementwise)
 
 
     """
@@ -228,11 +228,11 @@ class Abs(BaseLayer):
 
 
 class Exp(BaseLayer):
-    """A layer which outputs the natural exponent of its input.
-
+    r"""A layer which outputs the natural exponent of its input.
 
     TODO: More info...
 
+    Given :math:`x`, this layer returns :math:`\exp x`, elementwise.
 
     """    
 
@@ -243,11 +243,12 @@ class Exp(BaseLayer):
 
 
 class Log(BaseLayer):
-    """A layer which outputs the natural log of its input.
+    r"""A layer which outputs the natural log of its input.
 
 
     TODO: More info...
 
+    Given :math:`x`, this layer returns :math:`\log x`, elementwise.
 
     """
 
@@ -257,13 +258,53 @@ class Log(BaseLayer):
 
 
 
+class Reciprocal(BaseLayer):
+    r"""A layer which outputs the reciprocal of its input.
+
+
+    TODO: More info...
+
+    Given :math:`x`, this layer returns (elementwise):
+
+    .. math::
+
+        \text{Reciprocal}(x) = \frac{1}{x}
+
+    """
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.reciprocal(args['input'])
+
+
+
+class Sqrt(BaseLayer):
+    r"""A layer which outputs the square root of its input.
+
+
+    TODO: More info...
+
+    Given :math:`x`, this layer returns (elementwise):
+
+    .. math::
+
+        \text{Sqrt}(x) = \sqrt{x}
+
+    """
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.sqrt(args['input'])
+
+
+
 class Sigmoid(BaseLayer):
     r"""A layer which passes its input through a sigmoid function, elementwise.
 
 
     TODO: More info...
 
-    Given :math:`x`, this layer returns:
+    Given :math:`x`, this layer returns (elementwise):
 
     .. math::
 
@@ -283,7 +324,7 @@ class Relu(BaseLayer):
 
     TODO: More info...
 
-    Given :math:`x`, this layer returns:
+    Given :math:`x`, this layer returns (elementwise):
 
     .. math::
 
@@ -329,11 +370,16 @@ class Softmax(BaseLayer):
 
 
 class Sum(BaseLayer):
-    """A layer which outputs the sum of its inputs.
+    r"""A layer which outputs the sum of its inputs.
 
 
     TODO: More info...
 
+    Given a vector :math:`\mathbf{x}`, this layer returns:
+
+    .. math::
+
+        \text{Sum}(\mathbf{x}) = \sum_i x_i
 
     """
 
@@ -349,11 +395,16 @@ class Sum(BaseLayer):
 
 
 class Mean(BaseLayer):
-    """A layer which outputs the mean of its inputs.
+    r"""A layer which outputs the mean of its inputs.
 
 
     TODO: More info...
 
+    Given a vector :math:`\mathbf{x}`, this layer returns:
+
+    .. math::
+
+        \text{Mean}(\mathbf{x}) = \frac{1}{N} \sum_{i=1}^N x_i
 
     """
 
@@ -412,11 +463,16 @@ class Min(BaseLayer):
 
 
 class Prod(BaseLayer):
-    """A layer which outputs the product of its inputs.
+    r"""A layer which outputs the product of its inputs.
 
 
     TODO: More info...
 
+    Given a vector :math:`\mathbf{x}`, this layer returns:
+
+    .. math::
+
+        \text{Sum}(\mathbf{x}) = \prod_i x_i
 
     """
 
@@ -433,13 +489,18 @@ class Prod(BaseLayer):
 
 
 class LogSumExp(BaseLayer):
-    """A layer which outputs the log(sum(exp(inputs))).
+    r"""A layer which outputs the log(sum(exp(inputs))).
 
 
     TODO: More info...
 
     TODO: explain why this is useful when working in log space, numerical stability etc
 
+    Given a vector :math:`\mathbf{x}`, this layer returns:
+
+    .. math::
+
+        \text{LogSumExp}(\mathbf{x}) = \log \left( \sum_i \exp x_i \right)
 
     """
 
@@ -482,11 +543,19 @@ class Cat(BaseLayer):
 
 
 class Dot(BaseLayer):
-    """A layer which outputs the dot product of its two inputs.
+    r"""A layer which outputs the dot product of its two inputs.
 
 
     TODO: More info...
 
+    Given a two vectors :math:`\mathbf{a}` and :math:`\mathbf{b}`, 
+    this layer returns:
+
+    .. math::
+
+        \text{Dot}(\mathbf{a},\mathbf{b}) = 
+        \mathbf{a} \cdot \mathbf{b} = 
+        \sum_i ( a_i b_i )
 
     """
 
