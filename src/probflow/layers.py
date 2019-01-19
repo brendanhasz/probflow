@@ -10,8 +10,11 @@ Data Layers
 
 * :class:`.Input`
 
+
 Basic Arithmetic Layers
 -----------------------
+
+TODO: mention that these are all elementwise
 
 * :class:`.Add`
 * :class:`.Sub`
@@ -21,6 +24,38 @@ Basic Arithmetic Layers
 * :class:`.Abs`
 * :class:`.Exp`
 * :class:`.Log`
+
+
+Transformation Layers
+---------------------
+
+TODO: mention that these don't change the shape
+
+* :class:`.Sigmoid`
+* :class:`.Relu`
+* :class:`.Softmax`
+
+
+Reduce Layers
+-------------
+
+TODO: mention that these DO change the shape
+
+* :class:`.Sum`
+* :class:`.Mean`
+* :class:`.Min`
+* :class:`.Max`
+* :class:`.Prod`
+* :class:`.LogSumExp`
+
+
+Matrix Layers
+-------------
+
+* :class:`.Cat`
+* :class:`.Dot`
+* :class:`.Matmul`
+
 
 Neural Network Layers
 ---------------------
@@ -292,18 +327,6 @@ class Softmax(BaseLayer):
 
 
 
-# TODO: Logit
-
-
-
-# TODO: Probit
-
-
-
-# TODO: Softmax (?)
-
-
-
 class Sum(BaseLayer):
     """A layer which outputs the sum of its inputs.
 
@@ -431,6 +454,32 @@ class LogSumExp(BaseLayer):
 
 
 
+class Cat(BaseLayer):
+    """A layer which Concatenates its two inputs.
+
+
+    TODO: More info...
+
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = OrderedDict([
+        ('a', REQUIRED),
+        ('b', REQUIRED)
+    ])
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 1,
+    }
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.concat(args['a'], args['b'], axis=self.kwargs['axis'])
+
+
+
 class Dot(BaseLayer):
     """A layer which outputs the dot product of its two inputs.
 
@@ -477,32 +526,11 @@ class Matmul(BaseLayer):
     def _build(self, args, data):
         """Build the layer."""
         return tf.matmul(args['a'], args['b'])
+        # TODO: don't think this will work w/ tensors of >2 dims...
 
 
 
-class Cat(BaseLayer):
-    """A layer which Concatenates its two inputs.
-
-
-    TODO: More info...
-
-
-    """
-
-    # Layer arguments and their default values
-    _default_args = OrderedDict([
-        ('a', REQUIRED),
-        ('b', REQUIRED)
-    ])
-
-    # Layer keyword arguments and their default values
-    _default_kwargs = {
-        'axis': 1,
-    }
-
-    def _build(self, args, data):
-        """Build the layer."""
-        return tf.concat(args['a'], args['b'], axis=self.kwargs['axis'])
+# TODO: Inverse - inverts a matrix
 
 
 

@@ -115,8 +115,6 @@ class Variable(BaseVariable):
                  post_param_names=['loc', 'scale'],
                  post_param_lb=[None, 0],
                  post_param_ub=[None, None],
-                 lb=None,
-                 ub=None,
                  seed=None,
                  estimator='flipout'):
         """Construct an array of variable(s)."""
@@ -156,10 +154,6 @@ class Variable(BaseVariable):
         for p_ub in post_param_ub:
             assert p_ub is None or isinstance(p_ub, (int, float)), \
                 'post_param_ub must contain ints or floats or None'
-        assert lb is None or isinstance(lb, (int, float)), \
-            'lb must be None, int, or float'
-        assert ub is None or isinstance(ub, (int, float)), \
-            'ub must be None, int, or float'
         assert estimator is None or isinstance(estimator, str), \
             'estimator must be None or a string'
 
@@ -171,8 +165,6 @@ class Variable(BaseVariable):
         self.post_param_names = post_param_names
         self.post_param_lb = post_param_lb
         self.post_param_ub = post_param_ub
-        self.lb = lb
-        self.ub = ub
         self.seed = seed
         self.estimator = estimator
         self.posterior = None
@@ -205,8 +197,7 @@ class Variable(BaseVariable):
             else: 
                 return lb + tf.exp(data) # [lb, Inf]
         else:
-            if lb is None: 
-                #negative # [-Inf, ub]
+            if lb is None: #negative # [-Inf, ub]
                 return tf.exp(-data)
             else: 
                 return lb + (ub-lb)*tf.sigmoid(data) # [lb, ub]
@@ -300,7 +291,7 @@ class Variable(BaseVariable):
                                  'distribution in the location-scale family')
 
             # Posterior mean
-            w_mean = self._bound(self._built_posterior.mean(), lb, ub)
+            w_mean = self._built_posterior.mean()
 
             # Sample from centered posterior distribution
             w_sample = self._built_posterior.sample(seed=seed_stream()) - w_mean
@@ -320,7 +311,7 @@ class Variable(BaseVariable):
             raise ValueError('estimator must be None or flipout')
 
         # Apply bounds and return
-        return self._bound(samples, lb, ub)
+        return samples
 
 
     def _mean(self, data):
@@ -339,7 +330,7 @@ class Variable(BaseVariable):
             Data for this batch.
         """
         self._ensure_is_built()
-        return self._bound(self.posterior.mean(), lb, ub)
+        return self._built_posterior.mean()
 
 
     def _log_loss(self, vals):
