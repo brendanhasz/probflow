@@ -16,8 +16,12 @@ from tensorflow_probability.python.math import random_rademacher
 
 from .core import BaseParameter, BaseDistribution
 from .distributions import Normal, InvGamma
-from .layers import Sqrt
 
+
+__all__ = [
+    'Parameter',
+    'ScaleParameter',
+]
 
 
 class Parameter(BaseParameter):
@@ -163,6 +167,8 @@ class Parameter(BaseParameter):
         self.posterior = None
 
         # TODO: initializer?
+
+        # TODO: dtype?
 
 
     def _bound(self, data, lb, ub):
@@ -421,4 +427,5 @@ def ScaleParameter(self,
                          estimator=estimator)
 
     # Return the transformed parameter
+    from .layers import Sqrt
     return Sqrt(variance)

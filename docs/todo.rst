@@ -6,7 +6,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* ScaleParameter - just a regular Parameter (nee Variable) but with a Gamma posterior on the precision and no prior
 * Layers w/ multiple args should ensure their args are broadcastable
 * fit should have a record=False arg (record posterior values over training)
 * Finish BaseLayer, BaseModel.fit, Variable, and Input

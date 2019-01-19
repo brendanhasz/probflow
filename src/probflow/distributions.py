@@ -32,6 +32,17 @@ tfd = tfp.distributions
 from .core import ContinuousDistribution, DiscreteDistribution, REQUIRED
 
 
+__all__ = [
+    'Normal',
+    'HalfNormal',
+    'StudentT',
+    'Cauchy',
+    'Gamma',
+    'InvGamma',
+    'Bernoulli',
+    'Poisson',
+]
+
 
 class Normal(ContinuousDistribution):
     r"""The Normal distribution.

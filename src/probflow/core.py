@@ -14,6 +14,15 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 
+__all__ = [
+    'REQUIRED',
+    'BaseParameter',
+    'BaseLayer',
+    'BaseDistribution',
+    'ContinuousDistribution',
+    'DiscreteDistribution',
+]
+
 
 # Sentinel object for required arguments
 REQUIRED = object()

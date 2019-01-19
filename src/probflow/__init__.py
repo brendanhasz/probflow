@@ -1,11 +1,5 @@
-from . import core
-from . import distributions
-from . import layers
-from . import models
-from . import parameters
-
-# Also importable from root
-from .parameters import Parameter, ScaleParameter
+from .core import *
+from .parameters import *
 from .distributions import *
 from .layers import *
 from .models import *

@@ -19,6 +19,14 @@ from .layers import *
 from .distributions import *
 
 
+__all__ = [
+    'LinearRegression',
+    'LogisticRegression',
+    'DenseNet',
+    'DenseRegression',
+    'DenseClassifier',
+]
+
 
 def LinearRegression(data=None):
     """Linear regression model.

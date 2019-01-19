@@ -24,6 +24,8 @@ TODO: mention that these are all elementwise
 * :class:`.Abs`
 * :class:`.Exp`
 * :class:`.Log`
+* :class:`.Reciprocal`
+* :class:`.Sqrt`
 
 
 Transformation Layers
@@ -76,6 +78,35 @@ from .core import BaseLayer, REQUIRED
 from .distributions import Normal
 from .parameters import Parameter
 
+
+__all__ = [
+    'Input',
+    'Add',
+    'Sub',
+    'Mul',
+    'Div',
+    'Neg',
+    'Abs',
+    'Exp',
+    'Log',
+    'Reciprocal',
+    'Sqrt',
+    'Sigmoid',
+    'Relu',
+    'Softmax',
+    'Sum',
+    'Mean',
+    'Min',
+    'Max',
+    'Prod',
+    'LogSumExp',
+    'Cat',
+    'Dot',
+    'Matmul',
+    'Dense',
+    'Sequential',
+    'Embedding',
+]
 
 
 class Input(BaseLayer):
@@ -420,27 +451,6 @@ class Mean(BaseLayer):
 
 
 
-class Max(BaseLayer):
-    """A layer which outputs the maximum of its inputs.
-
-
-    TODO: More info...
-
-
-    """
-
-    # Layer keyword arguments and their default values
-    _default_kwargs = {
-        'axis': 1,
-    }
-    
-
-    def _build(self, args, data):
-        """Build the layer."""
-        return tf.reduce_max(args['input'], axis=self.kwargs['axis'])
-
-
-
 class Min(BaseLayer):
     """A layer which outputs the minimum of its inputs.
 
@@ -459,6 +469,27 @@ class Min(BaseLayer):
     def _build(self, args, data):
         """Build the layer."""
         return tf.reduce_min(args['input'], axis=self.kwargs['axis'])
+
+
+
+class Max(BaseLayer):
+    """A layer which outputs the maximum of its inputs.
+
+
+    TODO: More info...
+
+
+    """
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 1,
+    }
+    
+
+    def _build(self, args, data):
+        """Build the layer."""
+        return tf.reduce_max(args['input'], axis=self.kwargs['axis'])
 
 
 
