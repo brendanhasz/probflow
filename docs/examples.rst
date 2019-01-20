@@ -19,12 +19,12 @@ TODO: manually:
 
 .. code-block:: python
 
-    from probflow import Input, Variable, Normal
+    from probflow import Input, Parameter, Normal
 
     feature = Input()
-    weight = Variable()
-    bias = Variable()
-    noise_std = Variable(lb=0)
+    weight = Parameter()
+    bias = Parameter()
+    noise_std = ScaleParameter()
 
     predictions = weight*feature + bias
     model = Normal(predictions, noise_std)
@@ -37,10 +37,10 @@ TODO: with Dense (which automatically uses x as input if none is specified):
 
 .. code-block:: python
 
-    from probflow import Dense, Variable, Normal
+    from probflow import Dense, Parameter, Normal
 
     predictions = Dense()
-    noise_std = Variable(lb=0)
+    noise_std = ScaleParameter()
 
     model = Normal(predictions, noise_std)
     model.fit(x,y)
@@ -68,20 +68,20 @@ TODO: same idea as above just w/ predictions as input to logits for a bernoulli 
 Densely-connected Neural Network
 --------------------------------
 
-TODO: manually w/ Variable s,
+TODO: manually w/ Parameter s,
 
 TODO: then w/ Sequential, 
 
 .. code-block:: python
 
-    from probflow import Sequential, Dense, Variable, Normal
+    from probflow import Sequential, Dense, Parameter, Normal
 
     predictions = Sequential([
-        Dense(128),
-        Dense(64),
-        Dense(1)
+        Dense(units=128),
+        Dense(units=64),
+        Dense(units=1)
     ])
-    noise_std = Variable(lb=0)
+    noise_std = ScaleParameter()
     model = Normal(predictions, noise_std)
     model.fit(x,y)
 
@@ -89,7 +89,7 @@ TODO: then w/ DenseRegression or DenseClassifier. (automatically sets the size o
 
 .. code-block:: python
 
-    from probflow import Sequential, Dense, Variable, Normal
+    from probflow import DenseRegression
 
     model = DenseRegression(units=[128, 64])
     model.fit(x,y)
@@ -102,8 +102,8 @@ TODO: dual-module net which estimates predictions and uncertainty separately, an
 
 .. code-block:: python
 
-    predictions = DenseNet(units=[128, 64, 32])
-    noise_std = DenseNet(units=[128, 64, 32])
+    predictions = DenseNet(units=[128, 64, 32, 1])
+    noise_std = DenseNet(units=[128, 64, 32, 1])
     model = Cauchy(predictions, noise_std)
     model.fit(x,y)
 
