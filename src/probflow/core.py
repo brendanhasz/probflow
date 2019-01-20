@@ -341,6 +341,43 @@ class BaseLayer(ABC):
         return Matmul(self, other)
 
 
+    def __str__(self, prepend=''):
+        """String representation of a layer (and all its args)."""
+
+        # Settings
+        max_short = 40 #max length of a short representation
+        ind = '  ' #indentation to use
+
+        # Make string representation of this layer and its args
+        self_str = self.__class__.__name__
+        arg_strs = dict()
+        for arg in self.args:
+            if isinstance(self.args[arg], (int, float)):
+                arg_strs[arg] = str(self.args[arg])
+            elif isinstance(self.args[arg], (np.ndarray)):
+                arg_strs[arg] = 'np.ndarray shape='+str(self.args[arg].shape)
+            elif isinstance(self.args[arg], (tf.Tensor, tf.Variable)):
+                arg_strs[arg] = self.args[arg].__str__()
+            elif isinstance(self.args[arg], (BaseParameter, BaseLayer)):
+                tstr = self.args[arg].__str__(prepend=prepend+2*ind)
+                if len(tstr) < max_short:
+                    arg_strs[arg] = tstr
+                else:
+                    arg_strs[arg] = '\n'+prepend+tstr
+            else:
+                arg_strs[arg] = '???'
+
+        # Try a short representation
+        short_args = [a+' = '+arg_strs[a] for a in self.args]
+        short_str = self_str+'('+', '.join(short_args)+')'
+        if len(short_str) < max_short:
+            return short_str
+
+        # Use a longer representation if the shorter one failed
+        return '\n'.join([prepend+self_str] + 
+                         [prepend+ind+a+' = '+arg_strs[a] for a in self.args])
+
+
 
 class BaseDistribution(BaseLayer):
     """Abstract distribution class (used as an implementation base)
@@ -438,7 +475,22 @@ class BaseDistribution(BaseLayer):
         #TODO
         pass
 
-        
+
+    def plot_posteriors(self, params=None):
+        """Plot posterior distributions of the model's parameters.
+
+        TODO: Docs...
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.plot_posteriors` on a |Model|, you must 
+            first :meth:`.fit` it to some data.
+
+        """
+        #TODO
+        pass
+
+
     def predictive_distribution(self, x, num_samples=1000):
         """Draw samples from the model given x.
 

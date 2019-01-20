@@ -382,9 +382,10 @@ class Parameter(BaseParameter):
         pass
         
 
-# TODO: above assumes a continuous Parameter, should add support for
-# discrete Parameters.  In theory can just set posterior_fn to 
-# Bernoulli or Categorical, and make mean() return the mode?
+    def __str__(self, prepend=''):
+        """String representation of a parameter."""
+
+        return 'Parameter \''+self.name+'\''
 
 
 
@@ -429,3 +430,15 @@ def ScaleParameter(self,
     # Return the transformed parameter
     from .layers import Sqrt
     return Sqrt(variance)
+
+    # TODO: uh but if you call .posterior() on what this returns it will
+    # give you the posterior of the variance not of the std dev...
+
+
+# TODO: add support for discrete Parameters?
+# In theory can just set posterior_fn to 
+# Bernoulli or Categorical, and make mean() return the mode?
+# and have n_categories-1 different underlying tf variables
+# and transform them according to the additive logistic transformation?
+# to get probs of categories
+# https://en.wikipedia.org/wiki/Logit-normal_distribution#Probability_density_function_2
