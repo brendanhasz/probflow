@@ -19,7 +19,7 @@
 
 .. Format tf.Variable like a class.
 .. |Variable| replace:: |VariableFmt|_
-.. |VariableFmt| replace:: ``Tensor``
+.. |VariableFmt| replace:: ``Variable``
 .. _VariableFmt: http://www.tensorflow.org/api_docs/python/tf/Variable
 
 

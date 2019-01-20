@@ -11,6 +11,8 @@ Continuous Distributions
 * :class:`.HalfNormal`
 * :class:`.StudentT`
 * :class:`.Cauchy`
+* :class:`.Gamma`
+* :class:`.InvGamma`
 
 Discrete Distributions
 ----------------------
@@ -91,6 +93,10 @@ class HalfNormal(ContinuousDistribution):
 
     TODO: More info...
 
+    .. math::
+
+        p(x) = \frac{2}{\sqrt{2 \pi \sigma^2}} 
+               \exp \left( -\frac{(x-\mu)^2}{2 \sigma^2} \right)
 
     """
 
@@ -161,7 +167,7 @@ class Gamma(ContinuousDistribution):
 
     .. math::
 
-        y \sim \mathcal{Gamma}(\alpha, \beta)
+        y \sim \text{Gamma}(\alpha, \beta)
 
     .. math::
 
@@ -199,7 +205,7 @@ class InvGamma(ContinuousDistribution):
 
     .. math::
 
-        y \sim \mathcal{InvGamma}(\alpha, \beta)
+        y \sim \text{InvGamma}(\alpha, \beta)
 
     .. math::
 

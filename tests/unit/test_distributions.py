@@ -10,11 +10,18 @@ from probflow.distributions import *
 from probflow.layers import Add
 
 
-lp_1at0 = -0.9189385332046727 # log prob of normal dist @ 0sig w/ sig=1
-lp_1at1 = -1.4189385332046727 # log prob of normal dist @ 1sig w/ sig=1
-lp_2at0 = -1.612085713764618 # log prob of normal dist @ 0sig w/ sig=2
-lp_2at1 = -2.112085713764618 # log prob of normal dist @ 1sig w/ sig=2
+def lnormal(mu, sig, x):
+    """Log prob of normal dist w/ mean mu, std dev sig, @ x=x"""
+    return np.log(1.0 / np.sqrt(2*np.pi*sig*sig) *
+                  np.exp(-(x-mu)*(x-mu)/(2*sig*sig)))
 
+def lhnormal(sig, x):
+    """Log prob of normal dist w/ mean mu, std dev sig, @ x=x"""
+    if x>=0:
+        return np.log(2.0 / np.sqrt(2*np.pi*sig*sig) *
+                      np.exp(-(x*x)/(2*sig*sig)))
+    else:
+        return -np.inf
 
 def isclose(a, b, tol=1e-6):
     """Returns true if a and b are w/i tol"""
@@ -40,8 +47,8 @@ def test_normal_float_input():
         ])
     assert mu==2.0
     assert sig==1.0
-    assert isclose(lp1, lp_1at1)
-    assert isclose(lp2, lp_1at0)
+    assert isclose(lp1, lnormal(0, 1, 1))
+    assert isclose(lp2, lnormal(0, 1, 0))
 
 
 def test_normal_numpy_input():
@@ -72,10 +79,10 @@ def test_normal_numpy_input():
     assert mu[1][0]==2.0
     assert sig[0][0]==2.0
     assert sig[1][0]==1.0
-    assert isclose(lp0[0][0], lp_2at0)
-    assert isclose(lp0[1][0], lp_1at0)
-    assert isclose(lp1[0][0], lp_2at1)
-    assert isclose(lp1[1][0], lp_1at1)
+    assert isclose(lp0[0][0], lnormal(0, 2, 0))
+    assert isclose(lp0[1][0], lnormal(0, 1, 0))
+    assert isclose(lp1[0][0], lnormal(0, 2, 2))
+    assert isclose(lp1[1][0], lnormal(0, 1, 1))
 
 
 def test_normal_layer_input():
@@ -97,8 +104,8 @@ def test_normal_layer_input():
         ])
     assert mu==2.0
     assert sig==1.0
-    assert isclose(lp1, lp_1at1)
-    assert isclose(lp2, lp_1at0)
+    assert isclose(lp1, lnormal(0, 1, 1))
+    assert isclose(lp2, lnormal(0, 1, 0))
 
 
 def test_normal_tensor_input():
@@ -129,10 +136,10 @@ def test_normal_tensor_input():
     assert mu[1][0]==2.0
     assert sig[0][0]==2.0
     assert sig[1][0]==1.0
-    assert isclose(lp0[0][0], lp_2at0)
-    assert isclose(lp0[1][0], lp_1at0)
-    assert isclose(lp1[0][0], lp_2at1)
-    assert isclose(lp1[1][0], lp_1at1)
+    assert isclose(lp0[0][0], lnormal(0, 2, 0))
+    assert isclose(lp0[1][0], lnormal(0, 1, 0))
+    assert isclose(lp1[0][0], lnormal(0, 2, 2))
+    assert isclose(lp1[1][0], lnormal(0, 1, 1))
 
 
 def test_normal_variable_input():
@@ -165,7 +172,43 @@ def test_normal_variable_input():
     assert mu[1][0]==2.0
     assert sig[0][0]==2.0
     assert sig[1][0]==1.0
-    assert isclose(lp0[0][0], lp_2at0)
-    assert isclose(lp0[1][0], lp_1at0)
-    assert isclose(lp1[0][0], lp_2at1)
-    assert isclose(lp1[1][0], lp_1at1)
+    assert isclose(lp0[0][0], lnormal(0, 2, 0))
+    assert isclose(lp0[1][0], lnormal(0, 1, 0))
+    assert isclose(lp1[0][0], lnormal(0, 2, 2))
+    assert isclose(lp1[1][0], lnormal(0, 1, 1))
+
+
+# TODO: normal w/ parameter input
+
+
+def test_halfnormal():
+    """Tests probflow.distributions.HalfNormal w/ tf.Tensor input"""
+    a = tf.constant([[1], [2]], dtype=tf.float32)
+    d1 = HalfNormal(a)
+    d1.build()
+    assert isinstance(d1.built_obj, tfd.HalfNormal)
+    with tf.Session() as sess:
+        [
+            lp0, 
+            lp1,
+            lpn1,
+        ] = sess.run([
+            d1.built_obj.log_prob(np.array([[0.], [0.]])),
+            d1.built_obj.log_prob(np.array([[1.], [2.]])),
+            d1.built_obj.log_prob(np.array([[-1.], [-2.]])),
+        ])
+    assert isinstance(lp0, np.ndarray)
+    assert isinstance(lp1, np.ndarray)
+    assert isinstance(lpn1, np.ndarray)
+    assert lp0.ndim==2
+    assert lp0.shape[0]==2
+    assert lp0.shape[1]==1
+    assert lp1.ndim==2
+    assert lp1.shape[0]==2
+    assert lp1.shape[1]==1
+    assert isclose(lp0[0][0], lhnormal(1, 0))
+    assert isclose(lp0[1][0], lhnormal(2, 0))
+    assert isclose(lp1[0][0], lhnormal(1, 1))
+    assert isclose(lp1[1][0], lhnormal(2, 2))
+    assert lpn1[0][0]==-np.inf
+    assert lpn1[1][0]==-np.inf

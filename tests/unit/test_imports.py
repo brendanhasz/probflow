@@ -1,7 +1,6 @@
 """Tests importing works correctly."""
 
 import pytest
-
 from types import ModuleType, FunctionType
 from inspect import isclass
 
