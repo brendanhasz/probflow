@@ -15,6 +15,18 @@ TODO: make sure to have diagrams for each model
 Linear Regression
 -----------------
 
+TODO: explain a basic (bayesian) 1D linear regression:
+
+.. math::
+
+    \mathbf{y} \sim \text{Normal}(\mathbf{x} \beta_1 + \beta_0, \sigma)
+
+TODO: diagram...
+
+.. image:: img/examples/linear_regression_diagram.svg
+   :width: 50 %
+   :align: center
+
 TODO: manually:
 
 .. code-block:: python
