@@ -260,6 +260,9 @@ class Parameter(BaseParameter):
         self.posterior.build(data)
         self._built_posterior = self.posterior.built_obj
 
+        # Seed generator
+        self.seed_stream = tfd.SeedStream(self.seed, salt=self.name)
+
 
     def _sample(self, data):
         """Sample from the variational distribution.
@@ -289,13 +292,10 @@ class Parameter(BaseParameter):
         # Compute batch shape
         batch_shape = data.shape[0]
 
-        # Seed generator
-        seed_stream = tfd.SeedStream(self.seed, salt=self.name)
-
         # Draw random samples from the posterior
         if self.estimator is None:
             samples = self._built_posterior.sample(sample_shape=batch_shape,
-                                                   seed=seed_stream())
+                                                   seed=self.seed_stream)
 
         # Use the Flipout estimator (https://arxiv.org/abs/1803.04386)
         elif self.estimator=='flipout':
@@ -397,13 +397,20 @@ class Parameter(BaseParameter):
         (meant to be used by the user to examine the posterior dist)
 
         """
-        # TODO: run a tf sess and return a np array
-        pass
+        self._ensure_is_built()
+        # TODO: well really what we want to do is ensure it's part of a model
+        # which has been *fit*, so that we know the global tf variables were
+        # initialized...
+        samples_op = self.transform(
+            self._built_posterior.sample(sample_shape=num_samples,
+                                         seed=self.seed_stream))
+        with tf.Session() as sess:
+            samples = sess.run(samples_op)
+        return samples
         
 
     def __str__(self, prepend=''):
         """String representation of a parameter."""
-
         return 'Parameter \''+self.name+'\''
 
 

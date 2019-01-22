@@ -29,7 +29,7 @@ def test_core_imports():
 def test_parameters_imports():
     """Tests that stuff in parameters module imports correctly."""
     assert isclass(parameters.Parameter)
-    assert isinstance(parameters.ScaleParameter, FunctionType)
+    assert isclass(parameters.ScaleParameter)
 
 
 def test_layers_imports():
@@ -95,7 +95,7 @@ def test_submodules_import_from_root():
 
     # parameters
     assert isclass(Parameter)
-    assert isinstance(ScaleParameter, FunctionType)
+    assert isclass(ScaleParameter)
 
     # layers
     assert isclass(Input)

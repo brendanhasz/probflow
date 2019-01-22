@@ -6,7 +6,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* ScaleParameter as a class
 * Test that parameter._sample() works when data=tf.dataset_iterator()
 * Test that parameter._mean() works in the same way (correct shape? may need to tf.expand_dims())
 * Test that _log_loss, and _kl_loss work as expected
