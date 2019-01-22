@@ -463,17 +463,21 @@ class BaseDistribution(BaseLayer):
     def posterior(self, params=None):
         """Draw samples from parameter posteriors.
 
-        TODO: Docs...
+        TODO: Docs... params is a list of strings of params to plot
 
         .. admonition:: Model must be fit first!
 
             Before calling :meth:`.posterior` on a |Model|, you must first 
             :meth:`.fit` it to some data.
 
+        TODO: should return a dict w/ an entry for each parameter in the model
+        NOT a pandas array, b/c posterior params might be different sizes
+
         """
 
         # Check model has been fit
         self._ensure_is_fit()
+        # TODO: well what if you just want to draw from the priors?
 
         #TODO
         pass
@@ -482,7 +486,7 @@ class BaseDistribution(BaseLayer):
     def plot_posteriors(self, params=None):
         """Plot posterior distributions of the model's parameters.
 
-        TODO: Docs...
+        TODO: Docs... params is a list of strings of params to plot
 
         .. admonition:: Model must be fit first!
 

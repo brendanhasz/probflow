@@ -72,6 +72,20 @@ class Parameter(BaseParameter):
         Seed for the random number generator.  
         Set to |None| to use the global seed.
         Default = |None|
+    transform : lambda function
+        Transform to apply to the random variable.  For example, to create a
+        parameter with an inverse gamma posterior, use 
+        ``posterior``=:class:`.Gamma`` and 
+        ``transform = lambda x: tf.reciprocal(x)``
+        Default is to use no transform.
+    inv_transform : lambda function
+        Inverse transform which will convert values in transformed space back
+        into the posterior distribution's coordinates.  For example, to create
+        a parameter with an inverse gamma posterior, use 
+        ``posterior``=:class:`.Gamma``, 
+        ``transform = lambda x: tf.reciprocal(x)``, and 
+        ``inv_transform = lambda x: tf.reciprocal(x)``.
+        Default is to use no transform.
     estimator : {``'flipout'`` or |None|}
         Method of posterior estimator to use. Valid values:
 
@@ -113,7 +127,9 @@ class Parameter(BaseParameter):
                  post_param_lb=[None, 0],
                  post_param_ub=[None, None],
                  seed=None,
-                 estimator='flipout'):
+                 estimator='flipout',
+                 transform=lambda x: x,
+                 inv_transform=lambda x: x):
         """Construct an array of Parameter(s)."""
 
         # Check types
@@ -164,6 +180,8 @@ class Parameter(BaseParameter):
         self.post_param_ub = post_param_ub
         self.seed = seed
         self.estimator = estimator
+        self.transform = transform
+        self.inv_transform = inv_transform
         self.posterior = None
 
         # TODO: initializer?
@@ -309,8 +327,8 @@ class Parameter(BaseParameter):
         else:
             raise ValueError('estimator must be None or \'flipout\'')
 
-        # Apply bounds and return
-        return samples
+        # Apply transformation and return
+        return self.transform(samples)
 
 
     def _mean(self, data):
@@ -329,7 +347,7 @@ class Parameter(BaseParameter):
             Data for this batch.
         """
         self._ensure_is_built()
-        return self._built_posterior.mean()
+        return self.transform(self._built_posterior.mean())
 
 
     def _log_loss(self, vals):
@@ -349,7 +367,8 @@ class Parameter(BaseParameter):
         """
         self._ensure_is_built()
         if self.prior is not None:
-            return (self._built_prior.log_prob(vals) + 
+
+            return (self._built_prior.log_prob(self.inv_transform(vals)) + 
                     self.prior.arg_loss_sum)
         else:
             return 0 #no prior, no loss
@@ -389,15 +408,10 @@ class Parameter(BaseParameter):
 
 
 
-def ScaleParameter(self, 
-                   shape=1,
-                   prior=None,
-                   name='ScaleParameter',
-                   seed=None,
-                   estimator='flipout'):
-    r"""Standard deviation param whose variance has an InverseGamma posterior.
+class ScaleParameter(Parameter):
+    r"""Standard deviation parameter.
 
-    This is a convenience function for creating a standard deviation parameter
+    This is a convenience class for creating a standard deviation parameter
     (\sigma).  It is created by first constructing a variance parameter 
     (:math:`\sigma^2`) which uses an inverse gamma distribution as the
     variational posterior.
@@ -414,27 +428,114 @@ def ScaleParameter(self,
 
     By default, a uniform prior is used.
 
+    Parameters
+    ----------
+    shape : int, list of int, or 1D |ndarray|
+        Shape of the array containing the parameters. 
+        Default = ``1``
+    name : str
+        Name of the parameter(s).  
+        Default = ``'Parameter'``
+    prior : |None| or a |Distribution| object
+        Prior probability distribution function which has been instantiated
+        with parameters.
+        Default = :class:`.Normal` ``(0,1)``
+    posterior_fn : |Distribution|
+        Probability distribution class to use to approximate the posterior.
+        Default = :class:`.Normal`
+    post_param_names : list of str
+        List of posterior distribution parameter names.  Elements in this 
+        list should correspond to elements of ``post_param_lb`` and 
+        ``post_param_ub``.
+        Default = ``['loc', 'scale']`` (assumes ``posterior_fn = Normal``)
+    post_param_lb : list of {int or float or |None|}
+        List of posterior distribution parameter lower bounds.  The 
+        variational distribution's ``i``-th unconstrained parameter value will 
+        be transformed to fall between ``post_param_lb[i]`` and 
+        ``post_param_ub[i]``. Elements of this list should correspond to 
+        elements of ``post_param_names`` and ``post_param_ub``.
+        Default = ``[None, 0]`` (assumes ``posterior_fn = Normal``)
+    post_param_ub : list of {int or float or |None|}
+        List of posterior distribution parameter upper bounds.  The 
+        variational distribution's ``i``-th unconstrained parameter value will 
+        be transformed to fall between ``post_param_lb[i]`` and 
+        ``post_param_ub[i]``. Elements of this list should correspond to 
+        elements of ``post_param_names`` and ``post_param_ub``.
+        Default = ``[None, None]`` (assumes ``posterior_fn = Normal``)
+    seed : int, float, or |None|
+        Seed for the random number generator.  
+        Set to |None| to use the global seed.
+        Default = |None|
+    transform : lambda function
+        Transform to apply to the random variable.  For example, to create a
+        parameter with an inverse gamma posterior, use 
+        ``posterior``=:class:`.Gamma`` and 
+        ``transform = lambda x: tf.reciprocal(x)``
+        Default is ``lambda x: tf.sqrt(x)``
+    inv_transform : lambda function
+        Inverse transform which will convert values in transformed space back
+        into the posterior distribution's coordinates.  For example, to create
+        a parameter with an inverse gamma posterior, use 
+        ``posterior``=:class:`.Gamma``, 
+        ``transform = lambda x: tf.reciprocal(x)``, and 
+        ``inv_transform = lambda x: tf.reciprocal(x)``.
+        Default is ``lambda x: tf.square(x)``
+    estimator : {``'flipout'`` or |None|}
+        Method of posterior estimator to use. Valid values:
+
+        * |None|: Generate random samples from the variational distribution 
+          for each batch independently.
+        * `'flipout'`: Use the Flipout estimator :ref:`[1] <ref_flipout>` to 
+          more efficiently generate samples from the variational distribution.
+
+        Default = ``'flipout'``
+
+    Notes
+    -----
+    When using the flipout estimator (``estimator='flipout'``), ``posterior_fn`` 
+    must be a symmetric distribution of the location-scale family - one of:
+
+    * :class:`.Normal`
+    * :class:`.StudentT`
+    * :class:`.Cauchy`
+
+    Examples
+    --------
+    TODO
+
+    References
+    ----------
+    .. _ref_flipout:
+    .. [1] Yeming Wen, Paul Vicol, Jimmy Ba, Dustin Tran, and Roger Grosse. 
+        Flipout: Efficient Pseudo-Independent Weight Perturbations on 
+        Mini-Batches. *International Conference on Learning Representations*, 
+        2018. https://arxiv.org/abs/1803.04386
     """
 
-    # Create the variance parameter
-    variance = Parameter(shape=shape,
+    def __init__(self, 
+                 shape=1,
+                 name='ScaleParameter',
+                 prior=None,
+                 posterior_fn=InvGamma,
+                 post_param_names=['shape', 'rate'],
+                 post_param_lb=[0, 0],
+                 post_param_ub=[None, None],
+                 seed=None,
+                 estimator='flipout',
+                 transform=lambda x: tf.sqrt(x),
+                 inv_transform=lambda x: tf.square(x)):
+        super().__init__(shape=shape,
                          name=name,
                          prior=prior,
-                         posterior_fn=InvGamma,
-                         post_param_names=['shape', 'rate'],
-                         post_param_lb=[0, 0],
-                         post_param_ub=[None, None],
+                         posterior_fn=posterior_fn,
+                         post_param_names=post_param_names,
+                         post_param_lb=post_param_lb,
+                         post_param_ub=post_param_ub,
                          seed=seed,
-                         estimator=estimator)
+                         estimator=estimator,
+                         transform=transform,
+                         inv_transform=inv_transform)
 
-    # Return the transformed parameter
-    from .layers import Sqrt
-    return Sqrt(variance)
-
-    # TODO: uh but if you call .posterior() on what this returns it will
-    # give you the posterior of the variance not of the std dev...
-    # well, actually you CAN'T call .posterior() on what this returns
-    # b/c it returns a layer not a Parameter...
 
 
 # TODO: add support for discrete Parameters?

@@ -6,6 +6,7 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
+* ScaleParameter as a class
 * Test that parameter._sample() works when data=tf.dataset_iterator()
 * Test that parameter._mean() works in the same way (correct shape? may need to tf.expand_dims())
 * Test that _log_loss, and _kl_loss work as expected
@@ -39,6 +40,7 @@ Backlog (long term):
 
 * `Tensorflow graph view`_
 * `Tensorflow dashboard`_
+* `Slicing`_
 * `Embedding layer`_
 * Neural Matrix Factorization
 * Multivariate Normal, StudentT, and Cauchy dists
@@ -85,6 +87,52 @@ Sklearn support
 Model classes should be consistent with a sklearn estimator. 
 Or if that won't work, include a sklearn Estimator which takes a model obj.
 https://scikit-learn.org/dev/developers/contributing.html#rolling-your-own-estimator
+
+Array Slicing
+^^^^^^^^^^^^^
+
+Ability to 'slice' arrays, e.g.:
+
+.. code-block:: python
+
+   inds = Input()
+   values = Variable(shape[n_unique_inds,1])
+   values[inds]
+
+This will enable the user to do embeddings,
+
+.. code-block:: python
+
+   user_ids = Input('user ids')
+   item_ids = Input('user ids')
+   user_embeddings = Parameter(shape=[n_users, 50])
+   item_embeddings = Parameter(shape=[n_items, 50])
+   predictions = Dot(user_embeddings[user_ids],
+                     item_embeddings[item_ids])
+
+mixed effects,
+
+.. code-block:: python
+
+  subj_id = Input('subject')
+  mixed_eff = Parameter(shape=n_subj)
+  predictions = mixed_eff[subj_id]
+
+and multilevel models:
+
+.. code-block:: python
+
+  pop_mean = Parameter()
+  pop_std = ScaleParameter()
+  subj_params = Parameter(shape=n_subj,
+                          prior=Normal(pop_mean, pop_std))
+  subj_id = Input('subject')
+  params = subj_params[subj_id]
+
+using tf.gather() under the hood.  
+how does np implement that?  Ok looks like via __getitem__
+which should be added to Parameter (can't slice on layers)
+see https://docs.python.org/3/reference/datamodel.html#object.__getitem__
 
 Embedding layer
 ^^^^^^^^^^^^^^^
