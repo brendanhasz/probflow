@@ -63,6 +63,8 @@ def test_parameter_sample_none_estimator():
 
 def test_parameter_posterior():
     """Tests probflow.parameters.Parameter.posterior"""
+
+    # Scalar parameter
     p1 = Parameter(name='test_parameter_posterior')
     p1._build(None)
     init_op = tf.global_variables_initializer()
@@ -74,4 +76,34 @@ def test_parameter_posterior():
     assert samples.ndim==2
     assert samples.shape[0]==10
     assert samples.shape[1]==1
-    # TODO: posterior from parameter w/ 2d shape?
+    the_sess.close()
+
+    # Parameter with shape=(2,1)
+    p1 = Parameter(name='test_parameter_posterior21', shape=[2, 1])
+    p1._build(None)
+    init_op = tf.global_variables_initializer()
+    the_sess = tf.Session()
+    the_sess.run(init_op)
+    p1._session = the_sess
+    samples = p1.posterior(num_samples=10)
+    assert isinstance(samples, np.ndarray)
+    assert samples.ndim==3
+    assert samples.shape[0]==10
+    assert samples.shape[1]==2
+    assert samples.shape[2]==1
+    the_sess.close()
+
+    # Parameter with shape=(1,2)
+    p1 = Parameter(name='test_parameter_posterior12', shape=[1, 2])
+    p1._build(None)
+    init_op = tf.global_variables_initializer()
+    the_sess = tf.Session()
+    the_sess.run(init_op)
+    p1._session = the_sess
+    samples = p1.posterior(num_samples=10)
+    assert isinstance(samples, np.ndarray)
+    assert samples.ndim==3
+    assert samples.shape[0]==10
+    assert samples.shape[1]==1
+    assert samples.shape[2]==2
+    the_sess.close()
