@@ -263,6 +263,7 @@ class Bernoulli(DiscreteDistribution):
                             '\'logits\' or \'probs\'')
 
 
+
 class Poisson(DiscreteDistribution):
     r"""The Poisson distribution.
 

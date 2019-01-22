@@ -6,19 +6,23 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Layers w/ multiple args should ensure their args are broadcastable
+* Test that parameter._sample() works when data=tf.dataset_iterator()
+* Test that parameter._mean() works in the same way (correct shape? may need to tf.expand_dims())
+* Test that _log_loss, and _kl_loss work as expected
+* Finish basedistribution.fit()
 * fit should have a record=False arg (record posterior values over training)
-* Finish BaseLayer, BaseModel.fit, Variable, and Input
+* Finish BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Tests and debug a simple 1d linear model
-* Docs for BaseLayer, BaseModel.fit, Variable, and Input
+* Make sure it works on validation data of a different size
+* Docs for BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)
 * Docs for distributions + layers
-* Finish BaseModel methods
-* Tests for BaseModel methods
-* Docs for BaseModel methods
+* Finish BaseDistribution critisism methods
+* Tests for BaseDistribution critisism methods
+* Docs for BaseDistribution critisism methods
 * Dense layer (w/ flipout)
 * Test for Dense, and compare to stan or edward
-* Sequential layer
+* `Sequential layer`_
 * Tests
 * Models which only use Dense
 * Tests
@@ -26,6 +30,7 @@ Backlog (short term):
 * `Mean alias for discrete dists`_
 * Models which use them (Classifiers)
 * Tests
+* Write the docs main page and user guide
 * `Reset method`_
 * `Sklearn support`_
 
@@ -58,6 +63,11 @@ But, it's technically not correct.
 
 Notes
 -----
+
+Sequential layer
+^^^^^^^^^^^^^^^^
+
+Sequential layer can't be a class which inherits from BaseLayer b/c it takes a list.  Also, elements of that list will be instantiated Layers.  Will have to be a func which sets the arg['input'] of each sucessive element as the output of the last layer and then return the last layer?
 
 Mean alias for discrete dists
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

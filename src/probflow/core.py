@@ -428,6 +428,9 @@ class BaseDistribution(BaseLayer):
         #x_vals = iterator...
         # N = number of datapoints (x.shape[0])
 
+        # Rename parameters w/ identical names
+        # TODO
+
         # Recursively build this model and its args
         self.build(data)
         model = self.built_obj
@@ -438,7 +441,7 @@ class BaseDistribution(BaseLayer):
         self.mean_log_loss = (self.mean_arg_loss_sum + 
                               self._log_loss(self.mean_obj, y_vals))
         self.kl_loss = (self.kl_loss_sum + 
-                        self._kl_loss())  #TODO: tho a layer shouldn't really have priors?
+                        self._kl_loss())
 
         # Loss functions
         log_likelihood = tf.reduce_mean(model.log_prob(y_vals))

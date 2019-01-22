@@ -63,10 +63,33 @@ def LogisticRegression(data=None):
 
 
 
+def PoissonRegression(data=None):
+    """Poisson regression model.
+
+    TODO: docs...
+
+    """
+    
+    # Use default input if none specified
+    if data is None:
+        data = Input()
+
+    # A Poisson regression
+    predictions = Exp(Dense(data))
+    return Poisson(predictions)
+
+
+
 def DenseNet(data=None, units=[1]):
     """Multiple dense layers in a row.
 
-    DOES NOT INCLUDE AN OBSERVATION DISTRIBUTION!
+    .. admonition:: Does not include an observation distribution!
+
+        :func:`.DenseNet` returns a |Layer|, unlike other ready-made models 
+        like :func:`.DenseRegression` which return a |Model|.  This means you
+        cannot call :meth:`.fit` on the output of this function.  Instead, use
+        the returned layer as a building block in a model which has an 
+        observation distribution.
 
     TODO: docs...
 

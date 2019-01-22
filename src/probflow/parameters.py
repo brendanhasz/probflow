@@ -307,7 +307,7 @@ class Parameter(BaseParameter):
 
         # No other estimators supported at the moment
         else:
-            raise ValueError('estimator must be None or flipout')
+            raise ValueError('estimator must be None or \'flipout\'')
 
         # Apply bounds and return
         return samples
@@ -433,6 +433,8 @@ def ScaleParameter(self,
 
     # TODO: uh but if you call .posterior() on what this returns it will
     # give you the posterior of the variance not of the std dev...
+    # well, actually you CAN'T call .posterior() on what this returns
+    # b/c it returns a layer not a Parameter...
 
 
 # TODO: add support for discrete Parameters?
