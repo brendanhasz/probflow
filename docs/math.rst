@@ -1,5 +1,5 @@
-Appendix: Mathematical Details
-==============================
+Mathematical Details
+====================
 
 TODO: intro
 
@@ -32,7 +32,7 @@ If we use `Kullback-Leibler divergence <http://en.wikipedia.org/wiki/Kullback%E2
 This divergence between the variational and true posteriors can be broken down into the sum of three terms:
 
 1. the divergence between the prior and the variational distribution
-2. the expected log likelihood
+2. the (negative) expected log likelihood
 3. the log model evidence (probability of the data)
 
 .. math::
