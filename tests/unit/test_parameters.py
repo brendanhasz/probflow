@@ -2,6 +2,7 @@
 
 import pytest
 
+import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 tfd = tfp.distributions
@@ -65,14 +66,12 @@ def test_parameter_posterior():
     p1 = Parameter(name='test_parameter_posterior')
     p1._build(None)
     init_op = tf.global_variables_initializer()
-    with tf.Session() as sess:
-        sess.run(init_op)
+    the_sess = tf.Session()
+    the_sess.run(init_op)
+    p1._session = the_sess
     samples = p1.posterior(num_samples=10)
-    # crap looks like variables won't save their values between sessions?
-    # sigh. tensorflooooowww! *shakes fist at ~~the heavens~~ Mountain View CA*
-    # so when you call posterior and it starts up a new session it complains
-    # that the variables havent been initialized.
-    # soooo may have to store a pointer to a tf.Session which was created during
-    # call to model.fit()? or build()?
-    # and then use that sess w/ self._tf_sess.run(...) in posterior
-    # a la https://stackoverflow.com/a/46479180
+    assert isinstance(samples, np.ndarray)
+    assert samples.ndim==2
+    assert samples.shape[0]==10
+    assert samples.shape[1]==1
+    # TODO: posterior from parameter w/ 2d shape?

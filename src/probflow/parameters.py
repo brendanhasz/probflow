@@ -412,7 +412,7 @@ class Parameter(BaseParameter):
         return samples
 
 
-    # TODO: plot_posterior
+    # TODO: plot_posterior(kde=False)
         
 
     def __str__(self, prepend=''):

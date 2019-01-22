@@ -299,6 +299,17 @@ class BaseLayer(ABC):
         self.mean_obj = self._build_mean(self.mean_args, data)
 
 
+    def _parameter_list(self):
+        """Get a list of parameters in this layer or its arguments."""
+        params = []
+        for arg in self.args:
+            if isinstance(arg, BaseLayer):
+                params += arg._parameter_list()
+            elif isinstance(arg, BaseParameter):
+                params += [arg]
+        return params
+
+
     def __add__(self, other):
         """Add this layer to another layer, parameter, or value."""
         from .layers import Add
@@ -394,6 +405,20 @@ class BaseDistribution(BaseLayer):
         return obj.log_prob(vals)
 
 
+    def _make_parameter_names_unique(self, params):
+        """Rename parameters in this model such that each name is unique."""
+        names = dict()
+        for param in params:
+            name = param.name
+            if name in names:
+                new_name = (names[name][-1].rsplit(' ', 1)[0] + 
+                            ' ' + str(len(names[name])+1))
+                names[name].append(new_name)
+                param.name = new_name
+            else: #name not yet used
+                names[name] = [name]
+
+
     def fit(self, x, y, batch_size=128, epochs=100, 
             optimizer='adam', learning_rate=None, metrics=None):
         """Fit model.
@@ -428,15 +453,22 @@ class BaseDistribution(BaseLayer):
         #x_vals = iterator...
         # N = number of datapoints (x.shape[0])
 
-        # Rename parameters w/ identical names
-        # TODO: recurse down the model, renaming duplicates
+        # Get a list of all parameters in the model
+        self._parameters = self._parameter_list()
 
-        # Create session and assign to parameters
-        # TODO: recurse down the model, setting param._session = sess for each parameter
+        # Rename parameters w/ identical names
+        self._make_parameter_names_unique(self._parameters)
 
         # Recursively build this model and its args
         self.build(data)
         model = self.built_obj
+
+        # Create the TensorFlow session
+        self._session = tf.Session()
+
+        # Assign session to each parameter
+        for param in self._parameters:
+            param._session = self._session
 
         # Set up TensorFlow graph for the losses
         self.log_loss = (self.arg_loss_sum + 
@@ -451,7 +483,8 @@ class BaseDistribution(BaseLayer):
         kl_loss = self.kl_loss / N
         elbo_loss = kl_loss - log_likelihood
 
-        # TODO: fit the model
+        # Fit the model
+        # TODO
 
         self.is_fit = True
 
@@ -462,7 +495,7 @@ class BaseDistribution(BaseLayer):
             raise RuntimeError('model must first be fit') 
 
 
-    def posterior(self, params=None):
+    def posterior(self, params=None, num_samples=1000):
         """Draw samples from parameter posteriors.
 
         TODO: Docs... params is a list of strings of params to plot
@@ -479,10 +512,19 @@ class BaseDistribution(BaseLayer):
 
         # Check model has been fit
         self._ensure_is_fit()
-        # TODO: well what if you just want to draw from the priors?
 
-        #TODO
-        pass
+        # Get all params if not specified
+        if params is None:
+            params = [param.name for param in self._parameters]
+
+        # Get the posterior distributions
+        posteriors = dict()
+        for param in self._parameters:
+            if param.name in params:
+                posteriors[param.name] = \
+                    param.posterior(num_samples=num_samples)
+
+        return posteriors
 
 
     def plot_posteriors(self, params=None):
