@@ -429,7 +429,10 @@ class BaseDistribution(BaseLayer):
         # N = number of datapoints (x.shape[0])
 
         # Rename parameters w/ identical names
-        # TODO
+        # TODO: recurse down the model, renaming duplicates
+
+        # Create session and assign to parameters
+        # TODO: recurse down the model, setting param._session = sess for each parameter
 
         # Recursively build this model and its args
         self.build(data)
@@ -451,7 +454,6 @@ class BaseDistribution(BaseLayer):
         # TODO: fit the model
 
         self.is_fit = True
-        pass
 
 
     def _ensure_is_fit(self):

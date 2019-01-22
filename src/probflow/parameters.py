@@ -182,7 +182,8 @@ class Parameter(BaseParameter):
         self.estimator = estimator
         self.transform = transform
         self.inv_transform = inv_transform
-        self.posterior = None
+        self._built_posterior = None
+        self._session = None
 
         # TODO: initializer?
 
@@ -215,16 +216,22 @@ class Parameter(BaseParameter):
                 return lb + tf.exp(data) # [lb, Inf]
         else:
             if lb is None: #negative # [-Inf, ub]
-                return tf.exp(-data)
+                return ub - tf.exp(-data)
             else: 
                 return lb + (ub-lb)*tf.sigmoid(data) # [lb, ub]
 
 
     def _ensure_is_built(self):
         """Raises a RuntimeError if parameter has not yet been built."""
-        if self.posterior is None:
+        if self._built_posterior is None:
             raise RuntimeError('parameter must first be built')
-    
+
+
+    def _ensure_is_fit(self):
+        """Raises a RuntimeError if parameter's modelhas not yet been fit."""
+        if self._session is None:
+            raise RuntimeError('model must first be fit')
+
 
     def _build(self, data):
         """Build the layer.
@@ -256,9 +263,9 @@ class Parameter(BaseParameter):
             params[arg] = self._bound(params[arg], lb, ub)
 
         # Create variational posterior distribution
-        self.posterior = self.posterior_fn(**params)
-        self.posterior.build(data)
-        self._built_posterior = self.posterior.built_obj
+        posterior = self.posterior_fn(**params)
+        posterior.build(data)
+        self._built_posterior = posterior.built_obj
 
         # Seed generator
         self.seed_stream = tfd.SeedStream(self.seed, salt=self.name)
@@ -398,15 +405,14 @@ class Parameter(BaseParameter):
 
         """
         self._ensure_is_built()
-        # TODO: well really what we want to do is ensure it's part of a model
-        # which has been *fit*, so that we know the global tf variables were
-        # initialized...
-        samples_op = self.transform(
-            self._built_posterior.sample(sample_shape=num_samples,
-                                         seed=self.seed_stream))
-        with tf.Session() as sess:
-            samples = sess.run(samples_op)
+        self._ensure_is_fit()
+        samples_op = self._built_posterior.sample(sample_shape=num_samples)
+        samples_op = self.transform(samples_op)
+        samples = self._session.run(samples_op)
         return samples
+
+
+    # TODO: plot_posterior
         
 
     def __str__(self, prepend=''):
