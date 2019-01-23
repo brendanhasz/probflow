@@ -719,17 +719,17 @@ class Dense(BaseLayer):
         return self._mean
 
 
-    def _log_loss(self, obj, vals):
+    def _log_loss(self, vals):
         """Log loss incurred by this layer."""
         return self._log_loss_sum
 
 
-    def _mean_log_loss(self, obj, vals):
+    def _mean_log_loss(self, vals):
         """Log loss incurred by this layer w/ mean parameters."""
         return self._mean_log_loss_sum
 
 
-    def _kl_loss(self, obj, vals):
+    def _kl_loss(self):
         """The sum of divergences of variational posteriors from priors."""
         return self._kl_loss_sum
 

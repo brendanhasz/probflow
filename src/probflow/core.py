@@ -193,7 +193,7 @@ class BaseLayer(ABC):
         return self._build(args, data)
 
 
-    def _log_loss(self, obj, vals):
+    def _log_loss(self, vals):
         """Compute the log loss incurred by this layer.
 
         TODO: docs... default is no loss but can override when there is
@@ -202,7 +202,7 @@ class BaseLayer(ABC):
         return 0
 
 
-    def _mean_log_loss(self, obj, vals):
+    def _mean_log_loss(self, vals):
         """Compute the log loss incurred by this layer with mean parameters.
 
         TODO: docs... default is no loss but can override when there is
@@ -241,7 +241,7 @@ class BaseLayer(ABC):
                             ' tensor_like, model, layer, or valid')
 
 
-    def build(self, data=None):
+    def build(self, data, batch_shape):
         """Build this layer's arguments and loss, and then build the layer.
 
         TODO: actually do docs for this one...
@@ -258,41 +258,28 @@ class BaseLayer(ABC):
             elif self._arg_is('tensor_like', arg):
                 self.built_args[arg_name] = arg
                 self.mean_args[arg_name] = arg
-            elif self._arg_is('layer', arg):
-                arg.build(data)
+            elif self._arg_is('layer', arg) or self._arg_is('parameter', arg):
+                arg.build(data, batch_shape)
                 self.built_args[arg_name] = arg.built_obj
                 self.mean_args[arg_name] = arg.mean_obj
-            elif self._arg_is('parameter', arg):
-                arg._build(data)
-                self.built_args[arg_name] = arg._sample(data)
-                self.mean_args[arg_name] = arg._mean(data)
-
-        # TODO: could just make parameter and layer have same interface, ie
-        # built_obj and mean_obj are created during call to .build()
 
         # Sum the losses of this layer's arguments
-        self.arg_loss_sum = 0       # log posterior probability of sample model
-        self.mean_arg_loss_sum = 0  # log posterior probability of mean model
+        self.samp_loss_sum = 0 # log posterior probability of sample model
+        self.mean_loss_sum = 0 # log posterior probability of mean model
         self.kl_loss_sum = 0 # sum of KL div between variational post and priors
         for arg, arg_name in self.args.items():
             if self._arg_is('tensor_like', arg):
                 pass #no loss incurred by data
             elif self._arg_is('layer', arg):
-                self.arg_loss_sum += (
-                    arg.arg_loss_sum + 
-                    arg._log_loss(arg.built_obj, self.built_args[arg_name]))
-                self.mean_arg_loss_sum += (
-                    arg.mean_arg_loss_sum + 
-                    arg._mean_log_loss(arg.mean_obj, self.mean_args[arg_name]))
-                self.kl_loss_sum += (
-                    arg.kl_loss_sum +
-                    arg._kl_loss())
+                self.samp_loss_sum += arg.samp_loss_sum + arg._log_loss
+                self.mean_loss_sum += arg.mean_loss_sum + arg._mean_log_loss
+                self.kl_loss_sum += arg.kl_loss_sum + arg._kl_loss
             elif self._arg_is('parameter', arg):
-                self.arg_loss_sum += arg._log_loss(self.built_args[arg_name])
-                self.mean_arg_loss_sum += arg._log_loss(self.mean_args[arg_name])
-                self.kl_loss_sum += arg._kl_loss()
+                self.samp_loss_sum += arg._log_loss
+                self.mean_loss_sum += arg._mean_log_loss
+                self.kl_loss_sum += arg._kl_loss
 
-        # TODO: same idea - could make parameter + layer have same interface
+        # could make parameter + layer have same interface?
 
         # Build this layer's sample model and mean model
         self.built_obj = self._build(self.built_args, data)
@@ -447,11 +434,32 @@ class BaseDistribution(BaseLayer):
 
         """
 
+        # TODO: this should be an arg to fit...
+        dtype = tf.float32
+
         # Set up the data for fitting
         # TODO
         #y_vals = iterator...
         #x_vals = iterator...
         # N = number of datapoints (x.shape[0])
+        # first split into train and validation
+        #if x and y are arrays of the correct size (of the train data)
+        x_shape = list(x.shape)
+        y_shape = list(x.shape)
+        x_shape[0] = None
+        y_shape[0] = None
+        x_ph = tf.placeholder(dtype, x_shape)
+        y_ph = tf.placeholder(dtype, x_shape)
+        train_dataset = tf.data.Dataset.from_tensor_slices((x, y))
+        train_batches = (train_dataset
+            .shuffle(x.shape[0], reshuffle_each_iteration=True)
+            .repeat()
+            .batch(batch_size))
+
+        # TODO: you want to use a feedable iterator, see https://www.tensorflow.org/guide/datasets
+        # may have to have batch_size be a placeholder (which is passed down recursively during build())
+        # and then you set the value w/ feed_dict
+        batch_shape_ph = tf.placeholder(tf.int32, [1])
 
         # Get a list of all parameters in the model
         self._parameters = self._parameter_list()
@@ -460,7 +468,7 @@ class BaseDistribution(BaseLayer):
         self._make_parameter_names_unique(self._parameters)
 
         # Recursively build this model and its args
-        self.build(data)
+        self.build(data, batch_shape_ph)
         model = self.built_obj
 
         # Create the TensorFlow session

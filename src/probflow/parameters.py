@@ -15,7 +15,7 @@ tfd = tfp.distributions
 from tensorflow_probability.python.math import random_rademacher
 
 from .core import BaseParameter, BaseDistribution
-from .distributions import Normal, InvGamma
+from .distributions import Normal, StudentT, Cauchy, InvGamma
 
 
 __all__ = [
@@ -170,6 +170,12 @@ class Parameter(BaseParameter):
         assert estimator is None or isinstance(estimator, str), \
             'estimator must be None or a string'
 
+        # Check for valid posterior if using flipout
+        sym_dists = [Normal, StudentT, Cauchy]
+        if estimator=='flipout' and posterior_fn not in sym_dists:
+            raise ValueError('flipout requires a symmetric posterior ' +
+                             'distribution in the location-scale family')
+
         # Assign attributes
         self.shape = shape
         self.name = name
@@ -186,8 +192,6 @@ class Parameter(BaseParameter):
         self._session = None
 
         # TODO: initializer?
-
-        # TODO: dtype?
 
 
     def _bound(self, data, lb, ub):
@@ -233,22 +237,16 @@ class Parameter(BaseParameter):
             raise RuntimeError('model must first be fit')
 
 
-    def _build(self, data):
-        """Build the layer.
-
-        TODO: docs
-
-        Parameters
-        ----------
-        data : |Tensor|
-            Data for this batch.
-        """
-
-        # Build the prior distribution
+    def _build_prior(self, data, batch_shape):
+        """Build the parameter's prior distribution."""
         if self.prior is not None:
-            self.prior.build(data)
+            self.prior.build(data, batch_shape)
             self._built_prior = self.prior.built_obj
             # TODO: Check that the built prior shape is broadcastable w/ self.shape
+
+
+    def _build_posterior(self, data, batch_shape):
+        """Build the parameter's posterior distribution."""
 
         # Create posterior distribution parameters
         params = dict()
@@ -263,68 +261,43 @@ class Parameter(BaseParameter):
             params[arg] = self._bound(params[arg], lb, ub)
 
         # Create variational posterior distribution
-        posterior = self.posterior_fn(**params)
-        posterior.build(data)
-        self._built_posterior = posterior.built_obj
+        self.posterior = self.posterior_fn(**params)
+        self.posterior.build(data, batch_shape)
+        self._built_posterior = self.posterior.built_obj
+
+
+    def _build_sample(self, data, batch_shape):
+        """Build the sample model."""
 
         # Seed generator
         self.seed_stream = tfd.SeedStream(self.seed, salt=self.name)
 
-
-    def _sample(self, data):
-        """Sample from the variational distribution.
-        
-        TODO: docs
-
-        .. admonition:: Parameter must be built first!
-
-            Before calling :meth:`.sample` on a |Parameter|, you must first 
-            :meth:`.build` it, or :meth:`.fit` a model it belongs to.
-
-        Parameters
-        ----------
-        data : |Tensor|
-            Data for this batch.
-
-        Returns
-        -------
-        |Tensor|
-            An (unevaluated) tensor with samples from the variational dist.
-
-        """
-
-        # Ensure parameter has been built
-        self._ensure_is_built()
-
-        # Compute batch shape
-        batch_shape = data.shape[0]
-
         # Draw random samples from the posterior
         if self.estimator is None:
             samples = self._built_posterior.sample(sample_shape=batch_shape,
-                                                   seed=self.seed_stream)
+                                                   seed=self.seed_stream())
 
         # Use the Flipout estimator (https://arxiv.org/abs/1803.04386)
         elif self.estimator=='flipout':
-
-            # Flipout only works w/ distributions symmetric around 0
-            if not isinstance(self._built_posterior, [tfd.Normal, 
-                                                      tfd.StudentT,
-                                                      tfd.Cauchy]):
-                raise ValueError('flipout requires a symmetric posterior ' +
-                                 'distribution in the location-scale family')
 
             # Posterior mean
             w_mean = self._built_posterior.mean()
 
             # Sample from centered posterior distribution
-            w_sample = self._built_posterior.sample(seed=seed_stream()) - w_mean
+            w_sample = self._built_posterior.sample(seed=self.seed_stream()) 
+            w_sample -= w_mean
+
+            # TODO: this might not be the best way to do it...
+            # could manually set loc=0 for the tfp.distribution
+            # ie posterior(loc=0, scale=param1)
+            # param2 = free param
+            # and then fit [param1, param2] w/ posterior.sample() + param2
 
             # Random sign matrixes
             sign_r = random_rademacher(w_sample.shape, dtype=data.dtype,
-                                       seed=seed_stream())
+                                       seed=self.seed_stream())
             sign_s = random_rademacher(batch_shape, dtype=data.dtype,
-                                       seed=seed_stream())
+                                       seed=self.seed_stream())
 
             # Flipout-generated samples for this batch
             samples = tf.multiply(tf.expand_dims(w_sample*sign_r, 0), sign_s)
@@ -334,70 +307,54 @@ class Parameter(BaseParameter):
         else:
             raise ValueError('estimator must be None or \'flipout\'')
 
-        # Apply transformation and return
-        return self.transform(samples)
+        # Apply transformation
+        self._built_obj_raw = samples
+        self.built_obj = self.transform(self._built_obj_raw)
 
 
-    def _mean(self, data):
-        """Mean of the variational distribution.
+    def _build_mean(self):
+        """Build the mean model."""
+        self._mean_obj_raw = self._built_posterior.mean()
+        self.mean_obj = self.transform(self._mean_obj_raw)
+
+
+    def _build_losses(self):
+        """Build all the losses."""
+        if self.prior is None: #no prior, no losses
+            self._log_loss = 0 
+            self._mean_log_loss = 0
+            self._kl_loss = 0
+        else:
+            self._log_loss = (
+                self._built_prior.log_prob(self._built_obj_raw) + 
+                self.prior.samp_loss_sum)
+            self._mean_log_loss = (
+                self._built_prior.log_prob(self._mean_obj_raw) + 
+                self.prior.mean_loss_sum)
+            self._kl_loss = (tf.reduce_sum(
+                tfd.kl_divergence(self._built_posterior,
+                                  self._built_prior))
+                + self.prior.kl_loss_sum)
+
+
+    def build(self, data, batch_shape):
+        """Build the parameter.
 
         TODO: docs
-
-        .. admonition:: Parameter must be built first!
-
-            Before calling :meth:`.mean` on a |Parameter|, you must first 
-            :meth:`.build` it, or :meth:`.fit` a model it belongs to.
 
         Parameters
         ----------
         data : |Tensor|
             Data for this batch.
         """
-        self._ensure_is_built()
-        return self.transform(self._built_posterior.mean())
+        self._build_prior(data, batch_shape)
+        self._build_posterior(data, batch_shape)
+        self._build_sample(data, batch_shape)
+        self._build_mean()
+        self._build_losses()
 
 
-    def _log_loss(self, vals):
-        """Loss due to prior.
-
-        TODO: docs
-
-        .. admonition:: Parameter must be built first!
-
-            Before calling :meth:`.log_loss` on a |Parameter|, you must first 
-            :meth:`.build` it, or :meth:`.fit` a model it belongs to.
-
-        Parameters
-        ----------
-        vals : |Tensor|
-            Values which were sampled from the variational distribution.
-        """
-        self._ensure_is_built()
-        if self.prior is not None:
-
-            return (self._built_prior.log_prob(self.inv_transform(vals)) + 
-                    self.prior.arg_loss_sum)
-        else:
-            return 0 #no prior, no loss
-
-
-    def _kl_loss(self):
-        """Loss due to divergence between posterior and prior.
-
-        TODO: docs...
-
-        """
-        self._ensure_is_built()
-        return (tf.reduce_sum(
-                    tfd.kl_divergence(self._built_posterior, 
-                                      self._built_prior))
-                + self.prior.kl_loss_sum)
-        # TODO: make sure that the broadcasting occurs correctly here
-        # eg if posterior shape is [2,1], should return 
-        # (kl_div(post_1,prior_1) + kl_div(Post_2,prior_2))
-
-
-    def posterior(self, num_samples=1000):
+    def sample_posterior(self, num_samples=1000):
         """Sample from the posterior distribution.
 
         TODO: this is similar to _sample(), but returns a numpy array
@@ -534,7 +491,7 @@ class ScaleParameter(Parameter):
                  post_param_lb=[0, 0],
                  post_param_ub=[None, None],
                  seed=None,
-                 estimator='flipout',
+                 estimator=None,
                  transform=lambda x: tf.sqrt(x),
                  inv_transform=lambda x: tf.square(x)):
         super().__init__(shape=shape,

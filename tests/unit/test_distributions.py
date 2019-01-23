@@ -31,7 +31,7 @@ def isclose(a, b, tol=1e-6):
 def test_normal_float_input():
     """Tests probflow.distributions.Normal w/ float/int input"""
     d1 = Normal(2.0, 1.0)
-    d1.build()
+    d1.build(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(d1.built_obj, tfd.Normal)
     with tf.Session() as sess:
         [
@@ -56,7 +56,7 @@ def test_normal_numpy_input():
     a = np.array([[0], [2]]).astype('float32')
     b = np.array([[2], [1]]).astype('float32')
     d1 = Normal(a, b)
-    d1.build()
+    d1.build(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(d1.built_obj, tfd.Normal)
     with tf.Session() as sess:
         [
@@ -88,7 +88,7 @@ def test_normal_numpy_input():
 def test_normal_layer_input():
     """Tests probflow.distributions.Normal w/ layer inputs"""
     d1 = Normal(Add(1.0, 1.0), Add(0.5, 0.5))
-    d1.build()
+    d1.build(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(d1.built_obj, tfd.Normal)
     with tf.Session() as sess:
         [
@@ -113,7 +113,7 @@ def test_normal_tensor_input():
     a = tf.constant([[0], [2]], dtype=tf.float32)
     b = tf.constant([[2], [1]], dtype=tf.float32)
     d1 = Normal(a, b)
-    d1.build()
+    d1.build(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(d1.built_obj, tfd.Normal)
     with tf.Session() as sess:
         [
@@ -147,7 +147,7 @@ def test_normal_variable_input():
     a = tf.Variable([[0], [2]], dtype=tf.float32)
     b = tf.Variable([[2], [1]], dtype=tf.float32)
     d1 = Normal(a, b)
-    d1.build()
+    d1.build(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(d1.built_obj, tfd.Normal)
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:
@@ -185,7 +185,7 @@ def test_halfnormal():
     """Tests probflow.distributions.HalfNormal w/ tf.Tensor input"""
     a = tf.constant([[1], [2]], dtype=tf.float32)
     d1 = HalfNormal(a)
-    d1.build()
+    d1.build(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(d1.built_obj, tfd.HalfNormal)
     with tf.Session() as sess:
         [
