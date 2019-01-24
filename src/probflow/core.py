@@ -438,7 +438,7 @@ class BaseDistribution(BaseLayer):
         dtype = tf.float32
 
         # Set up the data for fitting
-        # TODO
+        # TODO: x,y input should be able to be np arrays, pandas arrays, or tf dataset iterators
         #y_vals = iterator...
         #x_vals = iterator...
         # N = number of datapoints (x.shape[0])
@@ -478,17 +478,21 @@ class BaseDistribution(BaseLayer):
         for param in self._parameters:
             param._session = self._session
 
-        # Set up TensorFlow graph for the losses
-        self.log_loss = (self.arg_loss_sum + 
+        # Set up TensorFlow graph for per-sample losses
+        self.log_loss = (self.arg_loss_sum +  #size (batch_size,)
                          self._log_loss(self.built_obj, y_vals))
-        self.mean_log_loss = (self.mean_arg_loss_sum + 
-                              self._log_loss(self.mean_obj, y_vals))
-        self.kl_loss = (self.kl_loss_sum + 
-                        self._kl_loss())
+        self.mean_log_loss = (self.mean_arg_loss_sum + #size (batch_size,)
+                              self._log_loss(self.mean_obj,y_vals))
+        self.kl_loss = self.kl_loss_sum + self._kl_loss() #size (1,)
 
-        # Loss functions
+        # TODO: uuhh do you ever actually need log_loss?
+        # that's just the log posterior prob of *samples* from the model?
+        # the only place you would need that is if you called
+        # log_prob (below) with distribution=True and individually=True...
+
+        # ELBO loss function
         log_likelihood = tf.reduce_mean(model.log_prob(y_vals))
-        kl_loss = self.kl_loss / N
+        kl_loss = tf.reduce_sum(self.kl_loss) / N
         elbo_loss = kl_loss - log_likelihood
 
         # Fit the model
@@ -503,7 +507,7 @@ class BaseDistribution(BaseLayer):
             raise RuntimeError('model must first be fit') 
 
 
-    def posterior(self, params=None, num_samples=1000):
+    def sample_posteriors(self, params=None, num_samples=1000):
         """Draw samples from parameter posteriors.
 
         TODO: Docs... params is a list of strings of params to plot
@@ -530,7 +534,7 @@ class BaseDistribution(BaseLayer):
         for param in self._parameters:
             if param.name in params:
                 posteriors[param.name] = \
-                    param.posterior(num_samples=num_samples)
+                    param.sample_posterior(num_samples=num_samples)
 
         return posteriors
 

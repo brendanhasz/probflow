@@ -225,16 +225,21 @@ class Parameter(BaseParameter):
                 return lb + (ub-lb)*tf.sigmoid(data) # [lb, ub]
 
 
-    def _ensure_is_built(self):
-        """Raises a RuntimeError if parameter has not yet been built."""
-        if self._built_posterior is None:
-            raise RuntimeError('parameter must first be built')
+    def build(self, data, batch_shape):
+        """Build the parameter.
 
+        TODO: docs
 
-    def _ensure_is_fit(self):
-        """Raises a RuntimeError if parameter's modelhas not yet been fit."""
-        if self._session is None:
-            raise RuntimeError('model must first be fit')
+        Parameters
+        ----------
+        data : |Tensor|
+            Data for this batch.
+        """
+        self._build_prior(data, batch_shape)
+        self._build_posterior(data, batch_shape)
+        self._build_sample(data, batch_shape)
+        self._build_mean()
+        self._build_losses()
 
 
     def _build_prior(self, data, batch_shape):
@@ -314,7 +319,7 @@ class Parameter(BaseParameter):
 
     def _build_mean(self):
         """Build the mean model."""
-        self._mean_obj_raw = self._built_posterior.mean()
+        self._mean_obj_raw = tf.expand_dims(self._built_posterior.mean(), 0)
         self.mean_obj = self.transform(self._mean_obj_raw)
 
 
@@ -325,33 +330,30 @@ class Parameter(BaseParameter):
             self._mean_log_loss = 0
             self._kl_loss = 0
         else:
-            self._log_loss = (
+            reduce_dims = np.arange(1, self._built_obj_raw.shape.ndims)
+            self._log_loss = tf.reduce_sum(
                 self._built_prior.log_prob(self._built_obj_raw) + 
-                self.prior.samp_loss_sum)
-            self._mean_log_loss = (
+                self.prior.samp_loss_sum,
+                axis=reduce_dims)
+            self._mean_log_loss = tf.reduce_sum(
                 self._built_prior.log_prob(self._mean_obj_raw) + 
                 self.prior.mean_loss_sum)
-            self._kl_loss = (tf.reduce_sum(
+            self._kl_loss = tf.reduce_sum(
                 tfd.kl_divergence(self._built_posterior,
-                                  self._built_prior))
-                + self.prior.kl_loss_sum)
+                                  self._built_prior) +
+                self.prior.kl_loss_sum)
 
 
-    def build(self, data, batch_shape):
-        """Build the parameter.
+    def _ensure_is_built(self):
+        """Raises a RuntimeError if parameter has not yet been built."""
+        if self._built_posterior is None:
+            raise RuntimeError('parameter must first be built')
 
-        TODO: docs
 
-        Parameters
-        ----------
-        data : |Tensor|
-            Data for this batch.
-        """
-        self._build_prior(data, batch_shape)
-        self._build_posterior(data, batch_shape)
-        self._build_sample(data, batch_shape)
-        self._build_mean()
-        self._build_losses()
+    def _ensure_is_fit(self):
+        """Raises a RuntimeError if parameter's modelhas not yet been fit."""
+        if self._session is None:
+            raise RuntimeError('model must first be fit')
 
 
     def sample_posterior(self, num_samples=1000):
