@@ -100,6 +100,7 @@ class HalfNormal(ContinuousDistribution):
             0,~\text{if~} x<0 \\
             \frac{2}{\sqrt{2 \pi \sigma^2}} 
             \exp \left( -\frac{(x-\mu)^2}{2 \sigma^2} \right),~\text{otherwise}
+        \end{cases}
 
 
 
