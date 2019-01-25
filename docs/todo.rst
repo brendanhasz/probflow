@@ -6,10 +6,7 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Add _session attribute to layers and params, which is set during call to fit()
-* Test that parameter._sample() works when data=tf.dataset_iterator()
-* Test that parameter._mean() works in the same way (correct shape? may need to tf.expand_dims())
-* Test that _log_loss, and _kl_loss work as expected
+* Test that Parameter.build() builds sample model (built_obj) correctly
 * Finish basedistribution.fit()
 * fit should have a record=False arg (record posterior values over training)
 * Finish BaseLayer, BaseDistribution.fit, Parameter, and Input

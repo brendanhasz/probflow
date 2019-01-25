@@ -176,6 +176,10 @@ class Parameter(BaseParameter):
             raise ValueError('flipout requires a symmetric posterior ' +
                              'distribution in the location-scale family')
 
+        # If shape is an integer, make it a list
+        if isinstance(shape, int):
+            shape = [shape]
+
         # Assign attributes
         self.shape = shape
         self.name = name
@@ -237,8 +241,8 @@ class Parameter(BaseParameter):
         """
         self._build_prior(data, batch_shape)
         self._build_posterior(data, batch_shape)
-        self._build_sample(data, batch_shape)
         self._build_mean()
+        self._build_sample(data, batch_shape)
         self._build_losses()
 
 
@@ -271,26 +275,31 @@ class Parameter(BaseParameter):
         self._built_posterior = self.posterior.built_obj
 
 
+    def _build_mean(self):
+        """Build the mean model."""
+        self._mean_obj_raw = tf.expand_dims(self._built_posterior.mean(), 0)
+        self.mean_obj = self.transform(self._mean_obj_raw)
+
+
     def _build_sample(self, data, batch_shape):
         """Build the sample model."""
 
         # Seed generator
-        self.seed_stream = tfd.SeedStream(self.seed, salt=self.name)
+        seed_stream = tfd.SeedStream(self.seed, salt=self.name)
 
         # Draw random samples from the posterior
         if self.estimator is None:
             samples = self._built_posterior.sample(sample_shape=batch_shape,
-                                                   seed=self.seed_stream())
+                                                   seed=seed_stream())
 
         # Use the Flipout estimator (https://arxiv.org/abs/1803.04386)
         elif self.estimator=='flipout':
 
             # Posterior mean
-            w_mean = self._built_posterior.mean()
+            mean = self._mean_obj_raw
 
             # Sample from centered posterior distribution
-            w_sample = self._built_posterior.sample(seed=self.seed_stream()) 
-            w_sample -= w_mean
+            sample = self._built_posterior.sample(seed=seed_stream()) - mean
 
             # TODO: this might not be the best way to do it...
             # could manually set loc=0 for the tfp.distribution
@@ -299,14 +308,21 @@ class Parameter(BaseParameter):
             # and then fit [param1, param2] w/ posterior.sample() + param2
 
             # Random sign matrixes
-            sign_r = random_rademacher(w_sample.shape, dtype=data.dtype,
-                                       seed=self.seed_stream())
+            sign_r = random_rademacher(self.shape, dtype=data.dtype,
+                                       seed=seed_stream())
             sign_s = random_rademacher(batch_shape, dtype=data.dtype,
-                                       seed=self.seed_stream())
+                                       seed=seed_stream())
+
+            # TODO: this can't be right, there's no point of applying sign_r 
+            # when you do it this way...
+
+            # Make sign_s the correct shape
+            while sign_s.shape.ndims < sample.shape.ndims:
+                sign_s = tf.expand_dims(sign_s, -1)
 
             # Flipout-generated samples for this batch
-            samples = tf.multiply(tf.expand_dims(w_sample*sign_r, 0), sign_s)
-            samples += tf.expand_dims(w_mean, 0)
+            samples = sample*tf.expand_dims(sign_r, 0)*sign_s
+            samples += mean
 
         # No other estimators supported at the moment
         else:
@@ -315,12 +331,6 @@ class Parameter(BaseParameter):
         # Apply transformation
         self._built_obj_raw = samples
         self.built_obj = self.transform(self._built_obj_raw)
-
-
-    def _build_mean(self):
-        """Build the mean model."""
-        self._mean_obj_raw = tf.expand_dims(self._built_posterior.mean(), 0)
-        self.mean_obj = self.transform(self._mean_obj_raw)
 
 
     def _build_losses(self):

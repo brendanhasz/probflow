@@ -16,7 +16,6 @@ def test_parameter_build():
     p1.build(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(p1._built_prior, tfd.Normal)
     assert isinstance(p1._built_posterior, tfd.Normal)
-    assert isinstance(p1.seed_stream, tfd.SeedStream)
     assert isinstance(p1._built_obj_raw, tf.Tensor)
     assert isinstance(p1.built_obj, tf.Tensor)
     assert isinstance(p1._mean_obj_raw, tf.Tensor)
@@ -75,7 +74,27 @@ def test_parameter_built_obj_none_estimator():
     assert np.all(o1==o2) #no transform should have happened
 
 
-# TODO: test above but w/ the flipout estimator
+def test_parameter_built_obj_flipout_estimator():
+    """Tests probflow.parameters.Parameter.built_obj w/ estimator=flipout"""
+    p1 = Parameter(name='test_parameter_built_obj_flipout_estimator',
+                   shape=[3,4], estimator='flipout')
+    p1.build(tf.placeholder(tf.float32, [1]), [2])
+    init_op = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init_op)
+        [o1, o2] = sess.run([p1.built_obj, 
+                             p1._built_obj_raw])
+    assert isinstance(o1, np.ndarray)
+    assert isinstance(o2, np.ndarray)
+    assert o1.ndim == 3
+    assert o1.shape[0] == 2
+    assert o1.shape[1] == 3
+    assert o1.shape[2] == 4
+    assert o2.ndim == 3
+    assert o2.shape[0] == 2
+    assert o2.shape[1] == 3
+    assert o2.shape[2] == 4
+    assert np.all(o1==o2) #no transform should have happened
 
 
 def test_parameter_mean_obj():
