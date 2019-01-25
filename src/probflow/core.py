@@ -249,11 +249,8 @@ class BaseLayer(ABC):
 
         """
 
-        # Get a list of all parameters in the model
+        # Store a list of all parameters in the model
         self._parameters = self._parameter_list()
-
-        # Rename parameters w/ identical names
-        self._make_parameter_names_unique(self._parameters)
 
         # Build each of this layer's arguments.
         self.built_args = dict()
@@ -302,20 +299,6 @@ class BaseLayer(ABC):
             elif isinstance(self.args[arg], BaseParameter):
                 params += [self.args[arg]]
         return params
-
-
-    def _make_parameter_names_unique(self, params):
-        """Rename parameters in this model such that each name is unique."""
-        names = dict()
-        for param in params:
-            name = param.name
-            if name in names:
-                new_name = (names[name][-1].rsplit('_', 1)[0] + 
-                            '_' + str(len(names[name])+1))
-                names[name].append(new_name)
-                param.name = new_name
-            else: #name not yet used
-                names[name] = [name]
 
 
     def __add__(self, other):

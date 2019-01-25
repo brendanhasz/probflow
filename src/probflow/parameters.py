@@ -240,12 +240,23 @@ class Parameter(BaseParameter):
         data : |Tensor|
             Data for this batch.
         """
+        self._make_name_unique()
         self._build_prior(data, batch_shape)
         self._build_posterior(data, batch_shape)
         self._build_mean()
         self._build_sample(data, batch_shape)
         self._build_losses()
         self._is_built = True
+
+
+    def _make_name_unique(self):
+        """Ensure this parameter's name is a unique scope name in TF graph."""
+        new_name = self.name
+        ix = 1
+        while tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=new_name):
+            new_name = self.name + '_' + str(ix)
+            ix += 1
+        self.name = new_name
 
 
     def _build_prior(self, data, batch_shape):
@@ -264,8 +275,6 @@ class Parameter(BaseParameter):
         with tf.variable_scope(self.name):
             for arg in self.post_param_names:
                 params[arg] = tf.get_variable(arg, shape=self.shape)
-                # TODO: can get an error here if you try to build a second
-                # model w/ Parameter w/ duplicate name...
 
         # Transform posterior parameters
         for arg, lb, ub in zip(self.post_param_names, 

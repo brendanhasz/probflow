@@ -34,6 +34,3 @@ def test_BaseDistribution_fit():
     model.fit(x, y, epochs=1)
 
     # if you run it w/ a bunch of epochs it recovers the true params!
-
-    # Reset the graph
-    tf.reset_default_graph()
