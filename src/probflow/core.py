@@ -392,22 +392,8 @@ class BaseDistribution(BaseLayer):
         return obj.log_prob(vals)
 
 
-    def _make_parameter_names_unique(self, params):
-        """Rename parameters in this model such that each name is unique."""
-        names = dict()
-        for param in params:
-            name = param.name
-            if name in names:
-                new_name = (names[name][-1].rsplit(' ', 1)[0] + 
-                            ' ' + str(len(names[name])+1))
-                names[name].append(new_name)
-                param.name = new_name
-            else: #name not yet used
-                names[name] = [name]
-
-
-    def fit(self, x, y, batch_size=128, epochs=100, 
-            optimizer='adam', learning_rate=None, metrics=None):
+    def fit(self, x, y, dtype=tf.float32, batch_size=128, epochs=100, 
+            optimizer='adam', learning_rate=None, metrics=None, verbose=True):
         """Fit model.
 
         TODO: Docs...
@@ -434,33 +420,6 @@ class BaseDistribution(BaseLayer):
 
         """
 
-        # TODO: this should be an arg to fit...
-        dtype = tf.float32
-
-        # Set up the data for fitting
-        # TODO: x,y input should be able to be np arrays, pandas arrays, or tf dataset iterators
-        #y_vals = iterator...
-        #x_vals = iterator...
-        # N = number of datapoints (x.shape[0])
-        # first split into train and validation
-        #if x and y are arrays of the correct size (of the train data)
-        x_shape = list(x.shape)
-        y_shape = list(x.shape)
-        x_shape[0] = None
-        y_shape[0] = None
-        x_ph = tf.placeholder(dtype, x_shape)
-        y_ph = tf.placeholder(dtype, x_shape)
-        train_dataset = tf.data.Dataset.from_tensor_slices((x, y))
-        train_batches = (train_dataset
-            .shuffle(x.shape[0], reshuffle_each_iteration=True)
-            .repeat()
-            .batch(batch_size))
-
-        # TODO: you want to use a feedable iterator, see https://www.tensorflow.org/guide/datasets
-        # may have to have batch_size be a placeholder (which is passed down recursively during build())
-        # and then you set the value w/ feed_dict
-        batch_shape_ph = tf.placeholder(tf.int32, [1])
-
         # Get a list of all parameters in the model
         self._parameters = self._parameter_list()
 
@@ -478,11 +437,30 @@ class BaseDistribution(BaseLayer):
         for param in self._parameters:
             param._session = self._session
 
+        # Batch shape
+        batch_shape_ph = tf.placeholder(tf.int32, [1])
+        if isinstance(batch_size, int):
+            batch_size = [batch_size]
+
+        # Split data into training and validation data
+
+        # Data placeholders
+        N = x.shape[0]
+        x_shape = list(x.shape)
+        y_shape = list(y.shape)
+        x_shape[0] = None
+        y_shape[0] = None
+        x_data = tf.placeholder(dtype, x_shape)
+        y_data = tf.placeholder(dtype, y_shape)
+        self._initialize_shuffles(N, epochs)
+
+        # TODO: add support for passing x and y as tf dataset iterators
+
         # Set up TensorFlow graph for per-sample losses
         self.log_loss = (self.arg_loss_sum +  #size (batch_size,)
-                         self._log_loss(self.built_obj, y_vals))
+                         self._log_loss(self.built_obj, y_data))
         self.mean_log_loss = (self.mean_arg_loss_sum + #size (batch_size,)
-                              self._log_loss(self.mean_obj,y_vals))
+                              self._log_loss(self.mean_obj, y_data))
         self.kl_loss = self.kl_loss_sum + self._kl_loss() #size (1,)
 
         # TODO: uuhh do you ever actually need log_loss?
@@ -491,14 +469,75 @@ class BaseDistribution(BaseLayer):
         # log_prob (below) with distribution=True and individually=True...
 
         # ELBO loss function
-        log_likelihood = tf.reduce_mean(model.log_prob(y_vals))
+        log_likelihood = tf.reduce_mean(model.log_prob(y_data))
         kl_loss = tf.reduce_sum(self.kl_loss) / N
         elbo_loss = kl_loss - log_likelihood
 
-        # Fit the model
-        # TODO
+        # TODO: determine a good default learning rate?
 
+        # Optimizer
+        with tf.name_scope('train'):
+          optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+          train_op = optimizer.minimize(elbo_loss)
+
+        # Initializers
+        init_op = tf.group(tf.global_variables_initializer(),
+                           tf.local_variables_initializer())
+
+        # Fit the model
+        Nbatches = np.ceil(N/batch_size) #number of batches per epoch
+        for epoch in range(epochs):
+
+            # Print progress
+            if verbose:
+                print('Epoch %d / %d' % (epoch, epochs))
+
+            # Train on each batch in this epoch
+            for batch in range(Nbatches):
+                #b_x, b_y = self._generate_batch(x, y, epoch, batch, batch_size)
+                #self._session.run(train_op, feed_dict={x_data: b_x,
+                #                                       y_data: b_y})
+                if verbose and batch % 100 == 0:
+                    print('  Batch %d / %d (%0.1f)\r' % 
+                          (batch, Nbatches, batch/Nbatches))
+                # TODO: print progress every so often
+
+            # TODO: evaluate metrics on validation data
+            print('  TODO: validated')
+
+
+        # Finished
         self.is_fit = True
+
+
+    def _make_parameter_names_unique(self, params):
+        """Rename parameters in this model such that each name is unique."""
+        names = dict()
+        for param in params:
+            name = param.name
+            if name in names:
+                new_name = (names[name][-1].rsplit(' ', 1)[0] + 
+                            ' ' + str(len(names[name])+1))
+                names[name].append(new_name)
+                param.name = new_name
+            else: #name not yet used
+                names[name] = [name]
+
+
+    def _initialize_shuffles(self, N, epochs):
+        """Initialize shuffling of the data across epochs"""
+        self._shuffled_ids = np.empty(N,epochs, dtype=np.uint64)
+        for epoch in range(epochs):
+            self._shuffled_ids[:,epoch] = np.random.permutation(N)
+
+
+    def _generate_batch(self, x, y, epoch, batch, batch_size):
+        """Generate data for one batch"""
+        N = x.shape[0]
+        a = batch*batch_size
+        b = min(N, (batch+1)*batch_size)
+        ix = self._shuffled_ids[a:b, epoch]
+        return x[ix,...], y[ix,...]
 
 
     def _ensure_is_fit(self):
@@ -564,7 +603,7 @@ class BaseDistribution(BaseLayer):
             Before calling :meth:`.predictive_distribution` on a |Model|, you 
             must first :meth:`.fit` it to some data.
 
-        Returns array of shape (x.shape[0],y.shape[1],num_samples)
+        Returns array of shape (x.shape[0],y.shape[1],...,y.shape[-1],num_samples)
 
         """
 
