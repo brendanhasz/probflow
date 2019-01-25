@@ -6,7 +6,8 @@ TODO: more info...
 
 """
 
-
+# TODO: time is a debugger
+import time
 
 from abc import ABC, abstractmethod
 import numpy as np
@@ -248,6 +249,12 @@ class BaseLayer(ABC):
 
         """
 
+        # Get a list of all parameters in the model
+        self._parameters = self._parameter_list()
+
+        # Rename parameters w/ identical names
+        self._make_parameter_names_unique(self._parameters)
+
         # Build each of this layer's arguments.
         self.built_args = dict()
         self.mean_args = dict()
@@ -290,11 +297,25 @@ class BaseLayer(ABC):
         """Get a list of parameters in this layer or its arguments."""
         params = []
         for arg in self.args:
-            if isinstance(arg, BaseLayer):
-                params += arg._parameter_list()
-            elif isinstance(arg, BaseParameter):
-                params += [arg]
+            if isinstance(self.args[arg], BaseLayer):
+                params += self.args[arg]._parameter_list()
+            elif isinstance(self.args[arg], BaseParameter):
+                params += [self.args[arg]]
         return params
+
+
+    def _make_parameter_names_unique(self, params):
+        """Rename parameters in this model such that each name is unique."""
+        names = dict()
+        for param in params:
+            name = param.name
+            if name in names:
+                new_name = (names[name][-1].rsplit('_', 1)[0] + 
+                            '_' + str(len(names[name])+1))
+                names[name].append(new_name)
+                param.name = new_name
+            else: #name not yet used
+                names[name] = [name]
 
 
     def __add__(self, other):
@@ -375,6 +396,11 @@ class BaseLayer(ABC):
         return '\n'.join([prepend+self_str] + 
                          [prepend+ind+a+' = '+arg_strs[a] for a in self.args])
 
+        # TODO: there's a bug somewhere...
+        # try:
+        # model = Normal(Parameter()*Input()+Parameter(), 1.0)
+        # print(model)
+
 
 
 class BaseDistribution(BaseLayer):
@@ -393,7 +419,7 @@ class BaseDistribution(BaseLayer):
 
 
     def fit(self, x, y, dtype=tf.float32, batch_size=128, epochs=100, 
-            optimizer='adam', learning_rate=None, metrics=None, verbose=True):
+            optimizer='adam', learning_rate=0.01, metrics=None, verbose=True):
         """Fit model.
 
         TODO: Docs...
@@ -420,29 +446,10 @@ class BaseDistribution(BaseLayer):
 
         """
 
-        # Get a list of all parameters in the model
-        self._parameters = self._parameter_list()
-
-        # Rename parameters w/ identical names
-        self._make_parameter_names_unique(self._parameters)
-
-        # Recursively build this model and its args
-        self.build(data, batch_shape_ph)
-        model = self.built_obj
-
-        # Create the TensorFlow session
-        self._session = tf.Session()
-
-        # Assign session to each parameter
-        for param in self._parameters:
-            param._session = self._session
-
-        # Batch shape
-        batch_shape_ph = tf.placeholder(tf.int32, [1])
-        if isinstance(batch_size, int):
-            batch_size = [batch_size]
-
         # Split data into training and validation data
+        # TODO
+
+        # Do we have to make sure data is at least 2 dimensional?
 
         # Data placeholders
         N = x.shape[0]
@@ -456,12 +463,18 @@ class BaseDistribution(BaseLayer):
 
         # TODO: add support for passing x and y as tf dataset iterators
 
+        # Batch shape
+        batch_shape_ph = tf.placeholder(tf.int32, [1])
+
+        # Recursively build this model and its args
+        self.build(x_data, batch_shape_ph)
+
         # Set up TensorFlow graph for per-sample losses
-        self.log_loss = (self.arg_loss_sum +  #size (batch_size,)
+        self.log_loss = (self.samp_loss_sum +  #size (batch_size,)
                          self._log_loss(self.built_obj, y_data))
-        self.mean_log_loss = (self.mean_arg_loss_sum + #size (batch_size,)
+        self.mean_log_loss = (self.mean_loss_sum + #size (batch_size,)
                               self._log_loss(self.mean_obj, y_data))
-        self.kl_loss = self.kl_loss_sum + self._kl_loss() #size (1,)
+        self.kl_loss = tf.cast(self.kl_loss_sum + self._kl_loss(), dtype)
 
         # TODO: uuhh do you ever actually need log_loss?
         # that's just the log posterior prob of *samples* from the model?
@@ -469,7 +482,7 @@ class BaseDistribution(BaseLayer):
         # log_prob (below) with distribution=True and individually=True...
 
         # ELBO loss function
-        log_likelihood = tf.reduce_mean(model.log_prob(y_data))
+        log_likelihood = tf.reduce_mean(self.built_obj.log_prob(y_data))
         kl_loss = tf.reduce_sum(self.kl_loss) / N
         elbo_loss = kl_loss - log_likelihood
 
@@ -480,12 +493,19 @@ class BaseDistribution(BaseLayer):
           optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
           train_op = optimizer.minimize(elbo_loss)
 
+        # Create the TensorFlow session and assign it to each parameter
+        self._session = tf.Session()
+        for param in self._parameters:
+            param._session = self._session
+
         # Initializers
         init_op = tf.group(tf.global_variables_initializer(),
                            tf.local_variables_initializer())
+        self._session.run(init_op)
 
         # Fit the model
-        Nbatches = np.ceil(N/batch_size) #number of batches per epoch
+        n_batch = int(np.ceil(N/batch_size))
+        print_batches = int(np.ceil(n_batch/10))
         for epoch in range(epochs):
 
             # Print progress
@@ -493,40 +513,32 @@ class BaseDistribution(BaseLayer):
                 print('Epoch %d / %d' % (epoch, epochs))
 
             # Train on each batch in this epoch
-            for batch in range(Nbatches):
-                #b_x, b_y = self._generate_batch(x, y, epoch, batch, batch_size)
-                #self._session.run(train_op, feed_dict={x_data: b_x,
-                #                                       y_data: b_y})
-                if verbose and batch % 100 == 0:
-                    print('  Batch %d / %d (%0.1f)\r' % 
-                          (batch, Nbatches, batch/Nbatches))
-                # TODO: print progress every so often
+            for batch in range(n_batch):
+                b_x, b_y = self._generate_batch(x, y, epoch, batch, batch_size)
+                self._session.run(train_op, 
+                                  feed_dict={x_data: b_x,
+                                             y_data: b_y,
+                                             batch_shape_ph: [b_x.shape[0]]})
 
-            # TODO: evaluate metrics on validation data
+                # Print progress
+                if verbose and batch % print_batches == 0:
+                    print("  Batch %d / %d (%0.1f)\r" % 
+                          (batch+1, n_batch, 100.0*batch/n_batch), end='')
+
+            # Evaluate metrics on validation data
+            # TODO: and then print the results
+            print(60*" "+"\r", end='')
             print('  TODO: validated')
 
 
-        # Finished
+
+        # Finished!
         self.is_fit = True
-
-
-    def _make_parameter_names_unique(self, params):
-        """Rename parameters in this model such that each name is unique."""
-        names = dict()
-        for param in params:
-            name = param.name
-            if name in names:
-                new_name = (names[name][-1].rsplit(' ', 1)[0] + 
-                            ' ' + str(len(names[name])+1))
-                names[name].append(new_name)
-                param.name = new_name
-            else: #name not yet used
-                names[name] = [name]
 
 
     def _initialize_shuffles(self, N, epochs):
         """Initialize shuffling of the data across epochs"""
-        self._shuffled_ids = np.empty(N,epochs, dtype=np.uint64)
+        self._shuffled_ids = np.empty((N, epochs), dtype=np.uint64)
         for epoch in range(epochs):
             self._shuffled_ids[:,epoch] = np.random.permutation(N)
 

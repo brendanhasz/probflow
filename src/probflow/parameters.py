@@ -194,6 +194,7 @@ class Parameter(BaseParameter):
         self.inv_transform = inv_transform
         self._built_posterior = None
         self._session = None
+        self._is_built = False
 
         # TODO: initializer?
 
@@ -244,6 +245,7 @@ class Parameter(BaseParameter):
         self._build_mean()
         self._build_sample(data, batch_shape)
         self._build_losses()
+        self._is_built = True
 
 
     def _build_prior(self, data, batch_shape):
@@ -262,6 +264,8 @@ class Parameter(BaseParameter):
         with tf.variable_scope(self.name):
             for arg in self.post_param_names:
                 params[arg] = tf.get_variable(arg, shape=self.shape)
+                # TODO: can get an error here if you try to build a second
+                # model w/ Parameter w/ duplicate name...
 
         # Transform posterior parameters
         for arg, lb, ub in zip(self.post_param_names, 
@@ -346,7 +350,7 @@ class Parameter(BaseParameter):
 
     def _ensure_is_built(self):
         """Raises a RuntimeError if parameter has not yet been built."""
-        if self._built_posterior is None:
+        if not self._is_built:
             raise RuntimeError('parameter must first be built')
 
 

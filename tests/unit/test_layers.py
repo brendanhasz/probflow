@@ -82,11 +82,22 @@ def test_add_layer():
     assert l2_out[1][0] == 6.0
 
     # With a Parameter as input
-    #a = Parameter()
-    #b = Parameter()
-    #l2 = Add(a, b)
-    # TODO: although maybe that should go in the integration tests?
-    # TODO (first do test_parameters and finish debugging that)
+    a = Parameter(shape=[3,4])
+    b = Parameter(shape=[3,4])
+    l1 = Add(a, b)
+    l1.build(tf.placeholder(tf.float32, [1]), [2])
+    init_op = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init_op)
+        l1_out = sess.run(l1.built_obj)
+    assert isinstance(l1_out, np.ndarray)
+    assert l1_out.ndim == 3
+    assert l1_out.shape[0] == 2
+    assert l1_out.shape[1] == 3
+    assert l1_out.shape[2] == 4
+
+    # Reset the graph
+    tf.reset_default_graph()
 
 
 def test_sub_layer():
@@ -158,9 +169,6 @@ def test_sub_layer():
     assert l2_out[0][0] == 3.0
     assert l2_out[1][0] == 2.0
 
-    # With a Parameter as input
-    # TODO
-
 
 def test_mul_layer():
     """Tests probflow.layers.Mul"""
@@ -230,9 +238,6 @@ def test_mul_layer():
     assert l2_out.shape[1] == 1
     assert l2_out[0][0] == 3.0
     assert l2_out[1][0] == 8.0
-
-    # With a Parameter as input
-    # TODO
 
 
 def test_div_layer():
@@ -304,9 +309,6 @@ def test_div_layer():
     assert isclose(l2_out[0][0], 1.0/3.0) #float32 vs 64...
     assert l2_out[1][0] == 0.5
 
-    # With a Parameter as input
-    # TODO
-
 
 def test_neg_layer():
     """Tests probflow.layers.Neg"""
@@ -375,9 +377,6 @@ def test_neg_layer():
     assert l2_out.shape[1] == 1
     assert l2_out[0][0] == -1.0
     assert l2_out[1][0] == 2.0
-
-    # With a Parameter as input
-    # TODO
 
 
 def test_abs_layer():
@@ -466,9 +465,6 @@ def test_abs_layer():
     assert l2_out[0][0] == 1.0
     assert l2_out[1][0] == 2.0
 
-    # With a Parameter as input
-    # TODO
-
 
 def test_exp_layer():
     """Tests probflow.layers.Exp"""
@@ -546,9 +542,6 @@ def test_exp_layer():
     assert l2_out.shape[1] == 1
     assert isclose(l2_out[0][0], 2.718281828459045)
     assert isclose(l2_out[1][0], 0.1353352832366127)
-
-    # With a Parameter as input
-    # TODO
 
 
 def test_log_layer():
@@ -628,9 +621,6 @@ def test_log_layer():
     assert isclose(l2_out[0][0], 0.0)
     assert isclose(l2_out[1][0], 1.0)
 
-    # With a Parameter as input
-    # TODO
-
 
 def test_layer_ops_overloading():
     """Tests the basic arithmetic ops (__add__, etc) are overloaded"""
@@ -681,3 +671,5 @@ def test_layer_ops_overloading():
 # TODO: Input layer
 
 # TODO: Dense layer
+
+# TODO: other layers

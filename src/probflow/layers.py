@@ -131,7 +131,7 @@ class Input(BaseLayer):
 
     def _build(self, args, data):
         """Build the layer."""
-        if isinstance(args['cols'], np.ndarray) and len(args['cols']) == 0:
+        if self.kwargs['cols'] is None:
             return data
         else:
             # TODO: slice data by cols
