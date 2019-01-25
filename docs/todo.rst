@@ -28,6 +28,7 @@ Backlog (short term):
 * Models which use them (Classifiers)
 * Tests
 * Write the docs main page and user guide
+* Examples dir (with examples therein)
 * `Reset method`_
 * `Sklearn support`_
 
