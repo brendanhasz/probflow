@@ -6,8 +6,7 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Test that Parameter.build() builds sample model (built_obj) correctly
-* Finish basedistribution.fit()
+* Finish BaseDistribution.fit()
 * fit should have a record=False arg (record posterior values over training)
 * Finish BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Tests and debug a simple 1d linear model

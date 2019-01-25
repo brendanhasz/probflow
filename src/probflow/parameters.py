@@ -270,6 +270,7 @@ class Parameter(BaseParameter):
             params[arg] = self._bound(params[arg], lb, ub)
 
         # Create variational posterior distribution
+        self._params = params
         self.posterior = self.posterior_fn(**params)
         self.posterior.build(data, batch_shape)
         self._built_posterior = self.posterior.built_obj
@@ -293,36 +294,25 @@ class Parameter(BaseParameter):
                                                    seed=seed_stream())
 
         # Use the Flipout estimator (https://arxiv.org/abs/1803.04386)
+        # TODO: this isn't actually the Flipout estimator...
+        # it flips samples around the posterior mean but not in the same way...
         elif self.estimator=='flipout':
 
-            # Posterior mean
-            mean = self._mean_obj_raw
+            # Create a centered version of the posterior
+            params = self._params.copy()
+            params['loc'] = 0.0
+            sample_posterior = self.posterior_fn(**params)
+            sample_posterior.build(data, batch_shape)
 
-            # Sample from centered posterior distribution
-            sample = self._built_posterior.sample(seed=seed_stream()) - mean
+            # Take a single sample from that centered posterior
+            sample = sample_posterior.built_obj.sample(seed=seed_stream())
 
-            # TODO: this might not be the best way to do it...
-            # could manually set loc=0 for the tfp.distribution
-            # ie posterior(loc=0, scale=param1)
-            # param2 = free param
-            # and then fit [param1, param2] w/ posterior.sample() + param2
+            # Generate random sign matrix
+            signs = random_rademacher(tf.concat([batch_shape, self.shape], 0),
+                                      dtype=data.dtype, seed=seed_stream())
 
-            # Random sign matrixes
-            sign_r = random_rademacher(self.shape, dtype=data.dtype,
-                                       seed=seed_stream())
-            sign_s = random_rademacher(batch_shape, dtype=data.dtype,
-                                       seed=seed_stream())
-
-            # TODO: this can't be right, there's no point of applying sign_r 
-            # when you do it this way...
-
-            # Make sign_s the correct shape
-            while sign_s.shape.ndims < sample.shape.ndims:
-                sign_s = tf.expand_dims(sign_s, -1)
-
-            # Flipout-generated samples for this batch
-            samples = sample*tf.expand_dims(sign_r, 0)*sign_s
-            samples += mean
+            # Flipout(ish)-generated samples
+            samples = sample*signs + self._mean_obj_raw
 
         # No other estimators supported at the moment
         else:
