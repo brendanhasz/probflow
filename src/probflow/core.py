@@ -6,7 +6,6 @@ TODO: more info...
 
 """
 
-
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -312,22 +311,22 @@ class BaseLayer(BaseObject):
                 self.mean_args[arg_name] = arg.mean_obj
 
         # Sum the losses of this layer's arguments
-        self.samp_loss_sum = 0 # log posterior probability of sample model
-        self.mean_loss_sum = 0 # log posterior probability of mean model
-        self.kl_loss_sum = 0 # sum of KL div between variational post and priors
-        for arg, arg_name in self.args.items():
+        self.samp_loss_sum = 0 #log posterior probability of sample model
+        self.mean_loss_sum = 0 #log posterior probability of mean model
+        self.kl_loss_sum = 0 #sum of KL div between variational post and priors
+        for arg_name, arg in self.args.items():
             if self._arg_is('tensor_like', arg):
                 pass #no loss incurred by data
             elif self._arg_is('layer', arg):
-                self.samp_loss_sum += arg.samp_loss_sum + arg._log_loss
-                self.mean_loss_sum += arg.mean_loss_sum + arg._mean_log_loss
-                self.kl_loss_sum += arg.kl_loss_sum + arg._kl_loss
+                self.samp_loss_sum += arg.samp_loss_sum
+                self.samp_loss_sum += arg._log_loss(arg.built_obj)
+                self.mean_loss_sum += arg.mean_loss_sum
+                self.mean_loss_sum += arg._mean_log_loss(arg.mean_obj)
+                self.kl_loss_sum += arg.kl_loss_sum + arg._kl_loss()
             elif self._arg_is('parameter', arg):
                 self.samp_loss_sum += arg._log_loss
                 self.mean_loss_sum += arg._mean_log_loss
                 self.kl_loss_sum += arg._kl_loss
-
-        # TODO: could make parameter + layer have same interface?
 
         # Build this layer's sample model and mean model
         self.built_obj = self._build(self.built_args, data, batch_shape)
@@ -355,7 +354,7 @@ class BaseLayer(BaseObject):
         # Make string representation of this layer and its args
         self_str = self.__class__.__name__
         arg_strs = dict()
-        for arg in self.args:
+        for arg in self._default_args:
             if isinstance(self.args[arg], (int, float)):
                 arg_strs[arg] = str(self.args[arg])
             elif isinstance(self.args[arg], (np.ndarray)):
@@ -372,14 +371,15 @@ class BaseLayer(BaseObject):
                 arg_strs[arg] = '???'
 
         # Try a short representation
-        short_args = [a+' = '+arg_strs[a] for a in self.args]
+        short_args = [a+' = '+arg_strs[a] for a in self._default_args]
         short_str = self_str+'('+', '.join(short_args)+')'
         if len(short_str) < max_short:
             return short_str
 
         # Use a longer representation if the shorter one failed
         return '\n'.join([prepend+self_str] +
-                         [prepend+ind+a+' = '+arg_strs[a] for a in self.args])
+                         [prepend+ind+a+' = '+arg_strs[a] 
+                          for a in self._default_args])
 
 
 
@@ -392,14 +392,21 @@ class BaseDistribution(BaseLayer):
 
     """
 
+
     # Posterior distribution parameter bounds (lower, upper)
     _post_param_bounds = {
         'input': (None, None)
     }
 
-    def _log_loss(self, obj, vals):
+
+    def _log_loss(self, vals):
         """Compute the log loss ."""
-        return obj.log_prob(vals)
+        return self.built_obj.log_prob(vals)
+
+
+    def _mean_log_loss(self, vals):
+        """Compute the log loss ."""
+        return self.mean_obj.log_prob(vals)
 
 
     def fit(self, x, y,
@@ -526,9 +533,9 @@ class BaseDistribution(BaseLayer):
 
         # Set up TensorFlow graph for per-sample losses
         self.log_loss = (self.samp_loss_sum +  #size (batch_size,)
-                         self._log_loss(self.built_obj, y_data))
+                         self._log_loss(y_data))
         self.mean_log_loss = (self.mean_loss_sum + #size (batch_size,)
-                              self._log_loss(self.mean_obj, y_data))
+                              self._mean_log_loss(y_data))
         self.kl_loss = tf.cast(self.kl_loss_sum + self._kl_loss(), dtype)
 
         # TODO: uuhh do you ever actually need log_loss?
@@ -561,6 +568,7 @@ class BaseDistribution(BaseLayer):
         self._session.run(init_op)
 
         # Fit the model
+        self.is_fit = True
         n_batch = int(np.ceil(N/batch_size)) #number of batches per epoch
         print_batches = int(np.ceil(n_batch/10)) #info each print_batches batch
         for epoch in range(epochs):
@@ -584,14 +592,13 @@ class BaseDistribution(BaseLayer):
                           (batch+1, n_batch, 100.0*batch/n_batch), end='')
 
             # Evaluate metrics
+            print(60*' '+"\r", end='')
             if metrics:
-                metric_d = self.metrics(x_val, y_val, metrics)
-                print(60*' '+"\r", end='')
-                print('  '+[m+': '+metric_d[m]+4*' ' for m in metric_d])
+                md = self.metrics(x_val, y_val, metrics)
+                print('  '+(4*' ').join([m+': '+str(md[m]) for m in md]))
 
         # Finished!
         print('Done!')
-        self.is_fit = True
 
 
     def _initialize_shuffles(self, N, epochs, shuffle):
@@ -619,7 +626,7 @@ class BaseDistribution(BaseLayer):
             raise RuntimeError('model must first be fit')
 
 
-    def sample_posteriors(self, params=None, num_samples=1000):
+    def sample_posterior(self, params=None, num_samples=1000):
         """Draw samples from parameter posteriors.
 
         TODO: Docs... params is a list of strings of params to plot
@@ -629,17 +636,35 @@ class BaseDistribution(BaseLayer):
             Before calling :meth:`.posterior` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
-        TODO: should return a dict w/ an entry for each parameter in the model
-        NOT a pandas array, b/c posterior params might be different sizes
+        Parameters
+        ----------
+        params : |ndarray|
+            Independent variable values of the dataset to fit (aka the 
+            "features").
 
+        Returns
+        -------
+        dict
+            Samples from the parameter posterior distributions.  A dictionary
+            where the keys contain the parameter names and the values contain
+            |ndarray|s with the posterior samples.  The |ndarray|s are of size
+            (``num_samples``,param.shape).
         """
 
         # Check model has been fit
         self._ensure_is_fit()
 
+        # Ensure num_samples is int
+        if type(num_samples) is not int:
+            raise TypeError('num_samples must be an int')
+
         # Get all params if not specified
         if params is None:
             params = [param.name for param in self._parameters]
+
+        # Make list if string was passed
+        if type(params) is str:
+            params = [params]
 
         # Get the posterior distributions
         posteriors = dict()
@@ -651,7 +676,7 @@ class BaseDistribution(BaseLayer):
         return posteriors
 
 
-    def plot_posteriors(self, params=None):
+    def plot_posterior(self, params=None):
         """Plot posterior distributions of the model's parameters.
 
         TODO: Docs... params is a list of strings of params to plot
@@ -692,8 +717,8 @@ class BaseDistribution(BaseLayer):
                        self._batch_size_ph: [x.shape[0]]})
 
 
-    def predict(self, x):
-        """Predict dependent variable for samples in x.
+    def predict(self, x=None):
+        """Predict dependent variable for samples in x.s
 
         TODO: explain how predictions are generated using the mean of each
         variational distribution
@@ -703,52 +728,21 @@ class BaseDistribution(BaseLayer):
             Before calling :meth:`.predict` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
-        TODO: update parameters list below which is wrong
-
         Parameters
         ----------
-        x : np.ndarray
-            Input array of independent variable values.  Should be
-            of shape (N,D), where N is the number of samples and D
-            is the number of dimensions of the independent variable.
-        method : {'mean', 'median', 'mode', 'min', 'max', 'prc'}
-            Method to use to convert the predictive distribution
-            into a single prediction.
-
-            * 'mean': Use the mean of the predictive distribution
-              (the default).
-            * 'median': Use the median of the predictive dist.
-            * 'mode': Use the mode of the predictive dist.
-            * 'min': Use the minimum of the predictive dist.
-            * 'max': Use the maximum of the predictive dist.
-            * 'prc': Use a specified percentile of the predictive
-              dist.  The `prc` arg sets what percentile value to
-              use.
-
-        prc : float
-            Percentile of the predictive distribution to use as
-            a prediction when ``method=='prc'``. Between 0 and 100
-            inclusive (default=50).
-        num_samples : int
-            Number of samples to draw from the posterior predictive
-            distribution (default=100).
+        x : |None| or |ndarray|
+            Input array of independent variable values of data on which to
+            evalutate the model.  First dimension should be equal to the number
+            of samples.
+            If |None|, will use the data the model was trained on (the default).
 
         Returns
         -------
         |ndarray|
-            Predicted y-value for each sample in `x`.  Will be of
-            size (N,D_out), where N is the number of samples (equal
-            to `x.shape[0]`) and D_out is the number of output
-            dimensions (equal to `y.shape[1]`).
-
-        See Also
-        --------
-        predictive_distribution : used to generate the distribution
-            which is used to make the prediction.
-
-        Notes
-        -----
-        TODO: Docs...
+            Predicted y-value for each sample in ``x``.  Will be of
+            size ``(N, D_out)``, where N is the number of samples (equal
+            to ``x.shape[0]``) and D_out is the number of output
+            dimensions (equal to ``y.shape[1:]``).
 
         Examples
         --------
@@ -759,7 +753,16 @@ class BaseDistribution(BaseLayer):
         # Check model has been fit
         self._ensure_is_fit()
 
-        # TODO: run tf session + predict using mean model
+        # Use training data if none passed
+        if x is None:
+            x = self._x_train
+
+        # Predict using the mean model
+        #TODO: will want to use mode, not mean, for discrete distributions?
+        return self._session.run(
+            self.mean_obj.mean(), 
+            feed_dict={self._x_ph: x,
+                       self._batch_size_ph: [x.shape[0]]})
 
 
     def metrics(self, x=None, y=None, metric_list=[]):
@@ -795,9 +798,14 @@ class BaseDistribution(BaseLayer):
             Default = empty list
         """
 
+        # Make list if metric_list is not
+        if isinstance(metric_list, str):
+            metric_list = [metric_list]
+
         # Use training data if none passed
-        x = self._x_train
-        y = self._y_train
+        if x is None and y is None:
+            x = self._x_train
+            y = self._y_train
 
         # Make predictions
         y_pred = self.predict(x)
@@ -1366,6 +1374,52 @@ class DiscreteDistribution(BaseDistribution):
     TODO: More info...
 
     """
+
+    def predict(self, x=None):
+        """Predict dependent variable for samples in x.s
+
+        TODO: explain how predictions are generated using the MODE of each
+        variational distribution
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.predict` on a |Model|, you must first
+            :meth:`.fit` it to some data.
+
+        Parameters
+        ----------
+        x : |None| or |ndarray|
+            Input array of independent variable values of data on which to
+            evalutate the model.  First dimension should be equal to the number
+            of samples.
+            If |None|, will use the data the model was trained on (the default).
+
+        Returns
+        -------
+        |ndarray|
+            Predicted y-value for each sample in ``x``.  Will be of
+            size ``(N, D_out)``, where N is the number of samples (equal
+            to ``x.shape[0]``) and D_out is the number of output
+            dimensions (equal to ``y.shape[1:]``).
+
+        Examples
+        --------
+        TODO: Docs...
+
+        """
+
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Use training data if none passed
+        if x is None:
+            x = self._x_train
+
+        # Predict using the mode of the mean model
+        return self._session.run(
+            self.mean_obj.mode(), 
+            feed_dict={self._x_ph: x,
+                       self._batch_size_ph: [x.shape[0]]})
 
 
     def calibration_curve(self, x, y, split_by=None, bins=10):

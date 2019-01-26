@@ -232,3 +232,40 @@ def test_scale_parameter_mean_obj():
     assert o2.shape[2] == 4
     assert not np.any(o1==o2) #transform should have happened
     # so none should be equal (unless == exactly 1.0 or 0.0)
+
+
+def test_parameter_ops_overloading():
+    """Tests the basic arithmetic ops are overloaded for parameters too"""
+
+    # Param to work with
+    p1 = Parameter()
+
+    # Add
+    o1 = p1 + 1
+    o1.build(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(o1.built_obj, tf.Tensor)
+
+    # Sub
+    o1 = p1 - 1
+    o1.build(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(o1.built_obj, tf.Tensor)
+
+    # Mult
+    o1 = p1 * 1
+    o1.build(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(o1.built_obj, tf.Tensor)
+
+    # Div
+    o1 = p1 + 1
+    o1.build(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(o1.built_obj, tf.Tensor)
+
+    # Neg
+    o1 = -p1
+    o1.build(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(o1.built_obj, tf.Tensor)
+
+    # Abs
+    o1 = abs(p1)
+    o1.build(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(o1.built_obj, tf.Tensor)

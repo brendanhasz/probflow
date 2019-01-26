@@ -140,6 +140,9 @@ class Parameter(BaseParameter):
         if isinstance(shape, int):
             shape = [shape]
 
+        # If shape is a numpy vector, make it a list
+        # TODO
+
         # Assign attributes
         self.shape = shape
         self.name = name
@@ -331,6 +334,12 @@ class Parameter(BaseParameter):
 
         TODO: this is similar to _sample(), but returns a numpy array
         (meant to be used by the user to examine the posterior dist)
+
+        Returns
+        -------
+        |ndarray|
+            Samples from the parameter posterior distribution.  Of size
+            ``(num_samples,self.shape)``.
 
         """
         self._ensure_is_built()
