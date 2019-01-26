@@ -28,13 +28,59 @@ REQUIRED = object()
 
 
 
-class BaseParameter(ABC):
+class BaseObject(ABC):
+    """Abstract probflow object class (used as an implementation base)"""
+
+    def __add__(self, other):
+        """Add this layer to another layer, parameter, or value."""
+        from .layers import Add
+        return Add(self, other)
+
+
+    def __sub__(self, other):
+        """Subtract from this layer another layer, parameter, or value."""
+        from .layers import Sub
+        return Sub(self, other)
+
+
+    def __mul__(self, other):
+        """Multiply this layer by another layer, parameter, or value."""
+        from .layers import Mul
+        return Mul(self, other)
+
+
+    def __truediv__(self, other):
+        """Divide this layer by another layer, parameter, or value."""
+        from .layers import Div
+        return Div(self, other)
+
+
+    def __abs__(self):
+        """Take the absolute value of the input to this layer."""
+        from .layers import Abs
+        return Abs(self)
+
+
+    def __neg__(self):
+        """Take the negative of the input to this layer."""
+        from .layers import Neg
+        return Neg(self)
+
+
+    def __matmul__(self, other):
+        """Matrix multiply this layer by another, per PEP 465."""
+        from .layers import Matmul
+        return Matmul(self, other)
+
+
+
+class BaseParameter(BaseObject):
     """Abstract parameter class (used as an implementation base)"""
     pass
 
 
 
-class BaseLayer(ABC):
+class BaseLayer(BaseObject):
     """Abstract layer class (used as an implementation base)
 
     This is an abstract base class for a layer.  Layers are objects which take
@@ -281,7 +327,7 @@ class BaseLayer(ABC):
                 self.mean_loss_sum += arg._mean_log_loss
                 self.kl_loss_sum += arg._kl_loss
 
-        # could make parameter + layer have same interface?
+        # TODO: could make parameter + layer have same interface?
 
         # Build this layer's sample model and mean model
         self.built_obj = self._build(self.built_args, data, batch_shape)
@@ -297,48 +343,6 @@ class BaseLayer(ABC):
             elif isinstance(self.args[arg], BaseParameter):
                 params += [self.args[arg]]
         return params
-
-
-    def __add__(self, other):
-        """Add this layer to another layer, parameter, or value."""
-        from .layers import Add
-        return Add(self, other)
-
-
-    def __sub__(self, other):
-        """Subtract from this layer another layer, parameter, or value."""
-        from .layers import Sub
-        return Sub(self, other)
-
-
-    def __mul__(self, other):
-        """Multiply this layer by another layer, parameter, or value."""
-        from .layers import Mul
-        return Mul(self, other)
-
-
-    def __truediv__(self, other):
-        """Divide this layer by another layer, parameter, or value."""
-        from .layers import Div
-        return Div(self, other)
-
-
-    def __abs__(self):
-        """Take the absolute value of the input to this layer."""
-        from .layers import Abs
-        return Abs(self)
-
-
-    def __neg__(self):
-        """Take the negative of the input to this layer."""
-        from .layers import Neg
-        return Neg(self)
-
-
-    def __matmul__(self, other):
-        """Matrix multiply this layer by another, per PEP 465."""
-        from .layers import Matmul
-        return Matmul(self, other)
 
 
     def __str__(self, prepend=''):
@@ -363,7 +367,7 @@ class BaseLayer(ABC):
                 if len(tstr) < max_short:
                     arg_strs[arg] = tstr
                 else:
-                    arg_strs[arg] = '\n'+prepend+tstr
+                    arg_strs[arg] = '\n'+tstr
             else:
                 arg_strs[arg] = '???'
 
@@ -377,19 +381,14 @@ class BaseLayer(ABC):
         return '\n'.join([prepend+self_str] +
                          [prepend+ind+a+' = '+arg_strs[a] for a in self.args])
 
-        # TODO: there's a bug somewhere...
-        # try:
-        # model = Normal(Parameter()*Input()+Parameter(), 1.0)
-        # print(model)
-
 
 
 class BaseDistribution(BaseLayer):
     """Abstract distribution class (used as an implementation base)
 
     TODO: More info...
-    talk about how a model defines a parameterized probability distribution which
-    you can call fit on
+    talk about how a model defines a parameterized probability distribution
+    which you can call fit on
 
     """
 
