@@ -153,7 +153,7 @@ class Add(BaseLayer):
         ('a', REQUIRED),
         ('b', REQUIRED)
     ])
-    
+
 
     def _build(self, args, data):
         """Build the layer."""
@@ -175,7 +175,7 @@ class Sub(BaseLayer):
         ('a', REQUIRED),
         ('b', REQUIRED)
     ])
-    
+
 
     def _build(self, args, data):
         """Build the layer."""
@@ -197,7 +197,7 @@ class Mul(BaseLayer):
         ('a', REQUIRED),
         ('b', REQUIRED)
     ])
-    
+
 
     def _build(self, args, data):
         """Build the layer."""
@@ -220,7 +220,7 @@ class Div(BaseLayer):
         ('a', REQUIRED),
         ('b', REQUIRED)
     ])
-    
+
 
     def _build(self, args, data):
         """Build the layer."""
@@ -235,7 +235,7 @@ class Neg(BaseLayer):
     TODO: More info... (elementwise)
 
 
-    """    
+    """
 
     def _build(self, args, data):
         """Build the layer."""
@@ -265,7 +265,7 @@ class Exp(BaseLayer):
 
     Given :math:`x`, this layer returns :math:`\exp x`, elementwise.
 
-    """    
+    """
 
     def _build(self, args, data):
         """Build the layer."""
@@ -341,7 +341,7 @@ class Sigmoid(BaseLayer):
 
         \text{Sigmoid}(x) = \frac{1}{1 + \exp (-x)}
 
-    """    
+    """
 
     def _build(self, args, data):
         """Build the layer."""
@@ -361,7 +361,7 @@ class Relu(BaseLayer):
 
         \text{Relu}(x) = \max (x, 0)
 
-    """    
+    """
 
     def _build(self, args, data):
         """Build the layer."""
@@ -392,7 +392,7 @@ class Softmax(BaseLayer):
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'axis': 1,
-    }    
+    }
 
     def _build(self, args, data):
         """Build the layer."""
@@ -443,7 +443,7 @@ class Mean(BaseLayer):
     _default_kwargs = {
         'axis': 1,
     }
-    
+
 
     def _build(self, args, data):
         """Build the layer."""
@@ -464,7 +464,7 @@ class Min(BaseLayer):
     _default_kwargs = {
         'axis': 1,
     }
-    
+
 
     def _build(self, args, data):
         """Build the layer."""
@@ -485,7 +485,7 @@ class Max(BaseLayer):
     _default_kwargs = {
         'axis': 1,
     }
-    
+
 
     def _build(self, args, data):
         """Build the layer."""
@@ -511,7 +511,7 @@ class Prod(BaseLayer):
     _default_kwargs = {
         'axis': 1,
     }
-    
+
 
     def _build(self, args, data):
         """Build the layer."""
@@ -539,7 +539,7 @@ class LogSumExp(BaseLayer):
     _default_kwargs = {
         'axis': 1,
     }
-    
+
 
     def _build(self, args, data):
         """Build the layer."""
@@ -553,6 +553,7 @@ class Cat(BaseLayer):
 
     TODO: More info...
 
+    TODO: really we want to be able to pass a LIST of inputs, not just 2
 
     """
 
@@ -569,7 +570,7 @@ class Cat(BaseLayer):
 
     def _build(self, args, data):
         """Build the layer."""
-        return tf.concat(args['a'], args['b'], axis=self.kwargs['axis'])
+        return tf.concat([args['a'], args['b']], axis=self.kwargs['axis'])
 
 
 
@@ -579,13 +580,13 @@ class Dot(BaseLayer):
 
     TODO: More info...
 
-    Given a two vectors :math:`\mathbf{a}` and :math:`\mathbf{b}`, 
+    Given a two vectors :math:`\mathbf{a}` and :math:`\mathbf{b}`,
     this layer returns:
 
     .. math::
 
-        \text{Dot}(\mathbf{a},\mathbf{b}) = 
-        \mathbf{a} \cdot \mathbf{b} = 
+        \text{Dot}(\mathbf{a},\mathbf{b}) =
+        \mathbf{a} \cdot \mathbf{b} =
         \sum_i ( a_i b_i )
 
     """
@@ -595,7 +596,7 @@ class Dot(BaseLayer):
         ('a', REQUIRED),
         ('b', REQUIRED)
     ])
-    
+
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'axis': 1,
@@ -622,7 +623,7 @@ class Matmul(BaseLayer):
         ('a', REQUIRED),
         ('b', REQUIRED)
     ])
-    
+
 
     def _build(self, args, data):
         """Build the layer."""
@@ -647,20 +648,20 @@ class Dense(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'input': None, 
+        'input': None,
     }
 
 
     # Layer keyword arguments and their default values
     _default_kwargs = {
-        'units': 1, 
-        'activation': tf.nn.relu, 
+        'units': 1,
+        'activation': tf.nn.relu,
         'weight_initializer': None, #TODO: glorot or something as default?
         'bias_initializer': None,   #TODO: glorot or something as default?
         'weight_prior': Normal(0, 1),
         'bias_prior': Normal(0, 1),
     }
-    
+
 
     def _build(self, args, data):
         """Build the layer."""
@@ -677,14 +678,15 @@ class Dense(BaseLayer):
         units = self.kwargs['units']
 
         # Create weight and bias parameters
-        weight = Parameter(shape=[ndims, units], 
-                          prior=self.kwargs['weight_prior'])
+        weight = Parameter(shape=[ndims, units],
+                           prior=self.kwargs['weight_prior'])
         bias = Parameter(shape=[1, units],
-                        prior=self.kwargs['bias_prior'])
+                         prior=self.kwargs['bias_prior'])
 
         # Build the weight and bias parameter
-        weight._build(data)
-        bias._build(data)
+        # TODO: this won't work, Parameter.build also needs the batch_shape!
+        weight.build(data)
+        bias.build(data)
 
         # Compute output using a sample from the variational posteriors
         weight_samples = self.weight._sample(data)
@@ -789,11 +791,11 @@ class Embedding(BaseLayer):
 
     TODO: prior/regularization for the embedding layer might be difficult b/c
     we're not including the log posterior in the loss (just the divergence and
-    the likelihood).  We just want point estimates for the embeddings (not 
-    variational posterior dist estimates) b/c of the rotational/multimodal 
+    the likelihood).  We just want point estimates for the embeddings (not
+    variational posterior dist estimates) b/c of the rotational/multimodal
     posterior problem.  But w/o a distribution, can't compute the divergence
     between a point and a distribution.  May have to pretend that there are
-    variance-1 normal dists around the embedding points and compute the KL div 
+    variance-1 normal dists around the embedding points and compute the KL div
     using that.
 
 

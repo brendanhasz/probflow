@@ -34,7 +34,7 @@ def LinearRegression(data=None):
     TODO: docs...
 
     """
-    
+
     # Use default input if none specified
     if data is None:
         data = Input()
@@ -69,7 +69,7 @@ def PoissonRegression(data=None):
     TODO: docs...
 
     """
-    
+
     # Use default input if none specified
     if data is None:
         data = Input()
@@ -85,10 +85,10 @@ def DenseNet(data=None, units=[1]):
 
     .. admonition:: Does not include an observation distribution!
 
-        :func:`.DenseNet` returns a |Layer|, unlike other ready-made models 
+        :func:`.DenseNet` returns a |Layer|, unlike other ready-made models
         like :func:`.DenseRegression` which return a |Model|.  This means you
         cannot call :meth:`.fit` on the output of this function.  Instead, use
-        the returned layer as a building block in a model which has an 
+        the returned layer as a building block in a model which has an
         observation distribution.
 
     TODO: docs...
@@ -129,70 +129,70 @@ def DenseClassifier(data=None, units=[1]):
 def Conv1dRegression(data=None):
     """TODO
     """
-    #TODO    
+    #TODO
     pass
 
 
 def Conv1dClassifier(data=None):
     """TODO
     """
-    #TODO    
+    #TODO
     pass
 
 
 def Conv2dRegression(data=None):
     """TODO
     """
-    #TODO    
+    #TODO
     pass
 
 
 def Conv2dClassifier(data=None):
     """TODO
     """
-    #TODO    
+    #TODO
     pass
 
 
 def DenseAutoencoderRegression(data=None):
     """TODO
     """
-    #TODO    
+    #TODO
     pass
 
 
 def DenseAutoencoderClassifier(data=None):
     """TODO
     """
-    #TODO    
+    #TODO
     pass
 
 
 def Conv1dAutoencoderRegression(data=None):
     """TODO
     """
-    #TODO    
+    #TODO
     pass
 
 
 def Conv1dAutoencoderClassifier(data=None):
     """TODO
     """
-    #TODO    
+    #TODO
     pass
 
 
 def Conv2dAutoencoderRegression(data=None):
     """TODO
     """
-    #TODO    
+    #TODO
     pass
 
 
 def Conv2dAutoencoderClassifier(data=None):
     """TODO
     """
-    #TODO    
+    #TODO
     pass
 
 

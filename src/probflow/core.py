@@ -6,14 +6,12 @@ TODO: more info...
 
 """
 
-# TODO: time is a debugger
-import time
 
 from abc import ABC, abstractmethod
+
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
-
 
 __all__ = [
     'REQUIRED',
@@ -39,9 +37,9 @@ class BaseParameter(ABC):
 class BaseLayer(ABC):
     """Abstract layer class (used as an implementation base)
 
-    This is an abstract base class for a layer.  Layers are objects which take 
+    This is an abstract base class for a layer.  Layers are objects which take
     other objects as input (other layers, parameters, or tensors) and output a
-    tensor. 
+    tensor.
 
     TODO: more...
 
@@ -54,15 +52,15 @@ class BaseLayer(ABC):
     * `_log_loss` (method)
 
     The `_default_args` attribute should contain a dict whose keys are the names
-    of the layer's arguments, and whose values are the default value of each 
+    of the layer's arguments, and whose values are the default value of each
     argument.  Setting an argument's value in `_default_args` to `None` causes
-    that argument to be mandatory (TypeError if that argument's value is not 
+    that argument to be mandatory (TypeError if that argument's value is not
     specified when instantiating the class).
 
-    The `_build` method should return a `Tensor` which was built from this 
+    The `_build` method should return a `Tensor` which was built from this
     layer's arguments. TODO: more details...
 
-    The `_log_loss` method should return the log loss incurred by this layer. 
+    The `_log_loss` method should return the log loss incurred by this layer.
 
     TODO: more...
 
@@ -81,7 +79,7 @@ class BaseLayer(ABC):
     --------
 
     We can define a layer which adds two arguments like so::
-    
+
         class Add(BaseLayer):
 
             self._default_args = {
@@ -94,18 +92,18 @@ class BaseLayer(ABC):
 
             def _log_loss(self, obj, vals):
                 return 0
-    
+
     then we can use that layer to add two other layers or tensors::
 
         x = Input()
         b = Parameter()
         mu = Add(x, b)
 
-    For more examples, see :class:`.Add`, :class:`.Sub`, :class:`.Mul`, 
+    For more examples, see :class:`.Add`, :class:`.Sub`, :class:`.Mul`,
     :class:`.Div`, :class:`.Abs`, :class:`.Exp`, and :class:`.Log`.
 
-    """ 
-    
+    """
+
 
     # Default keyword arguments for a layer
     _default_kwargs = dict()
@@ -124,10 +122,10 @@ class BaseLayer(ABC):
         delayed until build() or fit() is called.
         """
 
-        # Set layer arguments, using args, kwargs, and defaults 
+        # Set layer arguments, using args, kwargs, and defaults
         self.args = dict()
         for ix, arg in enumerate(self._default_args):
-            if ix<len(args):
+            if ix < len(args):
                 self.args[arg] = args[ix]
             elif arg in kwargs:
                 self.args[arg] = kwargs[arg]
@@ -139,15 +137,15 @@ class BaseLayer(ABC):
             if val is REQUIRED:
                 raise TypeError('required arg(s) were not set. '+
                                 type(self).__name__+' requires args: '+
-                                ', '.join(self._default_args.keys())) 
+                                ', '.join(self._default_args.keys()))
 
         # Ensure all arguments are of correct type
         for arg in self.args:
             if not self._arg_is('valid', self.args[arg]):
-                msg = ('Invalid type for ' + type(self).__name__ + 
-                       ' argument ' + arg + 
+                msg = ('Invalid type for ' + type(self).__name__ +
+                       ' argument ' + arg +
                        '.  Arguments to a layer must be one of: ' +
-                       'int, float, np.ndarray, ' + 
+                       'int, float, np.ndarray, ' +
                        'tf.Tensor, tf.Variable, ' +
                        'or a probflow layer or parameter.')
                 raise TypeError(msg)
@@ -155,7 +153,7 @@ class BaseLayer(ABC):
         # Set layer kwargs
         self.kwargs = dict()
         for ix, kwarg in enumerate(self._default_kwargs):
-            if len(args)>(len(self._default_args)+ix): #leftover args!
+            if len(args) > (len(self._default_args)+ix): #leftover args!
                 self.kwargs[kwarg] = args[len(args)+ix]
             elif kwarg in kwargs:
                 self.kwargs[kwarg] = kwargs[kwarg]
@@ -174,7 +172,7 @@ class BaseLayer(ABC):
     @abstractmethod
     def _build(self, args, data):
         """Build layer.
-        
+
         Inheriting class must define this method by building the layer for that
         class.  Should return a `Tensor` or a `tfp.distribution` using the
         layer arguments in args (a dict).
@@ -223,19 +221,19 @@ class BaseLayer(ABC):
 
     def _arg_is(self, type_str, arg):
         """Return true if arg is of type type_str."""
-        if type_str=='tensor_like':
+        if type_str == 'tensor_like':
             return isinstance(arg, (int, float, np.ndarray,
                                     tf.Tensor, tf.Variable))
-        elif type_str=='distribution':
+        elif type_str == 'distribution':
             return isinstance(arg, BaseDistribution)
-        elif type_str=='layer':
+        elif type_str == 'layer':
             return isinstance(arg, BaseLayer)
-        elif type_str=='parameter':
+        elif type_str == 'parameter':
             return isinstance(arg, BaseParameter)
-        elif type_str=='valid': #valid input to a layer
+        elif type_str == 'valid': #valid input to a layer
             return (not isinstance(arg, BaseDistribution) and
-                    isinstance(arg, (int, float, np.ndarray, 
-                                     tf.Tensor, tf.Variable, 
+                    isinstance(arg, (int, float, np.ndarray,
+                                     tf.Tensor, tf.Variable,
                                      BaseLayer, BaseParameter)))
         else:
             raise TypeError('type_str must a string, one of: number, tensor,' +
@@ -321,7 +319,7 @@ class BaseLayer(ABC):
 
     def __truediv__(self, other):
         """Divide this layer by another layer, parameter, or value."""
-        from .layers import Div        
+        from .layers import Div
         return Div(self, other)
 
 
@@ -376,7 +374,7 @@ class BaseLayer(ABC):
             return short_str
 
         # Use a longer representation if the shorter one failed
-        return '\n'.join([prepend+self_str] + 
+        return '\n'.join([prepend+self_str] +
                          [prepend+ind+a+' = '+arg_strs[a] for a in self.args])
 
         # TODO: there's a bug somewhere...
@@ -405,7 +403,7 @@ class BaseDistribution(BaseLayer):
         return obj.log_prob(vals)
 
 
-    def fit(self, x, y, dtype=tf.float32, batch_size=128, epochs=100, 
+    def fit(self, x, y, dtype=tf.float32, batch_size=128, epochs=100,
             optimizer='adam', learning_rate=0.01, metrics=None, verbose=True):
         """Fit model.
 
@@ -477,8 +475,8 @@ class BaseDistribution(BaseLayer):
 
         # Optimizer
         with tf.name_scope('train'):
-          optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-          train_op = optimizer.minimize(elbo_loss)
+            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+            train_op = optimizer.minimize(elbo_loss)
 
         # Create the TensorFlow session and assign it to each parameter
         self._session = tf.Session()
@@ -502,14 +500,14 @@ class BaseDistribution(BaseLayer):
             # Train on each batch in this epoch
             for batch in range(n_batch):
                 b_x, b_y = self._generate_batch(x, y, epoch, batch, batch_size)
-                self._session.run(train_op, 
+                self._session.run(train_op,
                                   feed_dict={x_data: b_x,
                                              y_data: b_y,
                                              batch_shape_ph: [b_x.shape[0]]})
 
                 # Print progress
                 if verbose and batch % print_batches == 0:
-                    print("  Batch %d / %d (%0.1f)\r" % 
+                    print("  Batch %d / %d (%0.1f)\r" %
                           (batch+1, n_batch, 100.0*batch/n_batch), end='')
 
             # Evaluate metrics on validation data
@@ -527,7 +525,7 @@ class BaseDistribution(BaseLayer):
         """Initialize shuffling of the data across epochs"""
         self._shuffled_ids = np.empty((N, epochs), dtype=np.uint64)
         for epoch in range(epochs):
-            self._shuffled_ids[:,epoch] = np.random.permutation(N)
+            self._shuffled_ids[:, epoch] = np.random.permutation(N)
 
 
     def _generate_batch(self, x, y, epoch, batch, batch_size):
@@ -536,13 +534,13 @@ class BaseDistribution(BaseLayer):
         a = batch*batch_size
         b = min(N, (batch+1)*batch_size)
         ix = self._shuffled_ids[a:b, epoch]
-        return x[ix,...], y[ix,...]
+        return x[ix, ...], y[ix, ...]
 
 
     def _ensure_is_fit(self):
         """Raises a RuntimeError if model has not yet been fit."""
         if not self.is_fit:
-            raise RuntimeError('model must first be fit') 
+            raise RuntimeError('model must first be fit')
 
 
     def sample_posteriors(self, params=None, num_samples=1000):
@@ -552,7 +550,7 @@ class BaseDistribution(BaseLayer):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.posterior` on a |Model|, you must first 
+            Before calling :meth:`.posterior` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         TODO: should return a dict w/ an entry for each parameter in the model
@@ -584,7 +582,7 @@ class BaseDistribution(BaseLayer):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.plot_posteriors` on a |Model|, you must 
+            Before calling :meth:`.plot_posteriors` on a |Model|, you must
             first :meth:`.fit` it to some data.
 
         """
@@ -599,7 +597,7 @@ class BaseDistribution(BaseLayer):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.predictive_distribution` on a |Model|, you 
+            Before calling :meth:`.predictive_distribution` on a |Model|, you
             must first :meth:`.fit` it to some data.
 
         Returns array of shape (x.shape[0],y.shape[1],...,y.shape[-1],num_samples)
@@ -621,7 +619,7 @@ class BaseDistribution(BaseLayer):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.predict` on a |Model|, you must first 
+            Before calling :meth:`.predict` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         TODO: update parameters list below which is wrong
@@ -633,7 +631,7 @@ class BaseDistribution(BaseLayer):
             of shape (N,D), where N is the number of samples and D
             is the number of dimensions of the independent variable.
         method : {'mean', 'median', 'mode', 'min', 'max', 'prc'}
-            Method to use to convert the predictive distribution 
+            Method to use to convert the predictive distribution
             into a single prediction.
 
             * 'mean': Use the mean of the predictive distribution
@@ -642,12 +640,12 @@ class BaseDistribution(BaseLayer):
             * 'mode': Use the mode of the predictive dist.
             * 'min': Use the minimum of the predictive dist.
             * 'max': Use the maximum of the predictive dist.
-            * 'prc': Use a specified percentile of the predictive 
-              dist.  The `prc` arg sets what percentile value to 
+            * 'prc': Use a specified percentile of the predictive
+              dist.  The `prc` arg sets what percentile value to
               use.
 
         prc : float
-            Percentile of the predictive distribution to use as 
+            Percentile of the predictive distribution to use as
             a prediction when ``method=='prc'``. Between 0 and 100
             inclusive (default=50).
         num_samples : int
@@ -659,7 +657,7 @@ class BaseDistribution(BaseLayer):
         |ndarray|
             Predicted y-value for each sample in `x`.  Will be of
             size (N,D_out), where N is the number of samples (equal
-            to `x.shape[0]`) and D_out is the number of output 
+            to `x.shape[0]`) and D_out is the number of output
             dimensions (equal to `y.shape[1]`).
 
         See Also
@@ -709,7 +707,7 @@ class BaseDistribution(BaseLayer):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.log_prob` on a |Model|, you must first 
+            Before calling :meth:`.log_prob` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         if individually is True, returns prob for each sample individually
@@ -717,9 +715,9 @@ class BaseDistribution(BaseLayer):
         if individually is False, returns product of each individual prob
             so return shape is (1,?)
         if dist is True, returns log probability posterior distribution
-            (distribution of probs for lots of samples from the model) 
+            (distribution of probs for lots of samples from the model)
             so return shape is (?,num_samples)
-        if dist is False, returns log posterior prob assuming each parameter 
+        if dist is False, returns log posterior prob assuming each parameter
             takes the mean value of its variational distribution
             so return shape iss (?,1)
 
@@ -740,25 +738,25 @@ class BaseDistribution(BaseLayer):
         #   prob = sess.run(tf_prob, feed_dict=???) #make the feed dict x and y
 
         # TODO: but will have to SAMPLE from model and compute prob multiple times?
-        # then what - take average? or median. 
-        # that doesn't make sense... 
+        # then what - take average? or median.
+        # that doesn't make sense...
         # somehow need to be able to take the mean of every variational parameter...
         # which is - sigh - intercepting like in edward.
         # the predict() method should use that too
         # maybe you should also have meanify(), and meanify_args()
-        #   as the equivalents of build(), and build_args(), but using the 
+        #   as the equivalents of build(), and build_args(), but using the
         #   mean of any distribution?
 
 
     def log_prob_by(self, x, y, x_by, bins=100, plot=True):
-        """Plot the log probability of observations `y` given `x` and the model 
+        """Plot the log probability of observations `y` given `x` and the model
         as a function of independent variable(s) `x_by`.
 
         TODO: docs...
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.log_prob_by` on a |Model|, you must first 
+            Before calling :meth:`.log_prob_by` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         """
@@ -772,8 +770,8 @@ class BaseDistribution(BaseLayer):
         probs = self.log_prob(x, y)
 
         # Plot probability as a fn of x_by cols of x
-        px, py = self.plot_by(x[:,x_by], probs, 
-                               bins=bins, plot=plot)
+        px, py = self.plot_by(x[:, x_by], probs,
+                              bins=bins, plot=plot)
 
         return px, py
 
@@ -785,7 +783,7 @@ class BaseDistribution(BaseLayer):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.prob` on a |Model|, you must first 
+            Before calling :meth:`.prob` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         also, this should probably use log_prob, above, then exp it...
@@ -796,18 +794,18 @@ class BaseDistribution(BaseLayer):
 
 
     def prob_by(self, x, y, x_by, bins=100, plot=True):
-        """Plot the probability of observations `y` given `x` and the model 
+        """Plot the probability of observations `y` given `x` and the model
         as a function of independent variable(s) `x_by`.
 
         TODO: docs...
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.prob_by` on a |Model|, you must first 
+            Before calling :meth:`.prob_by` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         """
-        
+
         # TODO: same idea as log_prob_by above
         pass
 
@@ -819,7 +817,7 @@ class BaseDistribution(BaseLayer):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.cdf` on a |Model|, you must first 
+            Before calling :meth:`.cdf` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         """
@@ -829,14 +827,14 @@ class BaseDistribution(BaseLayer):
 
 
     def cdf_by(self, x, y, x_by, bins=100):
-        """Plot the cumulative probability of observations `y` given `x` and 
+        """Plot the cumulative probability of observations `y` given `x` and
         the model as a function of independent variable(s) `x_by`.
 
         TODO: docs...
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.cdf_by` on a |Model|, you must first 
+            Before calling :meth:`.cdf_by` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         """
@@ -852,7 +850,7 @@ class BaseDistribution(BaseLayer):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.log_cdf` on a |Model|, you must first 
+            Before calling :meth:`.log_cdf` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         """
@@ -862,14 +860,14 @@ class BaseDistribution(BaseLayer):
 
 
     def log_cdf_by(self, x, y, x_by, bins=100):
-        """Plot the log cumulative probability of observations `y` given `x` 
+        """Plot the log cumulative probability of observations `y` given `x`
         and the model as a function of independent variable(s) `x_by`.
 
         TODO: docs...
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.log_cdf_by` on a |Model|, you must first 
+            Before calling :meth:`.log_cdf_by` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         """
@@ -887,12 +885,12 @@ class BaseDistribution(BaseLayer):
         Parameters
         ----------
         x : |None| or |ndarray|
-            Input array of independent variable values of data on which to 
+            Input array of independent variable values of data on which to
             evalutate the model.  First dimension should be equal to the number
             of samples.
             If |None|, will use the data the model was trained on (the default).
         y : |None| or |ndarray|
-            Input array of dependent variable values of data on which to 
+            Input array of dependent variable values of data on which to
             evalutate the model.  First dimension should be equal to the number
             of samples.
             If |None|, will use the data the model was trained on (the default).
@@ -908,22 +906,22 @@ class ContinuousDistribution(BaseDistribution):
 
     Does this only work in class docs [2]_
 
-    .. [2] Andrew Gelman, Ben Goodrich, Jonah Gabry, & Aki Vehtari.  
-        R-squared for Bayesian regression models. 
+    .. [2] Andrew Gelman, Ben Goodrich, Jonah Gabry, & Aki Vehtari.
+        R-squared for Bayesian regression models.
         *The American Statistician*, 2018.
         https://doi.org/10.1080/00031305.2018.1549100
     """
 
 
     def predictive_prc(self, x=None, y=None):
-        """Compute the percentile of each observation along the posterior 
+        """Compute the percentile of each observation along the posterior
         predictive distribution.
 
         TODO: Docs...
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.predictive_prc` on a |Model|, you must first 
+            Before calling :meth:`.predictive_prc` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         Parameters
@@ -952,19 +950,19 @@ class ContinuousDistribution(BaseDistribution):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.confidence_intervals` on a |Model|, you must  
+            Before calling :meth:`.confidence_intervals` on a |Model|, you must
             first :meth:`.fit` it to some data.
 
         Parameters
         ----------
         x : np.ndarray
-            Input array of independent variable values.  Should be of shape 
-            (N,D), where N is the number of samples and D is the number of 
+            Input array of independent variable values.  Should be of shape
+            (N,D), where N is the number of samples and D is the number of
             dimensions of the independent variable.
             If |None|, will use the data the model was trained on (the default).
         prcs : list of float, or np.ndarray
-            Percentiles to use as bounds of the confidence interval, between 0 
-            and 100. 
+            Percentiles to use as bounds of the confidence interval, between 0
+            and 100.
             Default = [2.5, 97.5]
         num_samples : int
             Number of samples from the posterior predictive distribution to
@@ -987,17 +985,17 @@ class ContinuousDistribution(BaseDistribution):
         pred_dist = self.predictive_distribution(x, num_samples=num_samples)
         return np.percentile(pred_dist, prcs)
 
-        
+
     def pred_dist_covered(self, x=None, y=None, prc=95.0):
-        """Compute whether each observation was covered by the 
-        inner `prc` percentile of the posterior predictive 
+        """Compute whether each observation was covered by the
+        inner `prc` percentile of the posterior predictive
         distribution.
 
         TODO: Docs...
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.pred_dist_covered` on a |Model|, you must  
+            Before calling :meth:`.pred_dist_covered` on a |Model|, you must
             first :meth:`.fit` it to some data.
 
         Parameters
@@ -1021,7 +1019,7 @@ class ContinuousDistribution(BaseDistribution):
         #TODO
         pass
 
-        
+
     def pred_dist_coverage(self, x=None, y=None, prc=95.0):
         """Compute the coverage of the inner `prc` percentile of the
         posterior predictive distribution.
@@ -1031,7 +1029,7 @@ class ContinuousDistribution(BaseDistribution):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.pred_dist_coverage` on a |Model|, you must  
+            Before calling :meth:`.pred_dist_coverage` on a |Model|, you must
             first :meth:`.fit` it to some data.
 
         Parameters
@@ -1057,8 +1055,8 @@ class ContinuousDistribution(BaseDistribution):
 
 
     def coverage_by(self, x_by, x=None, y=None, prc=95.0, bins=100, plot=True):
-        """Compute and plot the coverage of the inner `prc` 
-        percentile of the posterior predictive distribution as a 
+        """Compute and plot the coverage of the inner `prc`
+        percentile of the posterior predictive distribution as a
         function of specified independent variables.
 
         TODO: Docs...
@@ -1067,7 +1065,7 @@ class ContinuousDistribution(BaseDistribution):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.coverage_by` on a |Model|, you must first 
+            Before calling :meth:`.coverage_by` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         Parameters
@@ -1090,15 +1088,15 @@ class ContinuousDistribution(BaseDistribution):
 
         # TODO: alternatively, x_by should be able to be any array_like
         # as long as it's same size as x.shape[0]
-        
+
         # Plot probability as a fn of x_by cols of x
-        px, py = self.plot_by(x[:,x_by], covered, 
-                               bins=bins, plot=plot)
+        px, py = self.plot_by(x[:, x_by], covered,
+                              bins=bins, plot=plot)
 
         return px, py
 
 
-    def calibration_curve(self, x=None, y=None, split_by=None, 
+    def calibration_curve(self, x=None, y=None, split_by=None,
                           bins=10, plot=False):
         """Plot and/or return calibration curve.
 
@@ -1108,7 +1106,7 @@ class ContinuousDistribution(BaseDistribution):
 
         .. admonition:: Model must be fit first!
 
-            Before calling 
+            Before calling
             :meth:`calibration_curve() <.ContinuousModel.calibration_curve>` on
             a |Model|, you must first :meth:`.fit` it to some data.
 
@@ -1173,7 +1171,7 @@ class ContinuousDistribution(BaseDistribution):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.r_squared` on a |Model|, you must  
+            Before calling :meth:`.r_squared` on a |Model|, you must
             first :meth:`.fit` it to some data.
 
         Parameters
@@ -1185,10 +1183,10 @@ class ContinuousDistribution(BaseDistribution):
             Array of dependent variable values.  If |None|, will use
             the data the model was trained on (the default).
         num_samples : int
-            Number of posterior draws to use for computing the r-squared 
+            Number of posterior draws to use for computing the r-squared
             distribution.  Default = `1000`.
         plot : bool
-            Whether to plot the r-squared distribution   
+            Whether to plot the r-squared distribution
 
         Returns
         -------
@@ -1206,8 +1204,8 @@ class ContinuousDistribution(BaseDistribution):
         References
         ----------
         .. _ref_r_squared:
-        .. [1] Andrew Gelman, Ben Goodrich, Jonah Gabry, & Aki Vehtari.  
-            R-squared for Bayesian regression models. 
+        .. [1] Andrew Gelman, Ben Goodrich, Jonah Gabry, & Aki Vehtari.
+            R-squared for Bayesian regression models.
             *The American Statistician*, 2018.
             https://doi.org/10.1080/00031305.2018.1549100
         """
@@ -1251,24 +1249,24 @@ class DiscreteDistribution(BaseDistribution):
     def calibration_curve(self, x, y, split_by=None, bins=10):
         """Plot and return calibration curve.
 
-        Plots and returns the calibration curve (estimated 
-        probability of outcome vs the true probability of that 
+        Plots and returns the calibration curve (estimated
+        probability of outcome vs the true probability of that
         outcome).
 
         .. admonition:: Model must be fit first!
 
-            Before calling 
-            :meth:`calibration_curve() <.CategoricalModel.calibration_curve>` 
+            Before calling
+            :meth:`calibration_curve() <.CategoricalModel.calibration_curve>`
             on a |Model|, you must first :meth:`.fit` it to some data.
 
         Parameters
         ----------
-        x: 
-        y: 
-        split_by: draw curve independently for datapoints with 
+        x:
+        y:
+        split_by: draw curve independently for datapoints with
             each unique value in this categorical column number.
         bins: bins used to compute the curve.  An integer to
-            specify the number of evenly-spaced bins from 0 to 
+            specify the number of evenly-spaced bins from 0 to
             1, or a list or array-like to specify the bin edges.
 
         #TODO: split by continuous cols as well? Then will need to define bins or edges too
@@ -1284,7 +1282,7 @@ class DiscreteDistribution(BaseDistribution):
         pass
 
 
-    # TODO: are there categorical equivalents of predictive_prc, 
+    # TODO: are there categorical equivalents of predictive_prc,
     # pred_dist_covered, pred_dist_coverage, and coverage_by?
 
     # TODO: confusion_matrix (plot/return the confusion matrix of predictions)

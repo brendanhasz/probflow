@@ -37,10 +37,10 @@ class Parameter(BaseParameter):
     Parameters
     ----------
     shape : int, list of int, or 1D |ndarray|
-        Shape of the array containing the parameters. 
+        Shape of the array containing the parameters.
         Default = ``1``
     name : str
-        Name of the parameter(s).  
+        Name of the parameter(s).
         Default = ``'Parameter'``
     prior : |None| or a |Distribution| object
         Prior probability distribution function which has been instantiated
@@ -50,36 +50,36 @@ class Parameter(BaseParameter):
         Probability distribution class to use to approximate the posterior.
         Default = :class:`.Normal`
     seed : int, float, or |None|
-        Seed for the random number generator.  
+        Seed for the random number generator.
         Set to |None| to use the global seed.
         Default = |None|
     transform : lambda function
         Transform to apply to the random variable.  For example, to create a
-        parameter with an inverse gamma posterior, use 
-        ``posterior``=:class:`.Gamma`` and 
+        parameter with an inverse gamma posterior, use
+        ``posterior``=:class:`.Gamma`` and
         ``transform = lambda x: tf.reciprocal(x)``
         Default is to use no transform.
     inv_transform : lambda function
         Inverse transform which will convert values in transformed space back
         into the posterior distribution's coordinates.  For example, to create
-        a parameter with an inverse gamma posterior, use 
-        ``posterior``=:class:`.Gamma``, 
-        ``transform = lambda x: tf.reciprocal(x)``, and 
+        a parameter with an inverse gamma posterior, use
+        ``posterior``=:class:`.Gamma``,
+        ``transform = lambda x: tf.reciprocal(x)``, and
         ``inv_transform = lambda x: tf.reciprocal(x)``.
         Default is to use no transform.
     estimator : {``'flipout'`` or |None|}
         Method of posterior estimator to use. Valid values:
 
-        * |None|: Generate random samples from the variational distribution 
+        * |None|: Generate random samples from the variational distribution
           for each batch independently.
-        * `'flipout'`: Use the Flipout estimator :ref:`[1] <ref_flipout>` to 
+        * `'flipout'`: Use the Flipout estimator :ref:`[1] <ref_flipout>` to
           more efficiently generate samples from the variational distribution.
 
         Default = ``'flipout'``
 
     Notes
     -----
-    When using the flipout estimator (``estimator='flipout'``), ``posterior_fn`` 
+    When using the flipout estimator (``estimator='flipout'``), ``posterior_fn``
     must be a symmetric distribution of the location-scale family - one of:
 
     * :class:`.Normal`
@@ -93,13 +93,13 @@ class Parameter(BaseParameter):
     References
     ----------
     .. _ref_flipout:
-    .. [1] Yeming Wen, Paul Vicol, Jimmy Ba, Dustin Tran, and Roger Grosse. 
-        Flipout: Efficient Pseudo-Independent Weight Perturbations on 
-        Mini-Batches. *International Conference on Learning Representations*, 
+    .. [1] Yeming Wen, Paul Vicol, Jimmy Ba, Dustin Tran, and Roger Grosse.
+        Flipout: Efficient Pseudo-Independent Weight Perturbations on
+        Mini-Batches. *International Conference on Learning Representations*,
         2018. https://arxiv.org/abs/1803.04386
     """
 
-    def __init__(self, 
+    def __init__(self,
                  shape=1,
                  name='Parameter',
                  prior=Normal(0, 1),
@@ -114,14 +114,14 @@ class Parameter(BaseParameter):
         assert isinstance(shape, (int, list, np.ndarray)), \
             ('shape must be an int, list of ints, or a numpy ndarray')
         if isinstance(shape, int):
-            assert shape>0, 'shape must be positive'
+            assert shape > 0, 'shape must be positive'
         if isinstance(shape, list):
             for t_shape in shape:
                 assert isinstance(t_shape, int), 'shape must be integer(s)'
         if isinstance(shape, np.ndarray):
             assert shape.dtype.char in np.typecodes['AllInteger'], \
                 'shape must be integer(s)'
-            assert np.all(shape>=0), 'shape must be positive'
+            assert np.all(shape >= 0), 'shape must be positive'
         assert isinstance(name, str), 'name must be a string'
         assert prior is None or isinstance(prior, BaseDistribution), \
             'prior must be a probflow distribution or None'
@@ -132,7 +132,7 @@ class Parameter(BaseParameter):
 
         # Check for valid posterior if using flipout
         sym_dists = [Normal, StudentT, Cauchy]
-        if estimator=='flipout' and posterior_fn not in sym_dists:
+        if estimator == 'flipout' and posterior_fn not in sym_dists:
             raise ValueError('flipout requires a symmetric posterior ' +
                              'distribution in the location-scale family')
 
@@ -178,12 +178,12 @@ class Parameter(BaseParameter):
         if ub is None:
             if lb is None:
                 return data # [-Inf, Inf]
-            else: 
+            else:
                 return lb + tf.exp(data) # [lb, Inf]
         else:
             if lb is None: #negative # [-Inf, ub]
                 return ub - tf.exp(-data)
-            else: 
+            else:
                 return lb + (ub-lb)*tf.sigmoid(data) # [lb, ub]
 
 
@@ -266,7 +266,7 @@ class Parameter(BaseParameter):
         # Use the Flipout estimator (https://arxiv.org/abs/1803.04386)
         # TODO: this isn't actually the Flipout estimator...
         # it flips samples around the posterior mean but not in the same way...
-        elif self.estimator=='flipout':
+        elif self.estimator == 'flipout':
 
             # Create a centered version of the posterior
             params = self._params.copy()
@@ -296,17 +296,17 @@ class Parameter(BaseParameter):
     def _build_losses(self):
         """Build all the losses."""
         if self.prior is None: #no prior, no losses
-            self._log_loss = 0 
+            self._log_loss = 0
             self._mean_log_loss = 0
             self._kl_loss = 0
         else:
             reduce_dims = np.arange(1, self._built_obj_raw.shape.ndims)
             self._log_loss = tf.reduce_sum(
-                self._built_prior.log_prob(self._built_obj_raw) + 
+                self._built_prior.log_prob(self._built_obj_raw) +
                 self.prior.samp_loss_sum,
                 axis=reduce_dims)
             self._mean_log_loss = tf.reduce_sum(
-                self._built_prior.log_prob(self._mean_obj_raw) + 
+                self._built_prior.log_prob(self._mean_obj_raw) +
                 self.prior.mean_loss_sum)
             self._kl_loss = tf.reduce_sum(
                 tfd.kl_divergence(self._built_posterior,
@@ -342,7 +342,7 @@ class Parameter(BaseParameter):
 
 
     # TODO: plot_posterior(kde=False)
-        
+
 
     def __str__(self, prepend=''):
         """String representation of a parameter."""
@@ -354,7 +354,7 @@ class ScaleParameter(Parameter):
     r"""Standard deviation parameter.
 
     This is a convenience class for creating a standard deviation parameter
-    (\sigma).  It is created by first constructing a variance parameter 
+    (\sigma).  It is created by first constructing a variance parameter
     (:math:`\sigma^2`) which uses an inverse gamma distribution as the
     variational posterior.
 
@@ -373,10 +373,10 @@ class ScaleParameter(Parameter):
     Parameters
     ----------
     shape : int, list of int, or 1D |ndarray|
-        Shape of the array containing the parameters. 
+        Shape of the array containing the parameters.
         Default = ``1``
     name : str
-        Name of the parameter(s).  
+        Name of the parameter(s).
         Default = ``'Parameter'``
     prior : |None| or a |Distribution| object
         Prior probability distribution function which has been instantiated
@@ -386,7 +386,7 @@ class ScaleParameter(Parameter):
         Probability distribution class to use to approximate the posterior.
         Default = :class:`.InvGamma`
     seed : int, float, or |None|
-        Seed for the random number generator.  
+        Seed for the random number generator.
         Set to |None| to use the global seed.
         Default = |None|
 
@@ -397,7 +397,7 @@ class ScaleParameter(Parameter):
 
     """
 
-    def __init__(self, 
+    def __init__(self,
                  shape=1,
                  name='ScaleParameter',
                  prior=None,
@@ -415,7 +415,7 @@ class ScaleParameter(Parameter):
 
 
 # TODO: add support for discrete Parameters?
-# In theory can just set posterior_fn to 
+# In theory can just set posterior_fn to
 # Bernoulli or Categorical, and make mean() return the mode?
 # and have n_categories-1 different underlying tf variables
 # and transform them according to the additive logistic transformation?
