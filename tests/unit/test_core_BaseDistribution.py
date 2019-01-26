@@ -27,9 +27,6 @@ def test_BaseDistribution_fit():
     x = np.linspace(-3, 3, N)
     y = true_weight*x + true_bias + noise
 
-    x = np.reshape(x, (N, 1))
-    y = np.reshape(y, (N, 1))
-
     # Fit the model
     model.fit(x, y, epochs=1)
 

@@ -402,56 +402,127 @@ class BaseDistribution(BaseLayer):
         return obj.log_prob(vals)
 
 
-    def fit(self, x, y, dtype=tf.float32, batch_size=128, epochs=100,
-            optimizer='adam', learning_rate=0.01, metrics=None, verbose=True):
+    def fit(self, x, y,
+            dtype=tf.float32,
+            batch_size=128,
+            epochs=100,
+            optimizer='adam',
+            learning_rate=0.01,
+            metrics=[],
+            verbose=True,
+            validation_split=0,
+            validation_shuffle=True,
+            shuffle=True):
         """Fit model.
 
         TODO: Docs...
 
-        TODO: add math about variational inference + elbo loss func
-        TODO: and make sure to reference: https://arxiv.org/pdf/1505.05424.pdf
-        (just to say that the loss used is -ELBO + log_likelihood)
+        Parameters
+        ----------
+        x : |ndarray|
+            Independent variable values of the dataset to fit (aka the 
+            "features").
+        y : |ndarray|
+            Dependent variable values of the dataset to fit.
+        dtype : TODO
+            TODO
+        batch_size : int
+            TODO
+        epochs : int
+            TODO
+        optimizer : TODO
+            TODO
+        learning_rate : float
+            TODO
+        metrics : str or list of str
+            Metrics to evaluate each epoch.  To evaluate multiple metrics, 
+            pass a list of strings, where each string is a different metric.
+            Available metrics:
 
-        x and y should be able to be numpy arrays (in which case will set up as tf.Dataset automatically)
-        or pandas dfs
-        but they should also be able to be passed as tf.Datasets directly
-        how to get that to work with Input tho?
+            * 'acc': accuracy
+            * 'accuracy': accuracy
+            * 'mse': mean squared error
+            * 'sse': sum of squared errors
+            * 'mae': mean absolute error
 
-        metrics='mae' or 'accuracy' or something
+            Default = empty list
+        verbose : bool
+            Whether to print progress and metrics throughout training.
+            Default = True
+        validation_split : float between 0 and 1
+            Proportion of the data to use as validation data.
+            Default = 0
+        validation_shuffle : bool
+            Whether to shuffle which data is used for validation.
+            Default = True
+        shuffle : bool
+            Whether to shuffle the training data before each trainin epoch.
+            Default = True
 
-        Fit func should also have a validation_split arg (which defines what percentage of the data to use as validation data, along w/ shuffle arg, etc)
-        Fit func should automatically normalize the input data and try to transform it (but can disable that w/ auto_normalize=False, auto_transform=False)
-        And convert to float32s (but can change w/ dtype=tf.float64 or something)
-        Also should have callbacks like let's to do early stopping etc
-        Also have a monitor param which somehow lets you monitor the value of parameters over training?
-        And make sure to make it sklearn-compatible (ie you can put it in a pipeline and everything)
-        should have a show_tensorboard option (default is False) https://www.tensorflow.org/guide/summaries_and_tensorboard
+
+        TODO: brief math about variational inference :ref:`[1] <ref_bbb>`
+        (just to say that the loss used is -ELBO = KL - log_likelihood)
+
+
+        References
+        ----------
+        .. _ref_bbb:
+        .. [1] Charles Blundell, Julien Cornebise, Koray Kavukcuoglu, and 
+            Daan Wierstra. Weight uncertainty in neural networks. 
+            *arXiv preprint*, 2015. http://arxiv.org/abs/1505.05424
 
 
         """
 
-        # Split data into training and validation data
-        # TODO
+        # Check input data size matches
+        if x.shape[0] != y.shape[0]:
+            raise ValueError('x and y do not have same number of samples')
 
-        # Do we have to make sure data is at least 2 dimensional?
+        # TODO: add support for pandas arrays
+
+        # TODO: how to support integer columns?
+
+        # Split data into training and validation data
+        if validation_split > 0:
+            if validation_shuffle:
+                train_ix = np.random.rand(x.shape[0]) > validation_split
+            else:
+                train_ix = np.arange(x.shape[0]) > (validation_split*x.shape[0])
+            val_ix = ~train_ix
+            x_train = x[train_ix, ...]
+            y_train = y[train_ix, ...]
+            x_val = x[val_ix, ...]
+            y_val = y[val_ix, ...]
+        else:
+            x_train = x
+            y_train = y
+            x_val = x
+            y_val = y
+
+        # Store pointer to training data
+        self._x_train = x_train
+        self._y_train = y_train
 
         # Data placeholders
-        N = x.shape[0]
-        x_shape = list(x.shape)
-        y_shape = list(y.shape)
+        N = x_train.shape[0]
+        x_shape = list(x_train.shape)
+        y_shape = list(y_train.shape)
         x_shape[0] = None
         y_shape[0] = None
         x_data = tf.placeholder(dtype, x_shape)
         y_data = tf.placeholder(dtype, y_shape)
-        self._initialize_shuffles(N, epochs)
-
-        # TODO: add support for passing x and y as tf dataset iterators
+        self._initialize_shuffles(N, epochs, shuffle)
 
         # Batch shape
-        batch_shape_ph = tf.placeholder(tf.int32, [1])
+        batch_size_ph = tf.placeholder(tf.int32, [1])
+
+        # Store placeholders
+        self._batch_size_ph = batch_size_ph
+        self._x_ph = x_data
+        self._y_ph = y_data
 
         # Recursively build this model and its args
-        self.build(x_data, batch_shape_ph)
+        self.build(x_data, batch_size_ph)
 
         # Set up TensorFlow graph for per-sample losses
         self.log_loss = (self.samp_loss_sum +  #size (batch_size,)
@@ -472,6 +543,8 @@ class BaseDistribution(BaseLayer):
 
         # TODO: determine a good default learning rate?
 
+        # TODO: set optimizer based on optimizer arg
+
         # Optimizer
         with tf.name_scope('train'):
             optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
@@ -488,8 +561,8 @@ class BaseDistribution(BaseLayer):
         self._session.run(init_op)
 
         # Fit the model
-        n_batch = int(np.ceil(N/batch_size))
-        print_batches = int(np.ceil(n_batch/10))
+        n_batch = int(np.ceil(N/batch_size)) #number of batches per epoch
+        print_batches = int(np.ceil(n_batch/10)) #info each print_batches batch
         for epoch in range(epochs):
 
             # Print progress
@@ -498,33 +571,37 @@ class BaseDistribution(BaseLayer):
 
             # Train on each batch in this epoch
             for batch in range(n_batch):
-                b_x, b_y = self._generate_batch(x, y, epoch, batch, batch_size)
+                b_x, b_y = self._generate_batch(x_train, y_train, 
+                                                epoch, batch, batch_size)
                 self._session.run(train_op,
                                   feed_dict={x_data: b_x,
                                              y_data: b_y,
-                                             batch_shape_ph: [b_x.shape[0]]})
+                                             batch_size_ph: [b_x.shape[0]]})
 
                 # Print progress
                 if verbose and batch % print_batches == 0:
                     print("  Batch %d / %d (%0.1f)\r" %
                           (batch+1, n_batch, 100.0*batch/n_batch), end='')
 
-            # Evaluate metrics on validation data
-            # TODO: and then print the results
-            print(60*" "+"\r", end='')
-            print('  TODO: validated')
-
-
+            # Evaluate metrics
+            if metrics:
+                metric_d = self.metrics(x_val, y_val, metrics)
+                print(60*' '+"\r", end='')
+                print('  '+[m+': '+metric_d[m]+4*' ' for m in metric_d])
 
         # Finished!
+        print('Done!')
         self.is_fit = True
 
 
-    def _initialize_shuffles(self, N, epochs):
+    def _initialize_shuffles(self, N, epochs, shuffle):
         """Initialize shuffling of the data across epochs"""
         self._shuffled_ids = np.empty((N, epochs), dtype=np.uint64)
         for epoch in range(epochs):
-            self._shuffled_ids[:, epoch] = np.random.permutation(N)
+            if shuffle:
+                self._shuffled_ids[:, epoch] = np.random.permutation(N)
+            else:
+                self._shuffled_ids[:, epoch] = np.arange(N, dtype=np.uint64)
 
 
     def _generate_batch(self, x, y, epoch, batch, batch_size):
@@ -606,8 +683,13 @@ class BaseDistribution(BaseLayer):
         # Check model has been fit
         self._ensure_is_fit()
 
-        #TODO: actually compute the samples
-        pass
+        # TODO: check x is correct shape (matches self._x_ph)
+
+        # Draw samples from the predictive distribution
+        return self._session.run(
+            self.built_obj.sample(num_samples),
+            feed_dict={self._x_ph: x,
+                       self._batch_size_ph: [x.shape[0]]})
 
 
     def predict(self, x):
@@ -679,6 +761,67 @@ class BaseDistribution(BaseLayer):
 
         # TODO: run tf session + predict using mean model
 
+
+    def metrics(self, x=None, y=None, metric_list=[]):
+        """Compute metrics of model performance.
+
+        TODO: docs
+
+        TODO: methods which just call this w/ a specific metric? for shorthand
+
+        Parameters
+        ----------
+        x : |None| or |ndarray|
+            Input array of independent variable values of data on which to
+            evalutate the model.  First dimension should be equal to the number
+            of samples.
+            If |None|, will use the data the model was trained on (the default).
+        y : |None| or |ndarray|
+            Input array of dependent variable values of data on which to
+            evalutate the model.  First dimension should be equal to the number
+            of samples.
+            If |None|, will use the data the model was trained on (the default).
+        metric_list : str or list of str
+            Metrics to evaluate each epoch.  To evaluate multiple metrics, 
+            pass a list of strings, where each string is a different metric.
+            Available metrics:
+
+            * 'acc': accuracy
+            * 'accuracy': accuracy
+            * 'mse': mean squared error
+            * 'sse': sum of squared errors
+            * 'mae': mean absolute error
+
+            Default = empty list
+        """
+
+        # Use training data if none passed
+        x = self._x_train
+        y = self._y_train
+
+        # Make predictions
+        y_pred = self.predict(x)
+
+        # Dict to store metrics
+        metrics = dict()
+
+        # Compute accuracy
+        if 'acc' in metric_list or 'accuracy' in metric_list:
+            metrics['accuracy'] = np.mean(y == y_pred)
+
+        # Compute mean squared error
+        if 'mse' in metric_list:
+            metrics['mse'] = np.mean(np.square(y-y_pred))
+
+        # Compute sum of squared errors
+        if 'sse' in metric_list:
+            metrics['sse'] = np.sum(np.square(y-y_pred))
+
+        # Compute mean squared error
+        if 'mae' in metric_list:
+            metrics['mae'] = np.mean(y-y_pred)
+
+        return metrics
 
 
     def plot_by(self, x, data, bins=100, what='mean'):
@@ -874,27 +1017,7 @@ class BaseDistribution(BaseLayer):
         # TODO: same idea as log_prob_by above
         pass
 
-    def metrics(self, x=None, y=None, metric_list=[]):
-        """Compute metrics of model performance on data
 
-        TODO: docs, metric_list can contain 'mse', 'mae', 'accuracy', etc
-
-        TODO: methods which just call this w/ a specific metric? for shorthand
-
-        Parameters
-        ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values of data on which to
-            evalutate the model.  First dimension should be equal to the number
-            of samples.
-            If |None|, will use the data the model was trained on (the default).
-        y : |None| or |ndarray|
-            Input array of dependent variable values of data on which to
-            evalutate the model.  First dimension should be equal to the number
-            of samples.
-            If |None|, will use the data the model was trained on (the default).
-
-        """
 
 
 

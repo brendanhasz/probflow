@@ -43,6 +43,7 @@ Backlog (long term):
 * Multivariate Normal, StudentT, and Cauchy dists
 * Bayesian correlation example and Model
 * `Bijector support`_? e.g so you can do ``model=Exp(Normal()); model.fit()``
+* `Input data as tf dataset iterators`_
 * Conv layers
 * Pooling layers
 * Ready-made Conv models
@@ -154,6 +155,7 @@ opens the tensorboard while training.
 
 Bijector support
 ^^^^^^^^^^^^^^^^
+
 Adding the jacobian adjustment isn't too bad, just add Abs( d transform / dt ).
 But you also then need to worry about doing the *inverse* transform.
 E.g. w/ ``y ~ Exp(Normal(mu, sigma))``, Exp layer needs to *inverse* transform y
@@ -162,6 +164,19 @@ return that prob plus the Jacobian adjustment.
 
 But, don't need a special "bijector" or anything, just add that functionality
 to the Exp layer (and other transform layers, like Reciprocal, Log, and Sigmoid)
+
+
+Input data as tf dataset iterators
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The big advantage of bayes by backprop w/ tensorflow is your data doesn't have
+to fit into memory.  Right now, ``BaseDistribution.fit`` assumes its inputs
+``x`` and ``y`` are numpy arrays (or pandas arrays).  
+Though I guess you could use memory mapping if it won't fit in memory.
+Distributed arrays would be hard though.  Dask maybe?
+Anyway, it would be nice 
+to let it take dataset iterators so users can define their own data pipelines.
+
 
 Support for random effects and multilevel models
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
