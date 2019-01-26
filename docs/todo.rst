@@ -42,6 +42,7 @@ Backlog (long term):
 * Neural Matrix Factorization
 * Multivariate Normal, StudentT, and Cauchy dists
 * Bayesian correlation example and Model
+* `Bijector support`_? e.g so you can do ``model=Exp(Normal()); model.fit()``
 * Conv layers
 * Pooling layers
 * Ready-made Conv models
@@ -150,6 +151,17 @@ Tensorflow dashboard
 The ``fit()`` func should have a ``show_dashboard`` kwarg or something.  If true, 
 opens the tensorboard while training.
 
+
+Bijector support
+^^^^^^^^^^^^^^^^
+Adding the jacobian adjustment isn't too bad, just add Abs( d transform / dt ).
+But you also then need to worry about doing the *inverse* transform.
+E.g. w/ ``y ~ Exp(Normal(mu, sigma))``, Exp layer needs to *inverse* transform y
+(i.e. take ``ln(y)``), compute prob of ``ln(y) ~ N(mu, sigma)``, and then 
+return that prob plus the Jacobian adjustment.
+
+But, don't need a special "bijector" or anything, just add that functionality
+to the Exp layer (and other transform layers, like Reciprocal, Log, and Sigmoid)
 
 Support for random effects and multilevel models
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

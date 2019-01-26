@@ -49,25 +49,6 @@ class Parameter(BaseParameter):
     posterior_fn : |Distribution|
         Probability distribution class to use to approximate the posterior.
         Default = :class:`.Normal`
-    post_param_names : list of str
-        List of posterior distribution parameter names.  Elements in this 
-        list should correspond to elements of ``post_param_lb`` and 
-        ``post_param_ub``.
-        Default = ``['loc', 'scale']`` (assumes ``posterior_fn = Normal``)
-    post_param_lb : list of {int or float or |None|}
-        List of posterior distribution parameter lower bounds.  The 
-        variational distribution's ``i``-th unconstrained parameter value will 
-        be transformed to fall between ``post_param_lb[i]`` and 
-        ``post_param_ub[i]``. Elements of this list should correspond to 
-        elements of ``post_param_names`` and ``post_param_ub``.
-        Default = ``[None, 0]`` (assumes ``posterior_fn = Normal``)
-    post_param_ub : list of {int or float or |None|}
-        List of posterior distribution parameter upper bounds.  The 
-        variational distribution's ``i``-th unconstrained parameter value will 
-        be transformed to fall between ``post_param_lb[i]`` and 
-        ``post_param_ub[i]``. Elements of this list should correspond to 
-        elements of ``post_param_names`` and ``post_param_ub``.
-        Default = ``[None, None]`` (assumes ``posterior_fn = Normal``)
     seed : int, float, or |None|
         Seed for the random number generator.  
         Set to |None| to use the global seed.
@@ -123,9 +104,6 @@ class Parameter(BaseParameter):
                  name='Parameter',
                  prior=Normal(0, 1),
                  posterior_fn=Normal,
-                 post_param_names=['loc', 'scale'],
-                 post_param_lb=[None, 0],
-                 post_param_ub=[None, None],
                  seed=None,
                  estimator='flipout',
                  transform=lambda x: x,
@@ -149,24 +127,6 @@ class Parameter(BaseParameter):
             'prior must be a probflow distribution or None'
         assert issubclass(posterior_fn, BaseDistribution), \
             'posterior_fn must be a probflow distribution'
-        assert isinstance(post_param_names, list), \
-            'post_param_names must be a list of strings'        
-        assert all(isinstance(n, str) for n in post_param_names), \
-            'post_param_names must be a list of strings'
-        assert isinstance(post_param_lb, list), \
-            'post_param_lb must be a list of numbers'
-        assert len(post_param_lb)==len(post_param_names),\
-            'post_param_lb must be same length as post_param_names'
-        for p_lb in post_param_lb:
-            assert p_lb is None or isinstance(p_lb, (int, float)), \
-                'post_param_lb must contain ints or floats or None'
-        assert isinstance(post_param_ub, list), \
-            'post_param_ub must be a list of numbers'
-        assert len(post_param_ub)==len(post_param_names),\
-            'post_param_ub must be same length as post_param_names'
-        for p_ub in post_param_ub:
-            assert p_ub is None or isinstance(p_ub, (int, float)), \
-                'post_param_ub must contain ints or floats or None'
         assert estimator is None or isinstance(estimator, str), \
             'estimator must be None or a string'
 
@@ -185,9 +145,6 @@ class Parameter(BaseParameter):
         self.name = name
         self.prior = prior
         self.posterior_fn = posterior_fn
-        self.post_param_names = post_param_names
-        self.post_param_lb = post_param_lb
-        self.post_param_ub = post_param_ub
         self.seed = seed
         self.estimator = estimator
         self.transform = transform
@@ -273,13 +230,13 @@ class Parameter(BaseParameter):
         # Create posterior distribution parameters
         params = dict()
         with tf.variable_scope(self.name):
-            for arg in self.post_param_names:
+            for arg in self.posterior_fn._post_param_bounds:
                 params[arg] = tf.get_variable(arg, shape=self.shape)
 
         # Transform posterior parameters
-        for arg, lb, ub in zip(self.post_param_names, 
-                               self.post_param_lb, 
-                               self.post_param_ub):
+        for arg in self.posterior_fn._post_param_bounds:
+            lb = self.posterior_fn._post_param_bounds[arg][0]
+            ub = self.posterior_fn._post_param_bounds[arg][1]
             params[arg] = self._bound(params[arg], lb, ub)
 
         # Create variational posterior distribution
@@ -424,77 +381,20 @@ class ScaleParameter(Parameter):
     prior : |None| or a |Distribution| object
         Prior probability distribution function which has been instantiated
         with parameters.
-        Default = :class:`.Normal` ``(0,1)``
+        Default = |None|
     posterior_fn : |Distribution|
         Probability distribution class to use to approximate the posterior.
-        Default = :class:`.Normal`
-    post_param_names : list of str
-        List of posterior distribution parameter names.  Elements in this 
-        list should correspond to elements of ``post_param_lb`` and 
-        ``post_param_ub``.
-        Default = ``['loc', 'scale']`` (assumes ``posterior_fn = Normal``)
-    post_param_lb : list of {int or float or |None|}
-        List of posterior distribution parameter lower bounds.  The 
-        variational distribution's ``i``-th unconstrained parameter value will 
-        be transformed to fall between ``post_param_lb[i]`` and 
-        ``post_param_ub[i]``. Elements of this list should correspond to 
-        elements of ``post_param_names`` and ``post_param_ub``.
-        Default = ``[None, 0]`` (assumes ``posterior_fn = Normal``)
-    post_param_ub : list of {int or float or |None|}
-        List of posterior distribution parameter upper bounds.  The 
-        variational distribution's ``i``-th unconstrained parameter value will 
-        be transformed to fall between ``post_param_lb[i]`` and 
-        ``post_param_ub[i]``. Elements of this list should correspond to 
-        elements of ``post_param_names`` and ``post_param_ub``.
-        Default = ``[None, None]`` (assumes ``posterior_fn = Normal``)
+        Default = :class:`.InvGamma`
     seed : int, float, or |None|
         Seed for the random number generator.  
         Set to |None| to use the global seed.
         Default = |None|
-    transform : lambda function
-        Transform to apply to the random variable.  For example, to create a
-        parameter with an inverse gamma posterior, use 
-        ``posterior``=:class:`.Gamma`` and 
-        ``transform = lambda x: tf.reciprocal(x)``
-        Default is ``lambda x: tf.sqrt(x)``
-    inv_transform : lambda function
-        Inverse transform which will convert values in transformed space back
-        into the posterior distribution's coordinates.  For example, to create
-        a parameter with an inverse gamma posterior, use 
-        ``posterior``=:class:`.Gamma``, 
-        ``transform = lambda x: tf.reciprocal(x)``, and 
-        ``inv_transform = lambda x: tf.reciprocal(x)``.
-        Default is ``lambda x: tf.square(x)``
-    estimator : {``'flipout'`` or |None|}
-        Method of posterior estimator to use. Valid values:
 
-        * |None|: Generate random samples from the variational distribution 
-          for each batch independently.
-        * `'flipout'`: Use the Flipout estimator :ref:`[1] <ref_flipout>` to 
-          more efficiently generate samples from the variational distribution.
-
-        Default = ``'flipout'``
-
-    Notes
-    -----
-    When using the flipout estimator (``estimator='flipout'``), ``posterior_fn`` 
-    must be a symmetric distribution of the location-scale family - one of:
-
-    * :class:`.Normal`
-    * :class:`.StudentT`
-    * :class:`.Cauchy`
 
     Examples
     --------
     TODO
 
-    References
-    ----------
-    .. _ref_flipout:
-    .. [1] Yeming Wen, Paul Vicol, Jimmy Ba, Dustin Tran, and Roger Grosse. 
-        Flipout: Efficient Pseudo-Independent Weight Perturbations on 
-        Mini-Batches. *International Conference on Learning Representations*, 
-        2018. https://arxiv.org/abs/1803.04386
     """
 
     def __init__(self, 
@@ -502,24 +402,15 @@ class ScaleParameter(Parameter):
                  name='ScaleParameter',
                  prior=None,
                  posterior_fn=InvGamma,
-                 post_param_names=['shape', 'rate'],
-                 post_param_lb=[0, 0],
-                 post_param_ub=[None, None],
-                 seed=None,
-                 estimator=None,
-                 transform=lambda x: tf.sqrt(x),
-                 inv_transform=lambda x: tf.square(x)):
+                 seed=None):
         super().__init__(shape=shape,
                          name=name,
                          prior=prior,
                          posterior_fn=posterior_fn,
-                         post_param_names=post_param_names,
-                         post_param_lb=post_param_lb,
-                         post_param_ub=post_param_ub,
                          seed=seed,
-                         estimator=estimator,
-                         transform=transform,
-                         inv_transform=inv_transform)
+                         estimator=None,
+                         transform=lambda x: tf.sqrt(x),
+                         inv_transform=lambda x: tf.square(x))
 
 
 

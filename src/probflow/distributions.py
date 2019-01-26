@@ -78,8 +78,13 @@ class Normal(ContinuousDistribution):
     _default_args = OrderedDict([
         ('loc', 0),
         ('scale', 1)
-    ])    
+    ])
 
+    # Posterior distribution parameter bounds (lower, upper)
+    _post_param_bounds = {
+        'loc': (None, None),
+        'scale': (0, None)
+    }
 
     def _build(self, args, data):
         """Build the distribution model."""
@@ -97,9 +102,10 @@ class HalfNormal(ContinuousDistribution):
 
         p(x) = 
         \begin{cases}
-            0,~\text{if~} x<0 \\
+            0, & \text{if}~x<0 \\
             \frac{2}{\sqrt{2 \pi \sigma^2}} 
-            \exp \left( -\frac{(x-\mu)^2}{2 \sigma^2} \right),~\text{otherwise}
+            \exp \left( -\frac{(x-\mu)^2}{2 \sigma^2} \right), 
+            & \text{otherwise}
         \end{cases}
 
 
@@ -111,7 +117,11 @@ class HalfNormal(ContinuousDistribution):
     _default_args = {
         'scale': 1
     }
-    
+
+    # Posterior distribution parameter bounds (lower, upper)
+    _post_param_bounds = {
+        'scale': (0, None)
+    }    
 
     def _build(self, args, data):
         """Build the distribution model."""
@@ -136,6 +146,12 @@ class StudentT(ContinuousDistribution):
         ('scale', 1)
     ])   
     
+    # Posterior distribution parameter bounds (lower, upper)
+    _post_param_bounds = {
+        'df': (0, None),
+        'loc': (None, None),
+        'scale': (0, None)
+    }
 
     def _build(self, args, data):
         """Build the distribution model."""
@@ -159,6 +175,11 @@ class Cauchy(ContinuousDistribution):
         ('scale', 1)
     ])  
     
+    # Posterior distribution parameter bounds (lower, upper)
+    _post_param_bounds = {
+        'loc': (None, None),
+        'scale': (0, None)
+    }
 
     def _build(self, args, data):
         """Build the distribution model."""
@@ -197,6 +218,11 @@ class Gamma(ContinuousDistribution):
         ('rate', REQUIRED)
     ])    
 
+    # Posterior distribution parameter bounds (lower, upper)
+    _post_param_bounds = {
+        'shape': (0, None),
+        'rate': (0, None)
+    }
 
     def _build(self, args, data):
         """Build the distribution model."""
@@ -235,6 +261,11 @@ class InvGamma(ContinuousDistribution):
         ('rate', REQUIRED)
     ])    
 
+    # Posterior distribution parameter bounds (lower, upper)
+    _post_param_bounds = {
+        'shape': (0, None),
+        'rate': (0, None)
+    }
 
     def _build(self, args, data):
         """Build the distribution model."""
@@ -251,12 +282,15 @@ class Bernoulli(DiscreteDistribution):
 
     """
 
-
     # Default kwargs
     _default_kwargs = {
         'input_type': 'logits'
     }
     
+    # Posterior distribution parameter bounds (lower, upper)
+    _post_param_bounds = {
+        'input': (None, None)
+    }
 
     def _build(self, args, data):
         """Build the distribution model."""
@@ -285,6 +319,10 @@ class Poisson(DiscreteDistribution):
         'rate': REQUIRED
     }
     
+    # Posterior distribution parameter bounds (lower, upper)
+    _post_param_bounds = {
+        'rate': (0, None)
+    }
 
     def _build(self, args, data):
         """Build the distribution model."""

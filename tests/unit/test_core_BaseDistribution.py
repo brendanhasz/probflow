@@ -20,7 +20,7 @@ def test_BaseDistribution_fit():
     model = Normal(data*weight + bias, 1.0)
 
     # Generate data
-    N = 1000
+    N = 10
     true_weight = 0.5
     true_bias = -1
     noise = np.random.randn(N)
@@ -33,4 +33,4 @@ def test_BaseDistribution_fit():
     # Fit the model
     model.fit(x, y, epochs=1)
 
-    # if you run it w/ a bunch of epochs it recovers the true params!
+    # if you run it w/ more datapoints + epochs it recovers the true params!

@@ -189,7 +189,7 @@ def test_parameter_sample_posterior():
 def test_scale_parameter_built_obj_none_estimator():
     """Tests probflow.parameters.Parameter.built_obj w/ estimator=None"""
     p1 = ScaleParameter(name='test_scale_parameter_built_obj_none_estimator',
-                   shape=[3,4], estimator=None)
+                        shape=[3,4])
     p1.build(tf.placeholder(tf.float32, [1]), [2])
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:
@@ -213,7 +213,7 @@ def test_scale_parameter_built_obj_none_estimator():
 def test_scale_parameter_mean_obj():
     """Tests probflow.parameters.Parameter.mean_obj and _mean_obj_raw"""
     p1 = ScaleParameter(name='test_scale_parameter_mean_obj',
-                   shape=[3,4], estimator=None)
+                        shape=[3,4])
     p1.build(tf.placeholder(tf.float32, [1]), [2])
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:

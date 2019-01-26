@@ -395,6 +395,10 @@ class BaseDistribution(BaseLayer):
 
     """
 
+    # Posterior distribution parameter bounds (lower, upper)
+    _post_param_bounds = {
+        'input': (None, None)
+    }
 
     def _log_loss(self, obj, vals):
         """Compute the log loss ."""
