@@ -84,7 +84,7 @@ class Normal(ContinuousDistribution):
         'scale': (0, None)
     }
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the distribution model."""
         return tfd.Normal(loc=args['loc'], scale=args['scale'])
 
@@ -121,7 +121,7 @@ class HalfNormal(ContinuousDistribution):
         'scale': (0, None)
     }
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the distribution model."""
         return tfd.HalfNormal(scale=args['scale'])
 
@@ -151,7 +151,7 @@ class StudentT(ContinuousDistribution):
         'scale': (0, None)
     }
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the distribution model."""
         return tfd.StudentT(args['df'], args['loc'], args['scale'])
 
@@ -179,7 +179,7 @@ class Cauchy(ContinuousDistribution):
         'scale': (0, None)
     }
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the distribution model."""
         return tfd.Cauchy(args['loc'], args['scale'])
 
@@ -222,7 +222,7 @@ class Gamma(ContinuousDistribution):
         'rate': (0, None)
     }
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the distribution model."""
         return tfd.Gamma(concentration=args['shape'], rate=args['rate'])
 
@@ -265,7 +265,7 @@ class InvGamma(ContinuousDistribution):
         'rate': (0, None)
     }
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the distribution model."""
         return tfd.InverseGamma(concentration=args['shape'], rate=args['rate'])
 
@@ -290,7 +290,7 @@ class Bernoulli(DiscreteDistribution):
         'input': (None, None)
     }
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the distribution model."""
         if self.kwargs['input_type'] == 'logits': #input arg is the logits
             return tfd.Bernoulli(logits=args['input'])
@@ -322,7 +322,7 @@ class Poisson(DiscreteDistribution):
         'rate': (0, None)
     }
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the distribution model."""
         return tfd.Poisson(args['rate'])
 

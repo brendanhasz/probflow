@@ -170,7 +170,7 @@ class BaseLayer(ABC):
 
 
     @abstractmethod
-    def _build(self, args, data):
+    def _build(self, args, data, batch_shape):
         """Build layer.
 
         Inheriting class must define this method by building the layer for that
@@ -183,13 +183,13 @@ class BaseLayer(ABC):
         pass
 
 
-    def _build_mean(self, args, data):
+    def _build_mean(self, args, data, batch_shape):
         """Build the layer with mean parameters.
 
         TODO: docs. default is to just do the same thing as _build
 
         """
-        return self._build(args, data)
+        return self._build(args, data, batch_shape)
 
 
     def _log_loss(self, vals):
@@ -284,8 +284,8 @@ class BaseLayer(ABC):
         # could make parameter + layer have same interface?
 
         # Build this layer's sample model and mean model
-        self.built_obj = self._build(self.built_args, data)
-        self.mean_obj = self._build_mean(self.mean_args, data)
+        self.built_obj = self._build(self.built_args, data, batch_shape)
+        self.mean_obj = self._build_mean(self.mean_args, data, batch_shape)
 
 
     def _parameter_list(self):

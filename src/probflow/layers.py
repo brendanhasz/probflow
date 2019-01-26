@@ -129,7 +129,7 @@ class Input(BaseLayer):
     }
 
 
-    def _build(self, args, data):
+    def _build(self, _args, data, _batch_shape):
         """Build the layer."""
         if self.kwargs['cols'] is None:
             return data
@@ -155,7 +155,7 @@ class Add(BaseLayer):
     ])
 
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return args['a'] + args['b']
 
@@ -177,7 +177,7 @@ class Sub(BaseLayer):
     ])
 
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return args['a'] - args['b']
 
@@ -199,7 +199,7 @@ class Mul(BaseLayer):
     ])
 
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         # TODO: have to distinguish between matrix and elementwise mult somehow?
         return args['a'] * args['b']
@@ -222,7 +222,7 @@ class Div(BaseLayer):
     ])
 
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return args['a'] / args['b']
 
@@ -237,7 +237,7 @@ class Neg(BaseLayer):
 
     """
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return -args['input']
 
@@ -252,7 +252,7 @@ class Abs(BaseLayer):
 
     """
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return abs(args['input'])
 
@@ -267,7 +267,7 @@ class Exp(BaseLayer):
 
     """
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.exp(args['input'])
 
@@ -283,7 +283,7 @@ class Log(BaseLayer):
 
     """
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.log(args['input'])
 
@@ -303,7 +303,7 @@ class Reciprocal(BaseLayer):
 
     """
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.reciprocal(args['input'])
 
@@ -323,7 +323,7 @@ class Sqrt(BaseLayer):
 
     """
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.sqrt(args['input'])
 
@@ -343,7 +343,7 @@ class Sigmoid(BaseLayer):
 
     """
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.sigmoid(args['input'])
 
@@ -363,7 +363,7 @@ class Relu(BaseLayer):
 
     """
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.nn.relu(args['input'])
 
@@ -394,7 +394,7 @@ class Softmax(BaseLayer):
         'axis': 1,
     }
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.nn.softmax(args['input'], axis=self.kwargs['axis'])
 
@@ -419,7 +419,7 @@ class Sum(BaseLayer):
         'axis': 1,
     }
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.reduce_sum(args['input'], axis=self.kwargs['axis'])
 
@@ -445,7 +445,7 @@ class Mean(BaseLayer):
     }
 
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.reduce_mean(args['input'], axis=self.kwargs['axis'])
 
@@ -466,7 +466,7 @@ class Min(BaseLayer):
     }
 
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.reduce_min(args['input'], axis=self.kwargs['axis'])
 
@@ -487,7 +487,7 @@ class Max(BaseLayer):
     }
 
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.reduce_max(args['input'], axis=self.kwargs['axis'])
 
@@ -513,7 +513,7 @@ class Prod(BaseLayer):
     }
 
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.reduce_prod(args['input'], axis=self.kwargs['axis'])
 
@@ -541,7 +541,7 @@ class LogSumExp(BaseLayer):
     }
 
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.reduce_logsumexp(args['input'], axis=self.kwargs['axis'])
 
@@ -568,7 +568,7 @@ class Cat(BaseLayer):
         'axis': 1,
     }
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.concat([args['a'], args['b']], axis=self.kwargs['axis'])
 
@@ -602,7 +602,7 @@ class Dot(BaseLayer):
         'axis': 1,
     }
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.reduce_sum(args['a'] * args['b'], axis=self.kwargs['axis'])
         # TODO: this will only work w/ vector inputs...
@@ -625,7 +625,7 @@ class Matmul(BaseLayer):
     ])
 
 
-    def _build(self, args, data):
+    def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.matmul(args['a'], args['b'])
         # TODO: don't think this will work w/ tensors of >2 dims...
@@ -648,7 +648,7 @@ class Dense(BaseLayer):
 
     # Layer arguments and their default values
     _default_args = {
-        'input': None,
+        'input': Input(),
     }
 
 
@@ -663,17 +663,11 @@ class Dense(BaseLayer):
     }
 
 
-    def _build(self, args, data):
+    def _build(self, args, data, batch_shape):
         """Build the layer."""
 
-        # If no input specified, assume data is input
-        if args['input'] is None:
-            x_in = data
-        else:
-            x_in = args['input']
-
-        # Compute dimensions
-        # batch_size = x_in.shape[0]
+        # Inputs
+        x_in = args['input']
         ndims = x_in.shape[1]
         units = self.kwargs['units']
 
@@ -684,19 +678,18 @@ class Dense(BaseLayer):
                          prior=self.kwargs['bias_prior'])
 
         # Build the weight and bias parameter
-        # TODO: this won't work, Parameter.build also needs the batch_shape!
-        weight.build(data)
-        bias.build(data)
+        weight.build(data, batch_shape)
+        bias.build(data, batch_shape)
 
         # Compute output using a sample from the variational posteriors
-        weight_samples = self.weight._sample(data)
-        bias_samples = self.bias._sample(data)
+        weight_samples = self.weight.built_obj
+        bias_samples = self.bias.built_obj
         y_out = tf.matmul(x_in, weight_samples) + bias_samples
         self._sample = self.kwargs['activation'](y_out)
 
         # Compute the output using the means of the variational posteriors
-        weight_means = self.weight._mean(data)
-        bias_means = self.bias._mean(data)
+        weight_means = self.weight.mean_obj
+        bias_means = self.bias.mean_obj
         mean_y_out = tf.matmul(x_in, weight_means) + bias_means
         self._mean = self.kwargs['activation'](mean_y_out)
 
