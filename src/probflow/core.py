@@ -75,6 +75,11 @@ class BaseObject(ABC):
         return Matmul(self, other)
 
 
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        pass
+
+
 
 class BaseParameter(BaseObject):
     """Abstract parameter class (used as an implementation base)"""
@@ -207,6 +212,7 @@ class BaseLayer(BaseObject):
                 self.kwargs[kwarg] = kwargs[kwarg]
             else:
                 self.kwargs[kwarg] = self._default_kwargs[kwarg]
+        self._validate_kwargs(self.kwargs)
 
         # Set attribs for the built layer and fit state
         self.built_obj = None

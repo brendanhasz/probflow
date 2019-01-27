@@ -64,7 +64,9 @@ Neural Network Layers
 
 * :class:`.Dense`
 * :class:`.Sequential`
+* :class:`.Gather`
 * :class:`.Embedding`
+
 
 ----------
 
@@ -96,6 +98,7 @@ __all__ = [
     'Matmul',
     'Dense',
     'Sequential',
+    'Gather',
     'Embedding',
 ]
 
@@ -130,6 +133,14 @@ class Input(BaseLayer):
     }
 
 
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if (kwargs['cols'] is not None and 
+                not isinstance(kwargs['cols'], (int, str, list))):
+            raise ValueError('cols kwarg must be None, int, str, ' +
+                             'or list of int or str')
+
+
     def _build(self, _args, data, _batch_shape):
         """Build the layer."""
         if self.kwargs['cols'] is None:
@@ -148,6 +159,7 @@ class Add(BaseLayer):
 
 
     """
+
 
     # Layer arguments and their default values
     _default_args = OrderedDict([
@@ -171,6 +183,7 @@ class Sub(BaseLayer):
 
     """
 
+
     # Layer arguments and their default values
     _default_args = OrderedDict([
         ('a', REQUIRED),
@@ -192,6 +205,7 @@ class Mul(BaseLayer):
 
 
     """
+
 
     # Layer arguments and their default values
     _default_args = OrderedDict([
@@ -215,6 +229,7 @@ class Div(BaseLayer):
 
 
     """
+
 
     # Layer arguments and their default values
     _default_args = OrderedDict([
@@ -390,10 +405,18 @@ class Softmax(BaseLayer):
 
     """
 
+
     # Layer keyword arguments and their default values
     _default_kwargs = {
-        'axis': 1,
+        'axis': -1,
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['axis'], int):
+            raise ValueError('axis kwarg must be an int')
+
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
@@ -415,14 +438,24 @@ class Sum(BaseLayer):
 
     """
 
+
     # Layer keyword arguments and their default values
     _default_kwargs = {
-        'axis': 1,
+        'axis': -1,
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['axis'], int):
+            raise ValueError('axis kwarg must be an int')
+
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        return tf.reduce_sum(args['input'], axis=self.kwargs['axis'])
+        return tf.reduce_sum(args['input'], 
+                             axis=self.kwargs['axis'], 
+                             keepdims=True)
 
 
 
@@ -440,15 +473,24 @@ class Mean(BaseLayer):
 
     """
 
+
     # Layer keyword arguments and their default values
     _default_kwargs = {
-        'axis': 1,
+        'axis': -1,
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['axis'], int):
+            raise ValueError('axis kwarg must be an int')
 
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        return tf.reduce_mean(args['input'], axis=self.kwargs['axis'])
+        return tf.reduce_mean(args['input'], 
+                              axis=self.kwargs['axis'],
+                              keepdims=True)
 
 
 
@@ -461,15 +503,24 @@ class Min(BaseLayer):
 
     """
 
+
     # Layer keyword arguments and their default values
     _default_kwargs = {
-        'axis': 1,
+        'axis': -1,
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['axis'], int):
+            raise ValueError('axis kwarg must be an int')
 
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        return tf.reduce_min(args['input'], axis=self.kwargs['axis'])
+        return tf.reduce_min(args['input'], 
+                             axis=self.kwargs['axis'],
+                             keepdims=True)
 
 
 
@@ -482,15 +533,24 @@ class Max(BaseLayer):
 
     """
 
+
     # Layer keyword arguments and their default values
     _default_kwargs = {
-        'axis': 1,
+        'axis': -1,
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['axis'], int):
+            raise ValueError('axis kwarg must be an int')
 
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        return tf.reduce_max(args['input'], axis=self.kwargs['axis'])
+        return tf.reduce_max(args['input'], 
+                             axis=self.kwargs['axis'],
+                             keepdims=True)
 
 
 
@@ -508,15 +568,24 @@ class Prod(BaseLayer):
 
     """
 
+
     # Layer keyword arguments and their default values
     _default_kwargs = {
-        'axis': 1,
+        'axis': -1,
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['axis'], int):
+            raise ValueError('axis kwarg must be an int')
 
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        return tf.reduce_prod(args['input'], axis=self.kwargs['axis'])
+        return tf.reduce_prod(args['input'], 
+                              axis=self.kwargs['axis'],
+                              keepdims=True)
 
 
 
@@ -536,15 +605,24 @@ class LogSumExp(BaseLayer):
 
     """
 
+
     # Layer keyword arguments and their default values
     _default_kwargs = {
-        'axis': 1,
+        'axis': -1,
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['axis'], int):
+            raise ValueError('axis kwarg must be an int')
 
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        return tf.reduce_logsumexp(args['input'], axis=self.kwargs['axis'])
+        return tf.reduce_logsumexp(args['input'], 
+                                   axis=self.kwargs['axis'],
+                                   keepdims=True)
 
 
 
@@ -558,16 +636,25 @@ class Cat(BaseLayer):
 
     """
 
+
     # Layer arguments and their default values
     _default_args = OrderedDict([
         ('a', REQUIRED),
         ('b', REQUIRED)
     ])
 
+
     # Layer keyword arguments and their default values
     _default_kwargs = {
-        'axis': 1,
+        'axis': -1,
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['axis'], int):
+            raise ValueError('axis kwarg must be an int')
+
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
@@ -592,16 +679,25 @@ class Dot(BaseLayer):
 
     """
 
+
     # Layer arguments and their default values
     _default_args = OrderedDict([
         ('a', REQUIRED),
         ('b', REQUIRED)
     ])
 
+
     # Layer keyword arguments and their default values
     _default_kwargs = {
-        'axis': 1,
+        'axis': -1,
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['axis'], int):
+            raise ValueError('axis kwarg must be an int')
+
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
@@ -620,6 +716,7 @@ class Matmul(BaseLayer):
 
 
     """
+
 
     # Layer arguments and their default values
     _default_args = OrderedDict([
@@ -664,6 +761,12 @@ class Dense(BaseLayer):
         'weight_prior': Normal(0, 1),
         'bias_prior': Normal(0, 1),
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        # TODO
+        pass
 
 
     def _build(self, args, data, batch_shape):
@@ -792,17 +895,28 @@ class Gather(BaseLayer):
 
     """
 
+
     # Layer arguments and their default values
     _default_args = OrderedDict([
         ('values', REQUIRED),
         ('indices', REQUIRED)
     ])
 
+
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'axis': 0,
         'index_dtype': tf.uint32,
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['axis'], int):
+            raise ValueError('axis kwarg must be an int')
+        if not isinstance(kwargs['index_dtype'], tf.DType):
+            raise ValueError('index_dtype kwarg must be a tf.DType')
+
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""

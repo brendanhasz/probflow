@@ -100,3 +100,8 @@ model.plot_posterior(style='line')
 if plot:
     plt.show()
 
+# Plot all the model's posteriors w/ [hist, 2col, no_ci]
+model.plot_posterior(style='line', cols=2)
+if plot:
+    plt.show()
+
