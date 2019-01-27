@@ -4,9 +4,10 @@ import matplotlib.pyplot as plt
 from probflow import *
 
 # Set for actually viewing, decrease for just testing
-plot = True
+plot = False
 epochs = 1
 N = 10
+#plot = True
 #epochs = 1000
 #N = 1000
 

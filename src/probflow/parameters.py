@@ -441,6 +441,9 @@ class Parameter(BaseParameter):
                     plt.hist(samples[k,i], alpha=alpha, bins=be, 
                              color=patches[0].get_facecolor())
 
+        # TODO: may want to have an option to add legends w/ indexes
+        # (for Parameters w/ shape>1 there will be multiple lines in the plots)
+
         # Label with parameter name, and no y axis needed
         plt.xlabel(self.name)
         plt.gca().get_yaxis().set_visible(False)
@@ -449,6 +452,12 @@ class Parameter(BaseParameter):
     def __str__(self, prepend=''):
         """String representation of a parameter."""
         return 'Parameter \''+self.name+'\''
+
+
+    def __getitem__(self, inds):
+        """Get parameters by index."""
+        from .layers import Gather
+        return Gather(self, inds)
 
 
 

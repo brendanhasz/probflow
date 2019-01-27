@@ -95,6 +95,9 @@ https://scikit-learn.org/dev/developers/contributing.html#rolling-your-own-estim
 Array Slicing
 ^^^^^^^^^^^^^
 
+NOTE that you've implemented this, just need to test/debug it.
+Added layers.Gather and Parameter.__getitem__ which uses Gather.
+
 Ability to 'slice' arrays, e.g.:
 
 .. code-block:: python

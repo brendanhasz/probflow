@@ -779,6 +779,39 @@ class Conv2d(BaseLayer):
 
 
 
+class Gather(BaseLayer):
+    """Collects slices from a layer using indexes provided by another layer.
+
+    TODO: docs
+
+    e.g. if 
+    vals = [1.1, 2.2, 3.3, 4.4]  (a 4x1 vector), and
+    inds = [0, 2, 1]
+    then Gather(vals, inds) returns:
+    [1.1, 3.3, 2.2] (a 3x1 vector)
+
+    """
+
+    # Layer arguments and their default values
+    _default_args = OrderedDict([
+        ('values', REQUIRED),
+        ('indices', REQUIRED)
+    ])
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 0,
+        'index_dtype': tf.uint32,
+    }
+
+    def _build(self, args, _data, _batch_shape):
+        """Build the layer."""
+        return tf.gather(args['values'], 
+                         tf.cast(args['indexes'], self.kwargs['index_dtype']), 
+                         axis=self.kwargs['axis'])
+
+
+
 class Embedding(BaseLayer):
     """A categorical embedding layer.
 
@@ -794,6 +827,13 @@ class Embedding(BaseLayer):
     variance-1 normal dists around the embedding points and compute the KL div
     using that.
 
+    should cast input to int64 or something before using as indexes -> tf.gather
+
+    same idea as Gather (above), just it creates the embedding array for you
+    based on how many unique vals are in the training dataset
+
+    takes a kwarg="unique_vals" so it knows how many embedding params to create?
+    also should take a dims kwarg (embedding dimensions)
 
     """
 
