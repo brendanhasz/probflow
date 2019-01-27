@@ -19,6 +19,7 @@ __all__ = [
 from abc import ABC, abstractmethod
 
 import numpy as np
+import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow_probability as tfp
 
@@ -674,6 +675,11 @@ class BaseDistribution(BaseLayer):
         if type(params) is str:
             params = [params]
 
+        # Check requested parameters are in the model
+        for param in params:
+            if param not in [p.name for p in self._parameters]:
+                raise ValueError('Parameter \''+param+'\' not in this model')
+
         # Get the posterior distributions
         posteriors = dict()
         for param in self._parameters:
@@ -684,7 +690,14 @@ class BaseDistribution(BaseLayer):
         return posteriors
 
 
-    def plot_posterior(self, params=None):
+    def plot_posterior(self,
+                       num_samples=1000,
+                       params=None,
+                       style='fill',
+                       cols=1,
+                       bins=20,
+                       ci=0.0,
+                       bw=0.075):
         """Plot posterior distributions of the model's parameters.
 
         TODO: Docs... params is a list of strings of params to plot
@@ -694,9 +707,79 @@ class BaseDistribution(BaseLayer):
             Before calling :meth:`.plot_posteriors` on a |Model|, you must
             first :meth:`.fit` it to some data.
 
+        Parameters
+        ----------
+        num_samples : int
+            Number of samples to take from each posterior distribution for
+            estimating the density.  Default = 1000
+        params : str or list
+            List of parameters to plot.  Default is to plot the posterior of
+            all parameters in the model.
+        style : str
+            Which style of plot to show.  Available types are:
+
+            * ``'fill'`` - filled density plot (the default)
+            * ``'line'`` - line density plot
+            * ``'hist'`` - histogram
+
+        cols : int
+            Divide the subplots into a grid with this many columns.
+        bins : int or list or |ndarray|
+            Number of bins to use for the posterior density histogram (if 
+            ``kde=False``), or a list or vector of bin edges.
+        ci : float between 0 and 1
+            Confidence interval to plot.  Default = 0.95
+        bw : float
+            Bandwidth of the kernel density estimate (if using ``style='line'``
+            or ``style='fill'``).  Default is 0.075
         """
-        #TODO
-        pass
+
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Ensure input types are correct
+        if type(num_samples) is not int:
+            raise TypeError('num_samples must be an int')
+        if params is not None and not isinstance(params, (list, str)):
+            raise TypeError('params must None or a list of str')
+        if type(params) is list:
+            for param in params:
+                if type(param) is not str:
+                    raise TypeError('params must None or a list of str')
+        if type(style) is not str:
+            raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
+        if type(cols) is not int:
+            raise TypeError('cols must be an integer')
+        if not isinstance(bins, (int, float, np.ndarray)):
+            raise TypeError('bins must be an int or list or numpy vector')
+        if type(ci) is not float:
+            raise TypeError('ci must be a float between 0 and 1')
+
+        # Get all params if not specified
+        if params is None:
+            params = [param.name for param in self._parameters]
+
+        # Make list if string was passed
+        if type(params) is str:
+            params = [params]
+
+        # Check requested parameters are in the model
+        for param in params:
+            if param not in [p.name for p in self._parameters]:
+                raise ValueError('Parameter \''+param+'\' not in this model')
+
+        # Make dict of params to get
+        param_dict = dict()
+        for param in self._parameters:
+            if param.name in params:
+                param_dict[param.name] = param
+
+        # Plot each parameter's posterior distributions in separate subplot
+        rows = np.ceil(len(params)/cols)
+        for ix, param in enumerate(params):
+            plt.subplot(rows, cols, ix+1)
+            param_dict[param].plot_posterior(num_samples=num_samples, 
+                                             style=style, bins=bins, ci=ci)
 
 
     def predictive_distribution(self, x, num_samples=1000):
@@ -766,7 +849,6 @@ class BaseDistribution(BaseLayer):
             x = self._x_train
 
         # Predict using the mean model
-        #TODO: will want to use mode, not mean, for discrete distributions?
         return self._session.run(
             self.mean_obj.mean(), 
             feed_dict={self._x_ph: x,
@@ -1384,7 +1466,7 @@ class DiscreteDistribution(BaseDistribution):
     """
 
     def predict(self, x=None):
-        """Predict dependent variable for samples in x.s
+        """Predict discrete dependent variable for independent var samples in x.
 
         TODO: explain how predictions are generated using the MODE of each
         variational distribution

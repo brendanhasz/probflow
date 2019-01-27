@@ -12,6 +12,7 @@ __all__ = [
 ]
 
 import numpy as np
+import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow_probability as tfp
 tfd = tfp.distributions
@@ -209,6 +210,7 @@ class Parameter(BaseParameter):
 
     def _make_name_unique(self):
         """Ensure this parameter's name is a unique scope name in TF graph."""
+        # TODO: getting an error if you try to make duplicate *non-default* names
         new_name = self.name
         ix = 1
         while tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=new_name):
@@ -348,7 +350,100 @@ class Parameter(BaseParameter):
         return samples
 
 
-    # TODO: plot_posterior(kde=False)
+    def plot_posterior(self, num_samples=1000, style='fill', bins=20, ci=0.95,
+                       bw=0.075, alpha=0.4):
+        """Plot distribution of samples from the posterior distribution.
+
+        TODO: this is similar to _sample(), but returns a numpy array
+        (meant to be used by the user to examine the posterior dist)
+
+        Parameters
+        ----------
+        num_samples : int
+            Number of samples to take from each posterior distribution for
+            estimating the density.  Default = 1000
+        style : str
+            Which style of plot to show.  Available types are:
+
+            * ``'fill'`` - filled density plot (the default)
+            * ``'line'`` - line density plot
+            * ``'hist'`` - histogram
+
+        bins : int or list or |ndarray|
+            Number of bins to use for the posterior density histogram (if 
+            ``kde=False``), or a list or vector of bin edges.
+        ci : float between 0 and 1
+            Confidence interval to plot.  Default = 0.95
+        bw : float
+            Bandwidth of the kernel density estimate (if using ``style='line'``
+            or ``style='fill'``).  Default is 0.075
+        """
+
+        def approx_kde(data, bins=500, bw=0.075):
+            """A fast approximation to kernel density estimation."""
+            stds = 3 #use a gaussian kernel w/ this many std devs
+            counts, be = np.histogram(data, bins=bins)
+            db = be[1]-be[0]
+            pad = 0.5*bins*bw*stds*db
+            pbe = np.arange(db, pad, db)
+            x_out = np.concatenate((be[0]-np.flip(pbe),
+                                   be[0:-1] + np.diff(be),
+                                   be[-1]+pbe))
+            z_pad = np.zeros(pbe.shape[0])
+            raw = np.concatenate((z_pad, counts, z_pad))
+            k_x = np.linspace(-stds, stds, bins*bw*stds)
+            kernel = 1.0/np.sqrt(2.0*np.pi)*np.exp(-np.square(k_x)/2.0)
+            y_out = np.convolve(raw, kernel, mode='same')
+            return x_out, y_out
+
+        # Sample from the posterior
+        Np = np.prod(self.shape) #number of parameters
+        samples = self.sample_posterior(num_samples=num_samples)
+
+        # Compute confidence intervals
+        if ci:
+            cis = np.empty((Np, 2))
+            ci0 = 100 * (0.5 - ci/2.0);
+            ci1 = 100 * (0.5 + ci/2.0);
+            for i in range(Np):
+                cis[i,:] = np.percentile(samples[:,i], [ci0, ci1])
+
+        # Plot the samples
+        if style == 'line':
+            for i in range(Np):
+                px, py = approx_kde(samples[:,i], bw=bw)
+                p1 = plt.plot(px, py)
+                if ci:
+                    yci = np.interp(cis[i,:], px, py)
+                    plt.plot([cis[i,0], cis[i,0]], [0, yci[0]], 
+                             ':', color=p1[0].get_color())
+                    plt.plot([cis[i,1], cis[i,1]], [0, yci[1]], 
+                             ':', color=p1[0].get_color())
+        elif style == 'fill':
+            for i in range(Np):
+                color = next(plt.gca()
+                             ._get_patches_for_fill
+                             .prop_cycler)['color']
+                px, py = approx_kde(samples[:,i], bw=bw)
+                p1 = plt.fill(px, py, facecolor=color, alpha=alpha)
+                if ci:
+                    k = (px>cis[i,0]) & (px<cis[i,1])
+                    kx = px[k]
+                    ky = py[k]
+                    plt.fill(np.concatenate(([kx[0]], kx, [kx[-1]])),
+                             np.concatenate(([0], ky, [0])),
+                             facecolor=color, alpha=alpha)
+        elif style == 'hist':
+            for i in range(Np):
+                _, be, patches = plt.hist(samples[:,i], alpha=alpha, bins=bins)
+                if ci:
+                    k = (samples[:,i]>cis[i,0]) & (samples[:,i]<cis[i,1])
+                    plt.hist(samples[k,i], alpha=alpha, bins=be, 
+                             color=patches[0].get_facecolor())
+
+        # Label with parameter name, and no y axis needed
+        plt.xlabel(self.name)
+        plt.gca().get_yaxis().set_visible(False)
 
 
     def __str__(self, prepend=''):

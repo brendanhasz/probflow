@@ -93,8 +93,8 @@ def test_BaseDistribution_sample_posterior_vector():
     Nd = 3
 
     # Model = linear regression assuming error = 1
-    weight = Parameter(shape=Nd, estimator=None)
-    bias = Parameter(shape=Nd, estimator=None)
+    weight = Parameter(name='vector_weight', shape=Nd, estimator=None)
+    bias = Parameter(name='nonvec_bias', estimator=None)
     data = Input()
     model = Normal(Dot(data, weight) + bias, 1.0)
 
@@ -114,10 +114,12 @@ def test_BaseDistribution_sample_posterior_vector():
     samples = model.sample_posterior(num_samples=num_samples)
     assert isinstance(samples, dict)
     assert len(samples) == 2
-    for name, param in samples.items():
-        assert param.ndim == 2
-        assert param.shape[0] == num_samples
-        assert param.shape[1] == Nd
+    assert samples['vector_weight'].ndim == 2
+    assert samples['vector_weight'].shape[0] == num_samples
+    assert samples['vector_weight'].shape[1] == Nd
+    assert samples['nonvec_bias'].ndim == 2
+    assert samples['nonvec_bias'].shape[0] == num_samples
+    assert samples['nonvec_bias'].shape[1] == 1
 
 
 # TODO: test 2D X and params
@@ -130,6 +132,9 @@ def test_BaseDistribution_sample_posterior_vector():
 
 
 # TODO: test the shuffles work _initialize_shuffles
+
+
+# TODO: test that the flipout estimator works?
 
 
 # TODO: test the batches are being generated correctly _generate_batch
