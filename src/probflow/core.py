@@ -6,20 +6,22 @@ TODO: more info...
 
 """
 
-from abc import ABC, abstractmethod
-
-import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
-
 __all__ = [
     'REQUIRED',
+    'BaseObject',
     'BaseParameter',
     'BaseLayer',
     'BaseDistribution',
     'ContinuousDistribution',
     'DiscreteDistribution',
 ]
+
+from abc import ABC, abstractmethod
+
+import numpy as np
+import tensorflow as tf
+import tensorflow_probability as tfp
+
 
 
 # Sentinel object for required arguments
@@ -484,6 +486,12 @@ class BaseDistribution(BaseLayer):
         # Check input data size matches
         if x.shape[0] != y.shape[0]:
             raise ValueError('x and y do not have same number of samples')
+
+        # Make data at least 2 dimensional (0th dim should be N)
+        if y.ndim == 1:
+            y = np.expand_dims(y, 1)
+        if x.ndim == 1:
+            x = np.expand_dims(x, 1)
 
         # TODO: add support for pandas arrays
 

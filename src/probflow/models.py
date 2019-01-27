@@ -12,13 +12,6 @@ TODO: more info...
 
 """
 
-
-
-from .parameters import Parameter, ScaleParameter
-from .layers import *
-from .distributions import *
-
-
 __all__ = [
     'LinearRegression',
     'LogisticRegression',
@@ -26,6 +19,11 @@ __all__ = [
     'DenseRegression',
     'DenseClassifier',
 ]
+
+from .parameters import Parameter, ScaleParameter
+from .layers import * #TODO: only import what you need
+from .distributions import * #TODO: only import what you need
+
 
 
 def LinearRegression(data=None):

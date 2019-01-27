@@ -6,7 +6,10 @@ TODO: more info...
 
 """
 
-
+__all__ = [
+    'Parameter',
+    'ScaleParameter',
+]
 
 import numpy as np
 import tensorflow as tf
@@ -17,11 +20,6 @@ from tensorflow_probability.python.math import random_rademacher
 from .core import BaseParameter, BaseDistribution
 from .distributions import Normal, StudentT, Cauchy, InvGamma
 
-
-__all__ = [
-    'Parameter',
-    'ScaleParameter',
-]
 
 
 class Parameter(BaseParameter):

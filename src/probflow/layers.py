@@ -70,15 +70,6 @@ Neural Network Layers
 
 """
 
-from collections import OrderedDict
-import numpy as np
-import tensorflow as tf
-
-from .core import BaseLayer, REQUIRED
-from .distributions import Normal
-from .parameters import Parameter
-
-
 __all__ = [
     'Input',
     'Add',
@@ -107,6 +98,16 @@ __all__ = [
     'Sequential',
     'Embedding',
 ]
+
+from collections import OrderedDict
+
+import numpy as np
+import tensorflow as tf
+
+from .core import BaseLayer, REQUIRED
+from .distributions import Normal
+from .parameters import Parameter
+
 
 
 class Input(BaseLayer):
@@ -604,8 +605,10 @@ class Dot(BaseLayer):
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        return tf.reduce_sum(args['a'] * args['b'], axis=self.kwargs['axis'])
         # TODO: this will only work w/ vector inputs...
+        return tf.reduce_sum(args['a'] * args['b'], 
+                             axis=self.kwargs['axis'],
+                             keepdims=True)
 
 
 

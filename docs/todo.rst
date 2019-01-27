@@ -70,15 +70,20 @@ Sequential layer
 
 Sequential layer can't be a class which inherits from BaseLayer b/c it takes a list.  Also, elements of that list will be instantiated Layers.  Will have to be a func which sets the arg['input'] of each sucessive element as the output of the last layer and then return the last layer?
 
+
 Mean alias for discrete dists
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Categorical distributions should have a mean function (for convenience) which actually returns the mode (also have a mode func). That way if you call predict on a model which involves a categorical dist it'll work just fine (by recursively evaluating mean())
 
+
 Reset method
 ^^^^^^^^^^^^
+
 Models should have a reset() method which sets is_fit to false and clears the tf graph. Then, in fit, only builds the model if is_fit is false. That way you can do transfer learning or snapshot ensembling easily: fit to one set of data, then fit to another, and for the second fit the parameters start where they were at the end of the first fit. But if you want to explicitly re fit from scratch call model.reset()
 Ideally calling reset on a model would *only* reset the variables contained in that model, and not the entire TF graph...
+
+It should also close the tf session.
 
 Sklearn support
 ^^^^^^^^^^^^^^^
@@ -144,6 +149,9 @@ Tensorflow graph view
 Should be able to show the tensorflow graph for a model.
 Maybe via a something like ``model.tensorboard_graph(...same args as fit?...)``.
 See https://www.tensorflow.org/guide/graph_viz
+
+Also should handle scoping better so the tensorboard graph view of models isn't
+so hideous...
 
 
 Tensorflow dashboard

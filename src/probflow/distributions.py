@@ -24,14 +24,6 @@ TODO: Categorical, etc
 
 """
 
-
-from collections import OrderedDict
-import tensorflow_probability as tfp
-tfd = tfp.distributions
-
-from .core import ContinuousDistribution, DiscreteDistribution, REQUIRED
-
-
 __all__ = [
     'Normal',
     'HalfNormal',
@@ -42,6 +34,14 @@ __all__ = [
     'Bernoulli',
     'Poisson',
 ]
+
+from collections import OrderedDict
+
+import tensorflow_probability as tfp
+tfd = tfp.distributions
+
+from .core import ContinuousDistribution, DiscreteDistribution, REQUIRED
+
 
 
 class Normal(ContinuousDistribution):
