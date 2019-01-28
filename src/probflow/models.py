@@ -26,7 +26,7 @@ from .distributions import * #TODO: only import what you need
 
 
 
-def LinearRegression(data=None):
+def LinearRegression(data=None, estimator=None):
     """Linear regression model.
 
     TODO: docs...
@@ -38,7 +38,7 @@ def LinearRegression(data=None):
         data = Input()
 
     # A linear regression
-    error = ScaleParameter()
+    error = ScaleParameter(name='noise_std')
     predictions = Dense(data)
     return Normal(predictions, error)
 

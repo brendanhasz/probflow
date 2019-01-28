@@ -423,7 +423,21 @@ class Parameter(BaseParameter):
             Color(s) to use to plot the distribution.
             See https://matplotlib.org/tutorials/colors/colors.html
             Default = use the default matplotlib color cycle
+        alpha : float between 0 and 1
+            Transparency of fill/histogram
         """
+
+        # Check inputs
+        if type(num_samples) is not int or num_samples < 1:
+            raise TypeError('num_samples must be an int greater than 0')
+        if type(style) is not str or style not in ['fill', 'line', 'hist']:
+            raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
+        if not isinstance(bins, (int, float, np.ndarray)):
+            raise TypeError('bins must be an int or list or numpy vector')
+        if type(ci) is not float or ci<0.0 or ci>1.0:
+            raise TypeError('ci must be a float between 0 and 1')
+        if type(alpha) is not float or alpha<0.0 or alpha>1.0:
+            raise TypeError('alpha must be a float between 0 and 1')
 
         # Sample from the posterior
         samples = self.sample_posterior(num_samples=num_samples)

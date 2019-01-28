@@ -1,6 +1,5 @@
 
 import numpy as np
-import matplotlib.pyplot as plt
 from probflow import *
 
 PLOT = False
@@ -83,8 +82,9 @@ def test_plot_posterior_scalar():
 def test_plot_posterior_vector():
     """Tests Parameter.plot_posterior and BaseDistribution.plot_posterior"""
 
-    # Multivariate linear regression
     Nd = 3
+
+    # Multivariate linear regression
     weight = Parameter(shape=Nd, estimator=None)
     bias = Parameter(estimator=None)
     std_dev = ScaleParameter()
@@ -112,6 +112,7 @@ def test_plot_posterior_vector():
 
 if __name__ == "__main__":
     PLOT = True
+    import matplotlib.pyplot as plt
     epochs = 1000
     N = 1000
     test_plot_posterior_scalar()

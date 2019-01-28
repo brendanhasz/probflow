@@ -7,6 +7,7 @@ tfd = tfp.distributions
 
 from probflow import *
 
+PLOT = False
 N = 1000
 epochs = 1000
 
@@ -15,8 +16,8 @@ def test_LR_scalar_no_variance():
     """Tests a LR w/ scalar parameters and no variance parameter"""
 
     # Model = linear regression assuming error = 1
-    weight = Parameter(name='LRsnv_w', estimator=None)
-    bias = Parameter(name='LRsnv_b', estimator=None)
+    weight = Parameter(name='LRsnv_weight', estimator=None)
+    bias = Parameter(name='LRsnv_bias', estimator=None)
     data = Input()
     model = Normal(data*weight + bias, 1.0)
 
@@ -40,18 +41,26 @@ def test_LR_scalar_no_variance():
     means = model.posterior_mean()
     assert isinstance(means, dict)
     assert len(means) == 2
-    assert 'LRsnv_w' in means and 'LRsnv_b' in means
-    assert abs(means['LRsnv_w']-true_weight) < 0.2
-    assert abs(means['LRsnv_b']-true_bias) < 0.2
+    assert 'LRsnv_weight' in means and 'LRsnv_bias' in means
+    assert abs(means['LRsnv_weight']-true_weight) < 0.2
+    assert abs(means['LRsnv_bias']-true_bias) < 0.2
+
+    # Plot
+    if PLOT:
+        model.plot_posterior(ci=0.95)
+        plt.suptitle('Linear Regression - ' + 
+                     'weight=' + str(true_weight) +
+                     ', bias=' + str(true_bias))
+        plt.show()
 
 
 def test_LR_scalar():
     """Tests a LR w/ scalar parameters"""
 
     # Model = linear regression assuming error = 1
-    weight = Parameter(name='LRs_w', estimator=None)
-    bias = Parameter(name='LRs_b', estimator=None)
-    std_err = ScaleParameter(name='LRs_s')
+    weight = Parameter(name='LRs_weight', estimator=None)
+    bias = Parameter(name='LRs_bias', estimator=None)
+    std_err = ScaleParameter(name='LRs_std_dev')
     data = Input()
     model = Normal(data*weight + bias, std_err)
 
@@ -68,15 +77,100 @@ def test_LR_scalar():
 
     # Ensure values are correct
     means = model.posterior_mean()
-    assert abs(means['LRs_w']-true_weight) < 0.2
-    assert abs(means['LRs_b']-true_bias) < 0.2
-    assert abs(means['LRs_s']-true_std_err) < 0.2
+    assert abs(means['LRs_weight']-true_weight) < 0.2
+    assert abs(means['LRs_bias']-true_bias) < 0.2
+    assert abs(means['LRs_std_dev']-true_std_err) < 0.2
+
+    # Plot
+    if PLOT:
+        model.plot_posterior(ci=0.95)
+        plt.suptitle('Linear Regression - ' + 
+                     'weight=' + str(true_weight) +
+                     ', bias=' + str(true_bias) +
+                     ', std_err=' + str(true_std_err))
+        plt.show()
 
 
-# TODO: test multivariate LR
+def test_LR_vector():
+    """Tests a LR w/ vector weight parameter/input"""
+
+    Nd = 3 #number of dimensions of input
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(shape=Nd, name='LRv_weight', estimator=None)
+    bias = Parameter(name='LRv_bias', estimator=None)
+    std_err = ScaleParameter(name='LRv_std_dev')
+    data = Input()
+    model = Normal(Dot(data, weight) + bias, std_err)
+
+    # Generate data
+    true_weight = np.array([0.5, -0.25, 0.0])
+    true_bias = -1.0
+    true_std_err = 1.0
+    noise = true_std_err*np.random.randn(N, 1)
+    x = np.random.randn(N, Nd)
+    y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
+
+    # Fit the model
+    model.fit(x, y, epochs=epochs)
+
+    # Ensure values are correct
+    means = model.posterior_mean()
+    assert abs(means['LRv_weight'][0]-true_weight[0]) < 0.2
+    assert abs(means['LRv_weight'][1]-true_weight[1]) < 0.2
+    assert abs(means['LRv_weight'][2]-true_weight[2]) < 0.2
+    assert abs(means['LRv_bias']-true_bias) < 0.2
+    assert abs(means['LRv_std_dev']-true_std_err) < 0.2
+
+    # Plot
+    if PLOT:
+        model.plot_posterior(ci=0.95)
+        plt.suptitle('Linear Regression - ' + 
+                     'weights=' + str(true_weight) +
+                     ', bias=' + str(true_bias) +
+                     ', std_err=' + str(true_std_err))
+        plt.show()
 
 
-# TODO: test multivariate w/ "flipout"
+def test_LR_vector_flipout():
+    """Tests a LR w/ vector weight parameter/input + 'flipout' estimator"""
+
+    Nd = 3 #number of dimensions of input
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(shape=Nd, name='LRvf_weight')
+    bias = Parameter(name='LRvf_bias')
+    std_err = ScaleParameter(name='LRvf_std_dev')
+    data = Input()
+    model = Normal(Dot(data, weight) + bias, std_err)
+
+    # Generate data
+    true_weight = np.array([0.5, -0.25, 0.0])
+    true_bias = -1.0
+    true_std_err = 1.0
+    noise = true_std_err*np.random.randn(N, 1)
+    x = np.random.randn(N, Nd)
+    y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
+
+    # Fit the model
+    model.fit(x, y, epochs=epochs)
+
+    # Ensure values are correct
+    means = model.posterior_mean()
+    assert abs(means['LRvf_weight'][0]-true_weight[0]) < 0.2
+    assert abs(means['LRvf_weight'][1]-true_weight[1]) < 0.2
+    assert abs(means['LRvf_weight'][2]-true_weight[2]) < 0.2
+    assert abs(means['LRvf_bias']-true_bias) < 0.2
+    assert abs(means['LRvf_std_dev']-true_std_err) < 0.2
+
+    # Plot
+    if PLOT:
+        model.plot_posterior(ci=0.95)
+        plt.suptitle('Linear Regression (flipout est) ' + 
+                     'weights=' + str(true_weight) +
+                     ', bias=' + str(true_bias) +
+                     ', std_err=' + str(true_std_err))
+        plt.show()
 
 
 # TODO: test w/ Dense
@@ -85,38 +179,10 @@ def test_LR_scalar():
 # TODO: test w/ LinearRegression
 
 
-#def test_BaseDistribution_sample_posterior_vector():
-#    """Tests core.BaseDistribution.sample_posterior w/ vector params"""
-#
-#    # Parameters + input data is vector of length 3
-#    Nd = 3
-#
-#    # Model = linear regression assuming error = 1
-#    weight = Parameter(name='vector_weight', shape=Nd, estimator=None)
-#    bias = Parameter(name='nonvec_bias', estimator=None)
-#    data = Input()
-#    model = Normal(Dot(data, weight) + bias, 1.0)
-#
-#    # Generate data
-#    N = 10
-#    true_weight = np.array([0.5, -0.25, 0.0])
-#    true_bias = -1.0
-#    noise = np.random.randn(N, 1)
-#    x = np.random.randn(N, Nd)
-#    y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
-#
-#    # Fit the model
-#    model.fit(x, y, epochs=1)
-#
-#    # Check output of sample_posterior is correct
-#    num_samples = 3
-#    samples = model.sample_posterior(num_samples=num_samples)
-#    assert isinstance(samples, dict)
-#    assert len(samples) == 2
-#    assert samples['vector_weight'].ndim == 2
-#    assert samples['vector_weight'].shape[0] == num_samples
-#    assert samples['vector_weight'].shape[1] == Nd
-#    assert samples['nonvec_bias'].ndim == 2
-#    assert samples['nonvec_bias'].shape[0] == num_samples
-#    assert samples['nonvec_bias'].shape[1] == 1
-
+if __name__ == "__main__":
+    PLOT = True
+    import matplotlib.pyplot as plt
+    test_LR_scalar_no_variance()
+    test_LR_scalar()
+    test_LR_vector()
+    test_LR_vector_flipout()

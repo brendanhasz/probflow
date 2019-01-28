@@ -759,7 +759,8 @@ class BaseDistribution(BaseLayer):
                        bins=20,
                        ci=0.0,
                        bw=0.075,
-                       color=None):
+                       color=None,
+                       alpha=0.4):
         """Plot posterior distributions of the model's parameters.
 
         TODO: Docs... params is a list of strings of params to plot
@@ -798,28 +799,32 @@ class BaseDistribution(BaseLayer):
             Color(s) to use to plot the distribution.
             See https://matplotlib.org/tutorials/colors/colors.html
             Default = use the default matplotlib color cycle
+        alpha : float between 0 and 1
+            Transparency of fill/histogram of the density
         """
 
         # Check model has been fit
         self._ensure_is_fit()
 
-        # Ensure input types are correct
-        if type(num_samples) is not int:
-            raise TypeError('num_samples must be an int')
+        # Check inputs
+        if type(num_samples) is not int or num_samples < 1:
+            raise TypeError('num_samples must be an int greater than 0')
         if params is not None and not isinstance(params, (list, str)):
             raise TypeError('params must be None or a list of str')
         if type(params) is list:
             for param in params:
                 if type(param) is not str:
                     raise TypeError('params must be None or a list of str')
-        if type(style) is not str:
+        if type(style) is not str or style not in ['fill', 'line', 'hist']:
             raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
         if type(cols) is not int:
             raise TypeError('cols must be an integer')
         if not isinstance(bins, (int, float, np.ndarray)):
             raise TypeError('bins must be an int or list or numpy vector')
-        if type(ci) is not float:
+        if type(ci) is not float or ci<0.0 or ci>1.0:
             raise TypeError('ci must be a float between 0 and 1')
+        if type(alpha) is not float or alpha<0.0 or alpha>1.0:
+            raise TypeError('alpha must be a float between 0 and 1')
 
         # Get all params if not specified
         if params is None:
@@ -914,7 +919,8 @@ class BaseDistribution(BaseLayer):
                    bins=20,
                    ci=0.0,
                    bw=0.075,
-                   color=None):
+                   color=None,
+                   alpha=0.4):
         """Plot prior distributions of the model's parameters.
 
         TODO: Docs... params is a list of strings of params to plot
@@ -953,28 +959,32 @@ class BaseDistribution(BaseLayer):
             Color(s) to use to plot the distribution.
             See https://matplotlib.org/tutorials/colors/colors.html
             Default = use the default matplotlib color cycle
+        alpha : float between 0 and 1
+            Transparency of fill/histogram of the density
         """
 
         # Check model has been fit
         self._ensure_is_fit()
 
-        # Ensure input types are correct
-        if type(num_samples) is not int:
-            raise TypeError('num_samples must be an int')
+        # Check inputs
+        if type(num_samples) is not int or num_samples < 1:
+            raise TypeError('num_samples must be an int greater than 0')
         if params is not None and not isinstance(params, (list, str)):
             raise TypeError('params must be None or a list of str')
         if type(params) is list:
             for param in params:
                 if type(param) is not str:
                     raise TypeError('params must be None or a list of str')
-        if type(style) is not str:
+        if type(style) is not str or style not in ['fill', 'line', 'hist']:
             raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
         if type(cols) is not int:
             raise TypeError('cols must be an integer')
         if not isinstance(bins, (int, float, np.ndarray)):
             raise TypeError('bins must be an int or list or numpy vector')
-        if type(ci) is not float:
+        if type(ci) is not float or ci<0.0 or ci>1.0:
             raise TypeError('ci must be a float between 0 and 1')
+        if type(alpha) is not float or alpha<0.0 or alpha>1.0:
+            raise TypeError('alpha must be a float between 0 and 1')
 
         # Get all params if not specified
         if params is None:
@@ -1139,6 +1149,8 @@ class BaseDistribution(BaseLayer):
         # Compute mean squared error
         if 'mae' in metric_list:
             metrics['mae'] = np.mean(y-y_pred)
+
+        # TODO: cross-entropy, etc
 
         return metrics
 

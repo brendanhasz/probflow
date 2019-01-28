@@ -13,9 +13,8 @@ Backlog (short term):
 * Finish BaseDistribution.fit()
 * `Better parameter initialization`_
 * fit should have a record=False arg (record posterior values over training)
+* Tests and debug for validation split and shuffles
 * Finish BaseLayer, BaseDistribution.fit, Parameter, and Input
-* Tests and debug a simple 1d linear model
-* Make sure it works on validation data of a different size
 * Docs for BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)
 * Docs for distributions + layers
@@ -178,6 +177,9 @@ Tensorflow dashboard
 
 The ``fit()`` func should have a ``show_dashboard`` kwarg or something.  If true, 
 opens the tensorboard while training.
+
+Can run set up the TF stuff then run 
+import webbrowser; webbrowser.open('tf ip', new=2)
 
 
 Saving and loading and initializing parameters
