@@ -140,4 +140,10 @@ def test_BaseDistribution_sample_posterior_vector():
 # TODO: test the batches are being generated correctly _generate_batch
 
 
-# TODO: test plot_posterior, predictive_distribution, predict, metrics, etc
+# TODO: test the validation splitting / shuffling happens correctly
+
+
+# Tests for plot_posterior and plot_prior are in test_plot_posterior/prior
+
+
+# TODO: test predictive_distribution, predict, metrics, etc

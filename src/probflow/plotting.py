@@ -41,6 +41,20 @@ def get_next_color(def_color, ix):
         return def_color
 
 
+def get_ix_label(ix, shape):
+    """Get a string representation of the current index"""
+    dims = np.zeros(len(shape))
+    for d in range(len(shape)-1, 0, -1):
+        prod = np.prod(shape[:d])
+        dims[d] = np.floor(ix/prod)
+        ix -= dims[d]*prod
+    dims[0] = ix
+    if len(shape) == 1:
+        return str(dims[0].astype('int32'))
+    else:
+        return str(list(dims.astype('int32')))
+
+
 def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075, 
               alpha=0.4, color=None):
     """Plot the distribution of samples.
@@ -79,7 +93,11 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
         data = np.expand_dims(data, 1)
 
     # Number of datasets
-    Nd = np.prod(data.shape[1:])
+    dims = data.shape[1:]
+    Nd = np.prod(dims)
+
+    # Flatten if >1D
+    data = np.reshape(data, (data.shape[0], Nd), order='F')
 
     # Compute confidence intervals
     if ci:
@@ -92,9 +110,10 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
     # Plot the data
     for i in range(Nd):
         next_color = get_next_color(color, i)
+        lab = get_ix_label(i, dims)
         if style == 'line':
             px, py = approx_kde(data[:,i], bw=bw)
-            p1 = plt.plot(px, py, color=next_color)
+            p1 = plt.plot(px, py, color=next_color, label=lab)
             if ci:
                 yci = np.interp(cis[i,:], px, py)
                 plt.plot([cis[i,0], cis[i,0]], [0, yci[0]], 
@@ -103,7 +122,7 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
                          ':', color=next_color)
         elif style == 'fill':
             px, py = approx_kde(data[:,i], bw=bw)
-            p1 = plt.fill(px, py, facecolor=next_color, alpha=alpha)
+            p1 = plt.fill(px, py, facecolor=next_color, alpha=alpha, label=lab)
             if ci:
                 k = (px>cis[i,0]) & (px<cis[i,1])
                 kx = px[k]
@@ -112,18 +131,22 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
                          np.concatenate(([0], ky, [0])),
                          facecolor=next_color, alpha=alpha)
         elif style == 'hist':
-            _, be, patches = plt.hist(data[:,i], alpha=alpha, 
-                                      bins=bins, color=next_color)
+            _, be, patches = plt.hist(data[:,i], alpha=alpha,
+                                      bins=bins, color=next_color, label=lab)
             if ci:
                 k = (data[:,i]>cis[i,0]) & (data[:,i]<cis[i,1])
                 plt.hist(data[k,i], alpha=alpha, bins=be, color=next_color)
 
-    # TODO: may want to have an option to add legends w/ indexes
-    # (for Parameters w/ shape>1 there will be multiple lines in the plots)
+    # Only show the legend if there are >1 sample set
+    if Nd > 1:
+        plt.legend()
 
-    # Set x axis label, and no y axis needed
+    # Set x axis label, and no y axis or bounding box needed
     plt.xlabel(xlabel)
     plt.gca().get_yaxis().set_visible(False)
+    plt.gca().spines['left'].set_visible(False)
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
 
 
 def centered_text(text):

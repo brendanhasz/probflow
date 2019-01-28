@@ -69,8 +69,10 @@ def test_BaseLayer_str():
     bias = Parameter(name='thing_blue')
     data = Input()
     model = Normal(data*weight + bias, 3.0)
-    real_name = ('Normal\n  loc = \n    Add\n      a = \n        Mul\n' + 
-                 '          a = Input (all columns)\n          b = Parameter '+
-                 '\'thing_red'+
-                 '\'\n      b = Parameter \'thing_blue\'\n  scale = 3.0')
+    real_name = ('Normal\n  loc = \n    Add\n      a = \n        Mul' + 
+                 '\n          a = Input (all columns)\n          b = ' +
+                 '\n            Parameter \'thing_red\' shape=(1,) ' +
+                 'prior=Normal(loc=0,scale=1) posterior=Normal\n      b = ' +
+                 '\n        Parameter \'thing_blue\' shape=(1,) ' +
+                 'prior=Normal(loc=0,scale=1) posterior=Normal\n  scale = 3.0')
     assert model.__str__() == real_name
