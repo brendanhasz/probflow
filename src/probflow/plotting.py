@@ -10,6 +10,8 @@ TODO: more info...
 import numpy as np
 import matplotlib.pyplot as plt
 
+COLORS = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
 
 def approx_kde(data, bins=500, bw=0.075):
     """A fast approximation to kernel density estimation."""
@@ -29,7 +31,18 @@ def approx_kde(data, bins=500, bw=0.075):
     return x_out, y_out
 
 
-def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075, alpha=0.4):
+def get_next_color(def_color, ix):
+    """Get the next color in the color cycle"""
+    if def_color is None:
+        return COLORS[ix%len(COLORS)]
+    elif isinstance(def_color, list):
+        return def_color[ix%len(def_color)]
+    else:
+        return def_color
+
+
+def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075, 
+              alpha=0.4, color=None):
     """Plot the distribution of samples.
 
     Parameters
@@ -55,6 +68,10 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075, alpha=0.
         or ``style='fill'``).  Default is 0.075
     alpha : float between 0 and 1
         Transparency of the plot (if ``style``=``'fill'`` or ``'hist'``)
+    color : matplotlib color code or list of them
+        Color(s) to use to plot the distribution.
+        See https://matplotlib.org/tutorials/colors/colors.html
+        Default = use the default matplotlib color cycle
     """
 
     # If 1d make 2d
@@ -73,37 +90,33 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075, alpha=0.
             cis[i,:] = np.percentile(data[:,i], [ci0, ci1])
 
     # Plot the data
-    if style == 'line':
-        for i in range(Nd):
+    for i in range(Nd):
+        next_color = get_next_color(color, i)
+        if style == 'line':
             px, py = approx_kde(data[:,i], bw=bw)
-            p1 = plt.plot(px, py)
+            p1 = plt.plot(px, py, color=next_color)
             if ci:
                 yci = np.interp(cis[i,:], px, py)
                 plt.plot([cis[i,0], cis[i,0]], [0, yci[0]], 
-                         ':', color=p1[0].get_color())
+                         ':', color=next_color)
                 plt.plot([cis[i,1], cis[i,1]], [0, yci[1]], 
-                         ':', color=p1[0].get_color())
-    elif style == 'fill':
-        for i in range(Nd):
-            color = next(plt.gca()
-                         ._get_patches_for_fill
-                         .prop_cycler)['color']
+                         ':', color=next_color)
+        elif style == 'fill':
             px, py = approx_kde(data[:,i], bw=bw)
-            p1 = plt.fill(px, py, facecolor=color, alpha=alpha)
+            p1 = plt.fill(px, py, facecolor=next_color, alpha=alpha)
             if ci:
                 k = (px>cis[i,0]) & (px<cis[i,1])
                 kx = px[k]
                 ky = py[k]
                 plt.fill(np.concatenate(([kx[0]], kx, [kx[-1]])),
                          np.concatenate(([0], ky, [0])),
-                         facecolor=color, alpha=alpha)
-    elif style == 'hist':
-        for i in range(Nd):
-            _, be, patches = plt.hist(data[:,i], alpha=alpha, bins=bins)
+                         facecolor=next_color, alpha=alpha)
+        elif style == 'hist':
+            _, be, patches = plt.hist(data[:,i], alpha=alpha, 
+                                      bins=bins, color=next_color)
             if ci:
                 k = (data[:,i]>cis[i,0]) & (data[:,i]<cis[i,1])
-                plt.hist(data[k,i], alpha=alpha, bins=be,
-                         color=patches[0].get_facecolor())
+                plt.hist(data[k,i], alpha=alpha, bins=be, color=next_color)
 
     # TODO: may want to have an option to add legends w/ indexes
     # (for Parameters w/ shape>1 there will be multiple lines in the plots)

@@ -40,7 +40,7 @@ if plot:
     plt.show()
 
 # Plot all the model's posteriors w/ [hist, 2cols, ci]
-model.plot_posterior(style='hist', cols=2, ci=0.9)
+model.plot_posterior(style='hist', cols=2, ci=0.9, color='r')
 if plot:
     plt.show()
 
@@ -101,7 +101,7 @@ if plot:
     plt.show()
 
 # Plot all the model's posteriors w/ [hist, 2col, no_ci]
-model.plot_posterior(style='line', cols=2)
+model.plot_posterior(cols=2)
 if plot:
     plt.show()
 

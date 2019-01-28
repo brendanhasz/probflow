@@ -376,7 +376,7 @@ class Parameter(BaseParameter):
 
 
     def plot_posterior(self, num_samples=1000, style='fill', bins=20, ci=0.0,
-                       bw=0.075, alpha=0.4):
+                       bw=0.075, alpha=0.4, color=None):
         """Plot distribution of samples from the posterior distribution.
 
         TODO: docs
@@ -401,6 +401,10 @@ class Parameter(BaseParameter):
         bw : float
             Bandwidth of the kernel density estimate (if using ``style='line'``
             or ``style='fill'``).  Default is 0.075
+        color : matplotlib color code or list of them
+            Color(s) to use to plot the distribution.
+            See https://matplotlib.org/tutorials/colors/colors.html
+            Default = use the default matplotlib color cycle
         """
 
         # Sample from the posterior
@@ -408,11 +412,11 @@ class Parameter(BaseParameter):
         
         # Plot the posterior densities
         plot_dist(samples, xlabel=self.name, style=style, bins=bins, 
-                  ci=ci, bw=bw, alpha=alpha)
+                  ci=ci, bw=bw, alpha=alpha, color=color)
 
 
     def plot_prior(self, num_samples=10000, style='fill', bins=20, ci=0.0,
-                       bw=0.075, alpha=0.4):
+                       bw=0.075, alpha=0.4, color=None):
         """Plot distribution of samples from the prior distribution.
 
         TODO: docs
@@ -444,6 +448,10 @@ class Parameter(BaseParameter):
         bw : float
             Bandwidth of the kernel density estimate (if using ``style='line'``
             or ``style='fill'``).  Default is 0.075
+        color : matplotlib color code or list of them
+            Color(s) to use to plot the distribution.
+            See https://matplotlib.org/tutorials/colors/colors.html
+            Default = use the default matplotlib color cycle
         """
 
         # Show "No prior"
@@ -456,7 +464,7 @@ class Parameter(BaseParameter):
         
         # Plot the posterior densities
         plot_dist(samples, xlabel='Prior on '+self.name, style=style, 
-                  bins=bins, ci=ci, bw=bw, alpha=alpha)
+                  bins=bins, ci=ci, bw=bw, alpha=alpha, color=color)
 
 
     def __str__(self, prepend=''):

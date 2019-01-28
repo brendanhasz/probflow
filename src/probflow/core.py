@@ -709,7 +709,8 @@ class BaseDistribution(BaseLayer):
                        cols=1,
                        bins=20,
                        ci=0.0,
-                       bw=0.075):
+                       bw=0.075,
+                       color=None):
         """Plot posterior distributions of the model's parameters.
 
         TODO: Docs... params is a list of strings of params to plot
@@ -744,6 +745,10 @@ class BaseDistribution(BaseLayer):
         bw : float
             Bandwidth of the kernel density estimate (if using ``style='line'``
             or ``style='fill'``).  Default is 0.075
+        color : matplotlib color code or list of them
+            Color(s) to use to plot the distribution.
+            See https://matplotlib.org/tutorials/colors/colors.html
+            Default = use the default matplotlib color cycle
         """
 
         # Check model has been fit
@@ -791,7 +796,8 @@ class BaseDistribution(BaseLayer):
         for ix, param in enumerate(params):
             plt.subplot(rows, cols, ix+1)
             param_dict[param].plot_posterior(num_samples=num_samples, 
-                                             style=style, bins=bins, ci=ci)
+                                             style=style, bins=bins, ci=ci,
+                                             color=color)
 
 
     def sample_prior(self, params=None, num_samples=10000):
@@ -858,7 +864,8 @@ class BaseDistribution(BaseLayer):
                    cols=1,
                    bins=20,
                    ci=0.0,
-                   bw=0.075):
+                   bw=0.075,
+                   color=None):
         """Plot prior distributions of the model's parameters.
 
         TODO: Docs... params is a list of strings of params to plot
@@ -893,6 +900,10 @@ class BaseDistribution(BaseLayer):
         bw : float
             Bandwidth of the kernel density estimate (if using ``style='line'``
             or ``style='fill'``).  Default is 0.075
+        color : matplotlib color code or list of them
+            Color(s) to use to plot the distribution.
+            See https://matplotlib.org/tutorials/colors/colors.html
+            Default = use the default matplotlib color cycle
         """
 
         # Check model has been fit
@@ -939,8 +950,8 @@ class BaseDistribution(BaseLayer):
         rows = np.ceil(len(params)/cols)
         for ix, param in enumerate(params):
             plt.subplot(rows, cols, ix+1)
-            param_dict[param].plot_prior(num_samples=num_samples, 
-                                         style=style, bins=bins, ci=ci)
+            param_dict[param].plot_prior(num_samples=num_samples, style=style, 
+                                         bins=bins, ci=ci, color=color)
 
 
     def predictive_distribution(self, x, num_samples=1000):
