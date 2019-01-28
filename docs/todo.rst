@@ -7,7 +7,10 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* plotting submodule and plot_prior
+* make plotting submodule add legend when shape > 1
+* stats subfolder of tests which tests output of a basic LR, multivariate LR, and then test that using flipout est gives the same answers, then test that using dense layer gives the same answers
+* add support for pandas arrays in BaseDistribution.fit
+* make Input work when cols= a string (and input=pandas df)
 * Finish BaseDistribution.fit()
 * `Better parameter initialization`_
 * fit should have a record=False arg (record posterior values over training)

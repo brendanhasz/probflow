@@ -652,14 +652,16 @@ class BaseDistribution(BaseLayer):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.posterior` on a |Model|, you must first
+            Before calling :meth:`.sample_posterior` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
         Parameters
         ----------
-        params : |ndarray|
-            Independent variable values of the dataset to fit (aka the 
-            "features").
+        params : list
+            List of parameter names to sample.  Each element should be a str.
+        num_samples : int
+            Number of samples to take from each posterior distribution.
+            Default = 1000
 
         Returns
         -------
@@ -714,7 +716,7 @@ class BaseDistribution(BaseLayer):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.plot_posteriors` on a |Model|, you must
+            Before calling :meth:`.plot_posterior` on a |Model|, you must
             first :meth:`.fit` it to some data.
 
         Parameters
@@ -736,9 +738,9 @@ class BaseDistribution(BaseLayer):
             Divide the subplots into a grid with this many columns.
         bins : int or list or |ndarray|
             Number of bins to use for the posterior density histogram (if 
-            ``kde=False``), or a list or vector of bin edges.
+            ``style='hist'``), or a list or vector of bin edges.
         ci : float between 0 and 1
-            Confidence interval to plot.  Default = 0.95
+            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
         bw : float
             Bandwidth of the kernel density estimate (if using ``style='line'``
             or ``style='fill'``).  Default is 0.075
@@ -751,11 +753,11 @@ class BaseDistribution(BaseLayer):
         if type(num_samples) is not int:
             raise TypeError('num_samples must be an int')
         if params is not None and not isinstance(params, (list, str)):
-            raise TypeError('params must None or a list of str')
+            raise TypeError('params must be None or a list of str')
         if type(params) is list:
             for param in params:
                 if type(param) is not str:
-                    raise TypeError('params must None or a list of str')
+                    raise TypeError('params must be None or a list of str')
         if type(style) is not str:
             raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
         if type(cols) is not int:
@@ -790,6 +792,155 @@ class BaseDistribution(BaseLayer):
             plt.subplot(rows, cols, ix+1)
             param_dict[param].plot_posterior(num_samples=num_samples, 
                                              style=style, bins=bins, ci=ci)
+
+
+    def sample_prior(self, params=None, num_samples=10000):
+        """Draw samples from parameter priors.
+
+        TODO: Docs... params is a list of strings of params to plot
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.sample_prior` on a |Model|, you must first
+            :meth:`.fit` it to some data.
+
+        Parameters
+        ----------
+        params : list
+            List of parameter names to sample.  Each element should be a str.
+        num_samples : int
+            Number of samples to take from each prior distribution.
+            Default = 10000
+
+        Returns
+        -------
+        dict
+            Samples from the parameter prior distributions.  A dictionary
+            where the keys contain the parameter names and the values contain
+            |ndarray|s with the prior samples.  The |ndarray|s are of size
+            (``num_samples``,param.shape).
+        """
+
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Ensure num_samples is int
+        if type(num_samples) is not int:
+            raise TypeError('num_samples must be an int')
+
+        # Get all params if not specified
+        if params is None:
+            params = [param.name for param in self._parameters]
+
+        # Make list if string was passed
+        if type(params) is str:
+            params = [params]
+
+        # Check requested parameters are in the model
+        for param in params:
+            if param not in [p.name for p in self._parameters]:
+                raise ValueError('Parameter \''+param+'\' not in this model')
+
+        # Get the prior distribution samples
+        priors = dict()
+        for param in self._parameters:
+            if param.name in params:
+                priors[param.name] = \
+                    param.sample_prior(num_samples=num_samples)
+
+        return priors
+
+
+    def plot_prior(self,
+                   num_samples=10000,
+                   params=None,
+                   style='fill',
+                   cols=1,
+                   bins=20,
+                   ci=0.0,
+                   bw=0.075):
+        """Plot prior distributions of the model's parameters.
+
+        TODO: Docs... params is a list of strings of params to plot
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.plot_prior` on a |Model|, you must
+            first :meth:`.fit` it to some data.
+
+        Parameters
+        ----------
+        num_samples : int
+            Number of samples to take from each prior distribution.
+            Default = 10000
+        params : str or list
+            List of parameters to plot.  Default is to plot the prior of
+            all parameters in the model.
+        style : str
+            Which style of plot to show.  Available types are:
+
+            * ``'fill'`` - filled density plot (the default)
+            * ``'line'`` - line density plot
+            * ``'hist'`` - histogram
+
+        cols : int
+            Divide the subplots into a grid with this many columns.
+        bins : int or list or |ndarray|
+            Number of bins to use for the prior density histogram (if 
+            ``style='hist'``), or a list or vector of bin edges.
+        ci : float between 0 and 1
+            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
+        bw : float
+            Bandwidth of the kernel density estimate (if using ``style='line'``
+            or ``style='fill'``).  Default is 0.075
+        """
+
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Ensure input types are correct
+        if type(num_samples) is not int:
+            raise TypeError('num_samples must be an int')
+        if params is not None and not isinstance(params, (list, str)):
+            raise TypeError('params must be None or a list of str')
+        if type(params) is list:
+            for param in params:
+                if type(param) is not str:
+                    raise TypeError('params must be None or a list of str')
+        if type(style) is not str:
+            raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
+        if type(cols) is not int:
+            raise TypeError('cols must be an integer')
+        if not isinstance(bins, (int, float, np.ndarray)):
+            raise TypeError('bins must be an int or list or numpy vector')
+        if type(ci) is not float:
+            raise TypeError('ci must be a float between 0 and 1')
+
+        # Get all params if not specified
+        if params is None:
+            params = [param.name for param in self._parameters]
+
+        # Make list if string was passed
+        if type(params) is str:
+            params = [params]
+
+        # Check requested parameters are in the model
+        for param in params:
+            if param not in [p.name for p in self._parameters]:
+                raise ValueError('Parameter \''+param+'\' not in this model')
+
+        # Make dict of params to get
+        param_dict = dict()
+        for param in self._parameters:
+            if param.name in params:
+                param_dict[param.name] = param
+
+        # Plot each parameter's prior distribution in separate subplot
+        rows = np.ceil(len(params)/cols)
+        for ix, param in enumerate(params):
+            plt.subplot(rows, cols, ix+1)
+            param_dict[param].plot_prior(num_samples=num_samples, 
+                                         style=style, bins=bins, ci=ci)
 
 
     def predictive_distribution(self, x, num_samples=1000):

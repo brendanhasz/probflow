@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 from probflow import *
 
 # Set for actually viewing, decrease for just testing
-#plot = False
-#epochs = 1
-#N = 10
-plot = True
-epochs = 1000
-N = 1000
+plot = False
+epochs = 1
+N = 10
+#plot = True
+#epochs = 1000
+#N = 1000
 
 # Linear regression w/ 2 variables
 weight = Parameter(name='the_weight', estimator='flipout')
@@ -24,58 +24,58 @@ y = true_weight*x + true_bias + np.random.randn(N)
 
 model.fit(x, y, epochs=epochs)
 
-# Plot all the model's posteriors w/ [hist, 1col, no_ci]
-model.plot_posterior(style='hist')
+# Plot just the weight's prior w/ a teensy bandwidth
+weight.plot_prior(style='fill')
 if plot:
     plt.show()
 
-# Plot all the model's posteriors w/ [hist, 2cols, no_ci]
-model.plot_posterior(style='hist', cols=2)
+# Plot just the bias' prior w/ a yuge bandwidth
+bias.plot_prior(style='fill', ci=0.95)
 if plot:
     plt.show()
 
-# Plot all the model's posteriors w/ [hist, 1col, ci]
-model.plot_posterior(style='hist', ci=0.9)
+# Plot all the model's priors w/ [hist, 1col, no_ci]
+model.plot_prior(style='hist')
 if plot:
     plt.show()
 
-# Plot all the model's posteriors w/ [hist, 2cols, ci]
-model.plot_posterior(style='hist', cols=2, ci=0.9)
+# Plot all the model's priors w/ [hist, 2cols, no_ci]
+model.plot_prior(style='hist', cols=2)
 if plot:
     plt.show()
 
-# Plot all the model's posteriors w/ [line, 1col, no_ci]
-model.plot_posterior(style='line')
+# Plot all the model's priors w/ [hist, 1col, ci]
+model.plot_prior(style='hist', ci=0.9)
 if plot:
     plt.show()
 
-# Plot all the model's posteriors w/ [line, 1col, ci]
-model.plot_posterior(style='line', ci=0.95)
+# Plot all the model's priors w/ [hist, 2cols, ci]
+model.plot_prior(style='hist', cols=2, ci=0.9)
 if plot:
     plt.show()
 
-# Plot all the model's posteriors w/ [fill, 1col, no_ci]
-model.plot_posterior(style='fill')
+# Plot all the model's priors w/ [line, 1col, no_ci]
+model.plot_prior(style='line')
 if plot:
     plt.show()
 
-# Plot all the model's posteriors w/ [fill, 1col, ci]
-model.plot_posterior(style='fill', ci=0.95)
+# Plot all the model's priors w/ [line, 1col, ci]
+model.plot_prior(style='line', ci=0.95)
 if plot:
     plt.show()
 
-# Plot just the weight's posterior w/ a teensy bandwidth
-weight.plot_posterior(style='fill', bw=0.001)
+# Plot all the model's priors w/ [fill, 1col, no_ci]
+model.plot_prior(style='fill')
 if plot:
     plt.show()
 
-# Plot just the bias' posterior w/ a yuge bandwidth
-bias.plot_posterior(style='fill', bw=1)
+# Plot all the model's priors w/ [fill, 1col, ci]
+model.plot_prior(style='fill', ci=0.95)
 if plot:
     plt.show()
 
 # Default should be fill, 1col, no ci
-model.plot_posterior()
+model.plot_prior()
 if plot:
     plt.show()
 
@@ -95,13 +95,12 @@ y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
 
 model.fit(x, y, epochs=epochs)
 
-# Plot all the model's posteriors w/ [hist, 1col, no_ci]
-model.plot_posterior(style='line')
+# Plot all the model's priors w/ [hist, 1col, no_ci]
+model.plot_prior(style='line')
 if plot:
     plt.show()
 
-# Plot all the model's posteriors w/ [hist, 2col, no_ci]
-model.plot_posterior(style='line', cols=2)
+# Plot all the model's priors w/ [hist, 2col, no_ci]
+model.plot_prior(style='fill', ci=0.95, cols=2)
 if plot:
     plt.show()
-

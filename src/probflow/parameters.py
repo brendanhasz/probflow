@@ -12,7 +12,6 @@ __all__ = [
 ]
 
 import numpy as np
-import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow_probability as tfp
 tfd = tfp.distributions
@@ -20,7 +19,7 @@ from tensorflow_probability.python.math import random_rademacher
 
 from .core import BaseParameter, BaseDistribution
 from .distributions import Normal, StudentT, Cauchy, InvGamma
-
+from .plotting import plot_dist, centered_text
 
 
 class Parameter(BaseParameter):
@@ -350,12 +349,37 @@ class Parameter(BaseParameter):
         return samples
 
 
-    def plot_posterior(self, num_samples=1000, style='fill', bins=20, ci=0.95,
+    def sample_prior(self, num_samples=1000):
+        """Sample from the prior distribution.
+
+        TODO: docs
+
+        Returns
+        -------
+        |ndarray|
+            Samples from the parameter prior distribution.  Of size
+            ``(num_samples,self.shape)``.  If this parameter has not prior, 
+            returns an empty list.
+        """
+
+        # Return empty list if there is no prior
+        if self.prior is None:
+            return []
+
+        # Sample from the prior distribution
+        self._ensure_is_built()
+        self._ensure_is_fit()
+        samples_op = self._built_prior.sample(sample_shape=num_samples)
+        samples_op = self.transform(samples_op)
+        samples = self._session.run(samples_op)
+        return samples
+
+
+    def plot_posterior(self, num_samples=1000, style='fill', bins=20, ci=0.0,
                        bw=0.075, alpha=0.4):
         """Plot distribution of samples from the posterior distribution.
 
-        TODO: this is similar to _sample(), but returns a numpy array
-        (meant to be used by the user to examine the posterior dist)
+        TODO: docs
 
         Parameters
         ----------
@@ -371,87 +395,77 @@ class Parameter(BaseParameter):
 
         bins : int or list or |ndarray|
             Number of bins to use for the posterior density histogram (if 
-            ``kde=False``), or a list or vector of bin edges.
+            ``style='hist'``), or a list or vector of bin edges.
         ci : float between 0 and 1
-            Confidence interval to plot.  Default = 0.95
+            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
         bw : float
             Bandwidth of the kernel density estimate (if using ``style='line'``
             or ``style='fill'``).  Default is 0.075
         """
 
-        def approx_kde(data, bins=500, bw=0.075):
-            """A fast approximation to kernel density estimation."""
-            stds = 3 #use a gaussian kernel w/ this many std devs
-            counts, be = np.histogram(data, bins=bins)
-            db = be[1]-be[0]
-            pad = 0.5*bins*bw*stds*db
-            pbe = np.arange(db, pad, db)
-            x_out = np.concatenate((be[0]-np.flip(pbe),
-                                   be[0:-1] + np.diff(be),
-                                   be[-1]+pbe))
-            z_pad = np.zeros(pbe.shape[0])
-            raw = np.concatenate((z_pad, counts, z_pad))
-            k_x = np.linspace(-stds, stds, bins*bw*stds)
-            kernel = 1.0/np.sqrt(2.0*np.pi)*np.exp(-np.square(k_x)/2.0)
-            y_out = np.convolve(raw, kernel, mode='same')
-            return x_out, y_out
+        # Sample from the posterior
+        samples = self.sample_posterior(num_samples=num_samples)
+        
+        # Plot the posterior densities
+        plot_dist(samples, xlabel=self.name, style=style, bins=bins, 
+                  ci=ci, bw=bw, alpha=alpha)
+
+
+    def plot_prior(self, num_samples=10000, style='fill', bins=20, ci=0.0,
+                       bw=0.075, alpha=0.4):
+        """Plot distribution of samples from the prior distribution.
+
+        TODO: docs
+
+        NOTE that really you could have just evaluated the prior fn @ x values
+        and plotted a deterministic line.
+        BUT that only works for simple priors (e.g. Normal(0,1))
+        Since probflow allows (non-deterministic) parameterized priors, e.g.:
+        prior = Parameter()*Input()+Parameter()
+        it's simpler just to sample here instead of checking which is the case
+
+        Parameters
+        ----------
+        num_samples : int
+            Number of samples to take from each prior distribution for
+            estimating the density.  Default = 1000
+        style : str
+            Which style of plot to show.  Available types are:
+
+            * ``'fill'`` - filled density plot (the default)
+            * ``'line'`` - line density plot
+            * ``'hist'`` - histogram
+
+        bins : int or list or |ndarray|
+            Number of bins to use for the prior density histogram (if 
+            ``style='hist'``), or a list or vector of bin edges.
+        ci : float between 0 and 1
+            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
+        bw : float
+            Bandwidth of the kernel density estimate (if using ``style='line'``
+            or ``style='fill'``).  Default is 0.075
+        """
+
+        # Show "No prior"
+        if self.prior is None:
+            centered_text('No prior on '+self.name)
+            return
 
         # Sample from the posterior
-        Np = np.prod(self.shape) #number of parameters
-        samples = self.sample_posterior(num_samples=num_samples)
-
-        # Compute confidence intervals
-        if ci:
-            cis = np.empty((Np, 2))
-            ci0 = 100 * (0.5 - ci/2.0);
-            ci1 = 100 * (0.5 + ci/2.0);
-            for i in range(Np):
-                cis[i,:] = np.percentile(samples[:,i], [ci0, ci1])
-
-        # Plot the samples
-        if style == 'line':
-            for i in range(Np):
-                px, py = approx_kde(samples[:,i], bw=bw)
-                p1 = plt.plot(px, py)
-                if ci:
-                    yci = np.interp(cis[i,:], px, py)
-                    plt.plot([cis[i,0], cis[i,0]], [0, yci[0]], 
-                             ':', color=p1[0].get_color())
-                    plt.plot([cis[i,1], cis[i,1]], [0, yci[1]], 
-                             ':', color=p1[0].get_color())
-        elif style == 'fill':
-            for i in range(Np):
-                color = next(plt.gca()
-                             ._get_patches_for_fill
-                             .prop_cycler)['color']
-                px, py = approx_kde(samples[:,i], bw=bw)
-                p1 = plt.fill(px, py, facecolor=color, alpha=alpha)
-                if ci:
-                    k = (px>cis[i,0]) & (px<cis[i,1])
-                    kx = px[k]
-                    ky = py[k]
-                    plt.fill(np.concatenate(([kx[0]], kx, [kx[-1]])),
-                             np.concatenate(([0], ky, [0])),
-                             facecolor=color, alpha=alpha)
-        elif style == 'hist':
-            for i in range(Np):
-                _, be, patches = plt.hist(samples[:,i], alpha=alpha, bins=bins)
-                if ci:
-                    k = (samples[:,i]>cis[i,0]) & (samples[:,i]<cis[i,1])
-                    plt.hist(samples[k,i], alpha=alpha, bins=be, 
-                             color=patches[0].get_facecolor())
-
-        # TODO: may want to have an option to add legends w/ indexes
-        # (for Parameters w/ shape>1 there will be multiple lines in the plots)
-
-        # Label with parameter name, and no y axis needed
-        plt.xlabel(self.name)
-        plt.gca().get_yaxis().set_visible(False)
+        samples = self.sample_prior(num_samples=num_samples)
+        
+        # Plot the posterior densities
+        plot_dist(samples, xlabel='Prior on '+self.name, style=style, 
+                  bins=bins, ci=ci, bw=bw, alpha=alpha)
 
 
     def __str__(self, prepend=''):
         """String representation of a parameter."""
-        return 'Parameter \''+self.name+'\''
+        # TODO: will have to change this to allow complicated priors
+        return (prepend + 'Parameter \'' + self.name+'\'' +
+                ' shape=' + str(tuple(self.shape)) + 
+                ' prior=' + str(self.prior).replace(' ', '') +
+                ' posterior=' + self.posterior_fn.__name__)
 
 
     def __getitem__(self, inds):
