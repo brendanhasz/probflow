@@ -150,6 +150,14 @@ class Input(BaseLayer):
             pass
 
 
+    def __str__(self, prepend=''):
+        """String representation of a parameter."""
+        if self.kwargs['cols'] is None:
+            return 'Input (all columns)'
+        else:
+            return 'Input '+str(self.kwargs['cols'])
+
+
 
 class Add(BaseLayer):
     """A layer which adds two inputs.
@@ -946,7 +954,13 @@ class Embedding(BaseLayer):
     same idea as Gather (above), just it creates the embedding array for you
     based on how many unique vals are in the training dataset
 
+    will somehow need to be made aware of how many unique values there are in
+    the column(s) the layer is embedding...
     takes a kwarg="unique_vals" so it knows how many embedding params to create?
+    no that would be redundant for the user...
+    might just have to, from fit, recursively go thru the model and give each
+    embedding layer access to the unique values of their cols
+
     also should take a dims kwarg (embedding dimensions)
 
     """

@@ -70,6 +70,7 @@ def test_BaseLayer_str():
     data = Input()
     model = Normal(data*weight + bias, 3.0)
     real_name = ('Normal\n  loc = \n    Add\n      a = \n        Mul\n' + 
-                 '          a = Input()\n          b = Parameter \'thing_red'+
+                 '          a = Input (all columns)\n          b = Parameter '+
+                 '\'thing_red'+
                  '\'\n      b = Parameter \'thing_blue\'\n  scale = 3.0')
     assert model.__str__() == real_name

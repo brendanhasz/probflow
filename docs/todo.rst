@@ -3,10 +3,13 @@ Planned Improvements
 
 This page has a list of planned improvements, in order of when I plan to get to them.
 
+
 Backlog (short term):
 ---------------------
 
+* plotting submodule and plot_prior
 * Finish BaseDistribution.fit()
+* `Better parameter initialization`_
 * fit should have a record=False arg (record posterior values over training)
 * Finish BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Tests and debug a simple 1d linear model
@@ -42,6 +45,8 @@ Backlog (long term):
 * Neural Matrix Factorization
 * Multivariate Normal, StudentT, and Cauchy dists
 * Bayesian correlation example and Model
+* `Saving and loading and initializing parameters`_
+* `Transfer learning`_
 * `Bijector support`_? e.g so you can do ``model=Exp(Normal()); model.fit()``
 * `Input data as tf dataset iterators`_
 * Conv layers
@@ -65,6 +70,14 @@ But, it's technically not correct.
 Notes
 -----
 
+Better parameter initialization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Scale param should initialize w/ mean of 1 and SD of... Something reasonable.
+Also make sure the initializer your're using for parameter values is reasonable
+And make the STD devs variables also initialize to 1
+
+
 Sequential layer
 ^^^^^^^^^^^^^^^^
 
@@ -84,6 +97,7 @@ Models should have a reset() method which sets is_fit to false and clears the tf
 Ideally calling reset on a model would *only* reset the variables contained in that model, and not the entire TF graph...
 
 It should also close the tf session.
+
 
 Sklearn support
 ^^^^^^^^^^^^^^^
@@ -162,6 +176,26 @@ Tensorflow dashboard
 
 The ``fit()`` func should have a ``show_dashboard`` kwarg or something.  If true, 
 opens the tensorboard while training.
+
+
+Saving and loading and initializing parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Should have a way to save and load models, layers, parameters (and their posterior variable values!).  h5?  Or just pickle even?
+
+Also should be able to initialize parameter posterior variables to a specific value (a feature which would probably be used when loading a model/parameter).
+
+
+Transfer learning
+^^^^^^^^^^^^^^^^^
+
+Ideally, you can train a model, then take the parameters or even whole layers (with trees of parameters and layers within them) from that trained model, and plug it into a new model and train that new model.
+
+Also, should be able to set whether parameters are trainable. Or layers (which just sets the trainable value of all parameters contained in that layer or its children).
+E.g. for transfer learning, you might want to train a model, take some layer(s) from it, add a few layers on top, and then train *only those new layers* you added on top, so you'd want to set trainable=False for the layer(s) which were pre-trained.
+
+Could go through the tree and for all parameters set their posterior parameter 
+tf.Varable's .trainable property = False?
 
 
 Bijector support

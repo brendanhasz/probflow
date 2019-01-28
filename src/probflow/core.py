@@ -572,6 +572,10 @@ class BaseDistribution(BaseLayer):
             optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
             train_op = optimizer.minimize(elbo_loss)
 
+        # Ensure this model contains parameters
+        if len(self._parameters) == 0:
+            raise RuntimeError('model contains no parameters, cannot fit it!')
+
         # Create the TensorFlow session and assign it to each parameter
         self._session = tf.Session()
         for param in self._parameters:
