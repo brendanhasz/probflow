@@ -328,6 +328,24 @@ class Parameter(BaseParameter):
             raise RuntimeError('model must first be fit')
 
 
+    def posterior_mean(self):
+        """Get the mean of the posterior distribution(s).
+
+        TODO: docs: returns a numpy array
+
+        Returns
+        -------
+        |ndarray|
+            Mean of the parameter posterior distribution.  Size ``self.shape``.
+        """
+        self._ensure_is_built()
+        self._ensure_is_fit()
+        mean_op = self._built_posterior.mean()
+        mean_op = self.transform(mean_op)
+        mean = self._session.run(mean_op)
+        return mean
+
+
     def sample_posterior(self, num_samples=1000):
         """Sample from the posterior distribution.
 

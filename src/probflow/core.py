@@ -645,6 +645,55 @@ class BaseDistribution(BaseLayer):
             raise RuntimeError('model must first be fit')
 
 
+    def posterior_mean(self, params=None):
+        """Get the mean of the posterior distribution(s).
+
+        TODO: Docs... params is a list of strings of params to plot
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.posterior_mean` on a |Model|, you must first
+            :meth:`.fit` it to some data.
+
+        Parameters
+        ----------
+        params : list
+            List of parameter names to sample.  Each element should be a str.
+
+        Returns
+        -------
+        dict
+            Means of the parameter posterior distributions.  A dictionary
+            where the keys contain the parameter names and the values contain
+            |ndarray|s with the posterior means.  The |ndarray|s are the same
+            size as each parameter.
+        """
+
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Get all params if not specified
+        if params is None:
+            params = [param.name for param in self._parameters]
+
+        # Make list if string was passed
+        if type(params) is str:
+            params = [params]
+
+        # Check requested parameters are in the model
+        for param in params:
+            if param not in [p.name for p in self._parameters]:
+                raise ValueError('Parameter \''+param+'\' not in this model')
+
+        # Get the posterior means
+        posterior_means = dict()
+        for param in self._parameters:
+            if param.name in params:
+                posterior_means[param.name] = param.posterior_mean()
+
+        return posterior_means
+
+
     def sample_posterior(self, params=None, num_samples=1000):
         """Draw samples from parameter posteriors.
 
@@ -652,8 +701,8 @@ class BaseDistribution(BaseLayer):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.sample_posterior` on a |Model|, you must first
-            :meth:`.fit` it to some data.
+            Before calling :meth:`.sample_posterior` on a |Model|, you must 
+            first :meth:`.fit` it to some data.
 
         Parameters
         ----------

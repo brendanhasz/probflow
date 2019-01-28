@@ -7,7 +7,7 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* stats subfolder of tests which tests output of a basic LR, multivariate LR, and then test that using flipout est gives the same answers, then test that using dense layer gives the same answers
+* multivariate LR test, and then test that using flipout est gives the same answers
 * add support for pandas arrays in BaseDistribution.fit
 * make Input work when cols= a string (and input=pandas df)
 * Finish BaseDistribution.fit()
@@ -23,7 +23,7 @@ Backlog (short term):
 * Tests for BaseDistribution critisism methods
 * Docs for BaseDistribution critisism methods
 * Dense layer (w/ flipout)
-* Test for Dense, and compare to stan or edward
+* Test for Dense, add Dense test to stats/test_LinearRegression
 * `Sequential layer`_
 * Tests
 * Models which only use Dense
