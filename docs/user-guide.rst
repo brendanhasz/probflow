@@ -10,7 +10,8 @@ User Guide
    layers
    distributions
    fitting
-   criticizing
+   evaluating
+   visualizing
    ready_made_models
    examples
    math
