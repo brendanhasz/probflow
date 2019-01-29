@@ -7,12 +7,11 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* multivariate LR test, and then test that using flipout est gives the same answers
-* add support for pandas arrays in BaseDistribution.fit
+* test pandas support
 * make Input work when cols= a string (and input=pandas df)
 * Finish BaseDistribution.fit()
 * `Better parameter initialization`_
-* fit should have a record=False arg (record posterior values over training)
+* fit should have a record=False arg (record posterior values over training), and plot_posterior_over_training() func?  Tho in theory you could do that via tensorboard...
 * Tests and debug for validation split and shuffles
 * Finish BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Docs for BaseLayer, BaseDistribution.fit, Parameter, and Input

@@ -418,7 +418,7 @@ class BaseDistribution(BaseLayer):
         return self.mean_obj.log_prob(vals)
 
 
-    def fit(self, x, y,
+    def fit(self, x, y, data=None,
             dtype=tf.float32,
             batch_size=128,
             epochs=100,
@@ -426,7 +426,7 @@ class BaseDistribution(BaseLayer):
             learning_rate=0.01,
             metrics=[],
             verbose=True,
-            validation_split=0,
+            validation_split=0.0,
             validation_shuffle=True,
             shuffle=True):
         """Fit model.
@@ -435,17 +435,28 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x : |ndarray|
+        x : |ndarray| or str or list of str
             Independent variable values of the dataset to fit (aka the 
-            "features").
-        y : |ndarray|
-            Dependent variable values of the dataset to fit.
-        dtype : TODO
-            TODO
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            a string or list of strings specifying the columns of that 
+            |DataFrame| to use as independent variables.
+        y : |ndarray| or str or list of str
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            a string or list of strings specifying the columns of that 
+            |DataFrame| to use as dependent variables.
+        data : |None| or |DataFrame|
+            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
+            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
+            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
+            strings containing the columns from ``data`` to use.
+        dtype : |DType|
+            Cast the input data to this type, and use this type for parameters.
         batch_size : int
-            TODO
+            Number of samples per training batch.
         epochs : int
-            TODO
+            Number of epochs to train for (1 epoch is one full cycle through
+            all the training data).
         optimizer : TODO
             TODO
         learning_rate : float
@@ -490,58 +501,120 @@ class BaseDistribution(BaseLayer):
 
         """
 
-        # Check input data size matches
-        if x.shape[0] != y.shape[0]:
-            raise ValueError('x and y do not have same number of samples')
 
-        # Make data at least 2 dimensional (0th dim should be N)
-        if y.ndim == 1:
-            y = np.expand_dims(y, 1)
-        if x.ndim == 1:
-            x = np.expand_dims(x, 1)
+        def test_train_split(x, y, val_split, val_shuffle):
+            """Split data into training and validation data"""
+            if val_split > 0:
+                if val_shuffle:
+                    train_ix = np.random.rand(x.shape[0]) > val_split
+                else:
+                    num_val = int(val_split*x.shape[0])
+                    train_ix = np.full(x.shape[0], True)
+                    train_ix[-num_val:] = False
+                val_ix = ~train_ix
+                x_train = x[train_ix, ...]
+                y_train = y[train_ix, ...]
+                x_val = x[val_ix, ...]
+                y_val = y[val_ix, ...]
+            else:
+                x_train = x
+                y_train = y
+                x_val = x
+                y_val = y
+            return x_train.shape[0], x_train, y_train, x_val, y_val
 
-        # TODO: add support for pandas arrays
+
+        def make_placeholders(x, y, dtype):
+            """Create x, y, and batch_shape placeholders"""
+
+            # Store pointer to training data
+            self._x_train = x
+            self._y_train = y
+
+            # Data placeholders
+            x_shape = list(x_train.shape)
+            y_shape = list(y_train.shape)
+            x_shape[0] = None
+            y_shape[0] = None
+            x_data = tf.placeholder(dtype, x_shape)
+            y_data = tf.placeholder(dtype, y_shape)
+
+            # Batch shape
+            batch_size_ph = tf.placeholder(tf.int32, [1])
+
+            # Store placeholders
+            self._batch_size_ph = batch_size_ph
+            self._x_ph = x_data
+            self._y_ph = y_data
+
+            return x_data, y_data, batch_size_ph
+
+
+        def initialize_shuffles(N, epochs, shuffle):
+            """Initialize shuffling of the data across epochs"""
+            self._shuffled_ids = np.empty((N, epochs), dtype=np.uint64)
+            for epoch in range(epochs):
+                if shuffle:
+                    self._shuffled_ids[:, epoch] = np.random.permutation(N)
+                else:
+                    self._shuffled_ids[:, epoch] = \
+                        np.arange(N, dtype=np.uint64)
+
+
+        def generate_batch(x, y, epoch, batch, batch_size):
+            """Generate data for one batch"""
+            N = x.shape[0]
+            a = batch*batch_size
+            b = min(N, (batch+1)*batch_size)
+            ix = self._shuffled_ids[a:b, epoch]
+            return x[ix, ...], y[ix, ...], [ix.shape[0]]
+
+
+        # Check input types
+        if not isinstance(dtype, tf.DType):
+            raise TypeError('dtype must be a TensorFlow DType')
+        if not isinstance(batch_size, int):
+            raise TypeError('batch_size must be an int')
+        if batch_size < 1:
+            raise TypeError('batch_size must be greater than 0')
+        if not isinstance(epochs, int):
+            raise TypeError('epochs must be an int')
+        if epochs < 0:
+            raise TypeError('epochs must be non-negative')
+        if not isinstance(optimizer, str):
+            raise TypeError('optimizer must be a string')
+        if optimizer not in ['adam']:
+            raise TypeError('optimizer must be one of: \'adam\'')
+        if not isinstance(learning_rate, float):
+            raise TypeError('learning_rate must be a float')
+        if learning_rate < 0:
+            raise TypeError('learning_rate must be non-negative')
+        if not isinstance(verbose, bool):
+            raise TypeError('verbose must be True or False')
+        if not isinstance(validation_split, float):
+            raise TypeError('validation_split must be a float')
+        if validation_split < 0 or validation_split > 1:
+            raise TypeError('validation_split must be between 0 and 1')
+        if not isinstance(validation_shuffle, bool):
+            raise TypeError('validation_shuffle must be True or False')
+        if not isinstance(shuffle, bool):
+            raise TypeError('shuffle must be True or False')
+
+        # Process the input data
+        x, y = self._process_data(x, y, data)
 
         # TODO: how to support integer columns?
 
         # Split data into training and validation data
-        if validation_split > 0:
-            if validation_shuffle:
-                train_ix = np.random.rand(x.shape[0]) > validation_split
-            else:
-                train_ix = np.arange(x.shape[0]) > (validation_split*x.shape[0])
-            val_ix = ~train_ix
-            x_train = x[train_ix, ...]
-            y_train = y[train_ix, ...]
-            x_val = x[val_ix, ...]
-            y_val = y[val_ix, ...]
-        else:
-            x_train = x
-            y_train = y
-            x_val = x
-            y_val = y
+        N, x_train, y_train, x_val, y_val = \
+            test_train_split(x, y, validation_split, validation_shuffle)
 
-        # Store pointer to training data
-        self._x_train = x_train
-        self._y_train = y_train
+        # Create placeholders for input data
+        x_data, y_data, batch_size_ph = \
+            make_placeholders(x_train, y_train, dtype)
 
-        # Data placeholders
-        N = x_train.shape[0]
-        x_shape = list(x_train.shape)
-        y_shape = list(y_train.shape)
-        x_shape[0] = None
-        y_shape[0] = None
-        x_data = tf.placeholder(dtype, x_shape)
-        y_data = tf.placeholder(dtype, y_shape)
-        self._initialize_shuffles(N, epochs, shuffle)
-
-        # Batch shape
-        batch_size_ph = tf.placeholder(tf.int32, [1])
-
-        # Store placeholders
-        self._batch_size_ph = batch_size_ph
-        self._x_ph = x_data
-        self._y_ph = y_data
+        # Initialize the shuffling of training data
+        initialize_shuffles(N, epochs, shuffle)
 
         # Recursively build this model and its args
         self.build(x_data, batch_size_ph)
@@ -552,11 +625,6 @@ class BaseDistribution(BaseLayer):
         self.mean_log_loss = (self.mean_loss_sum + #size (batch_size,)
                               self._mean_log_loss(y_data))
         self.kl_loss = tf.cast(self.kl_loss_sum + self._kl_loss(), dtype)
-
-        # TODO: uuhh do you ever actually need log_loss?
-        # that's just the log posterior prob of *samples* from the model?
-        # the only place you would need that is if you called
-        # log_prob (below) with distribution=True and individually=True...
 
         # ELBO loss function
         log_likelihood = tf.reduce_mean(self.built_obj.log_prob(y_data))
@@ -598,12 +666,12 @@ class BaseDistribution(BaseLayer):
 
             # Train on each batch in this epoch
             for batch in range(n_batch):
-                b_x, b_y = self._generate_batch(x_train, y_train, 
-                                                epoch, batch, batch_size)
+                b_x, b_y, b_n = generate_batch(x_train, y_train, 
+                                               epoch, batch, batch_size)
                 self._session.run(train_op,
                                   feed_dict={x_data: b_x,
                                              y_data: b_y,
-                                             batch_size_ph: [b_x.shape[0]]})
+                                             batch_size_ph: b_n})
 
                 # Print progress
                 if verbose and batch % print_batches == 0:
@@ -620,29 +688,260 @@ class BaseDistribution(BaseLayer):
         print('Done!')
 
 
-    def _initialize_shuffles(self, N, epochs, shuffle):
-        """Initialize shuffling of the data across epochs"""
-        self._shuffled_ids = np.empty((N, epochs), dtype=np.uint64)
-        for epoch in range(epochs):
-            if shuffle:
-                self._shuffled_ids[:, epoch] = np.random.permutation(N)
-            else:
-                self._shuffled_ids[:, epoch] = np.arange(N, dtype=np.uint64)
-
-
-    def _generate_batch(self, x, y, epoch, batch, batch_size):
-        """Generate data for one batch"""
-        N = x.shape[0]
-        a = batch*batch_size
-        b = min(N, (batch+1)*batch_size)
-        ix = self._shuffled_ids[a:b, epoch]
-        return x[ix, ...], y[ix, ...]
-
-
     def _ensure_is_fit(self):
         """Raises a RuntimeError if model has not yet been fit."""
         if not self.is_fit:
             raise RuntimeError('model must first be fit')
+
+
+    def _process_data(self, x=None, y=None, data=None):
+        """Process and validate both x and y data"""
+
+        # Both or neither of x and y should be passed
+        if x is None and y is not None or y is None and x is not None:
+            raise TypeError('x and y should both be set or both be None')
+
+        # Use training data if none passed
+        if x is None:
+            x = self._x_train
+        if y is None:
+            y = self._y_train
+
+        # Numpy arrays
+        if data is None:
+
+            # Ensure they're both numpy arrays
+            if not isinstance(x, np.ndarray) or not isinstance(y, np.ndarray):
+                raise TypeError('x and y must be numpy ndarrays')
+
+            # Check input data size matches
+            if x.shape[0] != y.shape[0]:
+                raise ValueError('x and y must have same number samples')
+
+        else:
+
+            # Pandas DataFrame
+            from pandas import DataFrame
+            if isinstance(data, DataFrame):
+
+                # Check types
+                if not isinstance(x, (str, list)) or \
+                        not isinstance(y, (str, list)):
+                    raise TypeError('x and y must be strings or list of str')
+                for t in [x, y]:
+                    if isinstance(t, list):
+                        if not all([isinstance(e, str) for e in t]):
+                            raise TypeError('x and y must be list of strings')
+
+                # Get the columns
+                x = data[x].values
+                y = data[y].values
+
+            else:
+                raise TypeError('data must be None or a pandas DataFrame')
+
+        # Make data at least 2 dimensional (0th dim should be N)
+        if x.ndim == 1:
+            x = np.expand_dims(x, 1)
+        if y.ndim == 1:
+            y = np.expand_dims(y, 1)
+
+        return x, y
+
+
+    def _process_x_data(self, x=None, data=None):
+        """Process and validate just the x data"""
+
+        # Use training data if none passed
+        if x is None:
+            x = self._x_train
+
+        # Numpy arrays
+        if data is None:
+
+            # Ensure they're both numpy arrays
+            if not isinstance(x, np.ndarray):
+                raise TypeError('x must be a numpy ndarray')
+
+        else:
+
+            # Pandas DataFrame
+            from pandas import DataFrame
+            if isinstance(data, DataFrame):
+
+                # Check types
+                if not isinstance(x, (str, list)):
+                    raise TypeError('x must be a string or list of str')
+                if isinstance(x, list):
+                    if not all([isinstance(e, str) for e in x]):
+                        raise TypeError('x must be a string or list of str')
+
+                # Get the columns
+                x = data[x].values
+
+            else:
+                raise TypeError('data must be None or a pandas DataFrame')
+
+        # Make data at least 2 dimensional (0th dim should be N)
+        if x.ndim == 1:
+            x = np.expand_dims(x, 1)
+
+        return x
+
+
+    def predictive_distribution(self, x=None, data=None, num_samples=1000):
+        """Draw samples from the model given x.
+
+        TODO: Docs...
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.predictive_distribution` on a |Model|, you
+            must first :meth:`.fit` it to some data.
+
+        Returns array of shape 
+        (x.shape[0],y.shape[1],...,y.shape[-1],num_samples)
+
+        """
+
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Process input data
+        x = self._process_x_data(x, data)
+
+        # TODO: check x is correct shape (matches self._x_ph)
+
+        # Draw samples from the predictive distribution
+        return self._session.run(
+            self.built_obj.sample(num_samples),
+            feed_dict={self._x_ph: x,
+                       self._batch_size_ph: [x.shape[0]]})
+
+
+    def predict(self, x=None, data=None):
+        """Predict dependent variable for samples in x.s
+
+        TODO: explain how predictions are generated using the mean of each
+        variational distribution
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.predict` on a |Model|, you must first
+            :meth:`.fit` it to some data.
+
+        Parameters
+        ----------
+        x : |None| or |ndarray|
+            Input array of independent variable values of data on which to
+            evalutate the model.  First dimension should be equal to the number
+            of samples.  If |None|, will use the data the model was trained on 
+            (the default).
+
+        Returns
+        -------
+        |ndarray|
+            Predicted y-value for each sample in ``x``.  Will be of
+            size ``(N, D_out)``, where N is the number of samples (equal
+            to ``x.shape[0]``) and D_out is the number of output
+            dimensions (equal to ``y.shape[1:]``).
+
+        Examples
+        --------
+        TODO: Docs...
+
+        """
+
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Process input data
+        x = self._process_x_data(x, data)
+
+        # Predict using the mean model
+        return self._session.run(
+            self.mean_obj.mean(), 
+            feed_dict={self._x_ph: x,
+                       self._batch_size_ph: [x.shape[0]]})
+
+
+    def metrics(self, x=None, y=None, data=None, metric_list=[]):
+        """Compute metrics of model performance.
+
+        TODO: docs
+
+        TODO: methods which just call this w/ a specific metric? for shorthand
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.metrics` on a |Model|, you must first
+            :meth:`.fit` it to some data.
+
+        Parameters
+        ----------
+        x : |None| or |ndarray|
+            Input array of independent variable values of data on which to
+            evalutate the model.  First dimension should be equal to the number
+            of samples. If |None|, will use the data the model was trained on 
+            (the default).
+        y : |None| or |ndarray|
+            Input array of dependent variable values of data on which to
+            evalutate the model.  First dimension should be equal to the number
+            of samples. If |None|, will use the data the model was trained on 
+            (the default).
+        metric_list : str or list of str
+            Metrics to evaluate each epoch.  To evaluate multiple metrics, 
+            pass a list of strings, where each string is a different metric.
+            Available metrics:
+
+            * 'acc': accuracy
+            * 'accuracy': accuracy
+            * 'mse': mean squared error
+            * 'sse': sum of squared errors
+            * 'mae': mean absolute error
+
+            Default = empty list
+        """
+
+        # Check types
+        if not isinstance(metric_list, (str, list)):
+            raise ValueError('metric_list must be a string or list of strings')
+        if isinstance(metric_list, list):
+            if not all([isinstance(e, str) for e in metric_list]):
+                raise ValueError('metric_list must be a list of strings')
+
+        # Make list if metric_list is not
+        if isinstance(metric_list, str):
+            metric_list = [metric_list]
+
+        # Process input data
+        x, y = self._process_data(x, y, data)
+
+        # Make predictions
+        y_pred = self.predict(x)
+
+        # Dict to store metrics
+        metrics = dict()
+
+        # Compute accuracy
+        if 'acc' in metric_list or 'accuracy' in metric_list:
+            metrics['accuracy'] = np.mean(y == y_pred)
+
+        # Compute mean squared error
+        if 'mse' in metric_list:
+            metrics['mse'] = np.mean(np.square(y-y_pred))
+
+        # Compute sum of squared errors
+        if 'sse' in metric_list:
+            metrics['sse'] = np.sum(np.square(y-y_pred))
+
+        # Compute mean squared error
+        if 'mae' in metric_list:
+            metrics['mae'] = np.mean(y-y_pred)
+
+        # TODO: cross-entropy, etc
+
+        return metrics
 
 
     def posterior_mean(self, params=None):
@@ -884,8 +1183,13 @@ class BaseDistribution(BaseLayer):
         # Check model has been fit
         self._ensure_is_fit()
 
-        # Ensure num_samples is int
-        if type(num_samples) is not int:
+        # Check types
+        if params is not None and not isinstance(params, (str, list)):
+            raise TypeError('params must be a str or list of str')
+        if isinstance(params, list):
+            if not all([isinstance(p, str) for p in params]):
+                raise TypeError('params must be a str or list of str')
+        if not isinstance(num_samples, int):
             raise TypeError('num_samples must be an int')
 
         # Get all params if not specified
@@ -893,7 +1197,7 @@ class BaseDistribution(BaseLayer):
             params = [param.name for param in self._parameters]
 
         # Make list if string was passed
-        if type(params) is str:
+        if isinstance(params, str):
             params = [params]
 
         # Check requested parameters are in the model
@@ -1011,148 +1315,6 @@ class BaseDistribution(BaseLayer):
             plt.subplot(rows, cols, ix+1)
             param_dict[param].plot_prior(num_samples=num_samples, style=style, 
                                          bins=bins, ci=ci, color=color)
-
-
-    def predictive_distribution(self, x, num_samples=1000):
-        """Draw samples from the model given x.
-
-        TODO: Docs...
-
-        .. admonition:: Model must be fit first!
-
-            Before calling :meth:`.predictive_distribution` on a |Model|, you
-            must first :meth:`.fit` it to some data.
-
-        Returns array of shape (x.shape[0],y.shape[1],...,y.shape[-1],num_samples)
-
-        """
-
-        # Check model has been fit
-        self._ensure_is_fit()
-
-        # TODO: check x is correct shape (matches self._x_ph)
-
-        # Draw samples from the predictive distribution
-        return self._session.run(
-            self.built_obj.sample(num_samples),
-            feed_dict={self._x_ph: x,
-                       self._batch_size_ph: [x.shape[0]]})
-
-
-    def predict(self, x=None):
-        """Predict dependent variable for samples in x.s
-
-        TODO: explain how predictions are generated using the mean of each
-        variational distribution
-
-        .. admonition:: Model must be fit first!
-
-            Before calling :meth:`.predict` on a |Model|, you must first
-            :meth:`.fit` it to some data.
-
-        Parameters
-        ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values of data on which to
-            evalutate the model.  First dimension should be equal to the number
-            of samples.
-            If |None|, will use the data the model was trained on (the default).
-
-        Returns
-        -------
-        |ndarray|
-            Predicted y-value for each sample in ``x``.  Will be of
-            size ``(N, D_out)``, where N is the number of samples (equal
-            to ``x.shape[0]``) and D_out is the number of output
-            dimensions (equal to ``y.shape[1:]``).
-
-        Examples
-        --------
-        TODO: Docs...
-
-        """
-
-        # Check model has been fit
-        self._ensure_is_fit()
-
-        # Use training data if none passed
-        if x is None:
-            x = self._x_train
-
-        # Predict using the mean model
-        return self._session.run(
-            self.mean_obj.mean(), 
-            feed_dict={self._x_ph: x,
-                       self._batch_size_ph: [x.shape[0]]})
-
-
-    def metrics(self, x=None, y=None, metric_list=[]):
-        """Compute metrics of model performance.
-
-        TODO: docs
-
-        TODO: methods which just call this w/ a specific metric? for shorthand
-
-        Parameters
-        ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values of data on which to
-            evalutate the model.  First dimension should be equal to the number
-            of samples.
-            If |None|, will use the data the model was trained on (the default).
-        y : |None| or |ndarray|
-            Input array of dependent variable values of data on which to
-            evalutate the model.  First dimension should be equal to the number
-            of samples.
-            If |None|, will use the data the model was trained on (the default).
-        metric_list : str or list of str
-            Metrics to evaluate each epoch.  To evaluate multiple metrics, 
-            pass a list of strings, where each string is a different metric.
-            Available metrics:
-
-            * 'acc': accuracy
-            * 'accuracy': accuracy
-            * 'mse': mean squared error
-            * 'sse': sum of squared errors
-            * 'mae': mean absolute error
-
-            Default = empty list
-        """
-
-        # Make list if metric_list is not
-        if isinstance(metric_list, str):
-            metric_list = [metric_list]
-
-        # Use training data if none passed
-        if x is None and y is None:
-            x = self._x_train
-            y = self._y_train
-
-        # Make predictions
-        y_pred = self.predict(x)
-
-        # Dict to store metrics
-        metrics = dict()
-
-        # Compute accuracy
-        if 'acc' in metric_list or 'accuracy' in metric_list:
-            metrics['accuracy'] = np.mean(y == y_pred)
-
-        # Compute mean squared error
-        if 'mse' in metric_list:
-            metrics['mse'] = np.mean(np.square(y-y_pred))
-
-        # Compute sum of squared errors
-        if 'sse' in metric_list:
-            metrics['sse'] = np.sum(np.square(y-y_pred))
-
-        # Compute mean squared error
-        if 'mae' in metric_list:
-            metrics['mae'] = np.mean(y-y_pred)
-
-        # TODO: cross-entropy, etc
-
-        return metrics
 
 
     def plot_by(self, x, data, bins=100, what='mean'):

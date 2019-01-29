@@ -11,15 +11,9 @@
 
 .. |None| replace:: :obj:`None`
 .. |ndarray| replace:: :class:`ndarray <numpy.ndarray>`
+.. |DataFrame| replace:: :class:`DataFrame <pandas.DataFrame>`
 
-.. Format tf.Tensor like a class.  Yuck.
-.. |Tensor| replace:: |TensorFmt|_
-.. |TensorFmt| replace:: ``Tensor``
-.. _TensorFmt: http://www.tensorflow.org/api_docs/python/tf/Tensor
-
-.. Format tf.Variable like a class.
-.. |Variable| replace:: |VariableFmt|_
-.. |VariableFmt| replace:: ``Variable``
-.. _VariableFmt: http://www.tensorflow.org/api_docs/python/tf/Variable
-
-
+.. TENSORFLOW LINKS
+.. |Tensor| replace:: `Tensor <http://www.tensorflow.org/api_docs/python/tf/Tensor>`__
+.. |Variable| replace:: `Variable <http://www.tensorflow.org/api_docs/python/tf/Variable>`__
+.. |DType| replace:: `DType <https://www.tensorflow.org/api_docs/python/tf/dtypes/DType>`__
