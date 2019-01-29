@@ -38,12 +38,14 @@ def test_BaseDistribution_fit():
     model._ensure_is_fit()
 
     # Check model contains data
-    assert type(model._x_train) is np.ndarray
-    assert type(model._y_train) is np.ndarray
+    assert isinstance(model._train, dict)
+    assert isinstance(model._train['x'], np.ndarray)
+    assert isinstance(model._train['y'], np.ndarray)
     assert type(model._shuffled_ids) is np.ndarray
-    assert type(model._batch_size_ph) is tf.Tensor
-    assert type(model._x_ph) is tf.Tensor
-    assert type(model._y_ph) is tf.Tensor
+    assert isinstance(model._ph, dict)
+    assert isinstance(model._ph['batch_size'], tf.Tensor)
+    assert isinstance(model._ph['x'], tf.Tensor)
+    assert isinstance(model._ph['y'], tf.Tensor)
     assert type(model.log_loss) is tf.Tensor
     assert type(model.mean_log_loss) is tf.Tensor
     assert type(model.kl_loss) is tf.Tensor
@@ -120,6 +122,9 @@ def test_BaseDistribution_sample_posterior_vector():
     assert samples['nonvec_bias'].ndim == 2
     assert samples['nonvec_bias'].shape[0] == num_samples
     assert samples['nonvec_bias'].shape[1] == 1
+
+
+# TODO: test BaseLayer.fit works w/ pandas array
 
 
 # TODO: test 2D X and params

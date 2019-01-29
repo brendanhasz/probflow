@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow_probability as tfp
 
+from .utils.data import process_data, process_xy_data, test_train_split
 
 
 # Sentinel object for required arguments
@@ -435,16 +436,16 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x : |ndarray| or str or list of str
+        x : |ndarray| or int or str or list of str or int
             Independent variable values of the dataset to fit (aka the 
             "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
-            a string or list of strings specifying the columns of that 
-            |DataFrame| to use as independent variables.
-        y : |ndarray| or str or list of str
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables.
+        y : |ndarray| or int or str or list of str or int
             Dependent variable values of the dataset to fit (aka the 
             "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
-            a string or list of strings specifying the columns of that 
-            |DataFrame| to use as dependent variables.
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as dependent variables.
         data : |None| or |DataFrame|
             Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
             ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
@@ -480,7 +481,9 @@ class BaseDistribution(BaseLayer):
             Proportion of the data to use as validation data.
             Default = 0
         validation_shuffle : bool
-            Whether to shuffle which data is used for validation.
+            Whether to shuffle which data is used for validation.  If False,
+            the last ``validation_split`` proportion of the input data is used
+            for validation.
             Default = True
         shuffle : bool
             Whether to shuffle the training data before each trainin epoch.
@@ -502,34 +505,13 @@ class BaseDistribution(BaseLayer):
         """
 
 
-        def test_train_split(x, y, val_split, val_shuffle):
-            """Split data into training and validation data"""
-            if val_split > 0:
-                if val_shuffle:
-                    train_ix = np.random.rand(x.shape[0]) > val_split
-                else:
-                    num_val = int(val_split*x.shape[0])
-                    train_ix = np.full(x.shape[0], True)
-                    train_ix[-num_val:] = False
-                val_ix = ~train_ix
-                x_train = x[train_ix, ...]
-                y_train = y[train_ix, ...]
-                x_val = x[val_ix, ...]
-                y_val = y[val_ix, ...]
-            else:
-                x_train = x
-                y_train = y
-                x_val = x
-                y_val = y
-            return x_train.shape[0], x_train, y_train, x_val, y_val
-
-
         def make_placeholders(x, y, dtype):
             """Create x, y, and batch_shape placeholders"""
 
             # Store pointer to training data
-            self._x_train = x
-            self._y_train = y
+            self._train = dict()
+            self._train['x'] = x
+            self._train['y'] = y
 
             # Data placeholders
             x_shape = list(x_train.shape)
@@ -543,9 +525,10 @@ class BaseDistribution(BaseLayer):
             batch_size_ph = tf.placeholder(tf.int32, [1])
 
             # Store placeholders
-            self._batch_size_ph = batch_size_ph
-            self._x_ph = x_data
-            self._y_ph = y_data
+            self._ph = dict()
+            self._ph['batch_size'] = batch_size_ph
+            self._ph['x'] = x_data
+            self._ph['y'] = y_data
 
             return x_data, y_data, batch_size_ph
 
@@ -601,7 +584,7 @@ class BaseDistribution(BaseLayer):
             raise TypeError('shuffle must be True or False')
 
         # Process the input data
-        x, y = self._process_data(x, y, data)
+        x, y = process_xy_data(self, x, y, data)
 
         # TODO: how to support integer columns?
 
@@ -694,101 +677,6 @@ class BaseDistribution(BaseLayer):
             raise RuntimeError('model must first be fit')
 
 
-    def _process_data(self, x=None, y=None, data=None):
-        """Process and validate both x and y data"""
-
-        # Both or neither of x and y should be passed
-        if x is None and y is not None or y is None and x is not None:
-            raise TypeError('x and y should both be set or both be None')
-
-        # Use training data if none passed
-        if x is None:
-            x = self._x_train
-        if y is None:
-            y = self._y_train
-
-        # Numpy arrays
-        if data is None:
-
-            # Ensure they're both numpy arrays
-            if not isinstance(x, np.ndarray) or not isinstance(y, np.ndarray):
-                raise TypeError('x and y must be numpy ndarrays')
-
-            # Check input data size matches
-            if x.shape[0] != y.shape[0]:
-                raise ValueError('x and y must have same number samples')
-
-        else:
-
-            # Pandas DataFrame
-            from pandas import DataFrame
-            if isinstance(data, DataFrame):
-
-                # Check types
-                if not isinstance(x, (str, list)) or \
-                        not isinstance(y, (str, list)):
-                    raise TypeError('x and y must be strings or list of str')
-                for t in [x, y]:
-                    if isinstance(t, list):
-                        if not all([isinstance(e, str) for e in t]):
-                            raise TypeError('x and y must be list of strings')
-
-                # Get the columns
-                x = data[x].values
-                y = data[y].values
-
-            else:
-                raise TypeError('data must be None or a pandas DataFrame')
-
-        # Make data at least 2 dimensional (0th dim should be N)
-        if x.ndim == 1:
-            x = np.expand_dims(x, 1)
-        if y.ndim == 1:
-            y = np.expand_dims(y, 1)
-
-        return x, y
-
-
-    def _process_x_data(self, x=None, data=None):
-        """Process and validate just the x data"""
-
-        # Use training data if none passed
-        if x is None:
-            x = self._x_train
-
-        # Numpy arrays
-        if data is None:
-
-            # Ensure they're both numpy arrays
-            if not isinstance(x, np.ndarray):
-                raise TypeError('x must be a numpy ndarray')
-
-        else:
-
-            # Pandas DataFrame
-            from pandas import DataFrame
-            if isinstance(data, DataFrame):
-
-                # Check types
-                if not isinstance(x, (str, list)):
-                    raise TypeError('x must be a string or list of str')
-                if isinstance(x, list):
-                    if not all([isinstance(e, str) for e in x]):
-                        raise TypeError('x must be a string or list of str')
-
-                # Get the columns
-                x = data[x].values
-
-            else:
-                raise TypeError('data must be None or a pandas DataFrame')
-
-        # Make data at least 2 dimensional (0th dim should be N)
-        if x.ndim == 1:
-            x = np.expand_dims(x, 1)
-
-        return x
-
-
     def predictive_distribution(self, x=None, data=None, num_samples=1000):
         """Draw samples from the model given x.
 
@@ -799,24 +687,40 @@ class BaseDistribution(BaseLayer):
             Before calling :meth:`.predictive_distribution` on a |Model|, you
             must first :meth:`.fit` it to some data.
 
+        Parameters
+        ----------
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
+            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
+            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
+            strings containing the columns from ``data`` to use.
+        num_samples : int
+            TODO
+
         Returns array of shape 
         (x.shape[0],y.shape[1],...,y.shape[-1],num_samples)
 
         """
 
+        # Check inputs
+
         # Check model has been fit
         self._ensure_is_fit()
 
         # Process input data
-        x = self._process_x_data(x, data)
-
-        # TODO: check x is correct shape (matches self._x_ph)
+        x = process_data(self, x, data)
 
         # Draw samples from the predictive distribution
         return self._session.run(
             self.built_obj.sample(num_samples),
-            feed_dict={self._x_ph: x,
-                       self._batch_size_ph: [x.shape[0]]})
+            feed_dict={self._ph['x']: x,
+                       self._ph['batch_size']: [x.shape[0]]})
 
 
     def predict(self, x=None, data=None):
@@ -832,11 +736,17 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values of data on which to
-            evalutate the model.  First dimension should be equal to the number
-            of samples.  If |None|, will use the data the model was trained on 
-            (the default).
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
+            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
+            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
+            strings containing the columns from ``data`` to use.
 
         Returns
         -------
@@ -856,13 +766,13 @@ class BaseDistribution(BaseLayer):
         self._ensure_is_fit()
 
         # Process input data
-        x = self._process_x_data(x, data)
+        x = process_data(self, x, data)
 
         # Predict using the mean model
         return self._session.run(
             self.mean_obj.mean(), 
-            feed_dict={self._x_ph: x,
-                       self._batch_size_ph: [x.shape[0]]})
+            feed_dict={self._ph['x']: x,
+                       self._ph['batch_size']: [x.shape[0]]})
 
 
     def metrics(self, x=None, y=None, data=None, metric_list=[]):
@@ -879,16 +789,23 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values of data on which to
-            evalutate the model.  First dimension should be equal to the number
-            of samples. If |None|, will use the data the model was trained on 
-            (the default).
-        y : |None| or |ndarray|
-            Input array of dependent variable values of data on which to
-            evalutate the model.  First dimension should be equal to the number
-            of samples. If |None|, will use the data the model was trained on 
-            (the default).
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as dependent variables.  If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
+            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
+            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
+            strings containing the columns from ``data`` to use.
         metric_list : str or list of str
             Metrics to evaluate each epoch.  To evaluate multiple metrics, 
             pass a list of strings, where each string is a different metric.
@@ -915,7 +832,7 @@ class BaseDistribution(BaseLayer):
             metric_list = [metric_list]
 
         # Process input data
-        x, y = self._process_data(x, y, data)
+        x, y = process_data(self, x, y, data)
 
         # Make predictions
         y_pred = self.predict(x)
@@ -976,7 +893,7 @@ class BaseDistribution(BaseLayer):
             params = [param.name for param in self._parameters]
 
         # Make list if string was passed
-        if type(params) is str:
+        if isinstance(params, str):
             params = [params]
 
         # Check requested parameters are in the model
@@ -1330,12 +1247,14 @@ class BaseDistribution(BaseLayer):
         py is mean of data in each bin (or count or whatevs)
 
         plots 2d plot w/ colormap where goes to black w/ less datapoints
+
         """
         #TODO
         pass
 
 
-    def log_prob(self, x, y, individually=True, dist=False, num_samples=1000):
+    def log_prob(self, x=None, y=None, data=None, 
+                 individually=True, dist=False, num_samples=1000):
         """Compute the log probability of `y` given `x` and the model.
 
         TODO: Docs...
@@ -1355,6 +1274,26 @@ class BaseDistribution(BaseLayer):
         if dist is False, returns log posterior prob assuming each parameter
             takes the mean value of its variational distribution
             so return shape iss (?,1)
+
+        Parameters
+        ----------
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
+            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
+            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
+            strings containing the columns from ``data`` to use.
 
         """
 
@@ -1383,7 +1322,8 @@ class BaseDistribution(BaseLayer):
         #   mean of any distribution?
 
 
-    def log_prob_by(self, x, y, x_by, bins=100, plot=True):
+    def log_prob_by(self, x_by, x=None, y=None, data=None, 
+                    bins=100, plot=True):
         """Plot the log probability of observations `y` given `x` and the model
         as a function of independent variable(s) `x_by`.
 
@@ -1393,6 +1333,29 @@ class BaseDistribution(BaseLayer):
 
             Before calling :meth:`.log_prob_by` on a |Model|, you must first
             :meth:`.fit` it to some data.
+
+        Parameters
+        ----------
+        x_by : int or string or 2-element list of int or string
+            Independent variable to plot the log probability as a function of.
+            TODO
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
+            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
+            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
+            strings containing the columns from ``data`` to use.
 
         """
 
@@ -1411,7 +1374,8 @@ class BaseDistribution(BaseLayer):
         return px, py
 
 
-    def prob(self, x, y, individually=True, dist=False, num_samples=1000):
+    def prob(self, x=None, y=None, data=None,
+             individually=True, dist=False, num_samples=1000):
         """Compute the probability of `y` given `x` and the model.
 
         TODO: docs...
@@ -1422,13 +1386,35 @@ class BaseDistribution(BaseLayer):
             :meth:`.fit` it to some data.
 
         also, this should probably use log_prob, above, then exp it...
+
+        Parameters
+        ----------
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
+
+
         """
 
         # TODO: evaluate log_prob w/ tf like in log_prob above
         pass
 
 
-    def prob_by(self, x, y, x_by, bins=100, plot=True):
+    def prob_by(self, x_by, x=None, y=None, data=None, bins=100, plot=True):
         """Plot the probability of observations `y` given `x` and the model
         as a function of independent variable(s) `x_by`.
 
@@ -1439,13 +1425,34 @@ class BaseDistribution(BaseLayer):
             Before calling :meth:`.prob_by` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
+        Parameters
+        ----------
+        x_by : TODO
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
+
         """
 
         # TODO: same idea as log_prob_by above
         pass
 
 
-    def cdf(self, x, y):
+    def cdf(self, x=None, y=None, data=None):
         """Compute the cumulative probability of `y` given `x` and the model.
 
         TODO: docs...
@@ -1455,13 +1462,33 @@ class BaseDistribution(BaseLayer):
             Before calling :meth:`.cdf` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
+        Parameters
+        ----------
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
+
         """
 
         # TODO: same idea as log_prob above
         pass
 
 
-    def cdf_by(self, x, y, x_by, bins=100):
+    def cdf_by(self, x_by, x=None, y=None, data=None, bins=100):
         """Plot the cumulative probability of observations `y` given `x` and
         the model as a function of independent variable(s) `x_by`.
 
@@ -1472,13 +1499,34 @@ class BaseDistribution(BaseLayer):
             Before calling :meth:`.cdf_by` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
+        Parameters
+        ----------
+        x_by : TODO
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
+        bins : TODO
         """
 
         # TODO: same idea as log_prob_by above
         pass
 
 
-    def log_cdf(self, x, y):
+    def log_cdf(self, x=None, y=None, data=None):
         """Compute the log cumulative probability of `y` given `x` and the model.
 
         TODO: docs...
@@ -1488,13 +1536,33 @@ class BaseDistribution(BaseLayer):
             Before calling :meth:`.log_cdf` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
+        Parameters
+        ----------
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
+
         """
 
         # TODO: same idea as log_prob above
         pass
 
 
-    def log_cdf_by(self, x, y, x_by, bins=100):
+    def log_cdf_by(self, x_by, x=None, y=None, data=None, bins=100):
         """Plot the log cumulative probability of observations `y` given `x`
         and the model as a function of independent variable(s) `x_by`.
 
@@ -1505,6 +1573,27 @@ class BaseDistribution(BaseLayer):
             Before calling :meth:`.log_cdf_by` on a |Model|, you must first
             :meth:`.fit` it to some data.
 
+        Parameters
+        ----------
+        x_by : TODO
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
+        bins : TODO
         """
 
         # TODO: same idea as log_prob_by above
@@ -1528,7 +1617,7 @@ class ContinuousDistribution(BaseDistribution):
     """
 
 
-    def predictive_prc(self, x=None, y=None):
+    def predictive_prc(self, x=None, y=None, data=None):
         """Compute the percentile of each observation along the posterior
         predictive distribution.
 
@@ -1541,24 +1630,31 @@ class ContinuousDistribution(BaseDistribution):
 
         Parameters
         ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values.  Should be
-            of shape (N,D), where N is the number of samples and D
-            is the number of dimensions of the independent variable.
-            If |None|, will use the data the model was trained on (the default).
-        y : |None| or |ndarray|
-            Array of dependent variable values.  Should be of shape
-            (N,D_out), where N is the number of samples (equal to
-            `x.shape[0]) and D_out is the number of dimensions of
-            the dependent variable.
-            If |None|, will use the data the model was trained on (the default).
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
         """
 
         #TODO
         pass
 
 
-    def confidence_intervals(self, x=None, prcs=[2.5, 97.5], num_samples=1000):
+    def confidence_intervals(self, x=None, data=None,
+                             prcs=[2.5, 97.5], num_samples=1000):
         """Compute confidence intervals on predictions for `x`.
 
         TODO: docs, prcs contains percentiles of predictive_distribution to use
@@ -1570,11 +1666,17 @@ class ContinuousDistribution(BaseDistribution):
 
         Parameters
         ----------
-        x : np.ndarray
-            Input array of independent variable values.  Should be of shape
-            (N,D), where N is the number of samples and D is the number of
-            dimensions of the independent variable.
-            If |None|, will use the data the model was trained on (the default).
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x``.  If ``data`` is |None|, 
+            it is assumed that ``x`` is a |ndarray|.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` is a string
+            or list of strings containing the columns from ``data`` to use.
         prcs : list of float, or np.ndarray
             Percentiles to use as bounds of the confidence interval, between 0
             and 100.
@@ -1601,7 +1703,7 @@ class ContinuousDistribution(BaseDistribution):
         return np.percentile(pred_dist, prcs)
 
 
-    def pred_dist_covered(self, x=None, y=None, prc=95.0):
+    def pred_dist_covered(self, x=None, y=None, data=None, prc=95.0):
         """Compute whether each observation was covered by the
         inner `prc` percentile of the posterior predictive
         distribution.
@@ -1615,17 +1717,23 @@ class ContinuousDistribution(BaseDistribution):
 
         Parameters
         ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values.  Should be
-            of shape (N,D), where N is the number of samples and D
-            is the number of dimensions of the independent variable.
-            If |None|, will use the data the model was trained on (the default).
-        y : |None| or |ndarray|
-            Array of dependent variable values.  Should be of shape
-            (N,D_out), where N is the number of samples (equal to
-            `x.shape[0]) and D_out is the number of dimensions of
-            the dependent variable.
-            If |None|, will use the data the model was trained on (the default).
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
         """
 
         # Check model has been fit
@@ -1635,7 +1743,7 @@ class ContinuousDistribution(BaseDistribution):
         pass
 
 
-    def pred_dist_coverage(self, x=None, y=None, prc=95.0):
+    def pred_dist_coverage(self, x=None, y=None, data=None, prc=95.0):
         """Compute the coverage of the inner `prc` percentile of the
         posterior predictive distribution.
 
@@ -1649,17 +1757,23 @@ class ContinuousDistribution(BaseDistribution):
 
         Parameters
         ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values.  Should be
-            of shape (N,D), where N is the number of samples and D
-            is the number of dimensions of the independent variable.
-            If |None|, will use the data the model was trained on (the default).
-        y : |None| or |ndarray|
-            Array of dependent variable values.  Should be of shape
-            (N,D_out), where N is the number of samples (equal to
-            `x.shape[0]) and D_out is the number of dimensions of
-            the dependent variable.
-            If |None|, will use the data the model was trained on (the default).
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
         """
 
         # Check model has been fit
@@ -1669,7 +1783,8 @@ class ContinuousDistribution(BaseDistribution):
         pass
 
 
-    def coverage_by(self, x_by, x=None, y=None, prc=95.0, bins=100, plot=True):
+    def coverage_by(self, x_by, x=None, y=None, data=None, 
+                    prc=95.0, bins=100, plot=True):
         """Compute and plot the coverage of the inner `prc`
         percentile of the posterior predictive distribution as a
         function of specified independent variables.
@@ -1685,17 +1800,25 @@ class ContinuousDistribution(BaseDistribution):
 
         Parameters
         ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values.  Should be
-            of shape (N,D), where N is the number of samples and D
-            is the number of dimensions of the independent variable.
-            If |None|, will use the data the model was trained on (the default).
-        y : |None| or |ndarray|
-            Array of dependent variable values.  Should be of shape
-            (N,D_out), where N is the number of samples (equal to
-            `x.shape[0]) and D_out is the number of dimensions of
-            the dependent variable.
-            If |None|, will use the data the model was trained on (the default).
+        x_by : TODO
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
+        TODO: other args
         """
 
         # Compute whether each sample was covered by the interval
@@ -1711,8 +1834,8 @@ class ContinuousDistribution(BaseDistribution):
         return px, py
 
 
-    def calibration_curve(self, x=None, y=None, split_by=None,
-                          bins=10, plot=False):
+    def calibration_curve(self, x=None, y=None, data=None,
+                          split_by=None, bins=10, plot=False):
         """Plot and/or return calibration curve.
 
         Plots and returns the calibration curve (the percentile of the posterior
@@ -1727,17 +1850,23 @@ class ContinuousDistribution(BaseDistribution):
 
         Parameters
         ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values.  Should be
-            of shape (N,D), where N is the number of samples and D
-            is the number of dimensions of the independent variable.
-            If |None|, will use the data the model was trained on (the default).
-        y : |None| or |ndarray|
-            Array of dependent variable values.  Should be of shape
-            (N,D_out), where N is the number of samples (equal to
-            `x.shape[0]) and D_out is the number of dimensions of
-            the dependent variable.
-            If |None|, will use the data the model was trained on (the default).
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
         split_by : int
             Draw the calibration curve independently for datapoints
             with each unique value in `x[:,split_by]` (a categorical
@@ -1778,7 +1907,8 @@ class ContinuousDistribution(BaseDistribution):
         pass
 
 
-    def r_squared(self, x=None, y=None, num_samples=1000, plot=False):
+    def r_squared(self, x=None, y=None, data=None, 
+                  num_samples=1000, plot=False):
         """Compute the Bayesian R-squared value.
 
         Compute the Bayesian R-squared distribution :ref:`[1] <ref_r_squared>`.
@@ -1791,12 +1921,23 @@ class ContinuousDistribution(BaseDistribution):
 
         Parameters
         ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values.  If |None|, will use
-            the data the model was trained on (the default).
-        y : |None| or |ndarray|
-            Array of dependent variable values.  If |None|, will use
-            the data the model was trained on (the default).
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
         num_samples : int
             Number of posterior draws to use for computing the r-squared
             distribution.  Default = `1000`.
@@ -1828,28 +1969,39 @@ class ContinuousDistribution(BaseDistribution):
         pass
 
 
-    def residuals(self, x=None, y=None, plot=False):
+    def residuals(self, x=None, y=None, data=None):
         """Compute the residuals of the model's predictions.
 
         TODO: docs...
 
         Parameters
         ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values.  Should be
-            of shape (N,D), where N is the number of samples and D
-            is the number of dimensions of the independent variable.
-            If |None|, will use the data the model was trained on (the default).
-        y : |None| or |ndarray|
-            Array of dependent variable values.  Should be of shape
-            (N,D_out), where N is the number of samples (equal to
-            `x.shape[0]) and D_out is the number of dimensions of
-            the dependent variable.
-            If |None|, will use the data the model was trained on (the default).
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
 
         """
         # TODO
         pass
+
+
+    def plot_residuals():
+        pass
+        # TODO
 
 
 
@@ -1860,7 +2012,7 @@ class DiscreteDistribution(BaseDistribution):
 
     """
 
-    def predict(self, x=None):
+    def predict(self, x=None, data=None):
         """Predict discrete dependent variable for independent var samples in x.
 
         TODO: explain how predictions are generated using the MODE of each
@@ -1873,11 +2025,17 @@ class DiscreteDistribution(BaseDistribution):
 
         Parameters
         ----------
-        x : |None| or |ndarray|
-            Input array of independent variable values of data on which to
-            evalutate the model.  First dimension should be equal to the number
-            of samples.
-            If |None|, will use the data the model was trained on (the default).
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x``.  If ``data`` is |None|, 
+            it is assumed that ``x`` is a |ndarray|.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` is a string
+            or list of strings containing the columns from ``data`` to use.
 
         Returns
         -------
@@ -1896,18 +2054,18 @@ class DiscreteDistribution(BaseDistribution):
         # Check model has been fit
         self._ensure_is_fit()
 
-        # Use training data if none passed
-        if x is None:
-            x = self._x_train
+        # Process data
+        x = process_data(self, x, data)
 
         # Predict using the mode of the mean model
         return self._session.run(
             self.mean_obj.mode(), 
-            feed_dict={self._x_ph: x,
-                       self._batch_size_ph: [x.shape[0]]})
+            feed_dict={self._ph['x']: x,
+                       self._ph['batch_size']: [x.shape[0]]})
 
 
-    def calibration_curve(self, x, y, split_by=None, bins=10):
+    def calibration_curve(self, x=None, y=None, data=None,
+                          split_by=None, bins=10):
         """Plot and return calibration curve.
 
         Plots and returns the calibration curve (estimated
@@ -1922,11 +2080,28 @@ class DiscreteDistribution(BaseDistribution):
 
         Parameters
         ----------
-        x:
-        y:
-        split_by: draw curve independently for datapoints with
-            each unique value in this categorical column number.
-        bins: bins used to compute the curve.  An integer to
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
+        split_by : int or str
+            Draw curve independently for datapoints with each unique value in 
+            this categorical column number.
+        bins : int or list of float or |ndarray|
+            Number of bins used to compute the curve.  An integer to
             specify the number of evenly-spaced bins from 0 to
             1, or a list or array-like to specify the bin edges.
 

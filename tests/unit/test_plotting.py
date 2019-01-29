@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from probflow import *
 
-from probflow.plotting import plot_dist, get_ix_label
+from probflow.utils.plotting import plot_dist, get_ix_label
 
 PLOT = False
 

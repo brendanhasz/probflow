@@ -19,7 +19,7 @@ from tensorflow_probability.python.math import random_rademacher
 
 from .core import BaseParameter, BaseDistribution
 from .distributions import Normal, StudentT, Cauchy, InvGamma
-from .plotting import plot_dist, centered_text
+from .utils.plotting import plot_dist, centered_text
 
 
 class Parameter(BaseParameter):

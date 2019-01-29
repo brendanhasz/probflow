@@ -7,7 +7,7 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* test pandas support
+* test process_xy_data, test_train_split, and that BaseDistribution works w/ pandas
 * make Input work when cols= a string (and input=pandas df)
 * Finish BaseDistribution.fit()
 * `Better parameter initialization`_
