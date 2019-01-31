@@ -17,6 +17,7 @@ Backlog (short term):
 * Docs for BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)
 * Docs for distributions + layers
+* `Overload lshift op for Parameter`_
 * Finish BaseDistribution critisism methods
 * Tests for BaseDistribution critisism methods
 * Docs for BaseDistribution critisism methods
@@ -45,6 +46,7 @@ Backlog (long term):
 * Neural Matrix Factorization
 * Multivariate Normal, StudentT, and Cauchy dists
 * Bayesian correlation example and Model
+* `Separate model from noise uncertainty`_ 
 * `Saving and loading and initializing parameters`_
 * `Transfer learning`_
 * `Bijector support`_? e.g so you can do ``model=Exp(Normal()); model.fit()``
@@ -78,6 +80,45 @@ Also make sure the initializer your're using for parameter values is reasonable
 And make the STD devs variables also initialize to 1
 
 
+Overload lshift op for Parameter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Could override the lshift operator (<<) to set a parameters prior?
+
+Eg,
+
+.. code-block:: python
+
+   pop_mu = Parameter()
+   pop_std = ScaleParameter()
+   mu = Parameter(shape=Ns)
+   mu << Normal(pop_mu, pop_std)
+
+Though this is equivalent to 
+
+.. code-block:: python
+
+   pop_mu = Parameter()
+   pop_std = ScaleParameter()
+   mu = Parameter(shape=Ns, prior=Normal(pop_mu, pop_std))
+
+
+It's just more readable the first way, especially when there are a lot of 
+parameters having a lot of different priors.
+
+Under the hood this sets mu.prior to that normal dist, and should fail if LHS isn't a parameter and RHS isn't a distribution. Well it would be defined in Parameter so it wouldn't be overridden for anything else, but should make sure rhs is a distribution
+
+So in Parameter, just implement 
+
+.. code-block:: python
+
+   __lshift__(self, dist):
+       self.prior = dist
+       # And throw error if dist is not a dist
+
+https://docs.python.org/3/library/operator.html#operator.lshift
+
+
 Sequential layer
 ^^^^^^^^^^^^^^^^
 
@@ -106,8 +147,9 @@ Model classes should be consistent with a sklearn estimator.
 Or if that won't work, include a sklearn Estimator which takes a model obj.
 https://scikit-learn.org/dev/developers/contributing.html#rolling-your-own-estimator
 
-Array Slicing
-^^^^^^^^^^^^^
+
+Slicing
+^^^^^^^
 
 NOTE that you've implemented this, just need to test/debug it.
 Added layers.Gather and Parameter.__getitem__ which uses Gather.
@@ -155,10 +197,6 @@ how does np implement that?  Ok looks like via __getitem__
 which should be added to Parameter (can't slice on layers)
 see https://docs.python.org/3/reference/datamodel.html#object.__getitem__
 
-Embedding layer
-^^^^^^^^^^^^^^^
-
-With priors on the embedding vectors to regularize.  
 
 Tensorflow graph view
 ^^^^^^^^^^^^^^^^^^^^^
@@ -170,6 +208,14 @@ See https://www.tensorflow.org/guide/graph_viz
 Also should handle scoping better so the tensorboard graph view of models isn't
 so hideous...
 
+Save graph w/ 
+
+.. code-block:: python
+
+   writer = tf.summary.FileWriter("path\to\log", sess.graph)
+
+and remember to do ``writer.close()`` at some point.
+
 
 Tensorflow dashboard
 ^^^^^^^^^^^^^^^^^^^^
@@ -177,8 +223,33 @@ Tensorflow dashboard
 The ``fit()`` func should have a ``show_dashboard`` kwarg or something.  If true, 
 opens the tensorboard while training.
 
-Can run set up the TF stuff then run 
-import webbrowser; webbrowser.open('tf ip', new=2)
+Set up the TF stuff in python (see previous section).
+
+Then start tensorboard.  May have to use subprocess.Popen (part of std lib):
+
+.. code-block:: python
+
+   import subprocess
+   subprocess.Popen(['tensorboard' '--logdir=path\to\log'])
+
+And finally open a web browser to the tensorboard w/ the webbrowser package (also part of std lib)
+
+.. code-block:: python
+
+   import webbrowser
+   webbrowser.open('localhost:6006', new=2)
+
+
+Embedding layer
+^^^^^^^^^^^^^^^
+
+With priors on the embedding vectors to regularize.  
+
+
+Separate model from noise uncertainty
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Right now predictive_distribution estimates the total uncertainty. Would be nice to be able to separately estimate model uncertainty (aka epistemic unc) vs noise uncertainty (aka aleatoric unc).  Could estimate just the model uncertainty by taking the mean if the sample model? Ie _built_model.mean()
 
 
 Saving and loading and initializing parameters
@@ -239,7 +310,7 @@ Perhaps make a RandomVariable() which takes a slice of the x_values placeholder?
 Model comparison
 ^^^^^^^^^^^^^^^^
 
-somehow.  AIC/BIC/DIC/WAIC/LOO?
+AIC/BIC/DIC/WAIC/LOO?
 I mean.  Or just use held-out log posterior prob...
 or cross-validated summed log posterior prob?
 
