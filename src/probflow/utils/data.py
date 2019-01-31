@@ -6,12 +6,27 @@ TODO: more info...
 
 """
 
+
+
 import numpy as np
 
 
 
 def process_data(model, x=None, data=None, name='x'):
-    """Process and validate just the x data"""
+    """Process and validate one set of data.
+
+    Parameters
+    ----------
+    x : |ndarray| or int or str or list of str or int
+        Values of the dataset to process.  If ``data`` was passed as a 
+        |DataFrame|, ``x`` can be an int or string or list of ints or strings
+         specifying the columns of that |DataFrame| to process.
+
+    Returns
+    -------
+    |ndarray|
+        The processed data.
+    """
 
     # Ensure we were passed a model object
     # TODO
@@ -47,7 +62,7 @@ def process_data(model, x=None, data=None, name='x'):
             x = data.ix[:,x].values
 
         else:
-            raise TypeError('data must be None or a pandas DataFrame')
+            raise TypeError(name+' must be None or a pandas DataFrame')
 
     # Make data at least 2 dimensional (0th dim should be N)
     if x.ndim == 1:
@@ -59,7 +74,24 @@ def process_data(model, x=None, data=None, name='x'):
 
 
 def process_xy_data(self, x=None, y=None, data=None):
-    """Process and validate both x and y data"""
+    """Process and validate both x and y data
+
+    Parameters
+    ----------
+    x : |ndarray| or int or str or list of str or int
+        Values of the dataset to process.  If ``data`` was passed as a 
+        |DataFrame|, ``x`` can be an int or string or list of ints or strings
+         specifying the columns of that |DataFrame| to process.
+    y : |ndarray| or int or str or list of str or int
+        Values of a second dataset to process.  If ``data`` was passed as a 
+        |DataFrame|, ``y`` can be an int or string or list of ints or strings
+         specifying the columns of that |DataFrame| to process.
+
+    Returns
+    -------
+    (|ndarray|, |ndarray|)
+        The processed x and y data.
+    """
 
     # Both or neither of x and y should be passed
     if x is None and y is not None or y is None and x is not None:
@@ -69,18 +101,45 @@ def process_xy_data(self, x=None, y=None, data=None):
     x = process_data(self, x, data, name='x')
     y = process_data(self, y, data, name='y')
 
+    # Check that x and y have correct shape
+    if x.shape[0] != y.shape[0]:
+        raise ValueError('x and y must have the same number of samples')
+
     return x, y
 
 
 def test_train_split(x, y, val_split, val_shuffle):
-    """Split data into training and validation data"""
+    """Split data into training and validation data
+
+    Parameters
+    ----------
+    x : |ndarray|
+        Independent variable values.
+    y : |ndarray|
+        Dependent variable values.
+    val_split : float between 0 and 1
+        Proportion of the data to use as validation data.
+    val_shuffle : bool
+        Whether to shuffle which data is used for validation.  If False,
+        the last ``val_split`` proportion of the input data is used
+        for validation.
+
+    Returns
+    -------
+    (N, x_train, y_train, x_val, y_val)
+
+        * N: number of training samples
+        * x_train: independent variable values of the training data
+        * y_train: dependent variable values of the training data
+        * x_val: independent variable values of the validation data
+        * y_val: dependent variable values of the validation data
+    """
     if val_split > 0:
+        num_val = int(val_split*x.shape[0])
+        train_ix = np.full(x.shape[0], True)
+        train_ix[-num_val:] = False
         if val_shuffle:
-            train_ix = np.random.rand(x.shape[0]) > val_split
-        else:
-            num_val = int(val_split*x.shape[0])
-            train_ix = np.full(x.shape[0], True)
-            train_ix[-num_val:] = False
+            train_ix = np.random.permutation(train_ix)
         val_ix = ~train_ix
         x_train = x[train_ix, ...]
         y_train = y[train_ix, ...]

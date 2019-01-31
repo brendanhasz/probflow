@@ -1,4 +1,5 @@
 numpy
+pandas
 matplotlib
 tensorflow
 tensorflow_probability
