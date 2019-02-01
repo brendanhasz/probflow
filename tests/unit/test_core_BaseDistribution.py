@@ -3,6 +3,7 @@
 import pytest
 
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 import tensorflow_probability as tfp
 tfd = tfp.distributions
@@ -124,7 +125,43 @@ def test_BaseDistribution_sample_posterior_vector():
     assert samples['nonvec_bias'].shape[1] == 1
 
 
-# TODO: test BaseLayer.fit works w/ pandas array
+def test_BaseDistribution_sample_posterior_vector_pandas():
+    """Tests core.BaseDistribution.sample_posterior + fit w/ pandas input"""
+
+    # Parameters + input data is vector of length 3
+    Nd = 3
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(name='pd_weight', shape=Nd, estimator=None)
+    bias = Parameter(name='pd_bias', estimator=None)
+    data = Input()
+    model = Normal(Dot(data, weight) + bias, 1.0)
+
+    # Generate data
+    N = 10
+    true_weight = np.array([0.5, -0.25, 0.0])
+    true_bias = -1.0
+    noise = np.random.randn(N)
+    x = np.random.randn(N, Nd+1)
+    x[:,0] = np.sum(true_weight*x[:,1:], axis=1) + true_bias + noise
+    df = pd.DataFrame(x, columns=['a', 'b', 'c', 'd'])
+
+    # Fit the model
+    model.fit(['b', 'c', 'd'], 'a', data=df, epochs=1)
+
+    # Check output of sample_posterior is correct
+    num_samples = 3
+    samples = model.sample_posterior(num_samples=num_samples)
+    assert isinstance(samples, dict)
+    assert len(samples) == 2
+    assert samples['pd_weight'].ndim == 2
+    assert samples['pd_weight'].shape[0] == num_samples
+    assert samples['pd_weight'].shape[1] == Nd
+    assert samples['pd_bias'].ndim == 2
+    assert samples['pd_bias'].shape[0] == num_samples
+    assert samples['pd_bias'].shape[1] == 1
+
+
 
 
 # TODO: test 2D X and params
