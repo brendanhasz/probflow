@@ -429,10 +429,15 @@ class BaseDistribution(BaseLayer):
             verbose=True,
             validation_split=0.0,
             validation_shuffle=True,
-            shuffle=True):
+            shuffle=True,
+            record=None,
+            record_freq='batch'):
         """Fit model.
 
         TODO: Docs...
+
+        TODO: brief math about variational inference :ref:`[1] <ref_bbb>`
+        (just to say that the loss used is -ELBO = KL - log_likelihood)
 
         Parameters
         ----------
@@ -453,11 +458,12 @@ class BaseDistribution(BaseLayer):
             strings containing the columns from ``data`` to use.
         dtype : |DType|
             Cast the input data to this type, and use this type for parameters.
-        batch_size : int
-            Number of samples per training batch.
+        batch_size : int or None
+            Number of samples per training batch.  Use None to use all samples
+            per batch.  Default = 128
         epochs : int
             Number of epochs to train for (1 epoch is one full cycle through
-            all the training data).
+            all the training data).  Default = 100
         optimizer : TODO
             TODO
         learning_rate : float
@@ -488,10 +494,20 @@ class BaseDistribution(BaseLayer):
         shuffle : bool
             Whether to shuffle the training data before each trainin epoch.
             Default = True
-
-
-        TODO: brief math about variational inference :ref:`[1] <ref_bbb>`
-        (just to say that the loss used is -ELBO = KL - log_likelihood)
+        record : None or str or list of str
+            Parameters to record over the course of training.  If ``record`` is
+            None, no parameter recording occurrs.  If ``record`` is ``'all'``,
+            all parameters are recorded.  If ``record`` is a string containing
+            the name of a |Parameter|, that parameter's variational posterior
+            parameters are recorded.  If ``record`` is a list, each element of
+            the list should be a string with the name of a |Parameter| to 
+            record.
+        record_freq : string {'batch' or 'epoch'}
+            Recording frequency.  If ``record_freq`` is ``'batch'``, 
+            variational posterior parameters will be recorded once per batch.
+            If ``record_freq`` is ``'epoch'``, variational posterior parameters
+            will only be recorded once per epoch (which saves memory if your
+            model has many parameters).
 
 
         References
@@ -553,6 +569,20 @@ class BaseDistribution(BaseLayer):
             return x[ix, ...], y[ix, ...], [ix.shape[0]]
 
 
+        def initialize_records(record_freq, epochs, n_batch):
+            """Initialize dicts and arrays for recording posterior params"""
+            if record_freq == 'batch':
+                Nrecords = int(epochs*n_batch)
+            else:
+                Nrecords = int(epochs)
+            records = dict()
+            for param in self._parameters:
+                post_args = param.posterior_fn._default_args.keys()
+                records[param.name] = dict()
+                for post_arg in post_args:
+                    records[param.name][post_arg] = np.full(Nrecords, np.nan)
+            return records
+
         # Check input types
         if not isinstance(dtype, tf.DType):
             raise TypeError('dtype must be a TensorFlow DType')
@@ -582,6 +612,15 @@ class BaseDistribution(BaseLayer):
             raise TypeError('validation_shuffle must be True or False')
         if not isinstance(shuffle, bool):
             raise TypeError('shuffle must be True or False')
+        if record is not None and not isinstance(record, (str, list)):
+            raise TypeError('record must be None, a string, or a list')
+        if isinstance(record, list):
+            if not all([isinstance(e, str) for e in record]):
+                raise TypeError('record must be a list of strings')
+        if not isinstance(record_freq, str):
+            raise TypeError('record_freq must be a string')
+        if record_freq not in ['batch', 'epoch']:
+            raise ValueError('record_freq must be \'batch\' or \'epoch\'')
 
         # Process the input data
         x, y = process_xy_data(self, x, y, data)
@@ -637,9 +676,12 @@ class BaseDistribution(BaseLayer):
                            tf.local_variables_initializer())
         self._session.run(init_op)
 
+        # Set up arrays for recording
+        n_batch = int(np.ceil(N/batch_size)) #number of batches per epoch
+        records = initialize_records(record_freq, epochs, n_batch)
+
         # Fit the model
         self.is_fit = True
-        n_batch = int(np.ceil(N/batch_size)) #number of batches per epoch
         print_batches = int(np.ceil(n_batch/10)) #info each print_batches batch
         for epoch in range(epochs):
 
@@ -656,10 +698,20 @@ class BaseDistribution(BaseLayer):
                                              y_data: b_y,
                                              batch_size_ph: b_n})
 
+                # Record variational posteriors each batch
+                if record_freq == 'batch':
+                    pass
+                    # TODO
+
                 # Print progress
                 if verbose and batch % print_batches == 0:
                     print("  Batch %d / %d (%0.1f)\r" %
                           (batch+1, n_batch, 100.0*batch/n_batch), end='')
+
+            # Record variational posteriors each batch
+            if record_freq == 'epoch':
+                pass
+                # TODO
 
             # Evaluate metrics
             print(60*' '+"\r", end='')
