@@ -6,6 +6,8 @@ Examples
    :caption: Contents:
    :hidden:
 
+.. include:: macros.hrst
+
 TODO: intro
 
 TODO: make sure to have diagrams for each model

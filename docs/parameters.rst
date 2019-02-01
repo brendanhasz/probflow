@@ -1,6 +1,8 @@
 Parameters
 ==========
 
+.. include:: macros.hrst
+
 TODO: discuss parameters of the model, etc
 
 
@@ -40,7 +42,7 @@ For example, we could also have set the prior on a parameter to :math:`\mathcal{
    new_param = Parameter()
    new_param << Normal(1,2)
 
-Setting the prior via the ``<<`` operator is provided mainly for readability (similar to the ``~`` operator in `Stan <>`_).  It makes code much more readable especially when specifying complex multilevel models.  For example, instead of:
+Setting the prior via the ``<<`` operator is provided mainly for readability (it's meant to be used like the ``~`` operator in `Stan <https://mc-stan.org/>`_).  It makes code much more readable especially when specifying complex multilevel models.  For example, instead of:
 
 .. code-block:: python
 
@@ -62,11 +64,11 @@ We could use the ``<<`` operator to specify the same model:
 Scale Parameters
 ----------------
 
-A parameter which comes up often is a "scale" parameter.  For example, as the standard deviation (:math:`\sigma`) in a linear regression with normally-distributed noise:
+A parameter which comes up often in Bayesian modeling is a "scale" parameter.  For example, the standard deviation (:math:`\sigma`) in a linear regression with normally-distributed noise:
 
 .. math::
 
-    p(y | x) = \mathcal(N)(\beta x + \beta_0, \sigma)
+    p(y~|~x) = \mathcal{N}(\beta x + \beta_0, ~ \sigma)
 
 This :math:`\sigma` parameter cannot take values below 0, because the standard deviation cannot be negative.  So, we can't use the default posterior and prior for a |Parameter| (which is a :class:`.Normal` distribution for the posterior and :math:`\mathcal{N}(0, 1)` for the prior), because this default allows negative values.
 
@@ -84,7 +86,7 @@ and then transform this into the standard deviation parameter (:math:`\sigma`):
 
     \sigma = \sqrt{\sigma^2}
 
-This could be accomplished using probflow by `setting the posterior <Specifying the Variational Posterior>`_ to :class:`.InvGamma`, and then `transforming the parameter <Transforming Parameters>`_ with a square root:
+This could be accomplished using probflow by `setting the posterior <#specifying-the-variational-posterior>`_ to :class:`.InvGamma`, and then `transforming the parameter <#transforming-parameters>`_ with a square root:
 
 .. code-block:: python
 
@@ -108,7 +110,7 @@ By default, :class:`.ScaleParameter` uses a uniform prior.
 Transforming Parameters
 -----------------------
 
-TODO: talk about transform and inv_transform args to constructor
+TODO: talk about transform and inv_transform args to constructor.  Parameter w/ lognormal posterior as an example?  Also mention that the transform is only applied to the samples the posterior emits, and NOT to the prior (i.e. the prior and posterior should be in the same non-transformed space)
 
 
 Estimators

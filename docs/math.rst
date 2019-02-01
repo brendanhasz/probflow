@@ -1,6 +1,8 @@
 Mathematical Details
 ====================
 
+.. include:: macros.hrst
+
 TODO: intro
 
 

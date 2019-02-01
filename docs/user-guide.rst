@@ -17,4 +17,6 @@ User Guide
    examples
    math
 
+.. include:: macros.hrst
+
 TODO: description of the parts of the user guide

@@ -57,14 +57,6 @@ Backlog (long term):
 * `Mixture distribution`_
 * LSTM Layer
 
-Issues
-------
-
-Transformed mean does not return mean
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Currently mean() won't actually return the mean of a variable if that variable is transformed/bounded, bc mean(exp(x)) isn't the same as exp(mean(x)) ; currently you do the second one in Variable.mean(), and also in Exp(Variable()).
-It's not exactly the end of the world: if the variatinional dist used is Normal, it'll return the mode.
-But, it's technically not correct.
 
 
 Notes
@@ -82,6 +74,8 @@ Sequential layer
 ^^^^^^^^^^^^^^^^
 
 Sequential layer can't be a class which inherits from BaseLayer b/c it takes a list.  Also, elements of that list will be instantiated Layers.  Will have to be a func which sets the arg['input'] of each sucessive element as the output of the last layer and then return the last layer?
+
+Also each non-terminal layer in a Sequential layer's list can only have 1 output (and each non-first layer can only have 1 input).
 
 
 Mean alias for discrete dists
