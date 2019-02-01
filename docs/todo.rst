@@ -16,7 +16,6 @@ Backlog (short term):
 * Docs for BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)
 * Docs for distributions + layers
-* `Overload lshift op for Parameter`_
 * Finish BaseDistribution critisism methods
 * Tests for BaseDistribution critisism methods
 * Docs for BaseDistribution critisism methods
@@ -77,45 +76,6 @@ Better parameter initialization
 Scale param should initialize w/ mean of 1 and SD of... Something reasonable.
 Also make sure the initializer your're using for parameter values is reasonable
 And make the STD devs variables also initialize to 1
-
-
-Overload lshift op for Parameter
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Could override the lshift operator (<<) to set a parameters prior?
-
-Eg,
-
-.. code-block:: python
-
-   pop_mu = Parameter()
-   pop_std = ScaleParameter()
-   mu = Parameter(shape=Ns)
-   mu << Normal(pop_mu, pop_std)
-
-Though this is equivalent to 
-
-.. code-block:: python
-
-   pop_mu = Parameter()
-   pop_std = ScaleParameter()
-   mu = Parameter(shape=Ns, prior=Normal(pop_mu, pop_std))
-
-
-It's just more readable the first way, especially when there are a lot of 
-parameters having a lot of different priors.
-
-Under the hood this sets mu.prior to that normal dist, and should fail if LHS isn't a parameter and RHS isn't a distribution. Well it would be defined in Parameter so it wouldn't be overridden for anything else, but should make sure rhs is a distribution
-
-So in Parameter, just implement 
-
-.. code-block:: python
-
-   __lshift__(self, dist):
-       self.prior = dist
-       # And throw error if dist is not a dist
-
-https://docs.python.org/3/library/operator.html#operator.lshift
 
 
 Sequential layer

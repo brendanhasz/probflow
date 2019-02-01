@@ -6,12 +6,13 @@ User Guide
    :caption: Contents:
    :hidden:
 
+   inference
    parameters
    layers
    distributions
    fitting
    evaluating
-   visualizing
+   inspecting
    ready_made_models
    examples
    math

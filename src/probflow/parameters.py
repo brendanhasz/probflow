@@ -134,12 +134,11 @@ class Parameter(BaseParameter):
             raise ValueError('flipout requires a symmetric posterior ' +
                              'distribution in the location-scale family')
 
-        # If shape is an integer, make it a list
+        # Make shape a list
         if isinstance(shape, int):
             shape = [shape]
-
-        # If shape is a numpy vector, make it a list
-        # TODO
+        if isinstance(shape, np.ndarray):
+            shape = shape.tolist()
 
         # Assign attributes
         self.shape = shape
@@ -512,6 +511,17 @@ class Parameter(BaseParameter):
         """Get parameters by index."""
         from .layers import Gather
         return Gather(self, inds)
+
+
+    def __lshift__(self, dist):
+        """Set the prior distribution for this parameter."""
+
+        # Ensure prior to set is a distribution
+        if dist is not None and not isinstance(dist, BaseDistribution):
+            raise TypeError('prior must be a distribution object or None')
+
+        # Set new prior
+        self.prior = dist
 
 
 

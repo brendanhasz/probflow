@@ -8,6 +8,7 @@ import tensorflow_probability as tfp
 tfd = tfp.distributions
 
 from probflow.parameters import Parameter, ScaleParameter
+from probflow.distributions import Normal, StudentT
 
 
 def test_parameter_build():
@@ -269,3 +270,27 @@ def test_parameter_ops_overloading():
     o1 = abs(p1)
     o1.build(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(o1.built_obj, tf.Tensor)
+
+
+def test_parameter_prior_via_lshift_op():
+    """Tests that param << dist sets param's prior to dist (via __lshift__)"""
+
+    p1 = Parameter()
+    assert isinstance(p1.prior, Normal)
+
+    p1 << StudentT(1, 2, 3)
+
+    # Should have changed the prior!
+    assert not isinstance(p1.prior, Normal)
+    assert isinstance(p1.prior, StudentT)
+    assert p1.prior.args['df'] == 1
+    assert p1.prior.args['loc'] == 2
+    assert p1.prior.args['scale'] == 3
+
+    # And should still be able to be built
+    p1 << Normal(1, 3)
+    p1.build(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(p1._built_prior, tfd.Normal)
+    with tf.Session() as sess:
+        assert sess.run(p1._built_prior.mean()) == 1.0
+        assert sess.run(p1._built_prior.stddev()) == 3.0
