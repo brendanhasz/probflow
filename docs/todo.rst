@@ -7,10 +7,10 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* make Input work when cols= a string (and input=pandas df)
+* Add a plot_posterior_over_training() method which plots recorded args.  Should take a prob=True/False arg (plot each arg of posterior over training or plot the probability distribution as a color plot)
+* Add support for Input w/ cols= a string (and input=pandas df)
 * Finish BaseDistribution.fit()
 * `Better parameter initialization`_
-* fit should have a record=False arg (record posterior values over training), and plot_posterior_over_training() func?  Tho in theory you could do that via tensorboard...
 * Tests and debug for validation split and shuffles
 * Finish BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Docs for BaseLayer, BaseDistribution.fit, Parameter, and Input
@@ -49,14 +49,13 @@ Backlog (long term):
 * `Transfer learning`_
 * `Bijector support`_? e.g so you can do ``model=Exp(Normal()); model.fit()``
 * `Input data as tf dataset iterators`_
-* Conv layers
-* Pooling layers
-* Ready-made Conv models
 * `Model comparison`_
 * `Support for random effects and multilevel models`_
 * `Mixture distribution`_
+* Conv layers
+* Pooling layers
+* Ready-made Conv models
 * LSTM Layer
-
 
 
 Notes
@@ -236,6 +235,8 @@ return that prob plus the Jacobian adjustment.
 
 But, don't need a special "bijector" or anything, just add that functionality
 to the Exp layer (and other transform layers, like Reciprocal, Log, and Sigmoid)
+
+Also, is there a way to get mean() to work w/ Bijectors? TFP currently just throws an error when you try to call mean on a bijected dist. Currently mean() won't return the mean for transformed dists b/c for example mean(exp(x)) isn't the same as exp(mean(x)).  I don't think getting that to work is as easy as it is for the log prob (were you just transform or inv transform the values), because there's no principled way to get the mean of a transformed dist, and some transforms don't even have analytically tractable means (e.g. the logit normal dist).
 
 
 Input data as tf dataset iterators

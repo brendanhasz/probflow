@@ -162,6 +162,136 @@ def test_BaseDistribution_sample_posterior_vector_pandas():
     assert samples['pd_bias'].shape[1] == 1
 
 
+def test_BaseDistribution_fit_record():
+    """Tests core.BaseDistribution.fit w/ record-related args"""
+
+    # Parameters + input data is vector of length 3
+    Nd = 3
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(name='record_weight', shape=Nd, estimator=None)
+    bias = Parameter(name='record_bias', estimator=None)
+    data = Input()
+    model = Normal(Dot(data, weight) + bias, 1.0)
+
+    # Generate data
+    N = 10
+    true_weight = np.array([0.5, -0.25, 0.0])
+    true_bias = -1.0
+    noise = np.random.randn(N, 1)
+    x = np.random.randn(N, Nd)
+    y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
+
+    ###  NO RECORDING  ###
+
+    # Fit the model
+    model.fit(x, y, epochs=1, record=None)
+
+    # No recording should have occurred
+    assert not hasattr(model, '_records')
+
+    ###  RECORD ALL, ONCE PER EPOCH  ###
+
+    # Reset
+    tf.reset_default_graph()
+
+    # Fit the model, recording all param values once per epoch
+    model.fit(x, y, epochs=1, batch_size=5, record='all', record_freq='epoch')
+
+    # Check records
+    assert hasattr(model, '_records')
+    assert isinstance(model._records, dict)
+    assert 'record_weight' in model._records
+    assert isinstance(model._records['record_weight'], dict)
+    assert 'loc' in model._records['record_weight']
+    assert 'scale' in model._records['record_weight']
+    assert isinstance(model._records['record_weight']['loc'], np.ndarray)
+    assert isinstance(model._records['record_weight']['scale'], np.ndarray)
+    assert model._records['record_weight']['loc'].ndim == 2
+    assert model._records['record_weight']['loc'].shape[0] == 1
+    assert model._records['record_weight']['loc'].shape[1] == 3
+    assert model._records['record_weight']['scale'].ndim == 2
+    assert model._records['record_weight']['scale'].shape[0] == 1
+    assert model._records['record_weight']['scale'].shape[1] == 3
+    assert 'record_bias' in model._records
+    assert isinstance(model._records['record_bias'], dict)
+    assert 'loc' in model._records['record_bias']
+    assert 'scale' in model._records['record_bias']
+    assert isinstance(model._records['record_bias']['loc'], np.ndarray)
+    assert isinstance(model._records['record_bias']['scale'], np.ndarray)
+    assert model._records['record_bias']['loc'].ndim == 2
+    assert model._records['record_bias']['loc'].shape[0] == 1
+    assert model._records['record_bias']['loc'].shape[1] == 1
+    assert model._records['record_bias']['scale'].ndim == 2
+    assert model._records['record_bias']['scale'].shape[0] == 1
+    assert model._records['record_bias']['scale'].shape[1] == 1
+
+    ###  RECORD ALL, ONCE PER BATCH  ###
+
+    # Reset
+    tf.reset_default_graph()
+
+    # Fit the model, recording all param values once per epoch
+    model.fit(x, y, epochs=2, batch_size=5, record='all', record_freq='batch')
+
+    # Check records
+    assert hasattr(model, '_records')
+    assert isinstance(model._records, dict)
+    assert 'record_weight' in model._records
+    assert isinstance(model._records['record_weight'], dict)
+    assert 'loc' in model._records['record_weight']
+    assert 'scale' in model._records['record_weight']
+    assert isinstance(model._records['record_weight']['loc'], np.ndarray)
+    assert isinstance(model._records['record_weight']['scale'], np.ndarray)
+    assert model._records['record_weight']['loc'].ndim == 2
+    assert model._records['record_weight']['loc'].shape[0] == 4
+    assert model._records['record_weight']['loc'].shape[1] == 3
+    assert model._records['record_weight']['scale'].ndim == 2
+    assert model._records['record_weight']['scale'].shape[0] == 4
+    assert model._records['record_weight']['scale'].shape[1] == 3
+    assert 'record_bias' in model._records
+    assert isinstance(model._records['record_bias'], dict)
+    assert 'loc' in model._records['record_bias']
+    assert 'scale' in model._records['record_bias']
+    assert isinstance(model._records['record_bias']['loc'], np.ndarray)
+    assert isinstance(model._records['record_bias']['scale'], np.ndarray)
+    assert model._records['record_bias']['loc'].ndim == 2
+    assert model._records['record_bias']['loc'].shape[0] == 4
+    assert model._records['record_bias']['loc'].shape[1] == 1
+    assert model._records['record_bias']['scale'].ndim == 2
+    assert model._records['record_bias']['scale'].shape[0] == 4
+    assert model._records['record_bias']['scale'].shape[1] == 1
+
+    ###  RECORD JUST ONE PARAM, ONCE PER EPOCH  ###
+
+    # Reset
+    tf.reset_default_graph()
+
+    # Fit the model, recording all param values once per epoch
+    model.fit(x, y, epochs=1, record='record_weight', record_freq='epoch')
+
+    # Check records
+    assert hasattr(model, '_records')
+    assert isinstance(model._records, dict)
+    assert 'record_weight' in model._records
+    assert isinstance(model._records['record_weight'], dict)
+    assert 'loc' in model._records['record_weight']
+    assert 'scale' in model._records['record_weight']
+    assert isinstance(model._records['record_weight']['loc'], np.ndarray)
+    assert isinstance(model._records['record_weight']['scale'], np.ndarray)
+    assert model._records['record_weight']['loc'].ndim == 2
+    assert model._records['record_weight']['loc'].shape[0] == 1
+    assert model._records['record_weight']['loc'].shape[1] == 3
+    assert model._records['record_weight']['scale'].ndim == 2
+    assert model._records['record_weight']['scale'].shape[0] == 1
+    assert model._records['record_weight']['scale'].shape[1] == 3
+    assert 'record_bias' not in model._records
+
+    # TODO: plot if main
+
+    # TODO: once per batch
+
+    # TODO: only record one param
 
 
 # TODO: test 2D X and params

@@ -569,19 +569,33 @@ class BaseDistribution(BaseLayer):
             return x[ix, ...], y[ix, ...], [ix.shape[0]]
 
 
-        def initialize_records(record_freq, epochs, n_batch):
+        def init_records(to_record, record_freq, epochs, n_batch):
             """Initialize dicts and arrays for recording posterior params"""
             if record_freq == 'batch':
                 Nrecords = int(epochs*n_batch)
             else:
                 Nrecords = int(epochs)
             records = dict()
+            for record in to_record:
+                if record not in [p.name for p in self._parameters]:
+                    raise ValueError(record+' is not a parameter')
             for param in self._parameters:
-                post_args = param.posterior_fn._default_args.keys()
-                records[param.name] = dict()
-                for post_arg in post_args:
-                    records[param.name][post_arg] = np.full(Nrecords, np.nan)
+                if param.name in to_record:
+                    records[param.name] = dict()
+                    t_shape = [Nrecords] + param.shape
+                    for post_arg in param._params:
+                        records[param.name][post_arg] = \
+                            np.full(t_shape, np.nan)
             return records
+
+        def save_records(ix):
+            """Save posterior parameter values"""
+            for param in self._parameters:
+                if param.name in self._records:
+                    for post_arg in param._params:
+                        self._records[param.name][post_arg][ix,...] = \
+                            self._session.run(param._params[post_arg])
+
 
         # Check input types
         if not isinstance(dtype, tf.DType):
@@ -678,7 +692,13 @@ class BaseDistribution(BaseLayer):
 
         # Set up arrays for recording
         n_batch = int(np.ceil(N/batch_size)) #number of batches per epoch
-        records = initialize_records(record_freq, epochs, n_batch)
+        if isinstance(record, str):
+            if record == 'all':
+                record = [p.name for p in self._parameters]
+            else:
+                record = [record] #make list if not
+        if record is not None:
+            self._records = init_records(record, record_freq, epochs, n_batch)
 
         # Fit the model
         self.is_fit = True
@@ -699,19 +719,17 @@ class BaseDistribution(BaseLayer):
                                              batch_size_ph: b_n})
 
                 # Record variational posteriors each batch
-                if record_freq == 'batch':
-                    pass
-                    # TODO
+                if record is not None and record_freq == 'batch':
+                    save_records(epoch*n_batch + batch)
 
                 # Print progress
                 if verbose and batch % print_batches == 0:
                     print("  Batch %d / %d (%0.1f)\r" %
                           (batch+1, n_batch, 100.0*batch/n_batch), end='')
 
-            # Record variational posteriors each batch
-            if record_freq == 'epoch':
-                pass
-                # TODO
+            # Record variational posteriors each epoch
+            if record is not None and record_freq == 'epoch':
+                save_records(epoch)
 
             # Evaluate metrics
             print(60*' '+"\r", end='')
