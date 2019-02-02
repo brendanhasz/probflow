@@ -576,6 +576,7 @@ class BaseDistribution(BaseLayer):
             else:
                 Nrecords = int(epochs)
             records = dict()
+            records['x_epochs'] = np.linspace(1, epochs, Nrecords)
             for record in to_record:
                 if record not in [p.name for p in self._parameters]:
                     raise ValueError(record+' is not a parameter')
@@ -791,6 +792,9 @@ class BaseDistribution(BaseLayer):
             self.built_obj.sample(num_samples),
             feed_dict={self._ph['x']: x,
                        self._ph['batch_size']: [x.shape[0]]})
+
+
+    # TODO: plot_predictive_distribution()
 
 
     def predict(self, x=None, data=None):
@@ -1226,7 +1230,7 @@ class BaseDistribution(BaseLayer):
         num_samples : int
             Number of samples to take from each prior distribution.
             Default = 10000
-        params : str or list
+        params : |None| or str or list of str
             List of parameters to plot.  Default is to plot the prior of
             all parameters in the model.
         style : str
@@ -1303,6 +1307,85 @@ class BaseDistribution(BaseLayer):
             param_dict[param].plot_prior(num_samples=num_samples, style=style, 
                                          bins=bins, ci=ci, color=color)
 
+
+    def plot_posterior_over_training(self, 
+                                     params=None,
+                                     cols=1,
+                                     prob=True):
+        """Plot the variational posteriors over the course of training.
+
+        TODO: more docs...
+
+        Parameters
+        ----------
+        params : |None| or str or list of str
+            List of parameters to plot.  Default is to plot the posteriors of
+            all parameters in the model over the course of training.
+        cols : int
+            Divide the subplots into a grid with this many columns.
+        prob : bool
+            Whether to plot the probability distribution for each variational
+            posterior (if ``prob=True``), or to plot the value of each 
+            parameter of each variational distribution (if ``prob=False``).
+        """
+
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Check inputs
+        if params is not None and not isinstance(params, (list, str)):
+            raise TypeError('params must be None or a list of str')
+        if type(params) is list:
+            for param in params:
+                if not isinstance(param, str):
+                    raise TypeError('params must be None or a list of str')
+        if type(cols) is not int:
+            raise TypeError('cols must be an integer')
+
+        # Get all params if not specified
+        if params is None:
+            params = [p.name for p in self._parameters]
+
+        # Make list if string was passed
+        if isinstance(params, str):
+            params = [params]
+
+        # Check requested parameters are in the model
+        for param in params:
+            if param not in [p.name for p in self._parameters]:
+                raise ValueError('Parameter \''+param+'\' not in this model')
+
+        # Make dict of params to get
+        param_dict = dict()
+        for param in self._parameters:
+            if param.name in params:
+                param_dict[param.name] = param
+
+        # Plot the probability distributions
+        if prob:
+            pass
+            # TODO
+
+        # Just plot the parameter values of the variational distributions
+        else:
+
+            # Count how many posterior arguments there are
+            n_args = 0
+            for param in params:
+                n_args += len(param_dict[param]._params)
+
+            # Plot each variational posterior's argument in separate subplot
+            rows = np.ceil(n_args/cols)
+            ix = 0
+            x_vals = self._records['x_epochs']
+            for name, param in param_dict.items():
+                for arg in param._params:
+                    plt.subplot(rows, cols, ix+1)
+                    plt.plot(x_vals, self._records[name][arg])
+                    plt.ylabel(name+' '+arg)
+                    plt.xlabel('Epoch')
+                    ix += 1
+                    
 
     def plot_by(self, x, data, bins=100, what='mean'):
         """Compute and plot mean of data as a function of x.

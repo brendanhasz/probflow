@@ -10,6 +10,10 @@ tfd = tfp.distributions
 
 from probflow import *
 
+PLOT = False
+EPOCHS = 1
+NUM_SAMPLES = 10
+
 
 def test_BaseDistribution_fit():
     """Tests core.BaseDistribution.fit"""
@@ -162,6 +166,26 @@ def test_BaseDistribution_sample_posterior_vector_pandas():
     assert samples['pd_bias'].shape[1] == 1
 
 
+
+# TODO: test 2D X and params
+
+
+# TODO: test vector Y
+
+
+# TODO: test 2D Y
+
+
+# TODO: test the shuffles work _initialize_shuffles
+
+
+# TODO: test that the flipout estimator works?
+
+
+# TODO: test the batches are being generated correctly _generate_batch
+
+
+
 def test_BaseDistribution_fit_record():
     """Tests core.BaseDistribution.fit w/ record-related args"""
 
@@ -287,35 +311,66 @@ def test_BaseDistribution_fit_record():
     assert model._records['record_weight']['scale'].shape[1] == 3
     assert 'record_bias' not in model._records
 
-    # TODO: plot if main
 
-    # TODO: once per batch
+def test_BaseDistribution_plot_posterior_over_training():
+    """Tests core.BaseDistribution.plot_posterior_over_training"""
 
-    # TODO: only record one param
+    # Parameters + input data is vector of length 3
+    Nd = 3
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(name='record_weight', shape=Nd, estimator=None)
+    bias = Parameter(name='record_bias', estimator=None)
+    data = Input()
+    model = Normal(Dot(data, weight) + bias, 1.0)
+
+    # Generate data
+    N = NUM_SAMPLES
+    true_weight = np.array([0.5, -0.25, 0.0])
+    true_bias = -1.0
+    noise = np.random.randn(N, 1)
+    x = np.random.randn(N, Nd)
+    y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
+
+    ###  RECORD ALL, ONCE PER EPOCH  ###
+
+    # Fit the model, recording all param values once per epoch
+    model.fit(x, y, epochs=EPOCHS, record='all', record_freq='epoch')
+
+    # Plot records
+    model.plot_posterior_over_training(prob=False)
+    plt.show()
 
 
-# TODO: test 2D X and params
+    # TODO: test w/ once per batch
 
 
-# TODO: test vector Y
+    # TODO: test w/ only certain args
 
 
-# TODO: test 2D Y
+    # TODO: test when prob=True)
 
 
-# TODO: test the shuffles work _initialize_shuffles
+    # Reset
+    tf.reset_default_graph()
 
+    # Fit the model, recording all param values once per epoch
+    #model.fit(x, y, epochs=2, batch_size=5, record='all', record_freq='batch')
 
-# TODO: test that the flipout estimator works?
-
-
-# TODO: test the batches are being generated correctly _generate_batch
-
-
-# TODO: test the validation splitting / shuffling happens correctly
+    # Plot records
+    #model.plot_posterior_over_training()
+    #plt.show()
 
 
 # Tests for plot_posterior and plot_prior are in test_plot_posterior/prior
 
 
 # TODO: test predictive_distribution, predict, metrics, etc
+
+
+if __name__ == "__main__":
+    PLOT = True
+    EPOCHS = 1000
+    NUM_SAMPLES = 1000
+    import matplotlib.pyplot as plt
+    test_BaseDistribution_plot_posterior_over_training()
