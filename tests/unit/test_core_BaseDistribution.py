@@ -11,7 +11,7 @@ tfd = tfp.distributions
 from probflow import *
 
 PLOT = False
-EPOCHS = 1
+EPOCHS = 2
 NUM_SAMPLES = 10
 
 
@@ -311,6 +311,43 @@ def test_BaseDistribution_fit_record():
     assert model._records['record_weight']['scale'].shape[1] == 3
     assert 'record_bias' not in model._records
 
+    ###  RECORD LIST OF PARAMS, ONCE PER EPOCH  ###
+
+    # Reset
+    tf.reset_default_graph()
+
+    # Fit the model, recording all param values once per epoch
+    model.fit(x, y, epochs=1, record=['record_weight', 'record_bias'], 
+              record_freq='epoch')
+
+    # Check records
+    assert hasattr(model, '_records')
+    assert isinstance(model._records, dict)
+    assert 'record_weight' in model._records
+    assert isinstance(model._records['record_weight'], dict)
+    assert 'loc' in model._records['record_weight']
+    assert 'scale' in model._records['record_weight']
+    assert isinstance(model._records['record_weight']['loc'], np.ndarray)
+    assert isinstance(model._records['record_weight']['scale'], np.ndarray)
+    assert model._records['record_weight']['loc'].ndim == 2
+    assert model._records['record_weight']['loc'].shape[0] == 1
+    assert model._records['record_weight']['loc'].shape[1] == 3
+    assert model._records['record_weight']['scale'].ndim == 2
+    assert model._records['record_weight']['scale'].shape[0] == 1
+    assert model._records['record_weight']['scale'].shape[1] == 3
+    assert 'record_bias' in model._records
+    assert isinstance(model._records['record_bias'], dict)
+    assert 'loc' in model._records['record_bias']
+    assert 'scale' in model._records['record_bias']
+    assert isinstance(model._records['record_bias']['loc'], np.ndarray)
+    assert isinstance(model._records['record_bias']['scale'], np.ndarray)
+    assert model._records['record_bias']['loc'].ndim == 2
+    assert model._records['record_bias']['loc'].shape[0] == 1
+    assert model._records['record_bias']['loc'].shape[1] == 1
+    assert model._records['record_bias']['scale'].ndim == 2
+    assert model._records['record_bias']['scale'].shape[0] == 1
+    assert model._records['record_bias']['scale'].shape[1] == 1
+
 
 def test_BaseDistribution_plot_posterior_over_training():
     """Tests core.BaseDistribution.plot_posterior_over_training"""
@@ -319,8 +356,80 @@ def test_BaseDistribution_plot_posterior_over_training():
     Nd = 3
 
     # Model = linear regression assuming error = 1
-    weight = Parameter(name='record_weight', shape=Nd, estimator=None)
-    bias = Parameter(name='record_bias', estimator=None)
+    weight = Parameter(name='ppot_weight', shape=Nd, estimator=None)
+    bias = Parameter(name='ppot_bias', estimator=None)
+    data = Input()
+    std_dev = ScaleParameter()
+    model = Normal(Dot(data, weight) + bias, std_dev)
+
+    # Generate data
+    N = NUM_SAMPLES
+    true_weight = np.array([0.5, -0.25, 0.0])
+    true_bias = -1.0
+    noise = np.random.randn(N, 1)
+    x = np.random.randn(N, Nd)
+    y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
+
+    # All params, once per epoch
+    model.fit(x, y, epochs=EPOCHS, record='all', record_freq='epoch')
+    model.plot_posterior_over_training(prob=False)
+    if PLOT:
+        plt.show()
+
+    # All params, once per batch
+    tf.reset_default_graph()
+    model.fit(x, y, epochs=20, record='all', record_freq='batch')
+    model.plot_posterior_over_training(prob=False, marker='.')
+    if PLOT:
+        plt.show()
+
+    # Just weight params
+    model.plot_posterior_over_training('ppot_weight', prob=False)
+    if PLOT:
+        plt.show()
+
+    # TODO: test w/ 2d params
+
+
+def test_BaseDistribution_plot_posterior_over_training_prob_scalar():
+    """Tests core.BaseDistribution.plot_posterior_over_training 
+    w/ prob=true and scalar params
+    """
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(name='ppotp_weight', estimator=None)
+    bias = Parameter(name='ppotp_bias', estimator=None)
+    data = Input()
+    model = Normal(data*weight + bias, 1.0)
+
+    # Generate data
+    N = NUM_SAMPLES
+    true_weight = 0.5
+    true_bias = -1
+    noise = np.random.randn(N)
+    x = np.linspace(-3, 3, N)
+    y = true_weight*x + true_bias + noise
+
+    # Fit
+    model.fit(x, y, epochs=EPOCHS, record='all', record_freq='epoch')
+
+    # Plot
+    model.plot_posterior_over_training()
+    if PLOT:
+        plt.show()
+
+
+def test_BaseDistribution_plot_posterior_over_training_prob_vector():
+    """Tests core.BaseDistribution.plot_posterior_over_training 
+    w/ prob=true and vector params
+    """
+
+    # Parameters + input data is vector of length 3
+    Nd = 3
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(name='ppotpv_weight', shape=Nd, estimator=None)
+    bias = Parameter(name='ppotpv_bias', estimator=None)
     data = Input()
     model = Normal(Dot(data, weight) + bias, 1.0)
 
@@ -332,34 +441,14 @@ def test_BaseDistribution_plot_posterior_over_training():
     x = np.random.randn(N, Nd)
     y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
 
-    ###  RECORD ALL, ONCE PER EPOCH  ###
-
-    # Fit the model, recording all param values once per epoch
+    # Fit
     model.fit(x, y, epochs=EPOCHS, record='all', record_freq='epoch')
 
-    # Plot records
-    model.plot_posterior_over_training(prob=False)
-    plt.show()
+    # Plot
+    model.plot_posterior_over_training()
+    if PLOT:
+        plt.show()
 
-
-    # TODO: test w/ once per batch
-
-
-    # TODO: test w/ only certain args
-
-
-    # TODO: test when prob=True)
-
-
-    # Reset
-    tf.reset_default_graph()
-
-    # Fit the model, recording all param values once per epoch
-    #model.fit(x, y, epochs=2, batch_size=5, record='all', record_freq='batch')
-
-    # Plot records
-    #model.plot_posterior_over_training()
-    #plt.show()
 
 
 # Tests for plot_posterior and plot_prior are in test_plot_posterior/prior
@@ -370,7 +459,9 @@ def test_BaseDistribution_plot_posterior_over_training():
 
 if __name__ == "__main__":
     PLOT = True
-    EPOCHS = 1000
+    EPOCHS = 300
     NUM_SAMPLES = 1000
     import matplotlib.pyplot as plt
     test_BaseDistribution_plot_posterior_over_training()
+    test_BaseDistribution_plot_posterior_over_training_prob_scalar()
+    test_BaseDistribution_plot_posterior_over_training_prob_vector()

@@ -9,6 +9,7 @@ TODO: more info...
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_rgba
 
 COLORS = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
@@ -147,6 +148,114 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
     plt.gca().spines['left'].set_visible(False)
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
+
+
+
+def plot_line(xdata, ydata, xlabel='', ylabel='', fmt='-', color=None):
+    """Plot lines.
+
+    Parameters
+    ----------
+    xdata : |ndarray|
+        X values of points to plot.  Should be vector of length ``Nsamples``.
+    ydata : |ndarray|
+        Y vaules of points to plot.  Should be of size ``(Nsamples,...)``.
+    xlabel : str
+        Label for the x axis. Default is no x axis label.
+    ylabel : str
+        Label for the y axis.  Default is no y axis label.
+    fmt : str or matplotlib linespec
+        Line marker to use.  Default = ``'-'`` (a normal line).
+    color : matplotlib color code or list of them
+        Color(s) to use to plot the distribution.
+        See https://matplotlib.org/tutorials/colors/colors.html
+        Default = use the default matplotlib color cycle
+    """
+
+    # If 1d make 2d
+    if ydata.ndim == 1:
+        ydata = np.expand_dims(ydata, 1)
+
+    # Check x and y are the same size
+    if xdata.shape[0] != ydata.shape[0]:
+        raise ValueError('x and y data do not have same length')
+
+    # Number of datasets
+    dims = ydata.shape[1:]
+    Nd = np.prod(dims)
+
+    # Flatten if >1D
+    ydata = np.reshape(ydata, (ydata.shape[0], Nd), order='F')
+
+    # Plot the data
+    for i in range(Nd):
+        next_color = get_next_color(color, i)
+        lab = get_ix_label(i, dims)
+        p1 = plt.plot(xdata, ydata[:,i], fmt, color=next_color, label=lab)
+
+    # Only show the legend if there are >1 sample set
+    if Nd > 1:
+        plt.legend()
+
+    # Set x axis label, and no y axis or bounding box needed
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+
+def plot_dist_time(xdata, ydata, zdata, xlabel='', ylabel='', color=None):
+    """Plot a distribution over time.
+
+    Parameters
+    ----------
+    xdata : |ndarray|
+        X values of values to plot.
+    ydata : |ndarray|
+        Y values of values to plot.
+    zdata : |ndarray|
+        Density values of data to plot.  Should be of size 
+        ``(len(ydata),len(xdata)...)``.
+    xlabel : str
+        Label for the x axis. Default is no x axis label.
+    ylabel : str
+        Label for the y axis.  Default is no y axis label.
+    color : matplotlib color code or list of them
+        Color(s) to use to plot the distribution.
+        See https://matplotlib.org/tutorials/colors/colors.html
+        Default = use the default matplotlib color cycle
+    """
+
+    # Check sizes are correct
+    if len(ydata) != zdata.shape[0]:
+        raise ValueError('ydata must be of length zdata.shape[0]')
+    if len(xdata) != zdata.shape[1]:
+        raise ValueError('xdata must be of length zdata.shape[1]')
+
+    # Number of datasets
+    dims = zdata.shape[2:]
+    Nd = np.prod(dims)
+
+    # Flatten if >1D
+    zdata = np.reshape(zdata, (zdata.shape[0], zdata.shape[1], Nd), order='F')
+
+    # Plot the data
+    extent = [xdata[0], xdata[-1], ydata[0], ydata[-1]]
+    for i in range(Nd):
+        next_color = get_next_color(color, i)
+        lab = get_ix_label(i, dims)
+        p1 = plt.plot(0, 0, color=next_color, label=lab)
+        t_rgba = np.array(to_rgba(next_color))
+        cdata = np.ones((zdata.shape[0], zdata.shape[1], 1))*t_rgba
+        cdata[:,:,3] = zdata[:,:,i]/np.max(zdata[:,:,i])
+        plt.imshow(cdata, aspect='auto', interpolation='bilinear', 
+                   origin='lower', extent=extent)
+
+    # Only show the legend if there are >1 sample set
+    if Nd > 1:
+        plt.legend()
+
+    # Set x axis label, and no y axis or bounding box needed
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
 
 
 def centered_text(text):

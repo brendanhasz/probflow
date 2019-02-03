@@ -53,6 +53,7 @@ Backlog (long term):
 * `Model comparison`_
 * `Support for random effects and multilevel models`_
 * `Mixture distribution`_
+* `Optimize bounding`_
 * Conv layers
 * Pooling layers
 * Ready-made Conv models
@@ -274,3 +275,30 @@ Mixture distribution
 ^^^^^^^^^^^^^^^^^^^^
 
 A continuous distribution which takes a list of other distrbutions.
+
+
+Optimize bounding
+^^^^^^^^^^^^^^^^^
+
+In Parameter._bound, ``exp`` and ``sigmoid`` are used just to bound the 
+variational posterior args within a certain range.  Could just as easily
+use an approximation w/o losing anything.  Could use a fast approximation 
+for the exp at least.  Since
+
+.. math::
+
+   e^x = \lim_{n \to \infty} \left( 1 + \frac{x}{n} \right)^n
+
+You can approximate it just by using a large enough :math:`n`.  E.g. w/ :math:`n=256`:
+
+.. code-block:: python
+
+   def fast_exp256(x):
+       e_x = 1.0 + x / 256
+       for i in range(8):
+           e_x *= e_x
+       return e_x
+
+(but obvi not in python haha).  Not sure if that would actually end up being faster in tensorflow or not.
+
+Could use tf.hard_sigmoid to approximate the sigmoid.

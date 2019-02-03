@@ -24,6 +24,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 from .utils.data import process_data, process_xy_data, test_train_split
+from .utils.plotting import plot_line, plot_dist_time
 
 
 # Sentinel object for required arguments
@@ -1311,7 +1312,9 @@ class BaseDistribution(BaseLayer):
     def plot_posterior_over_training(self, 
                                      params=None,
                                      cols=1,
-                                     prob=True):
+                                     prob=True,
+                                     marker='-',
+                                     y_res=100):
         """Plot the variational posteriors over the course of training.
 
         TODO: more docs...
@@ -1327,6 +1330,10 @@ class BaseDistribution(BaseLayer):
             Whether to plot the probability distribution for each variational
             posterior (if ``prob=True``), or to plot the value of each 
             parameter of each variational distribution (if ``prob=False``).
+        marker : str or matplotlib linespec
+            Line marker to use.
+        y_res : int
+            Y-axis resolution for density plot when ``prob=True``.
         """
 
         # Check model has been fit
@@ -1355,6 +1362,12 @@ class BaseDistribution(BaseLayer):
             if param not in [p.name for p in self._parameters]:
                 raise ValueError('Parameter \''+param+'\' not in this model')
 
+        # Check requested parameters were recorded
+        for param in params:
+            if param not in self._records:
+                raise ValueError('Parameter \''+param+'\' was not recorded.' +
+                                 ' To record, set the record argument to fit.')
+
         # Make dict of params to get
         param_dict = dict()
         for param in self._parameters:
@@ -1363,8 +1376,37 @@ class BaseDistribution(BaseLayer):
 
         # Plot the probability distributions
         if prob:
-            pass
-            # TODO
+
+            # X values
+            x_vals = self._records['x_epochs']
+            x_res = len(x_vals)
+
+            # Y values
+            # TODO: use tfd.dist.quantile @ 1st record and last
+            # to get bounds
+            # yvals = np.linspace(lb, ub, yres)
+            # for now just use set limits
+            y_vals = np.linspace(-5, 5, y_res)
+
+            # Plot densities over training
+            rows = np.ceil(len(params)/cols)
+            ix = 0
+            for name, param in param_dict.items():
+
+                # Compute the densities
+                t_post = param.posterior_fn(**self._records[name])
+                t_post.build(None, None)
+                t_post = t_post.built_obj
+                probs = np.empty([y_res,x_res]+param.shape)
+                with tf.Session() as sess:
+                    for iy in range(y_res):
+                        probs[iy,...] = sess.run(t_post.prob(y_vals[iy]))
+
+                # Plot the densities
+                plt.subplot(rows, cols, ix+1)
+                plot_dist_time(x_vals, y_vals, probs,
+                               xlabel='Epoch', ylabel=name)
+                ix += 1
 
         # Just plot the parameter values of the variational distributions
         else:
@@ -1381,9 +1423,8 @@ class BaseDistribution(BaseLayer):
             for name, param in param_dict.items():
                 for arg in param._params:
                     plt.subplot(rows, cols, ix+1)
-                    plt.plot(x_vals, self._records[name][arg])
-                    plt.ylabel(name+' '+arg)
-                    plt.xlabel('Epoch')
+                    plot_line(x_vals, self._records[name][arg], fmt=marker,
+                              xlabel='Epoch', ylabel=name+'\n'+arg)
                     ix += 1
                     
 
