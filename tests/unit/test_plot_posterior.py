@@ -5,6 +5,7 @@ from probflow import *
 PLOT = False
 epochs = 1
 N = 10
+NUM_SAMPLES = 10
 
 
 def test_plot_posterior_scalar():
@@ -24,57 +25,58 @@ def test_plot_posterior_scalar():
     model.fit(x, y, epochs=epochs)
 
     # Plot all the model's posteriors w/ [hist, 1col, no_ci]
-    model.plot_posterior(style='hist')
+    model.plot_posterior(style='hist', num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's posteriors w/ [hist, 2cols, no_ci]
-    model.plot_posterior(style='hist', cols=2)
+    model.plot_posterior(style='hist', cols=2, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's posteriors w/ [hist, 1col, ci]
-    model.plot_posterior(style='hist', ci=0.9)
+    model.plot_posterior(style='hist', ci=0.9, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's posteriors w/ [hist, 2cols, ci]
-    model.plot_posterior(style='hist', cols=2, ci=0.9, color='r')
+    model.plot_posterior(style='hist', cols=2, ci=0.9, color='r',
+                         num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's posteriors w/ [line, 1col, no_ci]
-    model.plot_posterior(style='line')
+    model.plot_posterior(style='line', num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's posteriors w/ [line, 1col, ci]
-    model.plot_posterior(style='line', ci=0.95)
+    model.plot_posterior(style='line', ci=0.95, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's posteriors w/ [fill, 1col, no_ci]
-    model.plot_posterior(style='fill')
+    model.plot_posterior(style='fill', num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's posteriors w/ [fill, 1col, ci]
-    model.plot_posterior(style='fill', ci=0.95)
+    model.plot_posterior(style='fill', ci=0.95, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot just the weight's posterior w/ a teensy bandwidth
-    weight.plot_posterior(style='fill', bw=0.001)
+    weight.plot_posterior(style='fill', bw=0.01, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot just the bias' posterior w/ a yuge bandwidth
-    bias.plot_posterior(style='fill', bw=1)
+    bias.plot_posterior(style='fill', bw=1, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Default should be fill, 1col, no ci
-    model.plot_posterior()
+    model.plot_posterior(num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
@@ -100,12 +102,12 @@ def test_plot_posterior_vector():
     model.fit(x, y, epochs=epochs)
 
     # Plot all the model's posteriors w/ [hist, 1col, no_ci]
-    model.plot_posterior(style='line')
+    model.plot_posterior(style='line', num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's posteriors w/ [hist, 2col, no_ci]
-    model.plot_posterior(cols=2, ci=0.95)
+    model.plot_posterior(cols=2, ci=0.95, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
@@ -115,5 +117,6 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     epochs = 1000
     N = 1000
+    NUM_SAMPLES = 1000
     test_plot_posterior_scalar()
     test_plot_posterior_vector()

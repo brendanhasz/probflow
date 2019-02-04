@@ -6,7 +6,7 @@ from probflow import *
 PLOT = False
 epochs = 1
 N = 10
-
+NUM_SAMPLES = 10
 
 def test_plot_prior_scalar():
     """Tests Parameter.plot_prior and BaseDistribution.plot_prior"""
@@ -25,57 +25,57 @@ def test_plot_prior_scalar():
     model.fit(x, y, epochs=epochs)
 
     # Plot just the weight's prior w/ a teensy bandwidth
-    weight.plot_prior(style='fill')
+    weight.plot_prior(style='fill', num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot just the bias' prior w/ a yuge bandwidth
-    bias.plot_prior(style='fill', ci=0.95)
+    bias.plot_prior(style='fill', ci=0.95, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's priors w/ [hist, 1col, no_ci]
-    model.plot_prior(style='hist')
+    model.plot_prior(style='hist', num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's priors w/ [hist, 2cols, no_ci]
-    model.plot_prior(style='hist', cols=2)
+    model.plot_prior(style='hist', cols=2, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's priors w/ [hist, 1col, ci]
-    model.plot_prior(style='hist', ci=0.9)
+    model.plot_prior(style='hist', ci=0.9, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's priors w/ [hist, 2cols, ci]
-    model.plot_prior(style='hist', cols=2, ci=0.9)
+    model.plot_prior(style='hist', cols=2, ci=0.9, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's priors w/ [line, 1col, no_ci]
-    model.plot_prior(style='line')
+    model.plot_prior(style='line', num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's priors w/ [line, 1col, ci]
-    model.plot_prior(style='line', ci=0.95)
+    model.plot_prior(style='line', ci=0.95, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's priors w/ [fill, 1col, no_ci]
-    model.plot_prior(style='fill')
+    model.plot_prior(style='fill', num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's priors w/ [fill, 1col, ci]
-    model.plot_prior(style='fill', ci=0.95)
+    model.plot_prior(style='fill', ci=0.95, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Default should be fill, 1col, no ci
-    model.plot_prior()
+    model.plot_prior(num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
@@ -100,12 +100,12 @@ def test_plot_prior_vector():
     model.fit(x, y, epochs=epochs)
 
     # Plot all the model's priors w/ [hist, 1col, no_ci]
-    model.plot_prior(style='line')
+    model.plot_prior(style='line', num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 
     # Plot all the model's priors w/ [hist, 2col, no_ci]
-    model.plot_prior(style='fill', ci=0.95, cols=2)
+    model.plot_prior(style='fill', ci=0.95, cols=2, num_samples=NUM_SAMPLES)
     if PLOT:
         plt.show()
 

@@ -7,7 +7,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Let plot_posterior_over_training() plot prob distribution when prob=True, and tests
 * Add support for Input w/ cols= a string (and input=pandas df)
 * Finish BaseDistribution.fit()
 * BaseDistribution.plot_predictive_distribution()
