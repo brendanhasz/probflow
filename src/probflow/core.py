@@ -24,7 +24,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 from .utils.data import process_data, process_xy_data, test_train_split
-from .utils.plotting import plot_line, plot_dist_time
+from .utils.plotting import plot_line, fill_between
 
 
 # Sentinel object for required arguments
@@ -726,7 +726,7 @@ class BaseDistribution(BaseLayer):
 
                 # Print progress
                 if verbose and batch % print_batches == 0:
-                    print("  Batch %d / %d (%0.1f)\r" %
+                    print("  Batch %d / %d (%0.1f%%)\r" %
                           (batch+1, n_batch, 100.0*batch/n_batch), end='')
 
             # Record variational posteriors each epoch
@@ -963,24 +963,13 @@ class BaseDistribution(BaseLayer):
         # Check model has been fit
         self._ensure_is_fit()
 
-        # Get all params if not specified
-        if params is None:
-            params = [param.name for param in self._parameters]
-
-        # Make list if string was passed
-        if isinstance(params, str):
-            params = [params]
-
-        # Check requested parameters are in the model
-        for param in params:
-            if param not in [p.name for p in self._parameters]:
-                raise ValueError('Parameter \''+param+'\' not in this model')
+        # Check parameter list
+        param_dict = self._validate_params(params)
 
         # Get the posterior means
         posterior_means = dict()
-        for param in self._parameters:
-            if param.name in params:
-                posterior_means[param.name] = param.posterior_mean()
+        for name, param in param_dict.items():
+            posterior_means[name] = param.posterior_mean()
 
         return posterior_means
 
@@ -1015,36 +1004,26 @@ class BaseDistribution(BaseLayer):
         # Check model has been fit
         self._ensure_is_fit()
 
-        # Ensure num_samples is int
-        if type(num_samples) is not int:
+        # Check parameter list
+        param_dict = self._validate_params(params)
+
+        # Check other inputs
+        if not isinstance(num_samples, int):
             raise TypeError('num_samples must be an int')
-
-        # Get all params if not specified
-        if params is None:
-            params = [param.name for param in self._parameters]
-
-        # Make list if string was passed
-        if type(params) is str:
-            params = [params]
-
-        # Check requested parameters are in the model
-        for param in params:
-            if param not in [p.name for p in self._parameters]:
-                raise ValueError('Parameter \''+param+'\' not in this model')
+        if num_samples < 1:
+            raise ValueError('num_samples must be greater than 0')
 
         # Get the posterior distributions
         posteriors = dict()
-        for param in self._parameters:
-            if param.name in params:
-                posteriors[param.name] = \
-                    param.sample_posterior(num_samples=num_samples)
+        for name, param in param_dict.items():
+            posteriors[name] = param.sample_posterior(num_samples=num_samples)
 
         return posteriors
 
 
     def plot_posterior(self,
-                       num_samples=1000,
                        params=None,
+                       num_samples=1000,
                        style='fill',
                        cols=1,
                        bins=20,
@@ -1063,12 +1042,12 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        num_samples : int
-            Number of samples to take from each posterior distribution for
-            estimating the density.  Default = 1000
         params : str or list
             List of parameters to plot.  Default is to plot the posterior of
             all parameters in the model.
+        num_samples : int
+            Number of samples to take from each posterior distribution for
+            estimating the density.  Default = 1000
         style : str
             Which style of plot to show.  Available types are:
 
@@ -1097,15 +1076,14 @@ class BaseDistribution(BaseLayer):
         # Check model has been fit
         self._ensure_is_fit()
 
-        # Check inputs
-        if type(num_samples) is not int or num_samples < 1:
-            raise TypeError('num_samples must be an int greater than 0')
-        if params is not None and not isinstance(params, (list, str)):
-            raise TypeError('params must be None or a list of str')
-        if type(params) is list:
-            for param in params:
-                if type(param) is not str:
-                    raise TypeError('params must be None or a list of str')
+        # Check parameter list
+        param_dict = self._validate_params(params)
+
+        # Check other inputs
+        if not isinstance(num_samples, int):
+            raise TypeError('num_samples must be an int')
+        if num_samples < 1:
+            raise ValueError('num_samples must be greater than 0')
         if type(style) is not str or style not in ['fill', 'line', 'hist']:
             raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
         if type(cols) is not int:
@@ -1117,28 +1095,9 @@ class BaseDistribution(BaseLayer):
         if type(alpha) is not float or alpha<0.0 or alpha>1.0:
             raise TypeError('alpha must be a float between 0 and 1')
 
-        # Get all params if not specified
-        if params is None:
-            params = [param.name for param in self._parameters]
-
-        # Make list if string was passed
-        if type(params) is str:
-            params = [params]
-
-        # Check requested parameters are in the model
-        for param in params:
-            if param not in [p.name for p in self._parameters]:
-                raise ValueError('Parameter \''+param+'\' not in this model')
-
-        # Make dict of params to get
-        param_dict = dict()
-        for param in self._parameters:
-            if param.name in params:
-                param_dict[param.name] = param
-
         # Plot each parameter's posterior distributions in separate subplot
-        rows = np.ceil(len(params)/cols)
-        for ix, param in enumerate(params):
+        rows = np.ceil(len(param_dict)/cols)
+        for ix, param in enumerate(param_dict):
             plt.subplot(rows, cols, ix+1)
             param_dict[param].plot_posterior(num_samples=num_samples, 
                                              style=style, bins=bins, ci=ci,
@@ -1175,41 +1134,26 @@ class BaseDistribution(BaseLayer):
         # Check model has been fit
         self._ensure_is_fit()
 
-        # Check types
-        if params is not None and not isinstance(params, (str, list)):
-            raise TypeError('params must be a str or list of str')
-        if isinstance(params, list):
-            if not all([isinstance(p, str) for p in params]):
-                raise TypeError('params must be a str or list of str')
+        # Check parameter list
+        param_dict = self._validate_params(params)
+
+        # Check other inputs
         if not isinstance(num_samples, int):
             raise TypeError('num_samples must be an int')
-
-        # Get all params if not specified
-        if params is None:
-            params = [param.name for param in self._parameters]
-
-        # Make list if string was passed
-        if isinstance(params, str):
-            params = [params]
-
-        # Check requested parameters are in the model
-        for param in params:
-            if param not in [p.name for p in self._parameters]:
-                raise ValueError('Parameter \''+param+'\' not in this model')
+        if num_samples < 1:
+            raise ValueError('num_samples must be greater than 0')
 
         # Get the prior distribution samples
         priors = dict()
-        for param in self._parameters:
-            if param.name in params:
-                priors[param.name] = \
-                    param.sample_prior(num_samples=num_samples)
+        for name, param in param_dict.items():
+            priors[name] = param.sample_prior(num_samples=num_samples)
 
         return priors
 
 
     def plot_prior(self,
-                   num_samples=10000,
                    params=None,
+                   num_samples=10000,
                    style='fill',
                    cols=1,
                    bins=20,
@@ -1228,12 +1172,12 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        num_samples : int
-            Number of samples to take from each prior distribution.
-            Default = 10000
         params : |None| or str or list of str
             List of parameters to plot.  Default is to plot the prior of
             all parameters in the model.
+        num_samples : int
+            Number of samples to take from each prior distribution.
+            Default = 10000
         style : str
             Which style of plot to show.  Available types are:
 
@@ -1262,15 +1206,14 @@ class BaseDistribution(BaseLayer):
         # Check model has been fit
         self._ensure_is_fit()
 
-        # Check inputs
-        if type(num_samples) is not int or num_samples < 1:
-            raise TypeError('num_samples must be an int greater than 0')
-        if params is not None and not isinstance(params, (list, str)):
-            raise TypeError('params must be None or a list of str')
-        if type(params) is list:
-            for param in params:
-                if type(param) is not str:
-                    raise TypeError('params must be None or a list of str')
+        # Check parameter list
+        param_dict = self._validate_params(params)
+
+        # Check other inputs
+        if not isinstance(num_samples, int):
+            raise TypeError('num_samples must be an int')
+        if num_samples < 1:
+            raise ValueError('num_samples must be greater than 0')
         if type(style) is not str or style not in ['fill', 'line', 'hist']:
             raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
         if type(cols) is not int:
@@ -1282,28 +1225,9 @@ class BaseDistribution(BaseLayer):
         if type(alpha) is not float or alpha<0.0 or alpha>1.0:
             raise TypeError('alpha must be a float between 0 and 1')
 
-        # Get all params if not specified
-        if params is None:
-            params = [param.name for param in self._parameters]
-
-        # Make list if string was passed
-        if type(params) is str:
-            params = [params]
-
-        # Check requested parameters are in the model
-        for param in params:
-            if param not in [p.name for p in self._parameters]:
-                raise ValueError('Parameter \''+param+'\' not in this model')
-
-        # Make dict of params to get
-        param_dict = dict()
-        for param in self._parameters:
-            if param.name in params:
-                param_dict[param.name] = param
-
         # Plot each parameter's prior distribution in separate subplot
-        rows = np.ceil(len(params)/cols)
-        for ix, param in enumerate(params):
+        rows = np.ceil(len(param_dict)/cols)
+        for ix, param in enumerate(param_dict):
             plt.subplot(rows, cols, ix+1)
             param_dict[param].plot_prior(num_samples=num_samples, style=style, 
                                          bins=bins, ci=ci, color=color)
@@ -1312,10 +1236,94 @@ class BaseDistribution(BaseLayer):
     def plot_posterior_over_training(self, 
                                      params=None,
                                      cols=1,
-                                     prob=True,
+                                     ci=[0.1, 0.5, 0.95],
                                      marker='-',
-                                     y_res=100):
+                                     alpha=0.3,
+                                     color=None):
         """Plot the variational posteriors over the course of training.
+
+        Plots confidence intervals of the variational posterior distributions
+        across training epochs.
+
+        TODO: more docs... 
+
+        Parameters
+        ----------
+        params : |None| or str or list of str
+            List of parameters to plot.  Default is to plot the posteriors of
+            all parameters in the model over the course of training.
+        cols : int
+            Divide the subplots into a grid with this many columns.
+        ci : list of float between 0 and 1
+            Confidence intervals to plot.  Default = ``[0.1, 0.5, 0.95]``.
+        marker : str or matplotlib linespec
+            Line marker to use.
+        alpha : float between 0 and 1
+            Transparency of density polygons
+        color : matplotlib color code or list of them
+            Color(s) to use to plot the distribution.
+            See https://matplotlib.org/tutorials/colors/colors.html
+            Default = use the default matplotlib color cycle
+        """
+
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Check parameter list
+        param_dict = self._validate_params(params, rec=True)
+
+        # Check other inputs
+        if not isinstance(cols, int):
+            raise TypeError('cols must be an integer')
+        if cols < 1:
+            raise ValueError('cols must be greater than 0')
+        if not isinstance(ci, (float, list)):
+            raise TypeError('ci must be a float or a list of floats')
+        if isinstance(ci, list):
+            for c in ci:
+                if not isinstance(c, float):
+                    raise TypeError('ci must be a float or a list of floats')
+
+        # X values
+        x_vals = self._records['x_epochs']
+        x_res = len(x_vals)
+
+        # Compute confidence interval percentiles
+        ci = np.array(ci)
+        ci_lb = 0.5 - ci/2.0
+        ci_ub = 0.5 + ci/2.0
+
+        # Plot confidence intervals over training
+        ix = 0
+        rows = np.ceil(len(param_dict)/cols)
+        for name, param in param_dict.items():
+
+            # Create a TFP distribution of the posterior across training
+            t_post = param.posterior_fn(**self._records[name])
+            t_post.build(None, None)
+            t_post = t_post.built_obj
+
+            # Compute the quantiles
+            tfo = param.transform
+            lb = np.empty([len(ci), x_res]+param.shape)
+            ub = np.empty([len(ci), x_res]+param.shape)
+            with tf.Session() as sess:
+                for iy in range(len(ci)):
+                    lb[iy,...] = sess.run(tfo(t_post.quantile(ci_lb[iy])))
+                    ub[iy,...] = sess.run(tfo(t_post.quantile(ci_ub[iy])))
+
+            # Plot the quantiles
+            plt.subplot(rows, cols, ix+1)
+            fill_between(x_vals, lb, ub, xlabel='Epoch', ylabel=name, 
+                         alpha=alpha, color=color)
+            ix += 1
+
+
+    def plot_posterior_args_over_training(self, 
+                                          params=None,
+                                          cols=1,
+                                          marker='-'):
+        """Plot the variational posterior's parameters across training.
 
         TODO: more docs...
 
@@ -1326,28 +1334,49 @@ class BaseDistribution(BaseLayer):
             all parameters in the model over the course of training.
         cols : int
             Divide the subplots into a grid with this many columns.
-        prob : bool
-            Whether to plot the probability distribution for each variational
-            posterior (if ``prob=True``), or to plot the value of each 
-            parameter of each variational distribution (if ``prob=False``).
         marker : str or matplotlib linespec
             Line marker to use.
-        y_res : int
-            Y-axis resolution for density plot when ``prob=True``.
         """
 
         # Check model has been fit
         self._ensure_is_fit()
 
-        # Check inputs
+        # Check parameter list
+        param_dict = self._validate_params(params, rec=True)
+
+        # Check other inputs
+        if not isinstance(cols, int):
+            raise TypeError('cols must be an integer')
+        if cols < 1:
+            raise ValueError('cols must be greater than 0')
+
+        # Count how many posterior arguments there are
+        n_args = 0
+        for _, param in param_dict.items():
+            n_args += len(param._params)
+
+        # Plot each variational posterior's argument in separate subplot
+        rows = np.ceil(n_args/cols)
+        ix = 0
+        x_vals = self._records['x_epochs']
+        for name, param in param_dict.items():
+            for arg in param._params:
+                plt.subplot(rows, cols, ix+1)
+                plot_line(x_vals, self._records[name][arg], fmt=marker,
+                          xlabel='Epoch', ylabel=name+'\n'+arg)
+                ix += 1
+
+
+    def _validate_params(self, params, rec=False):
+        """Check params list is valid."""
+
+        # Check types
         if params is not None and not isinstance(params, (list, str)):
             raise TypeError('params must be None or a list of str')
         if type(params) is list:
             for param in params:
                 if not isinstance(param, str):
                     raise TypeError('params must be None or a list of str')
-        if type(cols) is not int:
-            raise TypeError('cols must be an integer')
 
         # Get all params if not specified
         if params is None:
@@ -1363,10 +1392,12 @@ class BaseDistribution(BaseLayer):
                 raise ValueError('Parameter \''+param+'\' not in this model')
 
         # Check requested parameters were recorded
-        for param in params:
-            if param not in self._records:
-                raise ValueError('Parameter \''+param+'\' was not recorded.' +
-                                 ' To record, set the record argument to fit.')
+        if rec:
+            for param in params:
+                if param not in self._records:
+                    raise ValueError('Parameter \''+param+'\' was not ' +
+                                     'recorded. To record, set the record ' +
+                                     'argument when calling fit().')
 
         # Make dict of params to get
         param_dict = dict()
@@ -1374,59 +1405,8 @@ class BaseDistribution(BaseLayer):
             if param.name in params:
                 param_dict[param.name] = param
 
-        # Plot the probability distributions
-        if prob:
+        return param_dict
 
-            # X values
-            x_vals = self._records['x_epochs']
-            x_res = len(x_vals)
-
-            # Y values
-            # TODO: use tfd.dist.quantile @ 1st record and last
-            # to get bounds
-            # yvals = np.linspace(lb, ub, yres)
-            # for now just use set limits
-            y_vals = np.linspace(-5, 5, y_res)
-
-            # Plot densities over training
-            rows = np.ceil(len(params)/cols)
-            ix = 0
-            for name, param in param_dict.items():
-
-                # Compute the densities
-                t_post = param.posterior_fn(**self._records[name])
-                t_post.build(None, None)
-                t_post = t_post.built_obj
-                probs = np.empty([y_res,x_res]+param.shape)
-                with tf.Session() as sess:
-                    for iy in range(y_res):
-                        probs[iy,...] = sess.run(t_post.prob(y_vals[iy]))
-
-                # Plot the densities
-                plt.subplot(rows, cols, ix+1)
-                plot_dist_time(x_vals, y_vals, probs,
-                               xlabel='Epoch', ylabel=name)
-                ix += 1
-
-        # Just plot the parameter values of the variational distributions
-        else:
-
-            # Count how many posterior arguments there are
-            n_args = 0
-            for param in params:
-                n_args += len(param_dict[param]._params)
-
-            # Plot each variational posterior's argument in separate subplot
-            rows = np.ceil(n_args/cols)
-            ix = 0
-            x_vals = self._records['x_epochs']
-            for name, param in param_dict.items():
-                for arg in param._params:
-                    plt.subplot(rows, cols, ix+1)
-                    plot_line(x_vals, self._records[name][arg], fmt=marker,
-                              xlabel='Epoch', ylabel=name+'\n'+arg)
-                    ix += 1
-                    
 
     def plot_by(self, x, data, bins=100, what='mean'):
         """Compute and plot mean of data as a function of x.

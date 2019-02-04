@@ -349,8 +349,8 @@ def test_BaseDistribution_fit_record():
     assert model._records['record_bias']['scale'].shape[1] == 1
 
 
-def test_BaseDistribution_plot_posterior_over_training():
-    """Tests core.BaseDistribution.plot_posterior_over_training"""
+def test_BaseDistribution_plot_posterior_args_over_training():
+    """Tests core.BaseDistribution.plot_posterior_args_over_training"""
 
     # Parameters + input data is vector of length 3
     Nd = 3
@@ -372,28 +372,28 @@ def test_BaseDistribution_plot_posterior_over_training():
 
     # All params, once per epoch
     model.fit(x, y, epochs=EPOCHS, record='all', record_freq='epoch')
-    model.plot_posterior_over_training(prob=False)
+    model.plot_posterior_args_over_training()
     if PLOT:
         plt.show()
 
     # All params, once per batch
     tf.reset_default_graph()
     model.fit(x, y, epochs=20, record='all', record_freq='batch')
-    model.plot_posterior_over_training(prob=False, marker='.')
+    model.plot_posterior_args_over_training(marker='.')
     if PLOT:
         plt.show()
 
     # Just weight params
-    model.plot_posterior_over_training('ppot_weight', prob=False)
+    model.plot_posterior_args_over_training('ppot_weight')
     if PLOT:
         plt.show()
 
     # TODO: test w/ 2d params
 
 
-def test_BaseDistribution_plot_posterior_over_training_prob_scalar():
+def test_BaseDistribution_plot_posterior_over_training_scalar():
     """Tests core.BaseDistribution.plot_posterior_over_training 
-    w/ prob=true and scalar params
+    w/ scalar params
     """
 
     # Model = linear regression assuming error = 1
@@ -419,7 +419,7 @@ def test_BaseDistribution_plot_posterior_over_training_prob_scalar():
         plt.show()
 
 
-def test_BaseDistribution_plot_posterior_over_training_prob_vector():
+def test_BaseDistribution_plot_posterior_over_training_vector():
     """Tests core.BaseDistribution.plot_posterior_over_training 
     w/ prob=true and vector params
     """
@@ -462,6 +462,6 @@ if __name__ == "__main__":
     EPOCHS = 300
     NUM_SAMPLES = 1000
     import matplotlib.pyplot as plt
-    test_BaseDistribution_plot_posterior_over_training()
-    test_BaseDistribution_plot_posterior_over_training_prob_scalar()
-    test_BaseDistribution_plot_posterior_over_training_prob_vector()
+    test_BaseDistribution_plot_posterior_args_over_training()
+    test_BaseDistribution_plot_posterior_over_training_scalar()
+    test_BaseDistribution_plot_posterior_over_training_vector()

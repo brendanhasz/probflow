@@ -103,8 +103,8 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
     # Compute confidence intervals
     if ci:
         cis = np.empty((Nd, 2))
-        ci0 = 100 * (0.5 - ci/2.0);
-        ci1 = 100 * (0.5 + ci/2.0);
+        ci0 = 100 * (0.5 - ci/2.0)
+        ci1 = 100 * (0.5 + ci/2.0)
         for i in range(Nd):
             cis[i,:] = np.percentile(data[:,i], [ci0, ci1])
 
@@ -114,7 +114,7 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
         lab = get_ix_label(i, dims)
         if style == 'line':
             px, py = approx_kde(data[:,i], bw=bw)
-            p1 = plt.plot(px, py, color=next_color, label=lab)
+            plt.plot(px, py, color=next_color, label=lab)
             if ci:
                 yci = np.interp(cis[i,:], px, py)
                 plt.plot([cis[i,0], cis[i,0]], [0, yci[0]], 
@@ -123,7 +123,7 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
                          ':', color=next_color)
         elif style == 'fill':
             px, py = approx_kde(data[:,i], bw=bw)
-            p1 = plt.fill(px, py, facecolor=next_color, alpha=alpha, label=lab)
+            plt.fill(px, py, facecolor=next_color, alpha=alpha, label=lab)
             if ci:
                 k = (px>cis[i,0]) & (px<cis[i,1])
                 kx = px[k]
@@ -148,7 +148,6 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
     plt.gca().spines['left'].set_visible(False)
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
-
 
 
 def plot_line(xdata, ydata, xlabel='', ylabel='', fmt='-', color=None):
@@ -191,65 +190,68 @@ def plot_line(xdata, ydata, xlabel='', ylabel='', fmt='-', color=None):
     for i in range(Nd):
         next_color = get_next_color(color, i)
         lab = get_ix_label(i, dims)
-        p1 = plt.plot(xdata, ydata[:,i], fmt, color=next_color, label=lab)
+        plt.plot(xdata, ydata[:,i], fmt, color=next_color, label=lab)
 
     # Only show the legend if there are >1 sample set
     if Nd > 1:
         plt.legend()
 
-    # Set x axis label, and no y axis or bounding box needed
+    # Set axis labels
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
 
 
-def plot_dist_time(xdata, ydata, zdata, xlabel='', ylabel='', color=None):
-    """Plot a distribution over time.
+def fill_between(xdata, lb, ub, xlabel='', ylabel='', alpha=0.3, color=None):
+    """Fill between lines.
 
     Parameters
     ----------
     xdata : |ndarray|
-        X values of values to plot.
+        X values of points to plot.  Should be vector of length ``Nsamples``.
     ydata : |ndarray|
-        Y values of values to plot.
-    zdata : |ndarray|
-        Density values of data to plot.  Should be of size 
-        ``(len(ydata),len(xdata)...)``.
+        Y vaules of points to plot.  Should be of size ``(Nsamples,...)``.
     xlabel : str
         Label for the x axis. Default is no x axis label.
     ylabel : str
         Label for the y axis.  Default is no y axis label.
+    fmt : str or matplotlib linespec
+        Line marker to use.  Default = ``'-'`` (a normal line).
     color : matplotlib color code or list of them
         Color(s) to use to plot the distribution.
         See https://matplotlib.org/tutorials/colors/colors.html
         Default = use the default matplotlib color cycle
     """
 
-    # Check sizes are correct
-    if len(ydata) != zdata.shape[0]:
-        raise ValueError('ydata must be of length zdata.shape[0]')
-    if len(xdata) != zdata.shape[1]:
-        raise ValueError('xdata must be of length zdata.shape[1]')
+    # Check shapes
+    if not np.all(lb.shape == ub.shape):
+        raise ValueError('lb and ub must have same shape')
+    if len(xdata) != lb.shape[1]:
+        raise ValueError('xdata does not match shape of lb and ub')
 
-    # Number of datasets
-    dims = zdata.shape[2:]
+    # If 1d make 2d
+    if lb.ndim == 1:
+        lb = np.expand_dims(lb, 1)
+        ub = np.expand_dims(ub, 1)
+
+    # Number of fills and datasets
+    dims = lb.shape[2:]
     Nd = np.prod(dims)
+    Np = lb.shape[0]
 
     # Flatten if >1D
-    zdata = np.reshape(zdata, (zdata.shape[0], zdata.shape[1], Nd), order='F')
+    lb = np.reshape(lb, (lb.shape[0], lb.shape[1], Nd), order='F')
+    ub = np.reshape(ub, (ub.shape[0], ub.shape[1], Nd), order='F')
 
     # Plot the data
-    extent = [xdata[0], xdata[-1], ydata[0], ydata[-1]]
-    for i in range(Nd):
-        next_color = get_next_color(color, i)
-        lab = get_ix_label(i, dims)
-        p1 = plt.plot(0, 0, color=next_color, label=lab)
-        t_rgba = np.array(to_rgba(next_color))
-        cdata = np.ones((zdata.shape[0], zdata.shape[1], 1))*t_rgba
-        cdata[:,:,3] = zdata[:,:,i]/np.max(zdata[:,:,i])
-        plt.imshow(cdata, aspect='auto', interpolation='bilinear', 
-                   origin='lower', extent=extent)
+    for iD in range(Nd): #for each dataset,
+        next_color = get_next_color(color, iD)
+        lab = get_ix_label(iD, dims)
+        for iP in range(Np): #for each polygon,
+            plt.fill_between(xdata, lb[iP,:,iD], ub[iP,:,iD],
+                             alpha=alpha, facecolor=next_color, 
+                             label=lab if iP==0 else None)
 
-    # Only show the legend if there are >1 sample set
+    # Only show the legend if there are >1 datasets
     if Nd > 1:
         plt.legend()
 
