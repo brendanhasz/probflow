@@ -7,8 +7,6 @@ from probflow.utils.plotting import plot_dist
 from probflow.utils.plotting import get_ix_label
 from probflow.utils.plotting import fill_between
 
-PLOT = False
-
 
 def test_get_ix_label():
     """Tests utils.plotting.get_ix_label"""
@@ -22,15 +20,15 @@ def test_get_ix_label():
     assert get_ix_label(29, [3, 5, 2]) == '[2, 4, 1]'
 
 
-def test_plot_dist():
+def test_plot_dist(plot):
     """Tests utils.plotting.plot_dist"""
     data = np.random.randn(100)
     plot_dist(data, xlabel='the x label')
-    if PLOT:
+    if plot:
         plt.show()
 
 
-def test_fill_between_scalar():
+def test_fill_between_scalar(plot):
     """Tests utils.plotting.fill_between"""
 
     xdata = np.linspace(0, 1, 10)
@@ -44,11 +42,11 @@ def test_fill_between_scalar():
     ub[2,:,0] = np.linspace(1, 0, 10)
 
     fill_between(xdata, lb, ub)
-    if PLOT:
+    if plot:
         plt.show()
 
 
-def test_fill_between_vector():
+def test_fill_between_vector(plot):
     """Tests utils.plotting.fill_between w/ multiple datasets"""
 
     xdata = np.linspace(0, 1, 10)
@@ -70,11 +68,11 @@ def test_fill_between_vector():
     ub[1,:,2] = np.linspace(1, 0, 10) + 5
 
     fill_between(xdata, lb, ub)
-    if PLOT:
+    if plot:
         plt.show()
 
 
-def test_fill_between_matrix():
+def test_fill_between_matrix(plot):
     """Tests utils.plotting.fill_between w/ 2d datasets"""
 
     xdata = np.linspace(0, 1, 10)
@@ -110,15 +108,5 @@ def test_fill_between_matrix():
     ub[0,:,2, 1] = np.linspace(2, 0, 10) + 5 + 10
     ub[1,:,2, 1] = np.linspace(1, 0, 10) + 5 + 10
     fill_between(xdata, lb, ub)
-    if PLOT:
+    if plot:
         plt.show()
-
-
-if __name__ == "__main__":
-    PLOT = True
-    test_get_ix_label()
-    test_plot_dist()
-    test_fill_between_scalar()
-    test_fill_between_vector()
-    test_fill_between_matrix()
-    

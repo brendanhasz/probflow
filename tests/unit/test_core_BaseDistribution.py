@@ -10,37 +10,21 @@ tfd = tfp.distributions
 
 from probflow import *
 
-PLOT = False
 EPOCHS = 2
 NUM_SAMPLES = 10
 
 
-def test_BaseDistribution_fit():
+def test_ensure_is_fit(LR1_novar_unfit, LR1_novar):
+    """Tests BaseDistribution._ensure_is_fit"""
+    with pytest.raises(RuntimeError):
+        LR1_novar_unfit._ensure_is_fit()
+    LR1_novar._ensure_is_fit()
+
+
+def test_BaseDistribution_fit(LR1_novar):
     """Tests core.BaseDistribution.fit"""
 
-    # Model = linear regression assuming error = 1
-    weight = Parameter(estimator=None)
-    bias = Parameter(estimator=None)
-    data = Input()
-    model = Normal(data*weight + bias, 1.0)
-
-    # Generate data
-    N = 10
-    true_weight = 0.5
-    true_bias = -1
-    noise = np.random.randn(N)
-    x = np.linspace(-3, 3, N)
-    y = true_weight*x + true_bias + noise
-
-    # Should return a RuntimeError
-    with pytest.raises(RuntimeError):
-        model._ensure_is_fit()
-
-    # Fit the model
-    model.fit(x, y, epochs=1)
-
-    # Now should pass
-    model._ensure_is_fit()
+    model = LR1_novar #fixture from conftest.py
 
     # Check model contains data
     assert isinstance(model._train, dict)
@@ -58,44 +42,26 @@ def test_BaseDistribution_fit():
     assert model.is_fit
 
 
-def test_BaseDistribution_predictive_distribution():
+def test_BaseDistribution_predictive_distribution(LR3_novar, N_data):
     """Tests core.BaseDistribution.predictive_distribution"""
 
-    # Parameters + input data is vector of length 3
-    Nd = 3
-
-    # Model = linear regression assuming error = 1
-    weight = Parameter(shape=Nd, estimator=None)
-    bias = Parameter(estimator=None)
-    data = Input()
-    model = Normal(Dot(data, weight) + bias, 1.0)
-
-    # Generate data
-    N = 10
-    true_weight = np.array([0.5, -0.25, 0.0])
-    true_bias = -1.0
-    noise = np.random.randn(N, 1)
-    x = np.random.randn(N, Nd)
-    y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
-
-    # Fit the model
-    model.fit(x, y, epochs=1)
+    model = LR3_novar #fixture from conftest.py
 
     # Check predictive_distribution with no input
     prd = model.predictive_distribution()
     assert isinstance(prd, np.ndarray)
     assert prd.ndim == 3
     assert prd.shape[0] == 1000
-    assert prd.shape[1] == 10
+    assert prd.shape[1] == N_data
     assert prd.shape[2] == 1
 
     # Check predictive_distribution with validation input
-    x_val = np.random.rand(2, Nd)
+    x_val = np.random.rand(4, 3)
     prd = model.predictive_distribution(x_val)
     assert isinstance(prd, np.ndarray)
     assert prd.ndim == 3
     assert prd.shape[0] == 1000
-    assert prd.shape[1] == 2
+    assert prd.shape[1] == 4
     assert prd.shape[2] == 1
 
     # Check predictive_distribution w/ val input and num_samples
@@ -103,136 +69,80 @@ def test_BaseDistribution_predictive_distribution():
     assert isinstance(prd, np.ndarray)
     assert prd.ndim == 3
     assert prd.shape[0] == 20
-    assert prd.shape[1] == 2
+    assert prd.shape[1] == 4
     assert prd.shape[2] == 1
 
 
-def test_BaseDistribution_plot_predictive_distribution():
+def test_BaseDistribution_plot_predictive_distribution(LR3_novar, plot):
     """Tests core.BaseDistribution.plot_predictive_distribution"""
 
-    # Parameters + input data is vector of length 3
-    Nd = 3
-
-    # Model = linear regression assuming error = 1
-    weight = Parameter(shape=Nd, estimator=None)
-    bias = Parameter(estimator=None)
-    data = Input()
-    model = Normal(Dot(data, weight) + bias, 1.0)
-
-    # Generate data
-    N = 10
-    true_weight = np.array([0.5, -0.25, 0.0])
-    true_bias = -1.0
-    noise = np.random.randn(N, 1)
-    x = np.random.randn(N, Nd)
-    y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
-
-    # Fit the model
-    model.fit(x, y, epochs=1)
+    model = LR3_novar #fixture from conftest.py
+    x_val = np.random.rand(10, 3)
 
     # Check predictive_distribution with no input
-    prd = model.plot_predictive_distribution(style='line')
-    if PLOT:
+    prd = model.plot_predictive_distribution(x_val, style='line')
+    if plot:
         plt.suptitle('should show 10 line dists')
         plt.show()
 
     # Check predictive_distribution with no input
-    prd = model.plot_predictive_distribution(individually=True, cols=2)
-    if PLOT:
+    prd = model.plot_predictive_distribution(x_val, individually=True, cols=2)
+    if plot:
         plt.suptitle('should show 5x2 grid of 10 fill dists')
         plt.tight_layout()
         plt.show()
 
     # Check predictive_distribution with validation input
-    x_val = np.random.rand(1, Nd)
+    x_val = np.random.rand(1, 3)
     prd = model.plot_predictive_distribution(x_val)
-    if PLOT:
+    if plot:
         plt.suptitle('should show a single fill dist')
         plt.show()
 
     # Check predictive_distribution with conf intervals
     prd = model.plot_predictive_distribution(x_val, ci=0.95)
-    if PLOT:
+    if plot:
         plt.suptitle('should show a single fill dist w/ 95prc ci')
         plt.show()
 
-    # TODO: cols + 
-    # Check predictive_distribution w/ val input and num_samples
-    #prd = model.predictive_distribution(x_val, num_samples=20)
-    #if PLOT:
-    #    plt.show()
 
-
-
-def test_BaseDistribution_sample_posterior_scalar():
+def test_BaseDistribution_sample_posterior_scalar(LR1_novar):
     """Tests core.BaseDistribution.sample_posterior w/ scalar params"""
 
-    # Model = linear regression assuming error = 1
-    weight = Parameter(name='weight', estimator=None)
-    bias = Parameter(name='bias', estimator=None)
-    data = Input()
-    model = Normal(data*weight + bias, 1.0)
-
-    # Generate data
-    N = 10
-    true_weight = 0.5
-    true_bias = -1
-    noise = np.random.randn(N)
-    x = np.linspace(-3, 3, N)
-    y = true_weight*x + true_bias + noise
-
-    # Fit the model
-    model.fit(x, y, epochs=1)
+    model = LR1_novar #fixture from conftest.py
 
     # Check output of sample_posterior is correct
     samples = model.sample_posterior(num_samples=3)
     assert isinstance(samples, dict)
     assert len(samples) == 2
-    assert 'weight' in samples and 'bias' in samples
-    assert type(samples['weight']) is np.ndarray
-    assert samples['weight'].ndim == 2
-    assert samples['weight'].shape[0] == 3
-    assert samples['weight'].shape[1] == 1
-    assert type(samples['bias']) is np.ndarray
-    assert samples['bias'].ndim == 2
-    assert samples['bias'].shape[0] == 3
-    assert samples['bias'].shape[1] == 1
+    assert 'LR1_novar_weight' in samples
+    assert 'LR1_novar_bias' in samples
+    assert type(samples['LR1_novar_weight']) is np.ndarray
+    assert samples['LR1_novar_weight'].ndim == 2
+    assert samples['LR1_novar_weight'].shape[0] == 3
+    assert samples['LR1_novar_weight'].shape[1] == 1
+    assert type(samples['LR1_novar_bias']) is np.ndarray
+    assert samples['LR1_novar_bias'].ndim == 2
+    assert samples['LR1_novar_bias'].shape[0] == 3
+    assert samples['LR1_novar_bias'].shape[1] == 1
 
 
-def test_BaseDistribution_sample_posterior_vector():
+def test_BaseDistribution_sample_posterior_vector(LR3_novar):
     """Tests core.BaseDistribution.sample_posterior w/ vector params"""
 
-    # Parameters + input data is vector of length 3
-    Nd = 3
-
-    # Model = linear regression assuming error = 1
-    weight = Parameter(name='vector_weight', shape=Nd, estimator=None)
-    bias = Parameter(name='nonvec_bias', estimator=None)
-    data = Input()
-    model = Normal(Dot(data, weight) + bias, 1.0)
-
-    # Generate data
-    N = 10
-    true_weight = np.array([0.5, -0.25, 0.0])
-    true_bias = -1.0
-    noise = np.random.randn(N, 1)
-    x = np.random.randn(N, Nd)
-    y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
-
-    # Fit the model
-    model.fit(x, y, epochs=1)
+    model = LR3_novar #fixture from conftest.py
 
     # Check output of sample_posterior is correct
-    num_samples = 3
+    num_samples = 4
     samples = model.sample_posterior(num_samples=num_samples)
     assert isinstance(samples, dict)
     assert len(samples) == 2
-    assert samples['vector_weight'].ndim == 2
-    assert samples['vector_weight'].shape[0] == num_samples
-    assert samples['vector_weight'].shape[1] == Nd
-    assert samples['nonvec_bias'].ndim == 2
-    assert samples['nonvec_bias'].shape[0] == num_samples
-    assert samples['nonvec_bias'].shape[1] == 1
+    assert samples['LR3_novar_weight'].ndim == 2
+    assert samples['LR3_novar_weight'].shape[0] == num_samples
+    assert samples['LR3_novar_weight'].shape[1] == 3
+    assert samples['LR3_novar_bias'].ndim == 2
+    assert samples['LR3_novar_bias'].shape[0] == num_samples
+    assert samples['LR3_novar_bias'].shape[1] == 1
 
 
 def test_BaseDistribution_sample_posterior_vector_pandas():
@@ -455,7 +365,7 @@ def test_BaseDistribution_fit_record():
     assert model._records['record_bias']['scale'].shape[1] == 1
 
 
-def test_BaseDistribution_plot_posterior_args_over_training():
+def test_BaseDistribution_plot_posterior_args_over_training(LR3_var, plot):
     """Tests core.BaseDistribution.plot_posterior_args_over_training"""
 
     # Parameters + input data is vector of length 3
@@ -479,25 +389,25 @@ def test_BaseDistribution_plot_posterior_args_over_training():
     # All params, once per epoch
     model.fit(x, y, epochs=EPOCHS, record='all', record_freq='epoch')
     model.plot_posterior_args_over_training()
-    if PLOT:
+    if plot:
         plt.show()
 
     # All params, once per batch
     tf.reset_default_graph()
     model.fit(x, y, epochs=20, record='all', record_freq='batch')
     model.plot_posterior_args_over_training(marker='.')
-    if PLOT:
+    if plot:
         plt.show()
 
     # Just weight params
     model.plot_posterior_args_over_training('ppot_weight')
-    if PLOT:
+    if plot:
         plt.show()
 
     # TODO: test w/ 2d params
 
 
-def test_BaseDistribution_plot_posterior_over_training_scalar():
+def test_BaseDistribution_plot_posterior_over_training_scalar(plot):
     """Tests core.BaseDistribution.plot_posterior_over_training 
     w/ scalar params
     """
@@ -521,11 +431,11 @@ def test_BaseDistribution_plot_posterior_over_training_scalar():
 
     # Plot
     model.plot_posterior_over_training()
-    if PLOT:
+    if plot:
         plt.show()
 
 
-def test_BaseDistribution_plot_posterior_over_training_vector():
+def test_BaseDistribution_plot_posterior_over_training_vector(plot):
     """Tests core.BaseDistribution.plot_posterior_over_training 
     w/ prob=true and vector params
     """
@@ -552,7 +462,7 @@ def test_BaseDistribution_plot_posterior_over_training_vector():
 
     # Plot
     model.plot_posterior_over_training()
-    if PLOT:
+    if plot:
         plt.show()
 
 
@@ -561,14 +471,3 @@ def test_BaseDistribution_plot_posterior_over_training_vector():
 
 
 # TODO: test predictive_distribution, predict, metrics, etc
-
-
-if __name__ == "__main__":
-    PLOT = True
-    EPOCHS = 300
-    NUM_SAMPLES = 1000
-    import matplotlib.pyplot as plt
-    test_BaseDistribution_plot_predictive_distribution()
-    test_BaseDistribution_plot_posterior_args_over_training()
-    test_BaseDistribution_plot_posterior_over_training_scalar()
-    test_BaseDistribution_plot_posterior_over_training_vector()

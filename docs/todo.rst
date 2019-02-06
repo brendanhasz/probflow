@@ -7,7 +7,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* BaseDistribution.plot_predictive_distribution() and tests
 * Convert tests to setup() format (instead of fitting a new model each test)
 * Add support for Input w/ cols= a string (and input=pandas df)
 * Finish BaseDistribution.fit()
@@ -54,6 +53,7 @@ Backlog (long term):
 * `Support for random effects and multilevel models`_
 * `Mixture distribution`_
 * `Optimize bounding`_
+* Dev guide? (in add'n to user guide) Mention testing (eg --plot arg), inheritance structure etc
 * Conv layers
 * Pooling layers
 * Ready-made Conv models
