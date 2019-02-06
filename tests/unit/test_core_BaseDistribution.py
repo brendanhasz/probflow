@@ -58,6 +58,112 @@ def test_BaseDistribution_fit():
     assert model.is_fit
 
 
+def test_BaseDistribution_predictive_distribution():
+    """Tests core.BaseDistribution.predictive_distribution"""
+
+    # Parameters + input data is vector of length 3
+    Nd = 3
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(shape=Nd, estimator=None)
+    bias = Parameter(estimator=None)
+    data = Input()
+    model = Normal(Dot(data, weight) + bias, 1.0)
+
+    # Generate data
+    N = 10
+    true_weight = np.array([0.5, -0.25, 0.0])
+    true_bias = -1.0
+    noise = np.random.randn(N, 1)
+    x = np.random.randn(N, Nd)
+    y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
+
+    # Fit the model
+    model.fit(x, y, epochs=1)
+
+    # Check predictive_distribution with no input
+    prd = model.predictive_distribution()
+    assert isinstance(prd, np.ndarray)
+    assert prd.ndim == 3
+    assert prd.shape[0] == 1000
+    assert prd.shape[1] == 10
+    assert prd.shape[2] == 1
+
+    # Check predictive_distribution with validation input
+    x_val = np.random.rand(2, Nd)
+    prd = model.predictive_distribution(x_val)
+    assert isinstance(prd, np.ndarray)
+    assert prd.ndim == 3
+    assert prd.shape[0] == 1000
+    assert prd.shape[1] == 2
+    assert prd.shape[2] == 1
+
+    # Check predictive_distribution w/ val input and num_samples
+    prd = model.predictive_distribution(x_val, num_samples=20)
+    assert isinstance(prd, np.ndarray)
+    assert prd.ndim == 3
+    assert prd.shape[0] == 20
+    assert prd.shape[1] == 2
+    assert prd.shape[2] == 1
+
+
+def test_BaseDistribution_plot_predictive_distribution():
+    """Tests core.BaseDistribution.plot_predictive_distribution"""
+
+    # Parameters + input data is vector of length 3
+    Nd = 3
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(shape=Nd, estimator=None)
+    bias = Parameter(estimator=None)
+    data = Input()
+    model = Normal(Dot(data, weight) + bias, 1.0)
+
+    # Generate data
+    N = 10
+    true_weight = np.array([0.5, -0.25, 0.0])
+    true_bias = -1.0
+    noise = np.random.randn(N, 1)
+    x = np.random.randn(N, Nd)
+    y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
+
+    # Fit the model
+    model.fit(x, y, epochs=1)
+
+    # Check predictive_distribution with no input
+    prd = model.plot_predictive_distribution(style='line')
+    if PLOT:
+        plt.suptitle('should show 10 line dists')
+        plt.show()
+
+    # Check predictive_distribution with no input
+    prd = model.plot_predictive_distribution(individually=True, cols=2)
+    if PLOT:
+        plt.suptitle('should show 5x2 grid of 10 fill dists')
+        plt.tight_layout()
+        plt.show()
+
+    # Check predictive_distribution with validation input
+    x_val = np.random.rand(1, Nd)
+    prd = model.plot_predictive_distribution(x_val)
+    if PLOT:
+        plt.suptitle('should show a single fill dist')
+        plt.show()
+
+    # Check predictive_distribution with conf intervals
+    prd = model.plot_predictive_distribution(x_val, ci=0.95)
+    if PLOT:
+        plt.suptitle('should show a single fill dist w/ 95prc ci')
+        plt.show()
+
+    # TODO: cols + 
+    # Check predictive_distribution w/ val input and num_samples
+    #prd = model.predictive_distribution(x_val, num_samples=20)
+    #if PLOT:
+    #    plt.show()
+
+
+
 def test_BaseDistribution_sample_posterior_scalar():
     """Tests core.BaseDistribution.sample_posterior w/ scalar params"""
 
@@ -462,6 +568,7 @@ if __name__ == "__main__":
     EPOCHS = 300
     NUM_SAMPLES = 1000
     import matplotlib.pyplot as plt
+    test_BaseDistribution_plot_predictive_distribution()
     test_BaseDistribution_plot_posterior_args_over_training()
     test_BaseDistribution_plot_posterior_over_training_scalar()
     test_BaseDistribution_plot_posterior_over_training_vector()

@@ -8,6 +8,7 @@ Backlog (short term):
 ---------------------
 
 * BaseDistribution.plot_predictive_distribution() and tests
+* Convert tests to setup() format (instead of fitting a new model each test)
 * Add support for Input w/ cols= a string (and input=pandas df)
 * Finish BaseDistribution.fit()
 * `Better parameter initialization`_

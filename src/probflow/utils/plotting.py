@@ -137,6 +137,8 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
             if ci:
                 k = (data[:,i]>cis[i,0]) & (data[:,i]<cis[i,1])
                 plt.hist(data[k,i], alpha=alpha, bins=be, color=next_color)
+        else:
+            raise ValueError("style must be \'fill\', \'line\', or \'hist\'")
 
     # Only show the legend if there are >1 sample set
     if Nd > 1:

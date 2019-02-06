@@ -24,7 +24,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 from .utils.data import process_data, process_xy_data, test_train_split
-from .utils.plotting import plot_line, fill_between
+from .utils.plotting import plot_line, plot_dist, fill_between
 
 
 # Sentinel object for required arguments
@@ -775,9 +775,11 @@ class BaseDistribution(BaseLayer):
         num_samples : int
             Number of samples to draw from the model given ``x``.
 
-        Returns array of shape 
-        (x.shape[0],y.shape[1],...,y.shape[-1],num_samples)
-
+        Returns
+        -------
+        |ndarray|
+            Samples from the predictive distribution.  Size
+            (num_samples,x.shape[0],y.shape[0],...,y.shape[-1])        
         """        
 
         # Check model has been fit
@@ -808,7 +810,8 @@ class BaseDistribution(BaseLayer):
                                      ci=0.0,
                                      bw=0.075,
                                      color=None,
-                                     alpha=0.4):
+                                     alpha=0.4,
+                                     individually=False):
         """Plot samples from the model given x.
 
         TODO: Docs...
@@ -870,17 +873,19 @@ class BaseDistribution(BaseLayer):
         pred_dist = self.predictive_distribution(x=x, data=data, 
                                                  num_samples=num_samples)
 
-        # plot_dist takes (num_samples, Nd) but pred_dist is (Nd, num_samples)
-        pred_dist = np.swapaxes(pred_dist, 0, -1)
+        # Squeeze singleton dimension (assumes dep var is scalar)
+        pred_dist = pred_dist[...,0]
+        # TODO: ensure y is scalar
 
         # Plot the predictive distributions
-        N = pred_dist.shape[0]
+        N = pred_dist.shape[1]
         if individually:
             rows = np.ceil(N/cols)
             for i in range(N):
-                plt.subplot(rows, cols, ix+1)
-                plot_dist(pred_dist, xlabel='Dependent Variable', style=style,
-                          bins=bins, ci=ci, bw=bw, alpha=alpha, color=color)
+                plt.subplot(rows, cols, i+1)
+                plot_dist(pred_dist[:,i], xlabel='Datapoint '+str(i), 
+                          style=style, bins=bins, ci=ci, bw=bw, alpha=alpha, 
+                          color=color)
         else:
             plot_dist(pred_dist, xlabel='Dependent Variable', style=style, 
                       bins=bins, ci=ci, bw=bw, alpha=alpha, color=color)
@@ -1172,8 +1177,6 @@ class BaseDistribution(BaseLayer):
             raise TypeError('num_samples must be an int')
         if num_samples < 1:
             raise ValueError('num_samples must be greater than 0')
-        if type(style) is not str or style not in ['fill', 'line', 'hist']:
-            raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
         if type(cols) is not int:
             raise TypeError('cols must be an integer')
         if not isinstance(bins, (int, float, np.ndarray)):
