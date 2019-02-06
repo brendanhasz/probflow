@@ -7,9 +7,9 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
+* BaseDistribution.plot_predictive_distribution() and tests
 * Add support for Input w/ cols= a string (and input=pandas df)
 * Finish BaseDistribution.fit()
-* BaseDistribution.plot_predictive_distribution()
 * `Better parameter initialization`_
 * Tests and debug for validation split and shuffles
 * Finish BaseLayer, BaseDistribution.fit, Parameter, and Input

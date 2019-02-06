@@ -454,9 +454,9 @@ class BaseDistribution(BaseLayer):
             of that |DataFrame| to use as dependent variables.
         data : |None| or |DataFrame|
             Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
-            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
-            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
-            strings containing the columns from ``data`` to use.
+            ``x`` and ``y`` are each an |ndarray|.  If ``data`` is a 
+            |DataFrame|, :meth:`.fit` assumes ``x`` and ``y`` are strings or 
+            lists of strings containing the columns from ``data`` to use.
         dtype : |DType|
             Cast the input data to this type, and use this type for parameters.
         batch_size : int or None
@@ -773,20 +773,24 @@ class BaseDistribution(BaseLayer):
             :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
             strings containing the columns from ``data`` to use.
         num_samples : int
-            TODO
+            Number of samples to draw from the model given ``x``.
 
         Returns array of shape 
         (x.shape[0],y.shape[1],...,y.shape[-1],num_samples)
 
-        """
-
-        # Check inputs
+        """        
 
         # Check model has been fit
         self._ensure_is_fit()
 
         # Process input data
         x = process_data(self, x, data)
+
+        # Check other inputs
+        if not isinstance(num_samples, int):
+            raise TypeError('num_samples must be an int')
+        if num_samples < 1:
+            raise ValueError('num_samples must be greater than 0')
 
         # Draw samples from the predictive distribution
         return self._session.run(
@@ -795,7 +799,91 @@ class BaseDistribution(BaseLayer):
                        self._ph['batch_size']: [x.shape[0]]})
 
 
-    # TODO: plot_predictive_distribution()
+    def plot_predictive_distribution(self, x=None, 
+                                     data=None, 
+                                     num_samples=1000,
+                                     style='fill',
+                                     cols=1,
+                                     bins=20,
+                                     ci=0.0,
+                                     bw=0.075,
+                                     color=None,
+                                     alpha=0.4):
+        """Plot samples from the model given x.
+
+        TODO: Docs...
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.plot_predictive_distribution` on a |Model|,
+            you must first :meth:`.fit` it to some data.
+
+        TODO: another admonition about how this only works with
+        a continuous model whose y-variable is 1D.
+        TODO: or, could have separate ones for ContinuousModel and Discrete...
+
+        Parameters
+        ----------
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
+            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
+            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
+            strings containing the columns from ``data`` to use.
+        num_samples : int
+            Number of samples to draw from the model given ``x``.
+        style : str
+            Which style of plot to show.  Available types are:
+
+            * ``'fill'`` - filled density plot (the default)
+            * ``'line'`` - line density plot
+            * ``'hist'`` - histogram
+
+        cols : int
+            Divide the subplots into a grid with this many columns (if 
+            ``individually=True``.
+        bins : int or list or |ndarray|
+            Number of bins to use for the posterior density histogram (if 
+            ``style='hist'``), or a list or vector of bin edges.
+        ci : float between 0 and 1
+            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
+        bw : float
+            Bandwidth of the kernel density estimate (if using ``style='line'``
+            or ``style='fill'``).  Default is 0.075
+        color : matplotlib color code or list of them
+            Color(s) to use to plot the distribution.
+            See https://matplotlib.org/tutorials/colors/colors.html
+            Default = use the default matplotlib color cycle
+        alpha : float between 0 and 1
+            Transparency of fill/histogram of the density
+        individually : bool
+            If ``True``, plot one subplot per datapoint in ``x``, otherwise
+            plot all the predictive distributions on the same plot.
+        """
+
+        # Sample from the predictive distribution
+        pred_dist = self.predictive_distribution(x=x, data=data, 
+                                                 num_samples=num_samples)
+
+        # plot_dist takes (num_samples, Nd) but pred_dist is (Nd, num_samples)
+        pred_dist = np.swapaxes(pred_dist, 0, -1)
+
+        # Plot the predictive distributions
+        N = pred_dist.shape[0]
+        if individually:
+            rows = np.ceil(N/cols)
+            for i in range(N):
+                plt.subplot(rows, cols, ix+1)
+                plot_dist(pred_dist, xlabel='Dependent Variable', style=style,
+                          bins=bins, ci=ci, bw=bw, alpha=alpha, color=color)
+        else:
+            plot_dist(pred_dist, xlabel='Dependent Variable', style=style, 
+                      bins=bins, ci=ci, bw=bw, alpha=alpha, color=color)
 
 
     def predict(self, x=None, data=None):
