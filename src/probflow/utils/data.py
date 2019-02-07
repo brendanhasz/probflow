@@ -151,3 +151,23 @@ def test_train_split(x, y, val_split, val_shuffle):
         x_val = x
         y_val = y
     return x_train.shape[0], x_train, y_train, x_val, y_val
+
+
+def initialize_shuffles(N, epochs, shuffle):
+    """Initialize shuffling of the data across epochs"""
+    shuffled_ids = np.empty((N, epochs), dtype=np.uint64)
+    for epoch in range(epochs):
+        if shuffle:
+            shuffled_ids[:, epoch] = np.random.permutation(N)
+        else:
+            shuffled_ids[:, epoch] = np.arange(N, dtype=np.uint64)
+    return shuffled_ids
+
+
+def generate_batch(x, y, epoch, batch, batch_size, shuff_ids):
+    """Generate data for one batch"""
+    N = x.shape[0]
+    a = batch*batch_size
+    b = min(N, (batch+1)*batch_size)
+    ix = shuff_ids[a:b, epoch]
+    return x[ix, ...], y[ix, ...], [ix.shape[0]]

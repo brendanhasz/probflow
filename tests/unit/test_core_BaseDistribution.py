@@ -30,7 +30,6 @@ def test_BaseDistribution_fit(LR1_novar):
     assert isinstance(model._train, dict)
     assert isinstance(model._train['x'], np.ndarray)
     assert isinstance(model._train['y'], np.ndarray)
-    assert type(model._shuffled_ids) is np.ndarray
     assert isinstance(model._ph, dict)
     assert isinstance(model._ph['batch_size'], tf.Tensor)
     assert isinstance(model._ph['x'], tf.Tensor)

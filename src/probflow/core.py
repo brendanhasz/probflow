@@ -23,7 +23,11 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-from .utils.data import process_data, process_xy_data, test_train_split
+from .utils.data import process_data
+from .utils.data import process_xy_data
+from .utils.data import test_train_split
+from .utils.data import initialize_shuffles
+from .utils.data import generate_batch
 from .utils.plotting import plot_line, plot_dist, fill_between
 
 
@@ -550,26 +554,6 @@ class BaseDistribution(BaseLayer):
             return x_data, y_data, batch_size_ph
 
 
-        def initialize_shuffles(N, epochs, shuffle):
-            """Initialize shuffling of the data across epochs"""
-            self._shuffled_ids = np.empty((N, epochs), dtype=np.uint64)
-            for epoch in range(epochs):
-                if shuffle:
-                    self._shuffled_ids[:, epoch] = np.random.permutation(N)
-                else:
-                    self._shuffled_ids[:, epoch] = \
-                        np.arange(N, dtype=np.uint64)
-
-
-        def generate_batch(x, y, epoch, batch, batch_size):
-            """Generate data for one batch"""
-            N = x.shape[0]
-            a = batch*batch_size
-            b = min(N, (batch+1)*batch_size)
-            ix = self._shuffled_ids[a:b, epoch]
-            return x[ix, ...], y[ix, ...], [ix.shape[0]]
-
-
         def init_records(to_record, record_freq, epochs, n_batch):
             """Initialize dicts and arrays for recording posterior params"""
             if record_freq == 'batch':
@@ -652,7 +636,7 @@ class BaseDistribution(BaseLayer):
             make_placeholders(x_train, y_train, dtype)
 
         # Initialize the shuffling of training data
-        initialize_shuffles(N, epochs, shuffle)
+        shuff_ids = initialize_shuffles(N, epochs, shuffle)
 
         # Recursively build this model and its args
         self.build(x_data, batch_size_ph)
@@ -713,8 +697,8 @@ class BaseDistribution(BaseLayer):
 
             # Train on each batch in this epoch
             for batch in range(n_batch):
-                b_x, b_y, b_n = generate_batch(x_train, y_train, 
-                                               epoch, batch, batch_size)
+                b_x, b_y, b_n = generate_batch(x_train, y_train, epoch,
+                                               batch, batch_size, shuff_ids)
                 self._session.run(train_op,
                                   feed_dict={x_data: b_x,
                                              y_data: b_y,
