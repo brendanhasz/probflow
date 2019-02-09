@@ -181,6 +181,8 @@ class BaseLayer(BaseObject):
         delayed until build() or fit() is called.
         """
 
+        # TODO: error if no args and you pass a kwarg w/ no keyword
+
         # Set layer arguments, using args, kwargs, and defaults
         self.args = dict()
         for ix, arg in enumerate(self._default_args):
@@ -359,6 +361,17 @@ class BaseLayer(BaseObject):
         return params
 
 
+    def _input_list(self):
+        """Get a list of Input layers in this layer or its arguments."""
+        inputs = []
+        for arg in self.args:
+            if self.args[arg].__class__.__name__ == 'Input':
+                inputs += [self.args[arg]]
+            elif isinstance(self.args[arg], BaseLayer):
+                inputs += self.args[arg]._input_list()
+        return inputs
+
+
     def __str__(self, prepend=''):
         """String representation of a layer (and all its args)."""
 
@@ -424,7 +437,7 @@ class BaseDistribution(BaseLayer):
         return self.mean_obj.log_prob(vals)
 
 
-    def fit(self, x, y, data=None,
+    def fit(self, x_in, y_in, data=None,
             dtype=tf.float32,
             batch_size=128,
             epochs=100,
@@ -446,12 +459,12 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x : |ndarray| or int or str or list of str or int
+        x_in : |ndarray| or int or str or list of str or int
             Independent variable values of the dataset to fit (aka the 
             "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
             an int or string or list of ints or strings specifying the columns
             of that |DataFrame| to use as independent variables.
-        y : |ndarray| or int or str or list of str or int
+        y_in : |ndarray| or int or str or list of str or int
             Dependent variable values of the dataset to fit (aka the 
             "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
             an int or string or list of ints or strings specifying the columns
@@ -554,6 +567,38 @@ class BaseDistribution(BaseLayer):
             return x_data, y_data, batch_size_ph
 
 
+        def assign_input_cols(cols):
+            """Assigns integer values to Input objects' cols"""
+
+            def str2int(t_str, col_list):
+                int_col = None
+                for ix, col in enumerate(col_list):
+                    if col == t_str:
+                        int_col = ix
+                if int_col is None:
+                    raise RuntimeError(t_str+' not in x')
+                return int_col
+
+            inputs = self._input_list()
+            for tin in inputs:
+                t_col = tin.kwargs['cols']
+                if isinstance(t_col, int):
+                    tin._int_cols = tin.kwargs['cols']
+                if isinstance(t_col, str):
+                    tin._int_cols = str2int(t_col, cols)
+                if isinstance(t_col, list):
+                    int_cols = len(t_col)*[None]
+                    for ix, col in enumerate(t_col):
+                        if isinstance(col, str):
+                            int_cols[ix] = str2int(col, cols)
+                        elif isinstance(col, int):
+                            int_cols[ix] = col
+                        else:
+                            raise RuntimeError('Input cols must be int, ' +
+                                               'str, or list of either.')
+                    tin._int_cols = int_cols
+
+
         def init_records(to_record, record_freq, epochs, n_batch):
             """Initialize dicts and arrays for recording posterior params"""
             if record_freq == 'batch':
@@ -623,7 +668,7 @@ class BaseDistribution(BaseLayer):
             raise ValueError('record_freq must be \'batch\' or \'epoch\'')
 
         # Process the input data
-        x, y = process_xy_data(self, x, y, data)
+        x, y = process_xy_data(self, x_in, y_in, data)
 
         # TODO: how to support integer columns?
 
@@ -637,6 +682,9 @@ class BaseDistribution(BaseLayer):
 
         # Initialize the shuffling of training data
         shuff_ids = initialize_shuffles(N, epochs, shuffle)
+
+        # Assign columns to Input objects
+        assign_input_cols(x_in)
 
         # Recursively build this model and its args
         self.build(x_data, batch_size_ph)

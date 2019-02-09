@@ -1,6 +1,7 @@
 """Tests a Linear Regression works correctly"""
 
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 import tensorflow_probability as tfp
 tfd = tfp.distributions
@@ -177,6 +178,34 @@ def test_LR_vector_flipout():
 
 
 # TODO: test w/ LinearRegression
+
+
+def test_LR_pandas():
+    """Tests regression w/ pandas works correctly"""
+
+    # Parameters + input data is vector of length 3
+    Nd = 3
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(name='aic_pd_weight', shape=2, estimator=None)
+    data = Input(cols=['d', 'b'])
+    data2 = Input(cols='c')
+    model = Normal(Dot(data, weight) + data2, 1.0)
+
+    # Generate data
+    true_weight = np.array([0.5, -0.25])
+    noise = np.random.randn(N)
+    x = np.random.randn(N, Nd+1)
+    x[:,0] = np.sum(true_weight*x[:,[3, 1]], axis=1) + x[:,2] + noise
+    df = pd.DataFrame(x, columns=['a', 'b', 'c', 'd'])
+
+    # Fit the model
+    model.fit(['b', 'c', 'd'], 'a', data=df, epochs=epochs)
+
+    # Check that the inferences are in the correct ballpark
+    means = model.posterior_mean()
+    assert abs(means['aic_pd_weight'][0]-0.5) < 0.2
+    assert abs(means['aic_pd_weight'][1]+0.25) < 0.2
 
 
 if __name__ == "__main__":

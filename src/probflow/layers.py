@@ -133,6 +133,10 @@ class Input(BaseLayer):
     }
 
 
+    # Integer column ids
+    _int_cols = None
+
+
     def _validate_kwargs(self, kwargs):
         """Ensure the keyword arguments have correct types, etc."""
         if (kwargs['cols'] is not None and 
@@ -146,8 +150,9 @@ class Input(BaseLayer):
         if self.kwargs['cols'] is None:
             return data
         else:
-            # TODO: slice data by cols
-            pass
+            if self._int_cols is None:
+                raise RuntimeError('Integer columns were not set for Input')
+            return tf.transpose(tf.gather(tf.transpose(data), self._int_cols))
 
 
     def __str__(self, prepend=''):

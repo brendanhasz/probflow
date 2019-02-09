@@ -7,8 +7,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Tests and debug for validation split and shuffles
-* Add support for Input w/ cols= a string (and input=pandas df)
 * Finish BaseDistribution.fit()
 * `Better parameter initialization`_
 * Finish BaseLayer, BaseDistribution.fit, Parameter, and Input

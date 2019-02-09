@@ -56,6 +56,20 @@ def test_BaseLayer_parameter_list(LR1_novar_unfit):
     assert 'thing2' in names
 
 
+def test_BaseLayer_input_list(LR1_novar_unfit):
+    """Tests core.BaseLayer._input_list"""
+
+    model = LR1_novar_unfit #fixture from conftest.py
+
+    # Get the parameter list
+    inputs = LR1_novar_unfit._input_list() 
+    assert isinstance(inputs, list)
+    assert len(inputs) == 1
+    assert isinstance(inputs[0], BaseLayer)
+    assert inputs[0].__class__.__name__ == 'Input'
+    assert inputs[0]._int_cols is None
+
+
 def test_BaseLayer_str(LR1_novar_unfit):
     """Tests core.BaseLayer.__str__"""
     #weight = Parameter(name='thing_red')

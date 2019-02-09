@@ -200,6 +200,40 @@ def test_BaseDistribution_sample_posterior_vector_pandas():
 # TODO: test the batches are being generated correctly _generate_batch
 
 
+def test_BaseDistribution_assign_input_cols():
+    """Tests input columns are given integer values from string when using
+    pandas"""
+
+    # Parameters + input data is vector of length 3
+    Nd = 3
+    N = 10
+    epochs = 2
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(name='aic_pd_weight', shape=2, estimator=None)
+    data = Input(cols=['d', 'b'])
+    data2 = Input(cols='c')
+    model = Normal(Dot(data, weight) + data2, 1.0)
+
+    # Generate data
+    true_weight = np.array([0.5, -0.25])
+    noise = np.random.randn(N)
+    x = np.random.randn(N, Nd+1)
+    x[:,0] = np.sum(true_weight*x[:,[3, 1]], axis=1) + x[:,2] + noise
+    df = pd.DataFrame(x, columns=['a', 'b', 'c', 'd'])
+
+    # Fit the model
+    model.fit(['b', 'c', 'd'], 'a', data=df, epochs=epochs)
+
+    # Inputs should have been assigned integer columns
+    assert isinstance(data._int_cols, list)
+    assert all(isinstance(e, int) for e in data._int_cols)
+    assert len(data._int_cols) == 2
+    assert data._int_cols[0] == 2 # d is 3rd col of x
+    assert data._int_cols[1] == 0 # b is 1st col of x
+    assert isinstance(data2._int_cols, int)
+    assert data2._int_cols == 1 # c is 2nd col of x
+
 
 def test_BaseDistribution_fit_record():
     """Tests core.BaseDistribution.fit w/ record-related args"""
