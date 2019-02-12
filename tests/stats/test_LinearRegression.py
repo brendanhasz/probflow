@@ -2,18 +2,15 @@
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow_probability as tfp
 tfd = tfp.distributions
 
 from probflow import *
 
-PLOT = False
-N = 1000
-epochs = 1000
 
-
-def test_LR_scalar_no_variance():
+def test_LR_scalar_no_variance(plot, Ndata, Nepochs):
     """Tests a LR w/ scalar parameters and no variance parameter"""
 
     # Model = linear regression assuming error = 1
@@ -23,6 +20,7 @@ def test_LR_scalar_no_variance():
     model = Normal(data*weight + bias, 1.0)
 
     # Generate data
+    N = Ndata
     true_weight = 0.5
     true_bias = -1
     noise = np.random.randn(N)
@@ -30,7 +28,7 @@ def test_LR_scalar_no_variance():
     y = true_weight*x + true_bias + noise
 
     # Fit the model
-    model.fit(x, y, epochs=epochs)
+    model.fit(x, y, epochs=Nepochs)
 
     # Ensure we the mean of each parameter individually is correct
     wmean = weight.posterior_mean()
@@ -47,7 +45,7 @@ def test_LR_scalar_no_variance():
     assert abs(means['LRsnv_bias']-true_bias) < 0.2
 
     # Plot
-    if PLOT:
+    if plot:
         model.plot_posterior(ci=0.95)
         plt.suptitle('Linear Regression - ' + 
                      'weight=' + str(true_weight) +
@@ -55,7 +53,7 @@ def test_LR_scalar_no_variance():
         plt.show()
 
 
-def test_LR_scalar():
+def test_LR_scalar(plot, Ndata, Nepochs):
     """Tests a LR w/ scalar parameters"""
 
     # Model = linear regression assuming error = 1
@@ -66,6 +64,7 @@ def test_LR_scalar():
     model = Normal(data*weight + bias, std_err)
 
     # Generate data
+    N = Ndata
     true_weight = 0.5
     true_bias = -1.0
     true_std_err = 1.0
@@ -74,7 +73,7 @@ def test_LR_scalar():
     y = true_weight*x + true_bias + noise*true_std_err
 
     # Fit the model
-    model.fit(x, y, epochs=epochs)
+    model.fit(x, y, epochs=Nepochs)
 
     # Ensure values are correct
     means = model.posterior_mean()
@@ -83,7 +82,7 @@ def test_LR_scalar():
     assert abs(means['LRs_std_dev']-true_std_err) < 0.2
 
     # Plot
-    if PLOT:
+    if plot:
         model.plot_posterior(ci=0.95)
         plt.suptitle('Linear Regression - ' + 
                      'weight=' + str(true_weight) +
@@ -92,7 +91,7 @@ def test_LR_scalar():
         plt.show()
 
 
-def test_LR_vector():
+def test_LR_vector(plot, Ndata, Nepochs):
     """Tests a LR w/ vector weight parameter/input"""
 
     Nd = 3 #number of dimensions of input
@@ -105,6 +104,7 @@ def test_LR_vector():
     model = Normal(Dot(data, weight) + bias, std_err)
 
     # Generate data
+    N = Ndata
     true_weight = np.array([0.5, -0.25, 0.0])
     true_bias = -1.0
     true_std_err = 1.0
@@ -113,7 +113,7 @@ def test_LR_vector():
     y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
 
     # Fit the model
-    model.fit(x, y, epochs=epochs)
+    model.fit(x, y, epochs=Nepochs)
 
     # Ensure values are correct
     means = model.posterior_mean()
@@ -124,7 +124,7 @@ def test_LR_vector():
     assert abs(means['LRv_std_dev']-true_std_err) < 0.2
 
     # Plot
-    if PLOT:
+    if plot:
         model.plot_posterior(ci=0.95)
         plt.suptitle('Linear Regression - ' + 
                      'weights=' + str(true_weight) +
@@ -133,7 +133,7 @@ def test_LR_vector():
         plt.show()
 
 
-def test_LR_vector_flipout():
+def test_LR_vector_flipout(plot, Ndata, Nepochs):
     """Tests a LR w/ vector weight parameter/input + 'flipout' estimator"""
 
     Nd = 3 #number of dimensions of input
@@ -146,6 +146,7 @@ def test_LR_vector_flipout():
     model = Normal(Dot(data, weight) + bias, std_err)
 
     # Generate data
+    N = Ndata
     true_weight = np.array([0.5, -0.25, 0.0])
     true_bias = -1.0
     true_std_err = 1.0
@@ -154,7 +155,7 @@ def test_LR_vector_flipout():
     y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
 
     # Fit the model
-    model.fit(x, y, epochs=epochs)
+    model.fit(x, y, epochs=Nepochs)
 
     # Ensure values are correct
     means = model.posterior_mean()
@@ -165,7 +166,7 @@ def test_LR_vector_flipout():
     assert abs(means['LRvf_std_dev']-true_std_err) < 0.2
 
     # Plot
-    if PLOT:
+    if plot:
         model.plot_posterior(ci=0.95)
         plt.suptitle('Linear Regression (flipout est) ' + 
                      'weights=' + str(true_weight) +
@@ -180,7 +181,7 @@ def test_LR_vector_flipout():
 # TODO: test w/ LinearRegression
 
 
-def test_LR_pandas():
+def test_LR_pandas(plot, Ndata, Nepochs):
     """Tests regression w/ pandas works correctly"""
 
     # Parameters + input data is vector of length 3
@@ -193,6 +194,7 @@ def test_LR_pandas():
     model = Normal(Dot(data, weight) + data2, 1.0)
 
     # Generate data
+    N = Ndata
     true_weight = np.array([0.5, -0.25])
     noise = np.random.randn(N)
     x = np.random.randn(N, Nd+1)
@@ -200,18 +202,9 @@ def test_LR_pandas():
     df = pd.DataFrame(x, columns=['a', 'b', 'c', 'd'])
 
     # Fit the model
-    model.fit(['b', 'c', 'd'], 'a', data=df, epochs=epochs)
+    model.fit(['b', 'c', 'd'], 'a', data=df, epochs=Nepochs)
 
     # Check that the inferences are in the correct ballpark
     means = model.posterior_mean()
     assert abs(means['aic_pd_weight'][0]-0.5) < 0.2
     assert abs(means['aic_pd_weight'][1]+0.25) < 0.2
-
-
-if __name__ == "__main__":
-    PLOT = True
-    import matplotlib.pyplot as plt
-    test_LR_scalar_no_variance()
-    test_LR_scalar()
-    test_LR_vector()
-    test_LR_vector_flipout()
