@@ -17,3 +17,4 @@
 .. |Tensor| replace:: `Tensor <http://www.tensorflow.org/api_docs/python/tf/Tensor>`__
 .. |Variable| replace:: `Variable <http://www.tensorflow.org/api_docs/python/tf/Variable>`__
 .. |DType| replace:: `DType <https://www.tensorflow.org/api_docs/python/tf/dtypes/DType>`__
+.. |Initializer| replace:: `Initializer <https://www.tensorflow.org/api_docs/python/tf/initializers>`__

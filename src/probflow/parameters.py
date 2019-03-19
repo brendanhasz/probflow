@@ -65,6 +65,14 @@ class Parameter(BaseParameter):
         ``transform = lambda x: tf.reciprocal(x)``, and
         ``inv_transform = lambda x: tf.reciprocal(x)``.
         Default is to use no transform.
+    initializer : {|None| or dict or |Tensor| or |Initializer|}
+        Initializer for each variational posterior parameter.  To use the same
+        initializer for each variational posterior parameter, pass a |Tensor|
+        or an |Initializer|.  Set a different initializer for each variational
+        posterior parameter by passing a dict with keys containing the 
+        parameter names, and values containing the |Tensor| or |Initializer| 
+        with which to initialize each parameter.
+        Default is to use ``glorot_uniform_initializer``.
     estimator : {``'flipout'`` or |None|}
         Method of posterior estimator to use. Valid values:
 
@@ -105,7 +113,8 @@ class Parameter(BaseParameter):
                  seed=None,
                  estimator='flipout',
                  transform=lambda x: x,
-                 inv_transform=lambda x: x):
+                 inv_transform=lambda x: x,
+                 initializer=None):
         """Construct an array of Parameter(s)."""
 
         # Check types
@@ -125,13 +134,25 @@ class Parameter(BaseParameter):
             'prior must be a probflow distribution or None'
         assert issubclass(posterior_fn, BaseDistribution), \
             'posterior_fn must be a probflow distribution'
-        assert estimator is None or isinstance(estimator, str), \
-            'estimator must be None or a string'
+
+        if estimator is not None and not isinstance(estimator, str):
+            raise TypeError('estimator must be None or a string')
+        init_types = (dict, tf.Tensor, tf.keras.initializers.Initializer)
+        if initializer is not None and not isinstance(initializer, init_types):
+            raise TypeError('initializer must be None, a Tensor, an'
+                            ' Initializer, or a dict')
+        if isinstance(initializer, dict):
+            init_types = (tf.Tensor, tf.keras.initializers.Initializer)
+            for arg in initializer:
+                if (initializer[arg] is not None and
+                    not isinstance(initializer[arg], init_types)):
+                    raise TypeError('each value in initializer dict must be '
+                                    'None, a Tensor, or an Initializer')
 
         # Check for valid posterior if using flipout
         sym_dists = [Normal, StudentT, Cauchy]
         if estimator == 'flipout' and posterior_fn not in sym_dists:
-            raise ValueError('flipout requires a symmetric posterior ' +
+            raise ValueError('flipout requires a symmetric posterior '
                              'distribution in the location-scale family')
 
         # Make shape a list
@@ -152,8 +173,7 @@ class Parameter(BaseParameter):
         self._built_posterior = None
         self._session = None
         self._is_built = False
-
-        # TODO: initializer?
+        self.initializer = initializer
 
 
     def _bound(self, data, lb, ub):
@@ -208,7 +228,7 @@ class Parameter(BaseParameter):
 
     def _make_name_unique(self):
         """Ensure this parameter's name is a unique scope name in TF graph."""
-        # TODO: getting an error if you try to make duplicate *non-default* names
+        # TODO: getting an error here if you try to make duplicate *non-default* names
         new_name = self.name
         ix = 1
         while tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=new_name):
@@ -232,7 +252,12 @@ class Parameter(BaseParameter):
         params = dict()
         with tf.variable_scope(self.name):
             for arg in self.posterior_fn._post_param_bounds:
-                params[arg] = tf.get_variable(arg, shape=self.shape)
+                if isinstance(self.initializer, dict):
+                    params[arg] = tf.get_variable(arg, shape=self.shape,
+                                                  initializer=self.initializer[arg])
+                else:
+                    params[arg] = tf.get_variable(arg, shape=self.shape,
+                                                  initializer=self.initializer)
 
         # Transform posterior parameters
         for arg in self.posterior_fn._post_param_bounds:
@@ -564,7 +589,16 @@ class ScaleParameter(Parameter):
         Seed for the random number generator.
         Set to |None| to use the global seed.
         Default = |None|
-
+    initializer : {|None| or dict or |Tensor| or |Initializer|}
+        Initializer for each variational posterior parameter.  To use the same
+        initializer for each variational posterior parameter, pass a |Tensor|
+        or an |Initializer|.  Set a different initializer for each variational
+        posterior parameter by passing a dict with keys containing the 
+        parameter names, and values containing the |Tensor| or |Initializer| 
+        with which to initialize each parameter.
+        Default is to initialize both the ``shape`` and ``rate`` parameters
+        of the :class:`.InvGamma` variational posterior to ``log(5)`` (such 
+        that the values drawn from the distribution are initially ~1).
 
     Examples
     --------
@@ -577,7 +611,8 @@ class ScaleParameter(Parameter):
                  name='ScaleParameter',
                  prior=None,
                  posterior_fn=InvGamma,
-                 seed=None):
+                 seed=None,
+                 initializer={'shape': np.log(5.0), 'rate': np.log(5.0)}):
         super().__init__(shape=shape,
                          name=name,
                          prior=prior,
@@ -585,7 +620,8 @@ class ScaleParameter(Parameter):
                          seed=seed,
                          estimator=None,
                          transform=lambda x: tf.sqrt(x),
-                         inv_transform=lambda x: tf.square(x))
+                         inv_transform=lambda x: tf.square(x),
+                         initializer=initializer)
 
 
 
