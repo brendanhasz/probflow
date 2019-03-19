@@ -22,16 +22,3 @@ def pytest_generate_tests(metafunc):
         val = getattr(metafunc.config.option, arg)
         if arg in metafunc.fixturenames and val is not None:
             metafunc.parametrize(arg, [val])
-    #plot_value = metafunc.config.option.plot
-    #if 'plot' in metafunc.fixturenames and plot_value is not None:
-    #    metafunc.parametrize("plot", [plot_value])
-
-
-#@pytest.fixture(scope="session")
-#def N_data():
-#    return N
-
-
-#@pytest.fixture(scope="session")
-#def N_epochs():
-#    return EPOCHS

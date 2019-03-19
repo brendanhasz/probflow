@@ -670,8 +670,6 @@ class BaseDistribution(BaseLayer):
         # Process the input data
         x, y = process_xy_data(self, x_in, y_in, data)
 
-        # TODO: how to support integer columns?
-
         # Split data into training and validation data
         N, x_train, y_train, x_val, y_val = \
             test_train_split(x, y, validation_split, validation_shuffle)
@@ -700,10 +698,6 @@ class BaseDistribution(BaseLayer):
         log_likelihood = tf.reduce_mean(self.built_obj.log_prob(y_data))
         kl_loss = tf.reduce_sum(self.kl_loss) / N
         elbo_loss = kl_loss - log_likelihood
-
-        # TODO: determine a good default learning rate?
-
-        # TODO: set optimizer based on optimizer arg
 
         # Optimizer
         with tf.name_scope('train'):

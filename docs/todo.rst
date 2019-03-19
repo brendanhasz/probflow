@@ -9,6 +9,7 @@ Backlog (short term):
 
 * Finish BaseDistribution.fit()
 * `Better parameter initialization`_
+* Support integer input cols vs float
 * Finish BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Docs for BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)
@@ -41,6 +42,7 @@ Backlog (long term):
 * Neural Matrix Factorization
 * Multivariate Normal, StudentT, and Cauchy dists
 * Bayesian correlation example and Model
+* Support other optimizers
 * `Separate model from noise uncertainty`_ 
 * `Saving and loading and initializing parameters`_
 * `Transfer learning`_
