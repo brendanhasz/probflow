@@ -26,9 +26,7 @@ With ProbFlow, the core building blocks of a Bayesian model are parameters, laye
 
 For example, a simple Bayesian linear regression
 
-.. math::
-
-    y \sim \text{Normal}(w x + b, \sigma)
+.. image:: http://latex.codecogs.com/gif.latex?\large&space;y&space;\sim&space;\text{Normal}(w&space;x&space;&plus;&space;b,&space;\sigma)
 
 can be built with ProbFlow by:
 
@@ -129,4 +127,4 @@ Post bug reports, feature requests, and tutorial requests in `GitHub issues <htt
 Why the name, ProbFlow?
 -----------------------
 
-Because it's a package for probabilistic modeling, and it's built on TensorFlow.  ¯\_(ツ)_/¯
+Because it's a package for probabilistic modeling, and it's built on TensorFlow.  ¯\\_(ツ)_/¯

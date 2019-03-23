@@ -109,7 +109,7 @@ For convenience, ProbFlow also includes several :ref:`ready-made models <ready_m
     model = LinearRegression()
     model.fit(x, y)
 
-Using parameters, layers, and distributions as simple building blocks, ProbFlow allows for the painless creation of complicated Bayesian models like :ref:`generalized linear models <examples_glm>`, :ref:`neural matrix factorization <examples_nmf>` models, and :ref:`mixed effects models <examples_mixed_effects>`.  Take a look at the :ref:`examples` section and the :ref:`user_guide` for more!
+Using parameters, layers, and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like :ref:`generalized linear models <examples_glm>`, :ref:`neural matrix factorization <examples_nmf>` models, and :ref:`mixed effects models <examples_mixed_effects>`.  Take a look at the :ref:`examples` section and the :ref:`user_guide` for more!
 
 
 Installation
@@ -133,4 +133,4 @@ Post bug reports, feature requests, and tutorial requests in `GitHub issues <htt
 Why the name, ProbFlow?
 -----------------------
 
-Because it's a package for probabilistic modeling, and it's built on TensorFlow.  ¯\_(ツ)_/¯
+Because it's a package for probabilistic modeling, and it's built on TensorFlow.  ¯\\_(ツ)_/¯
