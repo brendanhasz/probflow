@@ -142,7 +142,8 @@ class Parameter(BaseParameter):
             raise TypeError('initializer must be None, a Tensor, an'
                             ' Initializer, or a dict')
         if isinstance(initializer, dict):
-            init_types = (tf.Tensor, tf.keras.initializers.Initializer)
+            init_types = (float, np.ndarray, tf.Tensor, 
+                          tf.keras.initializers.Initializer)
             for arg in initializer:
                 if (initializer[arg] is not None and
                     not isinstance(initializer[arg], init_types)):
@@ -248,16 +249,26 @@ class Parameter(BaseParameter):
     def _build_posterior(self, data, batch_shape):
         """Build the parameter's posterior distribution."""
 
+        # Convert float initializer values to matching type
+        if isinstance(self.initializer, dict):
+            for param in self.initializer:
+                self.initializer[param] = tf.constant(self.initializer[param],
+                                                      dtype=data.dtype)
+        elif isinstance(self.initializer, (float, np.ndarray)):
+            self.initializer = tf.constant(self.initializer, dtype=data.dtype)
+
         # Create posterior distribution parameters
         params = dict()
         with tf.variable_scope(self.name):
             for arg in self.posterior_fn._post_param_bounds:
-                if isinstance(self.initializer, dict):
-                    params[arg] = tf.get_variable(arg, shape=self.shape,
-                                                  initializer=self.initializer[arg])
+                if self.initializer is None:
+                    params[arg] = tf.get_variable(arg, shape=self.shape)
+                elif isinstance(self.initializer, dict):
+                    params[arg] = \
+                        tf.get_variable(arg, initializer=self.initializer[arg])
                 else:
-                    params[arg] = tf.get_variable(arg, shape=self.shape,
-                                                  initializer=self.initializer)
+                    params[arg] = \
+                        tf.get_variable(arg, initializer=self.initializer)
 
         # Transform posterior parameters
         for arg in self.posterior_fn._post_param_bounds:
@@ -612,7 +623,10 @@ class ScaleParameter(Parameter):
                  prior=None,
                  posterior_fn=InvGamma,
                  seed=None,
-                 initializer={'shape': np.log(5.0), 'rate': np.log(5.0)}):
+                 initializer=None):
+        if initializer is None:
+            initializer = {'shape': np.full(shape, np.log(5.0)), 
+                           'rate': np.full(shape, np.log(5.0))}
         super().__init__(shape=shape,
                          name=name,
                          prior=prior,

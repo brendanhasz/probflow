@@ -1026,7 +1026,7 @@ class BaseDistribution(BaseLayer):
             metric_list = [metric_list]
 
         # Process input data
-        x, y = process_data(self, x, y, data)
+        x, y = process_xy_data(self, x, y, data)
 
         # Make predictions
         y_pred = self.predict(x)
