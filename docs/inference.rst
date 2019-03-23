@@ -1,7 +1,7 @@
+.. _inference:
+
 Bayesian Modeling
 =================
-
-.. _inference:
 
 .. include:: macros.hrst
 

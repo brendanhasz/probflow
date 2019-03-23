@@ -1,7 +1,7 @@
+.. _distributions:
+
 Distributions
 =============
-
-.. _distributions:
 
 .. include:: macros.hrst
 

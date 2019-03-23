@@ -1,7 +1,7 @@
+.. _predicting:
+
 Making Predictions with a Model
 ===============================
-
-.. _predicting:
 
 .. include:: macros.hrst
 

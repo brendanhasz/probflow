@@ -1,7 +1,7 @@
+.. _evaluating:
+
 Evaluating Model Performance
 ============================
-
-.. _evaluating:
 
 .. include:: macros.hrst
 

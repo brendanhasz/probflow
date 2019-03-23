@@ -1,7 +1,7 @@
+.. _parameters:
+
 Parameters
 ==========
-
-.. _parameters:
 
 .. include:: macros.hrst
 

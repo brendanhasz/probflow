@@ -425,15 +425,36 @@ def test_BaseDistribution_plot_posterior_args_over_training(LR3_var, plot):
     if plot:
         plt.show()
 
+
+def test_BaseDistribution_posterior_args_over_training_batch(LR3_var, plot):
+    """Tests core.BaseDistribution.plot_posterior_args_over_training"""
+
+    # Parameters + input data is vector of length 3
+    Nd = 3
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(name='ppot_weight1', shape=Nd, estimator=None)
+    bias = Parameter(name='ppot_bias1', estimator=None)
+    data = Input()
+    std_dev = ScaleParameter()
+    model = Normal(Dot(data, weight) + bias, std_dev)
+
+    # Generate data
+    N = NUM_SAMPLES
+    true_weight = np.array([0.5, -0.25, 0.0])
+    true_bias = -1.0
+    noise = np.random.randn(N, 1)
+    x = np.random.randn(N, Nd)
+    y = np.expand_dims(np.sum(true_weight*x, axis=1) + true_bias, 1) + noise
+
     # All params, once per batch
-    tf.reset_default_graph()
     model.fit(x, y, epochs=20, record='all', record_freq='batch')
     model.plot_posterior_args_over_training(marker='.')
     if plot:
         plt.show()
 
     # Just weight params
-    model.plot_posterior_args_over_training('ppot_weight')
+    model.plot_posterior_args_over_training('ppot_weight1')
     if plot:
         plt.show()
 

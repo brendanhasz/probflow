@@ -1,7 +1,7 @@
+.. _layers:
+
 Layers
 ======
-
-.. _layers:
 
 .. include:: macros.hrst
 

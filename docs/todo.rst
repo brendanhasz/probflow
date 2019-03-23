@@ -9,7 +9,7 @@ Backlog (short term):
 
 * Finish BaseDistribution.fit()
 * `Better parameter initialization`_
-* Support integer input cols vs float
+* Support integer input cols vs float (or at least make slicing ops cast to int)
 * Finish BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Docs for BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)

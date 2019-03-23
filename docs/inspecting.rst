@@ -1,7 +1,7 @@
+.. _inspecting:
+
 Inspecting a Fit Model
 ======================
-
-.. _inspecting:
 
 .. include:: macros.hrst
 

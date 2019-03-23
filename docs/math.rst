@@ -1,7 +1,7 @@
+.. _math:
+
 Mathematical Details
 ====================
-
-.. _math:
 
 .. include:: macros.hrst
 
@@ -41,7 +41,7 @@ Proof:
 .. math::
 
     \text{KL}(~q(v|\theta)~||~p(v|\mathcal{D})~) =& \int q(v|\theta) \log \frac{q(v|\theta)}{p(v|\mathcal{D})} dv \\
-    ~ & \int q(v|\theta) \log \frac{q(v|\theta) ~ p(\mathcal{D})}{p(\mathcal{D}|v)~p(v)} dv \\
+    ~ =& \int q(v|\theta) \log \frac{q(v|\theta) ~ p(\mathcal{D})}{p(\mathcal{D}|v)~p(v)} dv \\
     ~ =& \int q(v|\theta) 
         \left( \log \frac{q(v|\theta)}{p(v)} - \log p(\mathcal{D}|v) + \log p(\mathcal{D}) \right) dv \\
     ~ =& \int \left( q(v|\theta) 
@@ -52,10 +52,10 @@ Proof:
     ~ =& \int q(v|\theta) \log \frac{q(v|\theta)}{p(v)} dv
         - \int q(v|\theta) \log p(\mathcal{D}|v) dv
         + \log p(\mathcal{D}) \\
-    ~ =& \text{KL} (~q(v|\theta)~||~p(v)~)
+    ~ =& ~ \text{KL} (~q(v|\theta)~||~p(v)~)
         - \int q(v|\theta) \log p(\mathcal{D}|v) dv 
         + \log p(\mathcal{D}) \\
-    ~ =& \text{KL} (~q(v|\theta)~||~p(v)~)
+    ~ =& ~ \text{KL} (~q(v|\theta)~||~p(v)~)
         - \mathbb{E}_{q(v|\theta)} [~\log p(\mathcal{D}|v)~] 
         + \log p(\mathcal{D})
 

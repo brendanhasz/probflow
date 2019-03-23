@@ -1,7 +1,7 @@
+.. _ready_made_models:
+
 Ready-made Models
 =================
-
-.. _ready_made_models:
 
 .. include:: macros.hrst
 

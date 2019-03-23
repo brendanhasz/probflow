@@ -252,8 +252,9 @@ class Parameter(BaseParameter):
         # Convert float initializer values to matching type
         if isinstance(self.initializer, dict):
             for param in self.initializer:
-                self.initializer[param] = tf.constant(self.initializer[param],
-                                                      dtype=data.dtype)
+                if isinstance(self.initializer[param], (float, np.ndarray)):
+                    self.initializer[param] = \
+                        tf.constant(self.initializer[param], dtype=data.dtype)
         elif isinstance(self.initializer, (float, np.ndarray)):
             self.initializer = tf.constant(self.initializer, dtype=data.dtype)
 

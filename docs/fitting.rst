@@ -1,7 +1,7 @@
+.. _fitting:
+
 Fitting a Model
 ===============
-
-.. _fitting:
 
 .. include:: macros.hrst
 
