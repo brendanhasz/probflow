@@ -17,24 +17,6 @@ EPOCHS = 300
 N = 500
 
 
-def pytest_addoption(parser):
-    parser.addoption("--plot", action="store_true", default=False, 
-                     help="Show plots")
-    #parser.addoption("--val_name", action="store", default="default str", 
-    #                 help="description") #for a str arg
-
-
-def pytest_generate_tests(metafunc):
-    plot_value = metafunc.config.option.plot
-    if 'plot' in metafunc.fixturenames and plot_value is not None:
-        metafunc.parametrize("plot", [plot_value])
-
-
-@pytest.fixture(scope="session")
-def N_data():
-    return N
-
-
 @pytest.fixture(scope="session")
 def LR1_novar_unfit():
     """Single linear regression w/ no variance parameter"""

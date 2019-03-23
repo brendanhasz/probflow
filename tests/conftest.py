@@ -1,4 +1,4 @@
-"""Fixtures for stats tests.
+"""Fixtures and options for all tests.
 
 """
 

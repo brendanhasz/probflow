@@ -9,8 +9,11 @@ tfd = tfp.distributions
 
 from probflow import *
 
+Ndata = 1000
+Nepochs = 1000
 
-def test_LR_scalar_no_variance(plot, Ndata, Nepochs):
+
+def test_LR_scalar_no_variance(plot):
     """Tests a LR w/ scalar parameters and no variance parameter"""
 
     # Model = linear regression assuming error = 1
@@ -53,7 +56,7 @@ def test_LR_scalar_no_variance(plot, Ndata, Nepochs):
         plt.show()
 
 
-def test_LR_scalar(plot, Ndata, Nepochs):
+def test_LR_scalar(plot):
     """Tests a LR w/ scalar parameters"""
 
     # Model = linear regression assuming error = 1
@@ -91,7 +94,7 @@ def test_LR_scalar(plot, Ndata, Nepochs):
         plt.show()
 
 
-def test_LR_vector(plot, Ndata, Nepochs):
+def test_LR_vector(plot):
     """Tests a LR w/ vector weight parameter/input"""
 
     Nd = 3 #number of dimensions of input
@@ -133,7 +136,7 @@ def test_LR_vector(plot, Ndata, Nepochs):
         plt.show()
 
 
-def test_LR_vector_flipout(plot, Ndata, Nepochs):
+def test_LR_vector_flipout(plot):
     """Tests a LR w/ vector weight parameter/input + 'flipout' estimator"""
 
     Nd = 3 #number of dimensions of input
@@ -175,13 +178,13 @@ def test_LR_vector_flipout(plot, Ndata, Nepochs):
         plt.show()
 
 
-# TODO: test w/ Dense
+# TODO: test w/ Dense (maybe in another file though)
 
 
 # TODO: test w/ LinearRegression
 
 
-def test_LR_pandas(plot, Ndata, Nepochs):
+def test_LR_pandas(plot):
     """Tests regression w/ pandas works correctly"""
 
     # Parameters + input data is vector of length 3

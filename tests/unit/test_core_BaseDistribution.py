@@ -41,7 +41,7 @@ def test_BaseDistribution_fit(LR1_novar):
     assert model.is_fit
 
 
-def test_BaseDistribution_predictive_distribution(LR3_novar, N_data):
+def test_BaseDistribution_predictive_distribution(LR3_novar, Ndata):
     """Tests core.BaseDistribution.predictive_distribution"""
 
     model = LR3_novar #fixture from conftest.py
@@ -51,7 +51,7 @@ def test_BaseDistribution_predictive_distribution(LR3_novar, N_data):
     assert isinstance(prd, np.ndarray)
     assert prd.ndim == 3
     assert prd.shape[0] == 1000
-    assert prd.shape[1] == N_data
+    assert prd.shape[1] == Ndata
     assert prd.shape[2] == 1
 
     # Check predictive_distribution with validation input
