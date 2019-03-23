@@ -6,7 +6,7 @@ ProbFlow
    :caption: Contents:
    :hidden:
 
-   user-guide
+   user_guide
    api
    todo
 
@@ -119,7 +119,7 @@ Before installing ProbFlow, you'll first need to install `TensorFlow <http://www
 
 Then, you can use `pip <https://pypi.org/project/pip/>`_ to install ProbFlow itself from the GitHub source:
 
-.. code-block::
+.. code-block:: bash
     
     pip install git+http://github.com/brendanhasz/probflow.git
 
