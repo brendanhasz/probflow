@@ -38,7 +38,7 @@ can be built with ProbFlow by:
 
 .. code-block:: python
 
-    from probflow import Input, Parameter, Normal
+    from probflow import Input, Parameter, ScaleParameter, Normal
     
     feature = Input()
     weight = Parameter()
@@ -61,23 +61,31 @@ You can generate predictions for new data:
 
     model.predict(x_test)
 
-Compute *probabilistic* predictions for new data:
+Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
 .. code-block:: python
 
-    model.plot_predictive_distribution(x_test)
+    model.plot_predictive_distribution(x_test, ci=0.95)
+
+.. image:: img/readme/pred_dist.svg
+   :width: 90 %
+   :align: center
 
 Evaluate your model's performance using metrics:
 
 .. code-block:: python
 
-    model.metrics(metric_list='accuracy')
+    model.metrics(metric_list='mse')
 
-Inspect the posterior distributions of your fit model's parameters:
+Inspect the posterior distributions of your fit model's parameters, with 95% confidence intervals:
 
 .. code-block:: python
 
-    model.plot_posterior()
+    model.plot_posterior(ci=0.95)
+
+.. image:: img/readme/posteriors.svg
+   :width: 90 %
+   :align: center
 
 and investigate how well your model is capturing uncertainty by examining how accurate its predictive intervals are:
 
