@@ -1,6 +1,8 @@
 Examples
 ========
 
+.. _examples:
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -42,7 +44,7 @@ TODO: manually:
 
     predictions = weight*feature + bias
     model = Normal(predictions, noise_std)
-    model.fit(x,y)
+    model.fit(x, y)
 
 TODO: look at posteriors and model criticism etc
 
@@ -57,7 +59,7 @@ TODO: with Dense (which automatically uses x as input if none is specified):
     noise_std = ScaleParameter()
 
     model = Normal(predictions, noise_std)
-    model.fit(x,y)
+    model.fit(x, y)
 
 TODO: how to access posterior elements from within the Dense layer
 
@@ -68,7 +70,7 @@ TODO: with ready-made model:
     from probflow import LinearRegression
 
     model = LinearRegression()
-    model.fit(x,y)
+    model.fit(x, y)
 
 TODO: how to access posterior elements from within the LinearRegression model
 
@@ -88,16 +90,16 @@ TODO: then w/ Sequential,
 
 .. code-block:: python
 
-    from probflow import Sequential, Dense, Parameter, Normal
+    from probflow import Sequential, Dense, ScaleParameter, Normal
 
-    predictions = Sequential([
+    predictions = Sequential(layers=[
         Dense(units=128),
         Dense(units=64),
         Dense(units=1)
     ])
     noise_std = ScaleParameter()
     model = Normal(predictions, noise_std)
-    model.fit(x,y)
+    model.fit(x, y)
 
 TODO: then w/ DenseRegression or DenseClassifier. (automatically sets the size of the last layer by looking @ size of input `y`, or the num unique elements of it for DenseClassifier)
 
@@ -106,7 +108,7 @@ TODO: then w/ DenseRegression or DenseClassifier. (automatically sets the size o
     from probflow import DenseRegression
 
     model = DenseRegression(units=[128, 64])
-    model.fit(x,y)
+    model.fit(x, y)
 
 
 Robust Dual-module Neural Network
@@ -119,8 +121,10 @@ TODO: dual-module net which estimates predictions and uncertainty separately, an
     predictions = DenseNet(units=[128, 64, 32, 1])
     noise_std = DenseNet(units=[128, 64, 32, 1])
     model = Cauchy(predictions, noise_std)
-    model.fit(x,y)
+    model.fit(x, y)
 
+
+.. _examples_glm:
 
 Poisson Regression (GLM)
 ------------------------
@@ -133,14 +137,11 @@ TODO: description...
 
     predictions = Exp(Dense())
     model = Poisson(predictions)
-    model.fit(x,y)
+    model.fit(x, y)
 
 
-Variational Autoencoder
------------------------
 
-TODO: w/ Dense, then w/ DenseAutoencoderRegression
-
+.. _examples_nmf:
 
 Neural Matrix Factorization
 ---------------------------
@@ -153,19 +154,21 @@ TODO: for a vanilla matrix factorization
 
     from probflow import *
 
-    x = df w/ 1st column user ids, 2nd col item ids
-    y = scores
+    #df = DataFrame w/ 3 columns: 'user_id', 'item_id', and 'rating'
 
-    users = Input(0)
-    items = Input(1)
+    # User and item IDs
+    users = Input('user_id')
+    items = Input('item_id')
 
+    # Matrix Factorization
     user_vec = Embedding(users, dims=50)
     item_vec = Embedding(items, dims=50)
     predictions = Dot(user_vec, item_vec)
     error = ScaleParameter()
 
+    # Fit a model w/ normally-distibuted error
     model = Normal(predictions, error)
-    model.fit(x,y)
+    model.fit(df[['user_id', 'item_id']], df['rating'])
 
 or for neural matrix factorization https://arxiv.org/abs/1708.05031
 
@@ -173,11 +176,11 @@ or for neural matrix factorization https://arxiv.org/abs/1708.05031
 
     from probflow import *
 
-    x = df w/ 1st column user ids, 2nd col item ids
-    y = scores
+    #df = DataFrame w/ 3 columns: 'user_id', 'item_id', and 'rating'
 
-    users = Input(0)
-    items = Input(1)
+    # User and item IDs
+    users = Input('user_id')
+    items = Input('item_id')
 
     # Matrix Factorization
     user_vec_mf = Embedding(users, dims=50)
@@ -190,12 +193,13 @@ or for neural matrix factorization https://arxiv.org/abs/1708.05031
     ncf_in = Cat([user_vec_ncf, item_vec_ncf])
     predictions_ncf = DenseNet(ncf_in, units=[128, 64, 32])
     
-    # Combination of the two methods
+    # Combine the two methods
     predictions = Dense(Cat([predictions_mf, predictions_ncf]))
     error = ScaleParameter()
 
+    # Fit a model w/ normally-distibuted error
     model = Normal(predictions, error)
-    model.fit(x,y)
+    model.fit(df[['user_id', 'item_id']], df['rating'])
 
 Or if you have implicit data (0 or 1 for whether the user has interacted with 
 the item), use model = Bernoulli(logits=predictions)
@@ -204,8 +208,10 @@ Or if there are discrete scores (e.g. 1-10), then use a BetaBinomial
 TODO: w/ Dense and Embedding layers, then w/ NeuralMatrixFactorization
 
 
-Multilevel Model
-----------------
+.. _examples_mixed_effects:
+
+Mixed Effects and Multilevel Models
+-----------------------------------
 
 Basic multilevel model:
 
@@ -221,15 +227,14 @@ Can be fit using probflow by:
 
     from probflow import Parameter, ScaleParameter, Normal
 
-    # N = number of subjects/groups
-    # G = subject/group id for each observation
-    # y = observations
+    # df = DataFrame with 2 columns: 'group' and 'observation'
+    N = df['group'].nunique()
+
+    G = Input('Group')
     
     pop_mean = Parameter()
     pop_std = ScaleParameter()
     data_std = ScaleParameter()
     
     beta = Parameter(shape=N, prior=Normal(0, pop_std))
-    model = Normal(pop_mean + beta, data_std)
-    
-TODO: but would have to tf.gather() beta values based on G.  Maybe should just use a 1D embedding layer and specify the prior?
+    model = Normal(pop_mean + beta[G], data_std)

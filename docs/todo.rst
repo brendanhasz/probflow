@@ -54,6 +54,7 @@ Backlog (long term):
 * `Optimize bounding`_
 * Dev guide? (in add'n to user guide) Mention testing (eg --plot arg), inheritance structure etc
 * Conv layers
+* Flipout estimator
 * Pooling layers
 * Ready-made Conv models
 * LSTM Layer
@@ -97,6 +98,7 @@ Sklearn support
 ^^^^^^^^^^^^^^^
 
 Model classes should be consistent with a sklearn estimator. 
+Should support predict_proba().
 Or if that won't work, include a sklearn Estimator which takes a model obj.
 https://scikit-learn.org/dev/developers/contributing.html#rolling-your-own-estimator
 
@@ -301,3 +303,5 @@ You can approximate it just by using a large enough :math:`n`.  E.g. w/ :math:`n
 (but obvi not in python haha).  Not sure if that would actually end up being faster in tensorflow or not.
 
 Could use tf.hard_sigmoid to approximate the sigmoid.
+
+Or, could just use tf.keras.constraints to bound the values...

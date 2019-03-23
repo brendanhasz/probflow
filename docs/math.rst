@@ -1,17 +1,12 @@
 Mathematical Details
 ====================
 
+.. _math:
+
 .. include:: macros.hrst
 
-TODO: intro
 
-
-Variational Inference
----------------------
-
-TODO: intro
-
-see ref [1]_
+ProbFlow fits Bayesian models to data using stochastic variational inference [1]_, specifically by performing "Bayes by backprop" [2]_.
 
 Notation:
 
@@ -21,13 +16,13 @@ Notation:
 - Likelihood: :math:`p(\mathcal{D}|v)`
 - Posterior: :math:`p(v|\mathcal{D})`
 
-With variational inference we approximate the posterior for each variable with a "variational posterior distribution" :math:`q`. That variational distribution has some parameters :math:`\theta`.  For example if we use a normal distribution as our variational distribution, it has two parameters (:math:`\mu` and :math:`\sigma`).  So, :math:`\theta = \{ \mu, \sigma \}` and 
+With variational inference we approximate the posterior for each variable with a "variational posterior distribution" :math:`q`. That variational distribution has some parameters :math:`\theta`.  For example, if we use a normal distribution as our variational distribution, it has two parameters (:math:`\mu` and :math:`\sigma`).  So, :math:`\theta = \{ \mu, \sigma \}` and 
 
 .. math::
 
     q(v|\theta) = q(v|\mu,\sigma) = \mathcal{N}(v | \mu, \sigma)
 
-The idea is to find the values of :math:`\theta` such that the difference between :math:`q(v|\theta)` (the variational distribution) and :math:`p(v|\mathcal{D})` (the true posterior distribution) is as small as possible.
+To "fit" a Bayesian model with this method, we want to find the values of :math:`\theta` such that the difference between :math:`q(v|\theta)` (the variational distribution) and :math:`p(v|\mathcal{D})` (the true posterior distribution) is as small as possible.
 
 If we use `Kullback-Leibler divergence <http://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence>`_ as our measure of "difference", then we want to find the best values for our variational distribution parameters (:math:`\hat{\theta}`) which give the lowest KL divergence between the variational distribution and the true posterior:
 
@@ -35,11 +30,13 @@ If we use `Kullback-Leibler divergence <http://en.wikipedia.org/wiki/Kullback%E2
 
     \hat{\theta} = \arg \min_\theta ~ \text{KL}(~q(v|\theta)~||~p(v|\mathcal{D})~) 
 
-This divergence between the variational and true posteriors can be broken down into the sum of three terms:
+The problem is, we don't know what the true posterior looks like - that's what we're trying to solve!  Luckily, this divergence between the variational and true posteriors can be broken down into the sum of three terms [3]_:
 
 1. the divergence between the prior and the variational distribution
 2. the (negative) expected log likelihood
 3. the log model evidence (the probability of the data)
+
+Proof:
 
 .. math::
 
@@ -82,21 +79,17 @@ When creating a loss function to maximize the ELBO, we need to be careful about 
     elbo_loss = kl_loss/N - log_likelihood
 
 
-Flipout
--------
-
-TODO
-
-see ref [2]_
 
 References
 ----------
-.. [1] Charles Blundell, Julien Cornebise, Koray Kavukcuoglu, and Daan Wierstra. 
+.. [1] Matthew D. Hoffman, David M. Blei, Chong Wang, and John Paisley.
+    Stochastic Variational Inference.
+    *Journal of Machine Learning Research* 14:1303−1347, 2013.
+    http://jmlr.org/papers/v14/hoffman13a.html
+.. [2] Charles Blundell, Julien Cornebise, Koray Kavukcuoglu, and Daan Wierstra. 
     Weight uncertainty in neural networks. 
     *arXiv preprint*, 2015. http://arxiv.org/abs/1505.05424
-.. [2] Yeming Wen, Paul Vicol, Jimmy Ba, Dustin Tran, and Roger Grosse. 
-    Flipout: Efficient Pseudo-Independent Weight Perturbations on 
-    Mini-Batches. *International Conference on Learning Representations*, 
-    2018. http://arxiv.org/abs/1803.04386
-
-
+.. [3] Michael I. Jordan, Zoubin Ghahramani, Tommi S. Jaakkola, and Lawrence K. Saul.
+    An Introduction to Variational Methods for Graphical Models.
+    *Machine Learning* 37:183, 1999.
+    http://doi.org/10.1023/A:1007665907178

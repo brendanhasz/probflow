@@ -1,9 +1,11 @@
 Parameters
 ==========
 
+.. _parameters:
+
 .. include:: macros.hrst
 
-TODO: discuss parameters of the model, etc
+TODO: parameters of the model, etc
 
 
 Creating a Parameter
@@ -111,9 +113,3 @@ Transforming Parameters
 -----------------------
 
 TODO: talk about transform and inv_transform args to constructor.  Parameter w/ lognormal posterior as an example?  Also mention that the transform is only applied to the samples the posterior emits, and NOT to the prior (i.e. the prior and posterior should be in the same non-transformed space)
-
-
-Estimators
-----------
-
-TODO: talk about full vs "flipout"

@@ -1,6 +1,8 @@
 Inspecting a Fit Model
 ======================
 
+.. _inspecting:
+
 .. include:: macros.hrst
 
 TODO: how to visualize posteriors and priors (and model structure?) with

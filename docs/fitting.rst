@@ -1,6 +1,8 @@
 Fitting a Model
 ===============
 
+.. _fitting:
+
 .. include:: macros.hrst
 
-TODO: discuss how models have to end in a distribution and how to fit them, etc
+TODO: to fit a model to data, w/ either numpy arrays or pandas DataFrame/Series, etc

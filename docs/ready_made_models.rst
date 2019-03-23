@@ -1,6 +1,8 @@
 Ready-made Models
 =================
 
+.. _ready_made_models:
+
 .. include:: macros.hrst
 
-TODO: discuss the different ready-made models in the models module
+TODO: the different ready-made models in the models module and how to use them

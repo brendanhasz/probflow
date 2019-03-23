@@ -1,6 +1,8 @@
 Layers
 ======
 
+.. _layers:
+
 .. include:: macros.hrst
 
-TODO: discuss layers, etc
+TODO: types of layers and how to use them, etc

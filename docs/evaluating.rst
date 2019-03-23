@@ -1,6 +1,8 @@
 Evaluating Model Performance
 ============================
 
+.. _evaluating:
+
 .. include:: macros.hrst
 
 TODO: how to criticize the model w/ metrics, residuals, predictive_distribution, 
