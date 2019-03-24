@@ -969,7 +969,7 @@ class BaseDistribution(BaseLayer):
                        self._ph['batch_size']: [x.shape[0]]})
 
 
-    def metrics(self, x=None, y=None, data=None, metric_list=[]):
+    def metrics(self, metric_list=[], x=None, y=None, data=None):
         """Compute metrics of model performance.
 
         TODO: docs
@@ -983,6 +983,18 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
+        metric_list : str or list of str
+            Metrics to evaluate each epoch.  To evaluate multiple metrics, 
+            pass a list of strings, where each string is a different metric.
+            Available metrics:
+
+            * 'acc': accuracy
+            * 'accuracy': accuracy
+            * 'mse': mean squared error
+            * 'sse': sum of squared errors
+            * 'mae': mean absolute error
+
+            Default = empty list
         x : |ndarray| or int or str or list of str or int
             Independent variable values of the dataset to fit (aka the 
             "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
@@ -1000,18 +1012,6 @@ class BaseDistribution(BaseLayer):
             ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
             :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
             strings containing the columns from ``data`` to use.
-        metric_list : str or list of str
-            Metrics to evaluate each epoch.  To evaluate multiple metrics, 
-            pass a list of strings, where each string is a different metric.
-            Available metrics:
-
-            * 'acc': accuracy
-            * 'accuracy': accuracy
-            * 'mse': mean squared error
-            * 'sse': sum of squared errors
-            * 'mae': mean absolute error
-
-            Default = empty list
         """
 
         # Check types

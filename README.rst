@@ -20,9 +20,9 @@ It's very much still a work in progress.
 Getting Started
 ---------------
 
-`TensorFlow Probability <http://www.tensorflow.org/probability>`_ is a fantastic Python library for building probabilistic models.  Unfortunately, because of the flexibility it allows, TensorFlow Probability requires a lot of boilerplate code in order to fit a full Bayesian model.  **ProbFlow** takes care of all the legwork, allowing you to quickly and painlessly build, fit, and evaluate custom Bayesian models (or `ready-made <http://probflow.readthedocs.io/en/latest/ready_made_models.html>`_ ones!) which run on top of `TensorFlow <http://www.tensorflow.org/>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability>`_.
+**ProbFlow** allows you to quickly and painlessly build, fit, and evaluate custom Bayesian models (or `ready-made <http://probflow.readthedocs.io/en/latest/ready_made_models.html>`_ ones!) which run on top of `TensorFlow <http://www.tensorflow.org/>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability>`_.
 
-With ProbFlow, the core building blocks of a Bayesian model are parameters, layers, and probability distributions (and, of course, the data input).  Layers define how parameters interact with the independent variables (the *x* data) to create the probability distribution of the observed dependent variables (the *y* values).
+With ProbFlow, the core building blocks of a Bayesian model are parameters, layers, and probability distributions (and, of course, the data input).  Layers define how parameters interact with the independent variables (the features) to predict the probability distribution of the dependent variables (the target).
 
 For example, a simple Bayesian linear regression
 
@@ -32,7 +32,7 @@ can be built with ProbFlow by:
 
 .. code-block:: python
 
-    from probflow import Input, Parameter, Normal
+    from probflow import Input, Parameter, ScaleParameter, Normal
     
     feature = Input()
     weight = Parameter()
@@ -69,7 +69,7 @@ Evaluate your model's performance using metrics:
 
 .. code-block:: python
 
-    model.metrics(metric_list='accuracy')
+    model.metrics('mse')
 
 Inspect the posterior distributions of your fit model's parameters, with 95% confidence intervals:
 

@@ -24,9 +24,9 @@ It's very much still a work in progress.
 Getting Started
 ---------------
 
-|TensorFlow Probability| is a fantastic Python library for building probabilistic models.  Unfortunately, because of the flexibility it allows, TensorFlow Probability requires a lot of boilerplate code in order to fit a full Bayesian model.  **ProbFlow** takes care of all the legwork, allowing you to quickly and painlessly build, fit, and evaluate custom Bayesian models (or :ref:`ready-made <ready_made_models>` ones!) which run on top of |TensorFlow| and |TensorFlow Probability|.
+**ProbFlow** allows you to quickly and painlessly build, fit, and evaluate custom Bayesian models (or :ref:`ready-made <ready_made_models>` ones!) which run on top of |TensorFlow| and |TensorFlow Probability|.
 
-With ProbFlow, the core building blocks of a Bayesian model are parameters, layers, and probability distributions (and, of course, the data input).  Layers define how parameters interact with the independent variables (the *x* data) to create the probability distribution of the observed dependent variables (the *y* values).
+With ProbFlow, the core building blocks of a Bayesian model are parameters, layers, and probability distributions (and, of course, the data input).  Layers define how parameters interact with the independent variables (the features) to predict the probability distribution of the dependent variables (the target).
 
 For example, a simple Bayesian linear regression
 
@@ -71,11 +71,11 @@ Compute *probabilistic* predictions for new data, with 95% confidence intervals:
    :width: 90 %
    :align: center
 
-Evaluate your model's performance using metrics:
+Evaluate your model's performance using various metrics:
 
 .. code-block:: python
 
-    model.metrics(metric_list='mse')
+    model.metrics('mse')
 
 Inspect the posterior distributions of your fit model's parameters, with 95% confidence intervals:
 
