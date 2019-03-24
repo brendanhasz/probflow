@@ -17,7 +17,7 @@ Backlog (short term):
 * Finish BaseDistribution critisism methods
 * Tests for BaseDistribution critisism methods
 * Docs for BaseDistribution critisism methods
-* Dense layer (w/ flipout)
+* Dense layer
 * Test for Dense, add Dense test to stats/test_LinearRegression
 * `Sequential layer`_
 * Tests
@@ -35,6 +35,7 @@ Backlog (short term):
 Backlog (long term):
 --------------------
 
+* `Parameter sharing`_
 * `Tensorflow graph view`_
 * `Tensorflow dashboard`_
 * `Slicing`_
@@ -225,6 +226,32 @@ E.g. for transfer learning, you might want to train a model, take some layer(s) 
 
 Could go through the tree and for all parameters set their posterior parameter 
 tf.Varable's .trainable property = False?
+
+
+Parameter sharing
+^^^^^^^^^^^^^^^^^
+
+For conv nets, resnet-like structures, etc.  As-is, if you tried to do:
+
+.. code-block:: python
+
+    beta = Parameter()
+    in1 = Input(0)
+    in2 = Input(1)
+    out = (in1*beta) + (in2*beta)
+
+I think it would *re-build* beta for in2, and then in1 would be pointing at a separate copy of the parameter which ProbFlow wouldn't know about.
+
+Should also allow layer sharing, where output from one layer can be piped into multiple other layers, e.g.:
+
+.. code-block:: python
+
+    layer1 = Dense(units=10)
+    layer2 = Dense(layer1, units=5)
+    layer3 = Cat([layer1, layer2])
+
+Honestly I think all of that may be as easy as putting an "if arg.build_obj is None" before arg.build() in core.BaseLayer.build().
+
 
 
 Bijector support

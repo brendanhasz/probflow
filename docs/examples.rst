@@ -48,6 +48,7 @@ TODO: manually:
 
 TODO: look at posteriors and model criticism etc
 
+TODO: multiple linear regression, posteriors, etc
 
 TODO: with Dense (which automatically uses x as input if none is specified):
 
@@ -101,13 +102,24 @@ TODO: then w/ Sequential,
     model = Normal(predictions, noise_std)
     model.fit(x, y)
 
-TODO: then w/ DenseRegression or DenseClassifier. (automatically sets the size of the last layer by looking @ size of input `y`, or the num unique elements of it for DenseClassifier)
+TODO: then w/ DenseNet, which automatically creates sequential dense layers, but NOT the normal dist on top
+
+.. code-block:: python
+
+    from probflow import Sequential, Dense, ScaleParameter, Normal
+
+    predictions = DenseNet(units=[128, 64, 1])
+    noise_std = ScaleParameter()
+    model = Normal(predictions, noise_std)
+    model.fit(x, y)
+
+TODO: then w/ DenseRegression (adds a normal dist observation dist) or DenseClassifier (adds a Bernoulli dist):
 
 .. code-block:: python
 
     from probflow import DenseRegression
 
-    model = DenseRegression(units=[128, 64])
+    model = DenseRegression(units=[128, 64, 1])
     model.fit(x, y)
 
 

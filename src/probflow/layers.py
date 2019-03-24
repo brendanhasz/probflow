@@ -68,6 +68,13 @@ Neural Network Layers
 * :class:`.Embedding`
 
 
+Custom Transform Layer
+----------------------
+
+A layer which performs an elementwise transform using any arbitrairy |TensorFlow| ops. 
+
+* :class:`.Transform`
+
 ----------
 
 """
@@ -355,6 +362,33 @@ class Sqrt(BaseLayer):
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
         return tf.sqrt(args['input'])
+
+
+
+class Transform(BaseLayer):
+    r"""Performs an elementwise transform using arbitrairy |TensorFlow| ops. 
+
+
+    TODO: More info...
+
+    Given :math:`x`, and some function :math:`f`, this layer returns 
+    :math:`f(x)`, elementwise.
+
+    """
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'func': lambda x: x,
+    }
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not callable(kwargs['func']):
+            raise ValueError('func kwarg must be a callable')
+
+    def _build(self, args, _data, _batch_shape):
+        """Build the layer."""
+        return self.kwargs['func'](args['input'])
 
 
 
