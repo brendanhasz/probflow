@@ -54,9 +54,9 @@ class Normal(ContinuousDistribution):
     parameters: 
 
     - a location parameter (``loc`` or :math:`\mu`) which determines the mean
-    of the distribution, and 
+      of the distribution, and 
     - a scale parameter (``scale`` or :math:`\sigma > 0`) which determines the
-    standard deviation of the distribution.
+      standard deviation of the distribution.
 
     A random variable :math:`x` drawn from a normal distribution
 
@@ -115,7 +115,7 @@ class HalfNormal(ContinuousDistribution):
     positive real numbers, and has one parameter:
 
     - a scale parameter (``scale`` or :math:`\sigma > 0`) which determines the
-    standard deviation of the distribution.
+      standard deviation of the distribution.
 
     A random variable :math:`x` drawn from a half-normal distribution
 
@@ -176,11 +176,11 @@ class StudentT(ContinuousDistribution):
     parameters:
 
     - a degrees of freedom parameter (``df`` or :math:`\nu > 0`), which
-    determines how many degrees of freedom the distribution has,
+      determines how many degrees of freedom the distribution has,
     - a location parameter (``loc`` or :math:`\mu`) which determines the mean
-    of the distribution, and
+      of the distribution, and
     - a scale parameter (``scale`` or :math:`\sigma > 0`) which determines the 
-    standard deviation of the distribution.
+      standard deviation of the distribution.
 
     A random variable :math:`x` drawn from a Student's t-distribution
 
@@ -251,9 +251,9 @@ class Cauchy(ContinuousDistribution):
     parameters: 
 
     - a location parameter (``loc`` or :math:`\mu`) which determines the
-    median of the distribution, and 
+      median of the distribution, and 
     - a scale parameter (``scale`` or :math:`\gamma > 0`) which determines the
-    spread of the distribution.
+      spread of the distribution.
 
     A random variable :math:`x` drawn from a Cauchy distribution
 
@@ -317,7 +317,7 @@ class Gamma(ContinuousDistribution):
     has two parameters: 
 
     - a shape parameter (``shape`` or :math:`\alpha > 0`, a.k.a. 
-    "concentration"), and
+      "concentration"), and
     - a rate parameter (``rate`` or :math:`\beta > 0`).
 
     The ratio of :math:`\frac{\alpha}{\beta}` determines the mean of the
@@ -385,7 +385,7 @@ class InvGamma(ContinuousDistribution):
     has two parameters: 
 
     - a shape parameter (``shape`` or :math:`\alpha > 0`, a.k.a. 
-    "concentration"), and
+      "concentration"), and
     - a rate parameter (``rate`` or :math:`\beta > 0`, a.k.a. "scale").
 
     The ratio of :math:`\frac{\beta}{\alpha-1}` determines the mean of the
@@ -527,7 +527,7 @@ class Poisson(DiscreteDistribution):
     and has one parameter: 
 
     - a rate parameter (``rate`` or :math:`\lambda`) which determines the mean
-    of the distribution.
+      of the distribution.
 
     A random variable :math:`x` drawn from a Poisson distribution
 

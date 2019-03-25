@@ -48,11 +48,11 @@ can be built with ProbFlow by:
     predictions = weight*feature + bias
     model = Normal(predictions, noise_std)
 
-Then, the model can be fit using variational inference in one line:
+Then, the model can be fit using variational inference, in *one line*:
 
 .. code-block:: python
 
-    # x and y are Numpy vectors
+    # x and y are Numpy arrays or pandas DataFrame/Series
     model.fit(x, y)
 
 You can generate predictions for new data:
