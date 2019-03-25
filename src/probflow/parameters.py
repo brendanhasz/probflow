@@ -262,8 +262,10 @@ class Parameter(BaseParameter):
         params = dict()
         with tf.variable_scope(self.name):
             for arg in self.posterior_fn._post_param_bounds:
-                if self.initializer is None:
-                    params[arg] = tf.get_variable(arg, shape=self.shape)
+                if self.initializer is None: #use default initializer
+                    init = self.posterior_fn._post_param_init[arg]
+                    params[arg] = tf.get_variable(arg, shape=self.shape,
+                                                  initializer=init)
                 elif isinstance(self.initializer, dict):
                     params[arg] = \
                         tf.get_variable(arg, initializer=self.initializer[arg])
@@ -625,9 +627,6 @@ class ScaleParameter(Parameter):
                  posterior_fn=InvGamma,
                  seed=None,
                  initializer=None):
-        if initializer is None:
-            initializer = {'shape': np.full(shape, np.log(5.0)), 
-                           'rate': np.full(shape, np.log(5.0))}
         super().__init__(shape=shape,
                          name=name,
                          prior=prior,
