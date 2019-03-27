@@ -883,6 +883,132 @@ class Dense(BaseLayer):
 
 
 
+class BatchNormalization(BaseLayer):
+    r"""A layer which normalizes its inputs.
+
+
+    TODO: More info...
+
+    Given a set of tensors for this batch, where :math:`x_{ij}` is
+    the :math:`i`-th element of the :math:`j`-th sample in this batch,
+    this layer returns an elementwise transformation of the input tensors
+    according to:
+
+    .. math::
+
+        \text{BatchNorm}(x_{ij}) = 
+        \gamma_i \left( \frac{x_{ij} - \mu_i}{\sigma_i} \right)
+        + \beta_i
+
+    Where :math:`\mu_i` is the mean of the :math:`i`-th element:
+
+    .. math::
+
+        \mu_i = \frac{1}{N} \sum_{k=1}{N} \mathbf x_{ik}
+
+    and :math:`\sigma_i` is the standard deviation of the :math:`i`-th 
+    element:
+
+    .. math::
+
+        \mu_i = \frac{1}{N} \sum_{k=1}{N} (\mathbf x_{ik} - \mu_i)^2
+
+    and :math:`\gamma` and :math:`\beta` are two free parameters for each 
+    element.
+    """
+
+    # Layer arguments and their default values
+    _default_args = {
+        'input': Input(),
+    }
+
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'weight_posterior': Normal,
+        'bias_posterior': Normal,
+        'weight_initializer': None,
+        'bias_initializer': None,
+        'weight_prior': Normal(0, 1),
+        'bias_prior': Normal(0, 1),
+    }
+
+
+    def _build(self, args, data, batch_shape):
+        """Build the layer."""
+
+        # Inputs
+        x_in = args['input']
+        dims = x_in.shape[1:]
+
+        # Normalize input elementwise
+        x_mean = tf.reduce_mean(x_in, axis=0, keepdims=True)
+        x_std = tf.nn.moments(x_in, axes=[0], keepdims=True)
+        x_norm = (x_in-x_mean)/x_std
+
+        # TODO: make scope for this layer's variables
+
+        # Create weight and bias parameters
+        weight = Parameter(shape=dims,
+                           posterior_fn=self.kwargs['weight_prior'],
+                           initializer=self.kwargs['weight_initializer'],
+                           prior=self.kwargs['weight_prior'])
+        bias = Parameter(shape=dims,
+                         posterior_fn=self.kwargs['bias_prior'],
+                         initializer=self.kwargs['bias_initializer'],
+                         prior=self.kwargs['bias_prior'])
+
+        # Build the weight and bias parameter
+        weight.build(data, batch_shape)
+        bias.build(data, batch_shape)
+
+        # Compute output using a sample from the variational posteriors
+        weight_samples = self.weight.built_obj
+        bias_samples = self.bias.built_obj
+        self._sample = x_norm*weight_samples + bias_samples
+
+        # Compute the output using the means of the variational posteriors
+        weight_means = self.weight.mean_obj
+        bias_means = self.bias.mean_obj
+        self._mean = x_norm*weight_means + bias_means
+
+        # Compute the losses
+        self._log_loss_sum = (weight._log_loss(weight_samples) +
+                              bias._log_loss(bias_samples))
+        self._mean_log_loss_sum = (weight._log_loss(weight_means) +
+                                   bias._log_loss(bias_means))
+        self._kl_loss_sum = weight._kl_loss() + bias._kl_loss()
+
+        # Return the sample
+        return self._sample
+
+
+    def _build_mean(self, args, data):
+        """Build the layer with mean parameters.
+
+        TODO: docs
+        Note that this was done in _build()
+
+        """
+        return self._mean
+
+
+    def _log_loss(self, vals):
+        """Log loss incurred by this layer."""
+        return self._log_loss_sum
+
+
+    def _mean_log_loss(self, vals):
+        """Log loss incurred by this layer w/ mean parameters."""
+        return self._mean_log_loss_sum
+
+
+    def _kl_loss(self):
+        """The sum of divergences of variational posteriors from priors."""
+        return self._kl_loss_sum
+
+
+
 class Sequential(BaseLayer):
     """A sequence of layers.
 
