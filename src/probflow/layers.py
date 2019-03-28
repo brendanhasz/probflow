@@ -912,14 +912,14 @@ class BatchNormalization(BaseLayer):
 
     .. math::
 
-        \mu_i = \frac{1}{N} \sum_{k=1}{N} \mathbf x_{ik}
+        \mu_i = \frac{1}{N} \sum_{k=1}^{N} x_{ik}
 
     and :math:`\sigma_i` is the standard deviation of the :math:`i`-th 
     element:
 
     .. math::
 
-        \mu_i = \frac{1}{N} \sum_{k=1}{N} (\mathbf x_{ik} - \mu_i)^2
+        \sigma_i = \frac{1}{N} \sum_{k=1}^{N} (x_{ik} - \mu_i)^2
 
     and :math:`\gamma` and :math:`\beta` are two free parameters for each 
     element.
@@ -966,7 +966,7 @@ class BatchNormalization(BaseLayer):
         x = Input()
         l1 = Dense(x, units=128)
         l1_norm = BatchNormalization(layer1)
-        l2 = Dense(l1, units=64)
+        l2 = Dense(l1_norm, units=64)
         ...
 
     References
