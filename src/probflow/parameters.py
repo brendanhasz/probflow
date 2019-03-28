@@ -27,10 +27,6 @@ class Parameter(BaseParameter):
 
     TODO: describe...
 
-    .. math::
-
-        y \sim \mathcal{N}(0, 1)
-
 
     Parameters
     ----------
@@ -72,7 +68,7 @@ class Parameter(BaseParameter):
         posterior parameter by passing a dict with keys containing the 
         parameter names, and values containing the |Tensor| or |Initializer| 
         with which to initialize each parameter.
-        Default is to use ``glorot_uniform_initializer``.
+        Default is to use the default initializer for that |Distribution|.
     estimator : {``'flipout'`` or |None|}
         Method of posterior estimator to use. Valid values:
 

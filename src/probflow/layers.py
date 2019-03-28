@@ -63,6 +63,7 @@ Neural Network Layers
 ---------------------
 
 * :class:`.Dense`
+* :class:`.BatchNormalization`
 * :class:`.Sequential`
 * :class:`.Gather`
 * :class:`.Embedding`
@@ -91,6 +92,7 @@ __all__ = [
     'Log',
     'Reciprocal',
     'Sqrt',
+    'Transform',
     'Sigmoid',
     'Relu',
     'Softmax',
@@ -104,6 +106,7 @@ __all__ = [
     'Dot',
     'Matmul',
     'Dense',
+    'BatchNormalization',
     'Sequential',
     'Gather',
     'Embedding',
@@ -824,6 +827,8 @@ class Dense(BaseLayer):
         ndims = x_in.shape[1]
         units = self.kwargs['units']
 
+        # TODO: make a scope for this layer's variables
+
         # Create weight and bias parameters
         weight = Parameter(shape=[ndims, units],
                            prior=self.kwargs['weight_prior'])
@@ -886,8 +891,11 @@ class Dense(BaseLayer):
 class BatchNormalization(BaseLayer):
     r"""A layer which normalizes its inputs.
 
-
-    TODO: More info...
+    Batch normalization is a technique which normalizes and re-scales and 
+    offsets the output of one layer before passing it on to another layer
+    [1]_.  It often leads to faster training of neural networks, and better
+    generalization error by stabilizing the change in the layers' input
+    distributions, or perhaps by smoothing the optimization landscape [2]_.
 
     Given a set of tensors for this batch, where :math:`x_{ij}` is
     the :math:`i`-th element of the :math:`j`-th sample in this batch,
@@ -915,6 +923,61 @@ class BatchNormalization(BaseLayer):
 
     and :math:`\gamma` and :math:`\beta` are two free parameters for each 
     element.
+
+    Parameters
+    ----------
+    input : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Input to batch-normalize.
+
+    Keyword Arguments
+    -----------------
+    weight_posterior : |Distribution|
+        Probability distribution class to use to approximate the posterior
+        for the weight parameter(s) (:math:`\gamma`).
+        Default = :class:`.Normal`
+    bias_posterior : |Distribution|
+        Probability distribution class to use to approximate the posterior
+        for the bias parameter(s) (:math:`\beta`).
+        Default = :class:`.Normal`
+    weight_prior : |None| or a |Distribution| object
+        Prior probability distribution for the weight parameter(s)
+        (:math:`\gamma`).  |None| or a |Distribution| function which has been
+        instantiated with parameters.
+        Default = :class:`.Normal` ``(0,1)``
+    bias_prior : |None| or a |Distribution| object
+        Prior probability distribution for the bias parameter(s)
+        (:math:`\beta`).  |None| or a |Distribution| function which has been
+        instantiated with parameters.
+        Default = :class:`.Normal` ``(0,1)``
+    weight_initializer : {|None| or dict or |Tensor| or |Initializer|}
+        Initializer for each of the weights' variational posterior parameters.
+        See :class:`.Parameter` for more information on how to specify a
+        custom ``initializer``.
+    bias_initializer : {|None| or dict or |Tensor| or |Initializer|}
+        Initializer for each of the weights' variational posterior parameters.
+        See :class:`.Parameter` for more information on how to specify a
+        custom ``initializer``.
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        x = Input()
+        l1 = Dense(x, units=128)
+        l1_norm = BatchNormalization(layer1)
+        l2 = Dense(l1, units=64)
+        ...
+
+    References
+    ----------
+    .. [1] Sergey Ioffe and Christian Szegedy.
+        Batch Normalization: Accelerating Deep Network Training by
+        Reducing Internal Covariate Shift.
+        *arXiv preprint*, 2015. http://arxiv.org/abs/1502.03167
+    .. [2] Shibani Santurkar, Dimitris Tsipras, Andrew Ilyas, and 
+        Aleksander Madry. How Does Batch Normalization Help Optimization?
+        *arXiv preprint*, 2018. http://arxiv.org/abs/1805.11604
     """
 
     # Layer arguments and their default values
@@ -946,7 +1009,7 @@ class BatchNormalization(BaseLayer):
         x_std = tf.nn.moments(x_in, axes=[0], keepdims=True)
         x_norm = (x_in-x_mean)/x_std
 
-        # TODO: make scope for this layer's variables
+        # TODO: make a scope for this layer's variables
 
         # Create weight and bias parameters
         weight = Parameter(shape=dims,
@@ -1018,8 +1081,85 @@ class Sequential(BaseLayer):
 
     """
 
-    # TODO
-    pass
+
+    # Layer arguments and their default values
+    _default_args = {
+        'input': Input(),
+    }
+
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'layers': [],
+    }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['layers'], list):
+            raise ValueError('layers kwarg must be a list of layers')
+        for layer in kwargs['layers']:
+            if not isinstance(kwargs['layers'], BaseLayer):
+                raise ValueError('each element of layers must be a BaseLayer')
+            if len(layer._default_args) > 1:
+                raise RuntimeError('each layer must take only 1 input')
+
+
+    def _build(self, args, data, batch_shape):
+        """Build the layer."""
+
+        # List of layers
+        layers = kwargs['layers']
+
+        # Connect the layers
+        output = args['input']
+        for layer in layers:
+            layer.args['input'] = output
+            output = layer
+
+        # Store a list of all parameters in each layer
+        for layer in layers:
+            self._parameters = layer._parameter_list()
+
+        # Build the layers
+        layers[-1].build(data, batch_shape)
+
+        # Store mean and sample
+        self._sample = layers[-1]._sample
+        self._mean = layers[-1]._mean
+
+        # Store the losses
+        self._log_loss_sum = layers[-1].samp_loss_sum
+        self._mean_log_loss_sum = layers[-1].mean_loss_sum
+        self._kl_loss_sum = layers[-1].kl_loss_sum
+
+        # Return the sample from the last layer
+        return self._sample
+
+
+    def _build_mean(self, args, data):
+        """Build the layer with mean parameters.
+
+        TODO: docs
+        Note that this was done in _build()
+
+        """
+        return self._mean
+
+
+    def _log_loss(self, vals):
+        """Log loss incurred by this layer."""
+        return self._log_loss_sum
+
+
+    def _mean_log_loss(self, vals):
+        """Log loss incurred by this layer w/ mean parameters."""
+        return self._mean_log_loss_sum
+
+
+    def _kl_loss(self):
+        """The sum of divergences of variational posteriors from priors."""
+        return self._kl_loss_sum
 
 
 
