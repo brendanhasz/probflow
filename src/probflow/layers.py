@@ -840,16 +840,18 @@ class Dense(BaseLayer):
         bias.build(data, batch_shape)
 
         # Compute output using a sample from the variational posteriors
-        weight_samples = self.weight.built_obj
-        bias_samples = self.bias.built_obj
+        weight_samples = weight.built_obj
+        bias_samples = bias.built_obj
         y_out = tf.matmul(x_in, weight_samples) + bias_samples
         self._sample = self.kwargs['activation'](y_out)
 
         # Compute the output using the means of the variational posteriors
-        weight_means = self.weight.mean_obj
-        bias_means = self.bias.mean_obj
+        weight_means = weight.mean_obj
+        bias_means = bias.mean_obj
         mean_y_out = tf.matmul(x_in, weight_means) + bias_means
         self._mean = self.kwargs['activation'](mean_y_out)
+
+        # TODO: store weight + bias as attributes?
 
         # Compute the losses
         self._log_loss_sum = (weight._log_loss(weight_samples) +
@@ -1011,13 +1013,16 @@ class BatchNormalization(BaseLayer):
 
         # TODO: make a scope for this layer's variables
 
+        # TODO: add option for whether to use probabalistic weight/bias params
+        # or just single point values
+
         # Create weight and bias parameters
         weight = Parameter(shape=dims,
-                           posterior_fn=self.kwargs['weight_prior'],
+                           posterior_fn=self.kwargs['weight_posterior'],
                            initializer=self.kwargs['weight_initializer'],
                            prior=self.kwargs['weight_prior'])
         bias = Parameter(shape=dims,
-                         posterior_fn=self.kwargs['bias_prior'],
+                         posterior_fn=self.kwargs['bias_posterior'],
                          initializer=self.kwargs['bias_initializer'],
                          prior=self.kwargs['bias_prior'])
 
@@ -1026,14 +1031,16 @@ class BatchNormalization(BaseLayer):
         bias.build(data, batch_shape)
 
         # Compute output using a sample from the variational posteriors
-        weight_samples = self.weight.built_obj
-        bias_samples = self.bias.built_obj
+        weight_samples = weight.built_obj
+        bias_samples = bias.built_obj
         self._sample = x_norm*weight_samples + bias_samples
 
         # Compute the output using the means of the variational posteriors
-        weight_means = self.weight.mean_obj
-        bias_means = self.bias.mean_obj
+        weight_means = weight.mean_obj
+        bias_means = bias.mean_obj
         self._mean = x_norm*weight_means + bias_means
+
+        # TODO: store weight + bias as attributes?
 
         # Compute the losses
         self._log_loss_sum = (weight._log_loss(weight_samples) +
@@ -1240,7 +1247,7 @@ class Gather(BaseLayer):
 
 
 class Embedding(BaseLayer):
-    """A categorical embedding layer.
+    r"""A categorical embedding layer.
 
 
     TODO: More info...
@@ -1268,10 +1275,126 @@ class Embedding(BaseLayer):
 
     also should take a dims kwarg (embedding dimensions)
 
+
+    Parameters
+    ----------
+    input : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Input non-negative integers to embed in a ``dims``-dimensional space.
+
+    Keyword Arguments
+    -----------------
+    dims : int > 0
+        Number of embedding dimensions.
+    probabilistic : bool
+        Whether to use probabilistic (True) or point estimates (False) for the
+        embeddings.
+        Default = False.
+    posterior : |Distribution|
+        Probability distribution class to use to approximate the embeddings'
+        posterior distributions.
+        Default = :class:`.Normal`
+    prior : |None| or a |Distribution| object
+        Prior probability distribution for the embeddings. |None| or a 
+        |Distribution| function which has been instantiated with parameters.
+        Default = :class:`.Normal` ``(0,1)``
+    initializer : {|None| or dict or |Tensor| or |Initializer|}
+        Initializer for the embeddings' variational posterior parameters.
+        See :class:`.Parameter` for more information on how to specify a
+        custom ``initializer``.
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        x = Input('word_id')
+        emb = Embedding(x, dims=50)
+        l1 = Dense(emb, units=128)
+        predictions = Dense(l1, units=1)
+        ...
+
     """
 
-    # TODO
-    pass
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'dims': 5,
+        'posterior': Normal,
+        'initializer': None,
+        'prior': Normal(0, 1),
+        'index_dtype': tf.uint32,
+    }
+
+
+    def _build(self, args, data, batch_shape):
+        """Build the layer."""
+
+        # Ensure arg is Input layer w/ only 1 dimension
+        if not isinstance(self.args['input'], Input):
+            raise TypeError('Embedding input must be an Input layer')
+        if isinstance(self.args['input']._int_cols, list):
+            raise RuntimeError('Embedding input must be 1-dimensional')
+
+        # Inputs
+        x_in = args['input']
+        input_dim = self.args['input']._nunique
+
+        # TODO: add option for whether to use probabalistic weight/bias params
+        # or just single point values
+
+        # TODO: make a scope for this layer's variables
+
+        # Create embedding parameters
+        embeddings = Parameter(shape=[input_dim, self.kwargs['dims']],
+                               posterior_fn=self.kwargs['posterior'],
+                               initializer=self.kwargs['initializer'],
+                               prior=self.kwargs['prior'])
+
+        # Build the embedding parameters
+        embeddings.build(data, batch_shape)
+
+        # Compute output using a sample from the variational posteriors
+        self._sample = tf.gather(embeddings.built_obj, 
+                                 tf.cast(x_in, self.kwargs['index_dtype']))
+
+        # Compute the output using the means of the variational posteriors
+        self._mean = tf.gather(embeddings.mean_obj, 
+                               tf.cast(x_in, self.kwargs['index_dtype']))
+
+        # TODO: store embeddings as attribute?
+
+        # Compute the losses
+        self._log_loss_sum = embeddings._log_loss(embeddings.built_obj)
+        self._mean_log_loss_sum = embeddings._log_loss(embeddings.mean_obj)
+        self._kl_loss_sum = embeddings._kl_loss()
+
+        # Return the sample
+        return self._sample
+
+
+    def _build_mean(self, args, data):
+        """Build the layer with mean parameters.
+
+        TODO: docs
+        Note that this was done in _build()
+
+        """
+        return self._mean
+
+
+    def _log_loss(self, vals):
+        """Log loss incurred by this layer."""
+        return self._log_loss_sum
+
+
+    def _mean_log_loss(self, vals):
+        """Log loss incurred by this layer w/ mean parameters."""
+        return self._mean_log_loss_sum
+
+
+    def _kl_loss(self):
+        """The sum of divergences of variational posteriors from priors."""
+        return self._kl_loss_sum
 
 
 # TODO: LSTM

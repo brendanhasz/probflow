@@ -567,8 +567,8 @@ class BaseDistribution(BaseLayer):
             return x_data, y_data, batch_size_ph
 
 
-        def assign_input_cols(cols):
-            """Assigns integer values to Input objects' cols"""
+        def assign_input_info(cols, x_data):
+            """Assigns integer values + nunique to Input objects"""
 
             def str2int(t_str, col_list):
                 int_col = None
@@ -583,10 +583,13 @@ class BaseDistribution(BaseLayer):
             for tin in inputs:
                 t_col = tin.kwargs['cols']
                 if isinstance(t_col, int):
-                    tin._int_cols = tin.kwargs['cols']
-                if isinstance(t_col, str):
-                    tin._int_cols = str2int(t_col, cols)
-                if isinstance(t_col, list):
+                    tin._int_cols = t_col
+                    tin._nunique = len(np.unique(x_data[:, t_col]))
+                elif isinstance(t_col, str):
+                    t_int = str2int(t_col, cols)
+                    tin._int_cols = t_int
+                    tin._nunique = len(np.unique(x_data[:, t_int]))
+                elif isinstance(t_col, list):
                     int_cols = len(t_col)*[None]
                     for ix, col in enumerate(t_col):
                         if isinstance(col, str):
@@ -682,7 +685,7 @@ class BaseDistribution(BaseLayer):
         shuff_ids = initialize_shuffles(N, epochs, shuffle)
 
         # Assign columns to Input objects
-        assign_input_cols(x_in)
+        assign_input_info(x_in, x)
 
         # Recursively build this model and its args
         self.build(x_data, batch_size_ph)
