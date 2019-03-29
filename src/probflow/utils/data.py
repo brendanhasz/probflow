@@ -31,6 +31,10 @@ def process_data(model, x=None, data=None, name='x'):
     # Ensure we were passed a model object
     # TODO
 
+    # Convert x to a list if not
+    if isinstance(x, (str, int)):
+        x = [x]
+
     # Use training data if none passed
     if x is None:
         try:
@@ -45,11 +49,14 @@ def process_data(model, x=None, data=None, name='x'):
         if not isinstance(x, np.ndarray):
             raise TypeError(name+' must be a numpy ndarray')
 
+        # Just return that array
+        xo = x
+
     else:
 
         # Pandas DataFrame
-        from pandas import DataFrame
-        if isinstance(data, DataFrame):
+        import pandas as pd
+        if isinstance(data, pd.DataFrame):
 
             # Check type
             if not isinstance(x, (int, str, list)):
@@ -58,19 +65,35 @@ def process_data(model, x=None, data=None, name='x'):
                 if not all([isinstance(e, (int, str)) for e in x]):
                     raise TypeError(name+' must be a list of int or str')
 
-            # Get the columns
-            x = data.ix[:,x].values
+            # Convert categorical columns to category codes
+            xo = np.full((data.shape[0], len(x)), np.nan)
+            for iC, col in enumerate(x):
+                if isinstance(col, str):
+                    if pd.api.types.is_object_dtype(data[col]):
+                        xo[:,iC] = (data[col].astype('category')
+                                    .cat.codes.values)
+                    else:
+                        xo[:,iC] = data[col]
+                elif isinstance(col, int):
+                    if pd.api.types.is_object_dtype(data.iloc[:col]):
+                        xo[:,iC] = (data.iloc[:,col].astype('category')
+                                    .cat.codes.values)
+                    else:
+                        xo[:,iC] = data.iloc[:,col]
+                else:
+                    raise TypeError('each element of ' + name +
+                                    ' must be str or int')
 
         else:
             raise TypeError(name+' must be None or a pandas DataFrame')
 
     # Make data at least 2 dimensional (0th dim should be N)
-    if x.ndim == 1:
-        x = np.expand_dims(x, 1)
+    if xo.ndim == 1:
+        xo = np.expand_dims(xo, 1)
 
     # TODO: ensure x data shape matches model._ph['x'] shape (only if fit)
 
-    return x
+    return xo
 
 
 def process_xy_data(self, x=None, y=None, data=None):
