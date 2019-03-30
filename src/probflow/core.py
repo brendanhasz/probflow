@@ -309,9 +309,6 @@ class BaseLayer(BaseObject):
 
         """
 
-        # Store a list of all parameters in the model
-        self._parameters = self._parameter_list()
-
         # Build each of this layer's arguments.
         self.built_args = dict()
         self.mean_args = dict()
@@ -686,6 +683,9 @@ class BaseDistribution(BaseLayer):
 
         # Assign columns to Input objects
         assign_input_info(x_in, x)
+
+        # Store a list of all parameters in the model
+        self._parameters = self._parameter_list()
 
         # Recursively build this model and its args
         self.build(x_data, batch_size_ph)

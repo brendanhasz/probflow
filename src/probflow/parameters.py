@@ -564,9 +564,9 @@ class ScaleParameter(Parameter):
     r"""Standard deviation parameter.
 
     This is a convenience class for creating a standard deviation parameter
-    (\sigma).  It is created by first constructing a variance parameter
-    (:math:`\sigma^2`) which uses an inverse gamma distribution as the
-    variational posterior.
+    (:math:`\sigma`).  It is created by first constructing a variance 
+    parameter (:math:`\sigma^2`) which uses an inverse gamma distribution as
+    the variational posterior.
 
     .. math::
 
@@ -607,8 +607,8 @@ class ScaleParameter(Parameter):
         parameter names, and values containing the |Tensor| or |Initializer| 
         with which to initialize each parameter.
         Default is to initialize both the ``shape`` and ``rate`` parameters
-        of the :class:`.InvGamma` variational posterior to ``log(5)`` (such 
-        that the values drawn from the distribution are initially ~1).
+        of the :class:`.InvGamma` variational posterior to the default for
+        that distribution (see :class:`.InvGamma`).
 
     Examples
     --------
