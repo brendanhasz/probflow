@@ -45,6 +45,59 @@ from .core import ContinuousDistribution, DiscreteDistribution, REQUIRED
 
 
 
+class Deterministic(ContinuousDistribution):
+    r"""A deterministic distribution.
+
+    A 
+    `deterministic distribution <https://en.wikipedia.org/wiki/Degenerate_distribution>`_
+    is a continuous distribution defined over all real numbers, and has one
+    parameter: 
+
+    - a location parameter (``loc`` or :math:`k_0`) which determines the mean
+      of the distribution.
+
+    A random variable :math:`x` drawn from a deterministic distribution
+    has probability of 1 at its location parameter value, and zero elsewhere:
+
+    .. math::
+
+        p(x) = 
+        \begin{cases}
+            1, & \text{if}~x=k_0 \\
+            0, & \text{otherwise}
+        \end{cases}
+
+    TODO: example image of the distribution
+
+
+    Parameters
+    ----------
+    loc : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Mean of the deterministic distribution (:math:`\mu`).
+        Default = 0
+    """
+
+    # Distribution parameters and their default values
+    _default_args = OrderedDict([
+        ('loc', 0),
+    ])
+
+    # Posterior distribution parameter bounds (lower, upper)
+    _post_param_bounds = {
+        'loc': (None, None),
+    }
+
+    # Posterior parameter initializers
+    _post_param_init = {
+        'loc': tf.initializers.truncated_normal(mean=0.0, stddev=1.0),
+    }
+
+    def _build(self, args, _data, _batch_shape):
+        """Build the distribution model."""
+        return tfd.Deterministic(loc=args['loc'])
+
+
+
 class Normal(ContinuousDistribution):
     r"""The Normal distribution.
 
