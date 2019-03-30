@@ -114,23 +114,25 @@ class Parameter(BaseParameter):
         """Construct an array of Parameter(s)."""
 
         # Check types
-        assert isinstance(shape, (int, list, np.ndarray)), \
-            ('shape must be an int, list of ints, or a numpy ndarray')
-        if isinstance(shape, int):
-            assert shape > 0, 'shape must be positive'
+        if not isinstance(shape, (int, list, np.ndarray)):
+            raise TypeError('shape must be int, list of ints, or ndarray')
+        if isinstance(shape, int) and shape < 1:
+            raise ValueError('shape must be positive')
         if isinstance(shape, list):
             for t_shape in shape:
-                assert isinstance(t_shape, int), 'shape must be integer(s)'
+                if not isinstance(t_shape, int):
+                    raise TypeError('each element of shape must be an int')
         if isinstance(shape, np.ndarray):
-            assert shape.dtype.char in np.typecodes['AllInteger'], \
-                'shape must be integer(s)'
-            assert np.all(shape >= 0), 'shape must be positive'
-        assert isinstance(name, str), 'name must be a string'
-        assert prior is None or isinstance(prior, BaseDistribution), \
-            'prior must be a probflow distribution or None'
-        assert issubclass(posterior_fn, BaseDistribution), \
-            'posterior_fn must be a probflow distribution'
-
+            if shape.dtype.char not in np.typecodes['AllInteger']:
+                raise TypeError('shape must be int(s)')
+            if not np.all(shape >= 0):
+                raise ValueError('shape must be positive')
+        if not isinstance(name, str):
+            raise TypeError('name must be a string')
+        if prior is not None and not isinstance(prior, BaseDistribution):
+            raise TypeError('prior must be None or a probflow distribution')
+        if not issubclass(posterior_fn, BaseDistribution):
+            raise TypeError('posterior_fn must be a probflow distribution')
         if estimator is not None and not isinstance(estimator, str):
             raise TypeError('estimator must be None or a string')
         init_types = (dict, tf.Tensor, tf.keras.initializers.Initializer)

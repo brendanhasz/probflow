@@ -8,6 +8,7 @@ Backlog (short term):
 ---------------------
 
 * Remove "flipout" from Parameter and tests
+* Change Parameter's "posterior_fn" arg to just "posterior"
 * Finish BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Docs for BaseLayer, BaseDistribution.fit, Parameter, and Input
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)

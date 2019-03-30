@@ -117,9 +117,25 @@ from collections import OrderedDict
 import numpy as np
 import tensorflow as tf
 
-from .core import BaseLayer, REQUIRED
-from .distributions import Normal
+from .core import BaseLayer, BaseDistribution, REQUIRED
+from .distributions import Normal, Deterministic
 from .parameters import Parameter
+
+
+
+def _validate_initializer(initializer):
+    """Ensure an object is a valid initializer"""
+    init_types = (dict, np.ndarray, tf.Tensor, 
+                  tf.keras.initializers.Initializer)
+    if initializer is not None and not isinstance(initializer, init_types):
+        raise TypeError('initializer must be None, a Tensor, an'
+                        ' Initializer, or a dict')
+    if isinstance(initializer, dict):
+        for arg in initializer:
+            if (initializer[arg] is not None and
+                not isinstance(initializer[arg], init_types)):
+                raise TypeError('each value in initializer dict must be '
+                                'None, a Tensor, or an Initializer')
 
 
 
@@ -806,8 +822,10 @@ class Dense(BaseLayer):
     _default_kwargs = {
         'units': 1,
         'activation': tf.nn.relu,
-        'weight_initializer': None, #TODO: glorot or something as default?
-        'bias_initializer': None,   #TODO: glorot or something as default?
+        'weight_posterior': Normal,
+        'bias_posterior': Normal,
+        'weight_initializer': None,
+        'bias_initializer': None,
         'weight_prior': Normal(0, 1),
         'bias_prior': Normal(0, 1),
     }
@@ -815,8 +833,22 @@ class Dense(BaseLayer):
 
     def _validate_kwargs(self, kwargs):
         """Ensure the keyword arguments have correct types, etc."""
-        # TODO
-        pass
+        if not isinstance(kwargs['units'], int):
+            raise TypeError('units kwarg must be an int')
+        if kwargs['units'] < 1:
+            raise ValueError('units kwarg must be positive')
+        if not callable(kwargs['activation']):
+            raise TypeError('activation must be a callable')
+        if not issubclass(kwargs['weight_posterior'], BaseDistribution):
+            raise TypeError('weight_posterior kwarg must be a Distribution')
+        if not issubclass(kwargs['bias_posterior'], BaseDistribution):
+            raise TypeError('bias_posterior kwarg must be a Distribution')
+        _validate_initializer(kwargs['weight_initializer'])
+        _validate_initializer(kwargs['bias_initializer'])
+        if not isinstance(kwargs['weight_prior'], BaseDistribution):
+            raise TypeError('weight_prior kwarg must be a Distribution')
+        if not isinstance(kwargs['bias_prior'], BaseDistribution):
+            raise TypeError('bias_prior kwarg must be a Distribution')
 
 
     def _build(self, args, data, batch_shape):
@@ -831,8 +863,12 @@ class Dense(BaseLayer):
 
         # Create weight and bias parameters
         weight = Parameter(shape=[ndims, units],
+                           posterior_fn=self.kwargs['weight_posterior'],
+                           initializer=self.kwargs['weight_initializer'],
                            prior=self.kwargs['weight_prior'])
         bias = Parameter(shape=[1, units],
+                         posterior_fn=self.kwargs['bias_posterior'],
+                         initializer=self.kwargs['bias_initializer'],
                          prior=self.kwargs['bias_prior'])
 
         # Build the weight and bias parameter
@@ -851,14 +887,16 @@ class Dense(BaseLayer):
         mean_y_out = tf.matmul(x_in, weight_means) + bias_means
         self._mean = self.kwargs['activation'](mean_y_out)
 
-        # TODO: store weight + bias as attributes?
-
         # Compute the losses
         self._log_loss_sum = (weight._log_loss(weight_samples) +
                               bias._log_loss(bias_samples))
         self._mean_log_loss_sum = (weight._log_loss(weight_means) +
                                    bias._log_loss(bias_means))
         self._kl_loss_sum = weight._kl_loss() + bias._kl_loss()
+
+        # Store weight and bias parameters as args
+        self.args['weight'] = weight
+        self.args['bias'] = bias
 
         # Return the sample
         return self._sample
@@ -990,6 +1028,7 @@ class BatchNormalization(BaseLayer):
 
     # Layer keyword arguments and their default values
     _default_kwargs = {
+        'proba': False,
         'weight_posterior': Normal,
         'bias_posterior': Normal,
         'weight_initializer': None,
@@ -997,6 +1036,22 @@ class BatchNormalization(BaseLayer):
         'weight_prior': Normal(0, 1),
         'bias_prior': Normal(0, 1),
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['proba'], bool):
+            raise TypeError('proba kwarg must be a bool')
+        if not issubclass(kwargs['weight_posterior'], BaseDistribution):
+            raise TypeError('weight_posterior kwarg must be a Distribution')
+        if not issubclass(kwargs['bias_posterior'], BaseDistribution):
+            raise TypeError('bias_posterior kwarg must be a Distribution')
+        _validate_initializer(kwargs['weight_initializer'])
+        _validate_initializer(kwargs['bias_initializer'])
+        if not isinstance(kwargs['weight_prior'], BaseDistribution):
+            raise TypeError('weight_prior kwarg must be a Distribution')
+        if not isinstance(kwargs['bias_prior'], BaseDistribution):
+            raise TypeError('bias_prior kwarg must be a Distribution')
 
 
     def _build(self, args, data, batch_shape):
@@ -1013,16 +1068,21 @@ class BatchNormalization(BaseLayer):
 
         # TODO: make a scope for this layer's variables
 
-        # TODO: add option for whether to use probabalistic weight/bias params
-        # or just single point values
+        # Set the variational posterior used for the bias/scaling parameters
+        if self.kwargs['proba']: #use full probability distribution
+            weight_posterior = self.kwargs['weight_posterior']
+            bias_posterior = self.kwargs['bias_posterior']
+        else: #only estimate point values
+            weight_posterior = Deterministic
+            bias_posterior = Deterministic
 
         # Create weight and bias parameters
         weight = Parameter(shape=dims,
-                           posterior_fn=self.kwargs['weight_posterior'],
+                           posterior_fn=weight_posterior,
                            initializer=self.kwargs['weight_initializer'],
                            prior=self.kwargs['weight_prior'])
         bias = Parameter(shape=dims,
-                         posterior_fn=self.kwargs['bias_posterior'],
+                         posterior_fn=bias_posterior,
                          initializer=self.kwargs['bias_initializer'],
                          prior=self.kwargs['bias_prior'])
 
@@ -1040,14 +1100,16 @@ class BatchNormalization(BaseLayer):
         bias_means = bias.mean_obj
         self._mean = x_norm*weight_means + bias_means
 
-        # TODO: store weight + bias as attributes?
-
         # Compute the losses
         self._log_loss_sum = (weight._log_loss(weight_samples) +
                               bias._log_loss(bias_samples))
         self._mean_log_loss_sum = (weight._log_loss(weight_means) +
                                    bias._log_loss(bias_means))
         self._kl_loss_sum = weight._kl_loss() + bias._kl_loss()
+
+        # Store weight and bias parameters as args
+        self.args['weight'] = weight
+        self.args['bias'] = bias
 
         # Return the sample
         return self._sample
@@ -1233,9 +1295,9 @@ class Gather(BaseLayer):
     def _validate_kwargs(self, kwargs):
         """Ensure the keyword arguments have correct types, etc."""
         if not isinstance(kwargs['axis'], int):
-            raise ValueError('axis kwarg must be an int')
+            raise TypeError('axis kwarg must be an int')
         if not isinstance(kwargs['index_dtype'], tf.DType):
-            raise ValueError('index_dtype kwarg must be a tf.DType')
+            raise TypeError('index_dtype kwarg must be a tf.DType')
 
 
     def _build(self, args, _data, _batch_shape):
@@ -1285,7 +1347,7 @@ class Embedding(BaseLayer):
     -----------------
     dims : int > 0
         Number of embedding dimensions.
-    probabilistic : bool
+    proba : bool
         Whether to use probabilistic (True) or point estimates (False) for the
         embeddings.
         Default = False.
@@ -1313,17 +1375,49 @@ class Embedding(BaseLayer):
         predictions = Dense(l1, units=1)
         ...
 
+
+    Notes
+    -----
+    
+    With probabilistic embeddings (when ``proba``=``True``), the embeddings
+    parameters are created as a matrix of independent parameters.  That is,
+    the covariance structure of the embedding posteriors is not modeled.
+    A multivariate distribution is also not used because the sum of the KL
+    divergence between multiple univariate distributions is equal to the 
+    KL divergence between two multivariate distributions with zero covariance
+    (with corresponding parameters in each dimension), as is the sum of the 
+    log posterior probabilities.  In other words, we use a NxM matrix of 
+    independent parameters instead of N M-dimensional parameters.
+
     """
 
 
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'dims': 5,
+        'proba': False,
         'posterior': Normal,
         'initializer': None,
         'prior': Normal(0, 1),
         'index_dtype': tf.uint32,
     }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['dims'], int):
+            raise TypeError('dims kwarg must be an int')
+        if kwargs['dims'] < 1:
+            raise ValueError('dims kwarg must be positive')
+        if not isinstance(kwargs['proba'], bool):
+            raise ValueError('proba kwarg must be a bool')
+        if not issubclass(kwargs['posterior'], BaseDistribution):
+            raise TypeError('posterior kwarg must be a Distribution class')
+        _validate_initializer(kwargs['initializer'])
+        if not isinstance(kwargs['prior'], BaseDistribution):
+            raise TypeError('prior kwarg must be a Distribution object')
+        if not isinstance(kwargs['index_dtype'], tf.DType):
+            raise TypeError('index_dtype kwarg must be a tf.DType')
 
 
     def _build(self, args, data, batch_shape):
@@ -1339,14 +1433,17 @@ class Embedding(BaseLayer):
         x_in = args['input']
         input_dim = self.args['input']._nunique
 
-        # TODO: add option for whether to use probabalistic weight/bias params
-        # or just single point values
-
         # TODO: make a scope for this layer's variables
+
+        # Set the variational posterior used for the embedding parameters
+        if self.kwargs['proba']: #use full probability distribution
+            posterior = self.kwargs['posterior']
+        else: #only estimate point values
+            posterior = Deterministic
 
         # Create embedding parameters
         embeddings = Parameter(shape=[input_dim, self.kwargs['dims']],
-                               posterior_fn=self.kwargs['posterior'],
+                               posterior_fn=posterior,
                                initializer=self.kwargs['initializer'],
                                prior=self.kwargs['prior'])
 
@@ -1361,12 +1458,13 @@ class Embedding(BaseLayer):
         self._mean = tf.gather(embeddings.mean_obj, 
                                tf.cast(x_in, self.kwargs['index_dtype']))
 
-        # TODO: store embeddings as attribute?
-
         # Compute the losses
         self._log_loss_sum = embeddings._log_loss(embeddings.built_obj)
         self._mean_log_loss_sum = embeddings._log_loss(embeddings.mean_obj)
         self._kl_loss_sum = embeddings._kl_loss()
+
+        # Store embeddings parameters as an arg
+        self.args['embeddings'] = embeddings
 
         # Return the sample
         return self._sample
