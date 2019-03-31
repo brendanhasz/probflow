@@ -82,7 +82,7 @@ class Parameter(BaseParameter):
                  shape=1,
                  name='Parameter',
                  prior=Normal(0, 1),
-                 posterior_fn=Normal,
+                 posterior=Normal,
                  seed=None,
                  transform=lambda x: x,
                  inv_transform=lambda x: x,
@@ -107,8 +107,8 @@ class Parameter(BaseParameter):
             raise TypeError('name must be a string')
         if prior is not None and not isinstance(prior, BaseDistribution):
             raise TypeError('prior must be None or a probflow distribution')
-        if not issubclass(posterior_fn, BaseDistribution):
-            raise TypeError('posterior_fn must be a probflow distribution')
+        if not issubclass(posterior, BaseDistribution):
+            raise TypeError('posterior must be a probflow distribution')
         init_types = (dict, tf.Tensor, tf.keras.initializers.Initializer)
         if initializer is not None and not isinstance(initializer, init_types):
             raise TypeError('initializer must be None, a Tensor, an'
@@ -132,7 +132,7 @@ class Parameter(BaseParameter):
         self.shape = shape
         self.name = name
         self.prior = prior
-        self.posterior_fn = posterior_fn
+        self.posterior_fn = posterior
         self.seed = seed
         self.transform = transform
         self.inv_transform = inv_transform
@@ -563,13 +563,13 @@ class ScaleParameter(Parameter):
                  shape=1,
                  name='ScaleParameter',
                  prior=None,
-                 posterior_fn=InvGamma,
+                 posterior=InvGamma,
                  seed=None,
                  initializer=None):
         super().__init__(shape=shape,
                          name=name,
                          prior=prior,
-                         posterior_fn=posterior_fn,
+                         posterior=posterior,
                          seed=seed,
                          transform=lambda x: tf.sqrt(x),
                          inv_transform=lambda x: tf.square(x),
@@ -578,7 +578,7 @@ class ScaleParameter(Parameter):
 
 
 # TODO: add support for discrete Parameters?
-# In theory can just set posterior_fn to
+# In theory can just set posterior to
 # Bernoulli or Categorical, and make mean() return the mode?
 # and have n_categories-1 different underlying tf variables
 # and transform them according to the additive logistic transformation?

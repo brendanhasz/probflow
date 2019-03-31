@@ -975,12 +975,12 @@ class Dense(BaseLayer):
         # Create weight and bias parameters
         weight = Parameter(shape=[ndims, units],
                            name=self.kwargs['name']+'_weight',
-                           posterior_fn=self.kwargs['weight_posterior'],
+                           posterior=self.kwargs['weight_posterior'],
                            initializer=self.kwargs['weight_initializer'],
                            prior=self.kwargs['weight_prior'])
         bias = Parameter(shape=[1, units],
                          name=self.kwargs['name']+'_bias',
-                         posterior_fn=self.kwargs['bias_posterior'],
+                         posterior=self.kwargs['bias_posterior'],
                          initializer=self.kwargs['bias_initializer'],
                          prior=self.kwargs['bias_prior'])
 
@@ -1202,12 +1202,12 @@ class BatchNormalization(BaseLayer):
         # Create weight and bias parameters
         weight = Parameter(shape=dims,
                            name=self.kwargs['name']+'_weight',
-                           posterior_fn=weight_posterior,
+                           posterior=weight_posterior,
                            initializer=self.kwargs['weight_initializer'],
                            prior=self.kwargs['weight_prior'])
         bias = Parameter(shape=dims,
                          name=self.kwargs['name']+'_bias',
-                         posterior_fn=bias_posterior,
+                         posterior=bias_posterior,
                          initializer=self.kwargs['bias_initializer'],
                          prior=self.kwargs['bias_prior'])
 
@@ -1591,7 +1591,7 @@ class Embedding(BaseLayer):
         # Create embedding parameters
         embeddings = Parameter(shape=[input_dim, self.kwargs['dims']],
                                name=self.kwargs['name'],
-                               posterior_fn=posterior,
+                               posterior=posterior,
                                initializer=self.kwargs['initializer'],
                                prior=self.kwargs['prior'])
 
