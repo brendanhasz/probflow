@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow as tf
 
 from probflow.layers import Add, Sub, Mul, Div, Neg, Abs, Exp, Log
+from probflow.layers import Dense
 from probflow.parameters import Parameter
 
 def isclose(a, b, tol=1e-7):
@@ -665,6 +666,24 @@ def test_layer_ops_overloading():
     assert isinstance(l3.built_obj, float)
     assert l3.built_obj == 1.0
 
+
+def test_dense_layer():
+    """Tests probflow.layers.Dense"""
+
+    # Float/int inputs
+    l1 = Dense(units=4)
+    l1.build(tf.placeholder(tf.float32, [2, 3]), [2])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    assert l1.built_obj.shape.ndims == 2
+    assert l1.built_obj.shape.dims[0].value == 2
+    assert l1.built_obj.shape.dims[1].value == 4
+    assert len(l1.args) == 3
+    assert 'input' in l1.args
+    assert 'weight' in l1.args
+    assert 'bias' in l1.args
+
+    # Reset the graph
+    tf.reset_default_graph()
 
 # TODO: check broadcasting works correctly
 

@@ -25,6 +25,7 @@ TODO: Categorical, etc
 """
 
 __all__ = [
+    'Deterministic',
     'Normal',
     'HalfNormal',
     'StudentT',

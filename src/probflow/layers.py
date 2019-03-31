@@ -901,9 +901,8 @@ class Dense(BaseLayer):
         w = Parameter(shape=3)
         b = Parameter()
         out = Relu(Dot(x, w) + b)
-        ...
 
-    can be accomplished more easily using a class:`.Dense` layer:
+    can be accomplished more easily using a :class:`.Dense` layer:
 
     .. code-block:: python
 
@@ -969,9 +968,9 @@ class Dense(BaseLayer):
         """Build the layer."""
 
         # Inputs
-        x_in = args['input']
-        ndims = x_in.shape[1]
+        ndims = args['input'].shape[1].value
         units = self.kwargs['units']
+        x_in = tf.reshape(args['input'], batch_shape+[ndims, 1])
 
         # Create weight and bias parameters
         weight = Parameter(shape=[ndims, units],
@@ -991,22 +990,22 @@ class Dense(BaseLayer):
 
         # Compute output using a sample from the variational posteriors
         weight_samples = weight.built_obj
-        bias_samples = bias.built_obj
-        y_out = tf.matmul(x_in, weight_samples) + bias_samples
+        bias_samples = tf.reshape(bias.built_obj, batch_shape+[units])
+        # TODO: uh, test that this is correct...
+        y_out = tf.reduce_sum(weight_samples*x_in, axis=1) + bias_samples
         self._sample = self.kwargs['activation'](y_out)
 
         # Compute the output using the means of the variational posteriors
-        weight_means = weight.mean_obj
-        bias_means = bias.mean_obj
-        mean_y_out = tf.matmul(x_in, weight_means) + bias_means
+        weight_means = weight.mean_obj,
+        bias_means = tf.reshape(bias.mean_obj, [1, units])
+        mean_y_out = tf.reduce_sum(weight_means*x_in, axis=1) + bias_means
         self._mean = self.kwargs['activation'](mean_y_out)
 
         # Compute the losses
-        self._log_loss_sum = (weight._log_loss(weight_samples) +
-                              bias._log_loss(bias_samples))
-        self._mean_log_loss_sum = (weight._log_loss(weight_means) +
-                                   bias._log_loss(bias_means))
-        self._kl_loss_sum = weight._kl_loss() + bias._kl_loss()
+        self._log_loss_sum = weight._log_loss + bias._log_loss
+        self._mean_log_loss_sum = (weight._mean_log_loss +
+                                   bias._mean_log_loss)
+        self._kl_loss_sum = weight._kl_loss + bias._kl_loss
 
         # Store weight and bias parameters as args
         self.args['weight'] = weight
@@ -1016,7 +1015,7 @@ class Dense(BaseLayer):
         return self._sample
 
 
-    def _build_mean(self, args, data):
+    def _build_mean(self, args, data, batch_shape):
         """Build the layer with mean parameters."""
         return self._mean
 
@@ -1057,14 +1056,15 @@ class BatchNormalization(BaseLayer):
         \gamma_i \left( \frac{x_{ij} - \mu_i}{\sigma_i} \right)
         + \beta_i
 
-    Where :math:`\mu_i` is the mean of the :math:`i`-th element:
+    Where :math:`\mu_i` is the mean of the :math:`i`-th element across the
+    batch:
 
     .. math::
 
         \mu_i = \frac{1}{N} \sum_{k=1}^{N} x_{ik}
 
     and :math:`\sigma_i` is the standard deviation of the :math:`i`-th 
-    element:
+    element across the batch:
 
     .. math::
 
@@ -1226,11 +1226,10 @@ class BatchNormalization(BaseLayer):
         self._mean = x_norm*weight_means + bias_means
 
         # Compute the losses
-        self._log_loss_sum = (weight._log_loss(weight_samples) +
-                              bias._log_loss(bias_samples))
-        self._mean_log_loss_sum = (weight._log_loss(weight_means) +
-                                   bias._log_loss(bias_means))
-        self._kl_loss_sum = weight._kl_loss() + bias._kl_loss()
+        self._log_loss_sum = weight._log_loss + bias._log_loss
+        self._mean_log_loss_sum = (weight._mean_log_loss +
+                                   bias._mean_log_loss)
+        self._kl_loss_sum = weight._kl_loss + bias._kl_loss
 
         # Store weight and bias parameters as args
         self.args['weight'] = weight
@@ -1240,7 +1239,7 @@ class BatchNormalization(BaseLayer):
         return self._sample
 
 
-    def _build_mean(self, args, data):
+    def _build_mean(self, args, data, batch_shape):
         """Build the layer with mean parameters."""
         return self._mean
 
@@ -1599,6 +1598,9 @@ class Embedding(BaseLayer):
         # Build the embedding parameters
         embeddings.build(data, batch_shape)
 
+        # TODO: need to figure out gathering samples
+        # embeddings.built_obj is shape [batch_size, input_dim, dims]
+
         # Compute output using a sample from the variational posteriors
         self._sample = tf.gather(embeddings.built_obj, 
                                  tf.cast(x_in, self.kwargs['index_dtype']))
@@ -1608,9 +1610,9 @@ class Embedding(BaseLayer):
                                tf.cast(x_in, self.kwargs['index_dtype']))
 
         # Compute the losses
-        self._log_loss_sum = embeddings._log_loss(embeddings.built_obj)
-        self._mean_log_loss_sum = embeddings._log_loss(embeddings.mean_obj)
-        self._kl_loss_sum = embeddings._kl_loss()
+        self._log_loss_sum = embeddings._log_loss
+        self._mean_log_loss_sum = embeddings._log_loss
+        self._kl_loss_sum = embeddings._kl_loss
 
         # Store embeddings parameters as an arg
         self.args['embeddings'] = embeddings
@@ -1619,7 +1621,7 @@ class Embedding(BaseLayer):
         return self._sample
 
 
-    def _build_mean(self, args, data):
+    def _build_mean(self, args, data, batch_shape):
         """Build the layer with mean parameters."""
         return self._mean
 
