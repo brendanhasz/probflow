@@ -15,7 +15,7 @@ def test_BaseLayer_build(LR1_novar_unfit):
 
     # Build model
     model = LR1_novar_unfit #fixture from conftest.py
-    model.build(tf.placeholder(tf.float32, [1]), [1])
+    model._build_recursively(tf.placeholder(tf.float32, [1]), [1])
 
     # Check args
     assert isinstance(model.built_args, dict)

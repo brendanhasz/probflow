@@ -173,7 +173,7 @@ class Parameter(BaseParameter):
                 return lb + (ub-lb)*tf.sigmoid(data) # [lb, ub]
 
 
-    def build(self, data, batch_shape):
+    def _build_recursively(self, data, batch_shape):
         """Build the parameter.
 
         TODO: docs
@@ -206,7 +206,7 @@ class Parameter(BaseParameter):
     def _build_prior(self, data, batch_shape):
         """Build the parameter's prior distribution."""
         if self.prior is not None:
-            self.prior.build(data, batch_shape)
+            self.prior._build_recursively(data, batch_shape)
             self._built_prior = self.prior.built_obj
             # TODO: Check that the built prior shape is broadcastable w/ self.shape
 
@@ -247,7 +247,7 @@ class Parameter(BaseParameter):
         # Create variational posterior distribution
         self._params = params
         self.posterior = self.posterior_fn(**params)
-        self.posterior.build(data, batch_shape)
+        self.posterior._build_recursively(data, batch_shape)
         self._built_posterior = self.posterior.built_obj
 
 

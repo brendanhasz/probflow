@@ -14,7 +14,7 @@ from probflow.distributions import Normal, StudentT
 def test_parameter_build():
     """Tests probflow.parameters.Parameter._build"""
     p1 = Parameter(name='test_parameter_build')
-    p1.build(tf.placeholder(tf.float32, [1]), [1])
+    p1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(p1._built_prior, tfd.Normal)
     assert isinstance(p1._built_posterior, tfd.Normal)
     assert isinstance(p1._built_obj_raw, tf.Tensor)
@@ -31,7 +31,7 @@ def test_parameter_ensure_is_built():
     p1 = Parameter(name='test_parameter_ensure_is_built')
     with pytest.raises(RuntimeError):
         p1._ensure_is_built()
-    p1.build(tf.placeholder(tf.float32, [1]), [1])
+    p1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     p1._ensure_is_built()
 
 
@@ -56,7 +56,7 @@ def test_parameter_built_obj():
     """Tests probflow.parameters.Parameter.built_obj"""
     p1 = Parameter(name='test_parameter_built_obj',
                    shape=[3,4])
-    p1.build(tf.placeholder(tf.float32, [1]), [2])
+    p1._build_recursively(tf.placeholder(tf.float32, [1]), [2])
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:
         sess.run(init_op)
@@ -79,7 +79,7 @@ def test_parameter_mean_obj():
     """Tests probflow.parameters.Parameter.mean_obj and _mean_obj_raw"""
     p1 = Parameter(name='test_parameter_mean_obj',
                    shape=[3,4])
-    p1.build(tf.placeholder(tf.float32, [1]), [2])
+    p1._build_recursively(tf.placeholder(tf.float32, [1]), [2])
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:
         sess.run(init_op)
@@ -102,7 +102,7 @@ def test_parameter_losses():
     """Tests probflow.parameters.Parameter._log_loss,_mean_log_loss,_kl_loss"""
     p1 = Parameter(name='test_parameter_losses',
                    shape=[3,4])
-    p1.build(tf.placeholder(tf.float32, [1]), [2])
+    p1._build_recursively(tf.placeholder(tf.float32, [1]), [2])
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:
         sess.run(init_op)
@@ -121,7 +121,7 @@ def test_parameter_sample_posterior():
 
     # Scalar parameter
     p1 = Parameter(name='test_parameter_posterior')
-    p1.build(tf.placeholder(tf.float32, [1]), [1])
+    p1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     init_op = tf.global_variables_initializer()
     the_sess = tf.Session()
     the_sess.run(init_op)
@@ -135,7 +135,7 @@ def test_parameter_sample_posterior():
 
     # Parameter with shape=(2,1)
     p1 = Parameter(name='test_parameter_posterior21', shape=[2, 1])
-    p1.build(tf.placeholder(tf.float32, [1]), [1])
+    p1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     init_op = tf.global_variables_initializer()
     the_sess = tf.Session()
     the_sess.run(init_op)
@@ -150,7 +150,7 @@ def test_parameter_sample_posterior():
 
     # Parameter with shape=(1,2)
     p1 = Parameter(name='test_parameter_posterior12', shape=[1, 2])
-    p1.build(tf.placeholder(tf.float32, [1]), [1])
+    p1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     init_op = tf.global_variables_initializer()
     the_sess = tf.Session()
     the_sess.run(init_op)
@@ -168,7 +168,7 @@ def test_scale_parameter_built_obj():
     """Tests probflow.parameters.Parameter.built_obj"""
     p1 = ScaleParameter(name='test_scale_parameter_built_obj',
                         shape=[3,4])
-    p1.build(tf.placeholder(tf.float32, [1]), [2])
+    p1._build_recursively(tf.placeholder(tf.float32, [1]), [2])
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:
         sess.run(init_op)
@@ -192,7 +192,7 @@ def test_scale_parameter_mean_obj():
     """Tests probflow.parameters.Parameter.mean_obj and _mean_obj_raw"""
     p1 = ScaleParameter(name='test_scale_parameter_mean_obj',
                         shape=[3,4])
-    p1.build(tf.placeholder(tf.float32, [1]), [2])
+    p1._build_recursively(tf.placeholder(tf.float32, [1]), [2])
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:
         sess.run(init_op)
@@ -220,32 +220,32 @@ def test_parameter_ops_overloading():
 
     # Add
     o1 = p1 + 1
-    o1.build(tf.placeholder(tf.float32, [1]), [1])
+    o1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(o1.built_obj, tf.Tensor)
 
     # Sub
     o1 = p1 - 1
-    o1.build(tf.placeholder(tf.float32, [1]), [1])
+    o1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(o1.built_obj, tf.Tensor)
 
     # Mult
     o1 = p1 * 1
-    o1.build(tf.placeholder(tf.float32, [1]), [1])
+    o1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(o1.built_obj, tf.Tensor)
 
     # Div
     o1 = p1 + 1
-    o1.build(tf.placeholder(tf.float32, [1]), [1])
+    o1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(o1.built_obj, tf.Tensor)
 
     # Neg
     o1 = -p1
-    o1.build(tf.placeholder(tf.float32, [1]), [1])
+    o1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(o1.built_obj, tf.Tensor)
 
     # Abs
     o1 = abs(p1)
-    o1.build(tf.placeholder(tf.float32, [1]), [1])
+    o1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(o1.built_obj, tf.Tensor)
 
 
@@ -266,7 +266,7 @@ def test_parameter_prior_via_lshift_op():
 
     # And should still be able to be built
     p1 << Normal(1, 3)
-    p1.build(tf.placeholder(tf.float32, [1]), [1])
+    p1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(p1._built_prior, tfd.Normal)
     with tf.Session() as sess:
         assert sess.run(p1._built_prior.mean()) == 1.0

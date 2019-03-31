@@ -302,7 +302,7 @@ class BaseLayer(BaseObject):
                             ' tensor_like, model, layer, or valid')
 
 
-    def build(self, data, batch_shape):
+    def _build_recursively(self, data, batch_shape):
         """Build this layer's arguments and loss, and then build the layer.
 
         TODO: actually do docs for this one...
@@ -320,7 +320,7 @@ class BaseLayer(BaseObject):
                 self.built_args[arg_name] = arg
                 self.mean_args[arg_name] = arg
             elif self._arg_is('layer', arg) or self._arg_is('parameter', arg):
-                arg.build(data, batch_shape)
+                arg._build_recursively(data, batch_shape)
                 self.built_args[arg_name] = arg.built_obj
                 self.mean_args[arg_name] = arg.mean_obj
 
@@ -685,7 +685,7 @@ class BaseDistribution(BaseLayer):
         assign_input_info(x_in, x)
 
         # Recursively build this model and its args
-        self.build(x_data, batch_size_ph)
+        self._build_recursively(x_data, batch_size_ph)
 
         # Set up TensorFlow graph for per-sample losses
         self.log_loss = (self.samp_loss_sum +  #size (batch_size,)
@@ -1420,7 +1420,7 @@ class BaseDistribution(BaseLayer):
 
             # Create a TFP distribution of the posterior across training
             t_post = param.posterior_fn(**self._records[name])
-            t_post.build(None, None)
+            t_post._build_recursively(None, None)
             t_post = t_post.built_obj
 
             # Compute the quantiles

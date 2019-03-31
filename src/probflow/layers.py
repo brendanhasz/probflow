@@ -985,8 +985,8 @@ class Dense(BaseLayer):
                          prior=self.kwargs['bias_prior'])
 
         # Build the weight and bias parameter
-        weight.build(data, batch_shape)
-        bias.build(data, batch_shape)
+        weight._build_recursively(data, batch_shape)
+        bias._build_recursively(data, batch_shape)
 
         # Compute output using a sample from the variational posteriors
         weight_samples = weight.built_obj
@@ -1212,8 +1212,8 @@ class BatchNormalization(BaseLayer):
                          prior=self.kwargs['bias_prior'])
 
         # Build the weight and bias parameter
-        weight.build(data, batch_shape)
-        bias.build(data, batch_shape)
+        weight._build_recursively(data, batch_shape)
+        bias._build_recursively(data, batch_shape)
 
         # Compute output using a sample from the variational posteriors
         weight_samples = weight.built_obj
@@ -1338,7 +1338,7 @@ class Sequential(BaseLayer):
             self._parameters = layer._parameter_list()
 
         # Build the layers
-        layers[-1].build(data, batch_shape)
+        layers[-1]._build_recursively(data, batch_shape)
 
         # Store mean and sample
         self._sample = layers[-1]._sample
@@ -1596,7 +1596,7 @@ class Embedding(BaseLayer):
                                prior=self.kwargs['prior'])
 
         # Build the embedding parameters
-        embeddings.build(data, batch_shape)
+        embeddings._build_recursively(data, batch_shape)
 
         # TODO: need to figure out gathering samples
         # embeddings.built_obj is shape [batch_size, input_dim, dims]
