@@ -33,8 +33,8 @@ def LR1_novar():
 
 
     # Create the model
-    weight = Parameter(name='LR1_novar_weight', estimator=None)
-    bias = Parameter(name='LR1_novar_bias', estimator=None)
+    weight = Parameter(name='LR1_novar_weight')
+    bias = Parameter(name='LR1_novar_bias')
     data = Input()
     model = Normal(data*weight + bias, 1.0)
 
@@ -59,8 +59,8 @@ def LR3_novar():
     Nd = 3
 
     # Create the model
-    weight = Parameter(shape=Nd, name='LR3_novar_weight', estimator=None)
-    bias = Parameter(name='LR3_novar_bias', estimator=None)
+    weight = Parameter(shape=Nd, name='LR3_novar_weight')
+    bias = Parameter(name='LR3_novar_bias')
     data = Input()
     model = Normal(Dot(data, weight) + bias, 1.0)
 
@@ -86,8 +86,8 @@ def LR3_var():
     Nd = 3
 
     # Create the model
-    weight = Parameter(shape=Nd, name='LR3_weight', estimator=None)
-    bias = Parameter(name='LR3_bias', estimator=None)
+    weight = Parameter(shape=Nd, name='LR3_weight')
+    bias = Parameter(name='LR3_bias')
     data = Input()
     std_dev = ScaleParameter(name='LR3_std_dev')
     model = Normal(Dot(data, weight) + bias, std_dev)

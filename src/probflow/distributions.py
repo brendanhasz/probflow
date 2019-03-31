@@ -5,6 +5,7 @@ TODO: more info
 Continuous Distributions
 ------------------------
 
+* :class:`.Deterministic`
 * :class:`.Normal`
 * :class:`.HalfNormal`
 * :class:`.StudentT`

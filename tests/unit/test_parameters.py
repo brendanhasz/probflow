@@ -52,33 +52,10 @@ def test_parameter_bound():
     assert o4 < 1.0
 
 
-def test_parameter_built_obj_none_estimator():
-    """Tests probflow.parameters.Parameter.built_obj w/ estimator=None"""
-    p1 = Parameter(name='test_parameter_built_obj_none_estimator',
-                   shape=[3,4], estimator=None)
-    p1.build(tf.placeholder(tf.float32, [1]), [2])
-    init_op = tf.global_variables_initializer()
-    with tf.Session() as sess:
-        sess.run(init_op)
-        [o1, o2] = sess.run([p1.built_obj, 
-                             p1._built_obj_raw])
-    assert isinstance(o1, np.ndarray)
-    assert isinstance(o2, np.ndarray)
-    assert o1.ndim == 3
-    assert o1.shape[0] == 2
-    assert o1.shape[1] == 3
-    assert o1.shape[2] == 4
-    assert o2.ndim == 3
-    assert o2.shape[0] == 2
-    assert o2.shape[1] == 3
-    assert o2.shape[2] == 4
-    assert np.all(o1==o2) #no transform should have happened
-
-
-def test_parameter_built_obj_flipout_estimator():
-    """Tests probflow.parameters.Parameter.built_obj w/ estimator=flipout"""
-    p1 = Parameter(name='test_parameter_built_obj_flipout_estimator',
-                   shape=[3,4], estimator='flipout')
+def test_parameter_built_obj():
+    """Tests probflow.parameters.Parameter.built_obj"""
+    p1 = Parameter(name='test_parameter_built_obj',
+                   shape=[3,4])
     p1.build(tf.placeholder(tf.float32, [1]), [2])
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:
@@ -101,7 +78,7 @@ def test_parameter_built_obj_flipout_estimator():
 def test_parameter_mean_obj():
     """Tests probflow.parameters.Parameter.mean_obj and _mean_obj_raw"""
     p1 = Parameter(name='test_parameter_mean_obj',
-                   shape=[3,4], estimator=None)
+                   shape=[3,4])
     p1.build(tf.placeholder(tf.float32, [1]), [2])
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:
@@ -124,7 +101,7 @@ def test_parameter_mean_obj():
 def test_parameter_losses():
     """Tests probflow.parameters.Parameter._log_loss,_mean_log_loss,_kl_loss"""
     p1 = Parameter(name='test_parameter_losses',
-                   shape=[3,4], estimator=None)
+                   shape=[3,4])
     p1.build(tf.placeholder(tf.float32, [1]), [2])
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:
@@ -187,9 +164,9 @@ def test_parameter_sample_posterior():
     the_sess.close()
 
 
-def test_scale_parameter_built_obj_none_estimator():
-    """Tests probflow.parameters.Parameter.built_obj w/ estimator=None"""
-    p1 = ScaleParameter(name='test_scale_parameter_built_obj_none_estimator',
+def test_scale_parameter_built_obj():
+    """Tests probflow.parameters.Parameter.built_obj"""
+    p1 = ScaleParameter(name='test_scale_parameter_built_obj',
                         shape=[3,4])
     p1.build(tf.placeholder(tf.float32, [1]), [2])
     init_op = tf.global_variables_initializer()

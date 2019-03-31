@@ -7,7 +7,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Remove "flipout" from Parameter and tests
 * Change Parameter's "posterior_fn" arg to just "posterior"
 * Rename public build() method to a private name (but _build() is already taken!)
 * Finish BaseLayer, BaseDistribution.fit, Parameter, and Input
@@ -24,36 +23,37 @@ Backlog (short term):
 * Models which only use Dense
 * Tests
 * Bernoulli and Poisson dists
+* Models which use them (Classifiers, GLMs)
 * `Mean alias for discrete dists`_
-* Models which use them (Classifiers)
-* Tests
-* Write the docs main page and user guide
-* Examples dir (with examples therein)
+* Tests for Bernoulli + Poisson dists + models
+* Write the user guide
+* Write the examples
+* Fix parameter naming problem (right now you get an error if you try to name two parameters the same thing)
 * `Reset method`_
 * `Sklearn support`_
+
 
 Backlog (long term):
 --------------------
 
 * `Parameter sharing`_
-* `Tensorflow graph view`_
-* `Tensorflow dashboard`_
 * `Slicing`_
 * `Embedding layer`_
-* Neural Matrix Factorization
-* Multivariate Normal, StudentT, and Cauchy dists
-* Bayesian correlation example and Model
-* Support other optimizers
+* Neural Matrix Factorization (model, tests, and example)
+* `Mixture distribution`_
 * `Separate model from noise uncertainty`_ 
+* `Support for random effects and multilevel models`_
+* Multivariate Normal, StudentT, and Cauchy dists
+* `Tensorflow graph view`_
+* `Tensorflow dashboard`_
+* Support other optimizers
 * `Saving and loading and initializing parameters`_
 * `Transfer learning`_
 * `Bijector support`_? e.g so you can do ``model=Exp(Normal()); model.fit()``
 * `Input data as tf dataset iterators`_
 * `Model comparison`_
-* `Support for random effects and multilevel models`_
-* `Mixture distribution`_
 * `Optimize bounding`_
-* Dev guide? (in add'n to user guide) Mention testing (eg --plot arg), inheritance structure etc
+* `Dev guide`_
 * Conv layers
 * Flipout estimator
 * Pooling layers
@@ -332,3 +332,9 @@ You can approximate it just by using a large enough :math:`n`.  E.g. w/ :math:`n
 Could use tf.hard_sigmoid to approximate the sigmoid.
 
 Or, could just use tf.keras.constraints to bound the values...
+
+
+Dev guide
+---------
+
+Testing (eg --plot arg, etc), inheritance structure, etc

@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = 'probflow'
-copyright = '2018, Brendan Hasz'
+copyright = '2019, Brendan Hasz'
 author = 'Brendan Hasz'
 
 # The short X.Y version

@@ -69,36 +69,13 @@ class Parameter(BaseParameter):
         parameter names, and values containing the |Tensor| or |Initializer| 
         with which to initialize each parameter.
         Default is to use the default initializer for that |Distribution|.
-    estimator : {``'flipout'`` or |None|}
-        Method of posterior estimator to use. Valid values:
 
-        * |None|: Generate random samples from the variational distribution
-          for each batch independently.
-        * `'flipout'`: Use the Flipout estimator :ref:`[1] <ref_flipout>` to
-          more efficiently generate samples from the variational distribution.
-
-        Default = ``'flipout'``
-
-    Notes
-    -----
-    When using the flipout estimator (``estimator='flipout'``), ``posterior_fn``
-    must be a symmetric distribution of the location-scale family - one of:
-
-    * :class:`.Normal`
-    * :class:`.StudentT`
-    * :class:`.Cauchy`
 
     Examples
     --------
     TODO
 
-    References
-    ----------
-    .. _ref_flipout:
-    .. [1] Yeming Wen, Paul Vicol, Jimmy Ba, Dustin Tran, and Roger Grosse.
-        Flipout: Efficient Pseudo-Independent Weight Perturbations on
-        Mini-Batches. *International Conference on Learning Representations*,
-        2018. https://arxiv.org/abs/1803.04386
+
     """
 
     def __init__(self,
@@ -107,7 +84,6 @@ class Parameter(BaseParameter):
                  prior=Normal(0, 1),
                  posterior_fn=Normal,
                  seed=None,
-                 estimator='flipout',
                  transform=lambda x: x,
                  inv_transform=lambda x: x,
                  initializer=None):
@@ -133,8 +109,6 @@ class Parameter(BaseParameter):
             raise TypeError('prior must be None or a probflow distribution')
         if not issubclass(posterior_fn, BaseDistribution):
             raise TypeError('posterior_fn must be a probflow distribution')
-        if estimator is not None and not isinstance(estimator, str):
-            raise TypeError('estimator must be None or a string')
         init_types = (dict, tf.Tensor, tf.keras.initializers.Initializer)
         if initializer is not None and not isinstance(initializer, init_types):
             raise TypeError('initializer must be None, a Tensor, an'
@@ -148,12 +122,6 @@ class Parameter(BaseParameter):
                     raise TypeError('each value in initializer dict must be '
                                     'None, a Tensor, or an Initializer')
 
-        # Check for valid posterior if using flipout
-        sym_dists = [Normal, StudentT, Cauchy]
-        if estimator == 'flipout' and posterior_fn not in sym_dists:
-            raise ValueError('flipout requires a symmetric posterior '
-                             'distribution in the location-scale family')
-
         # Make shape a list
         if isinstance(shape, int):
             shape = [shape]
@@ -166,7 +134,6 @@ class Parameter(BaseParameter):
         self.prior = prior
         self.posterior_fn = posterior_fn
         self.seed = seed
-        self.estimator = estimator
         self.transform = transform
         self.inv_transform = inv_transform
         self._built_posterior = None
@@ -297,34 +264,8 @@ class Parameter(BaseParameter):
         seed_stream = tfd.SeedStream(self.seed, salt=self.name)
 
         # Draw random samples from the posterior
-        if self.estimator is None:
-            samples = self._built_posterior.sample(sample_shape=batch_shape,
-                                                   seed=seed_stream())
-
-        # Use the Flipout estimator (https://arxiv.org/abs/1803.04386)
-        # TODO: this isn't actually the Flipout estimator...
-        # it flips samples around the posterior mean but not in the same way...
-        elif self.estimator == 'flipout':
-
-            # Create a centered version of the posterior
-            params = self._params.copy()
-            params['loc'] = 0.0
-            sample_posterior = self.posterior_fn(**params)
-            sample_posterior.build(data, batch_shape)
-
-            # Take a single sample from that centered posterior
-            sample = sample_posterior.built_obj.sample(seed=seed_stream())
-
-            # Generate random sign matrix
-            signs = random_rademacher(tf.concat([batch_shape, self.shape], 0),
-                                      dtype=data.dtype, seed=seed_stream())
-
-            # Flipout(ish)-generated samples
-            samples = sample*signs + self._mean_obj_raw
-
-        # No other estimators supported at the moment
-        else:
-            raise ValueError('estimator must be None or \'flipout\'')
+        samples = self._built_posterior.sample(sample_shape=batch_shape,
+                                               seed=seed_stream())
 
         # Apply transformation
         self._built_obj_raw = samples
@@ -630,7 +571,6 @@ class ScaleParameter(Parameter):
                          prior=prior,
                          posterior_fn=posterior_fn,
                          seed=seed,
-                         estimator=None,
                          transform=lambda x: tf.sqrt(x),
                          inv_transform=lambda x: tf.square(x),
                          initializer=initializer)

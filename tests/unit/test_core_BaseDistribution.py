@@ -151,8 +151,8 @@ def test_BaseDistribution_sample_posterior_vector_pandas():
     Nd = 3
 
     # Model = linear regression assuming error = 1
-    weight = Parameter(name='pd_weight', shape=Nd, estimator=None)
-    bias = Parameter(name='pd_bias', estimator=None)
+    weight = Parameter(name='pd_weight', shape=Nd)
+    bias = Parameter(name='pd_bias')
     data = Input()
     model = Normal(Dot(data, weight) + bias, 1.0)
 
@@ -194,9 +194,6 @@ def test_BaseDistribution_sample_posterior_vector_pandas():
 # TODO: test the shuffles work _initialize_shuffles
 
 
-# TODO: test that the flipout estimator works?
-
-
 # TODO: test the batches are being generated correctly _generate_batch
 
 
@@ -210,7 +207,7 @@ def test_BaseDistribution_assign_input_cols():
     epochs = 2
 
     # Model = linear regression assuming error = 1
-    weight = Parameter(name='aic_pd_weight', shape=2, estimator=None)
+    weight = Parameter(name='aic_pd_weight', shape=2)
     data = Input(cols=['d', 'b'])
     data2 = Input(cols='c')
     model = Normal(Dot(data, weight) + data2, 1.0)
@@ -242,8 +239,8 @@ def test_BaseDistribution_fit_record():
     Nd = 3
 
     # Model = linear regression assuming error = 1
-    weight = Parameter(name='record_weight', shape=Nd, estimator=None)
-    bias = Parameter(name='record_bias', estimator=None)
+    weight = Parameter(name='record_weight', shape=Nd)
+    bias = Parameter(name='record_bias')
     data = Input()
     model = Normal(Dot(data, weight) + bias, 1.0)
 
@@ -405,8 +402,8 @@ def test_BaseDistribution_plot_posterior_args_over_training(LR3_var, plot):
     Nd = 3
 
     # Model = linear regression assuming error = 1
-    weight = Parameter(name='ppot_weight', shape=Nd, estimator=None)
-    bias = Parameter(name='ppot_bias', estimator=None)
+    weight = Parameter(name='ppot_weight', shape=Nd)
+    bias = Parameter(name='ppot_bias')
     data = Input()
     std_dev = ScaleParameter()
     model = Normal(Dot(data, weight) + bias, std_dev)
@@ -433,8 +430,8 @@ def test_BaseDistribution_posterior_args_over_training_batch(LR3_var, plot):
     Nd = 3
 
     # Model = linear regression assuming error = 1
-    weight = Parameter(name='ppot_weight1', shape=Nd, estimator=None)
-    bias = Parameter(name='ppot_bias1', estimator=None)
+    weight = Parameter(name='ppot_weight1', shape=Nd)
+    bias = Parameter(name='ppot_bias1')
     data = Input()
     std_dev = ScaleParameter()
     model = Normal(Dot(data, weight) + bias, std_dev)
@@ -467,8 +464,8 @@ def test_BaseDistribution_plot_posterior_over_training_scalar(plot):
     """
 
     # Model = linear regression assuming error = 1
-    weight = Parameter(name='ppotp_weight', estimator=None)
-    bias = Parameter(name='ppotp_bias', estimator=None)
+    weight = Parameter(name='ppotp_weight')
+    bias = Parameter(name='ppotp_bias')
     data = Input()
     model = Normal(data*weight + bias, 1.0)
 
@@ -498,8 +495,8 @@ def test_BaseDistribution_plot_posterior_over_training_vector(plot):
     Nd = 3
 
     # Model = linear regression assuming error = 1
-    weight = Parameter(name='ppotpv_weight', shape=Nd, estimator=None)
-    bias = Parameter(name='ppotpv_bias', estimator=None)
+    weight = Parameter(name='ppotpv_weight', shape=Nd)
+    bias = Parameter(name='ppotpv_bias')
     data = Input()
     model = Normal(Dot(data, weight) + bias, 1.0)
 
