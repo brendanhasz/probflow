@@ -1,12 +1,16 @@
 """Layers.
 
-TODO: more info...
-A layer, unlike a model, returns a single value
-whereas a model returns a probability distribution!
+Layers take one or more tensors as input arguments, perform some computation
+on them, and output a single tensor.  They can additionally take keyword
+arguments which control how the computation is performed.
 
 
 Data Layers
 -----------
+
+The data input layer represents input(s) to the model, and allows for
+selecting a subset of the input data to pass through a specific part of the
+model.
 
 * :class:`.Input`
 
@@ -14,34 +18,41 @@ Data Layers
 Basic Arithmetic Layers
 -----------------------
 
-TODO: mention that these are all elementwise
+These layers perform element-wise arithmetic given two input tensors.
+The two input tensors must be the same size, and the output is the same 
+size as one of the inputs.
 
 * :class:`.Add`
 * :class:`.Sub`
 * :class:`.Mul`
 * :class:`.Div`
+
+
+Transformation Layers
+---------------------
+
+These layers perform element-wise transformations on a single input tensor.
+The output is the same size as the input.
+
 * :class:`.Neg`
 * :class:`.Abs`
 * :class:`.Exp`
 * :class:`.Log`
 * :class:`.Reciprocal`
 * :class:`.Sqrt`
-
-
-Transformation Layers
----------------------
-
-TODO: mention that these don't change the shape
-
 * :class:`.Sigmoid`
-* :class:`.Relu`
+* :class:`.Relu` (rectified linear unit activation function)
 * :class:`.Softmax`
+* :class:`.Transform` (define a custom transformation)
 
 
 Reduce Layers
 -------------
 
-TODO: mention that these DO change the shape
+These layers perform reduction operations on a single input tensor.
+Unlike the above Transformation layers, reduce layers *do* change the shape
+of the output relative to the input.  For example, if given a NxM tensor,
+:class:`.Sum` will return a Nx1 tensor, having taken the sum across each row.
 
 * :class:`.Sum`
 * :class:`.Mean`
@@ -54,27 +65,25 @@ TODO: mention that these DO change the shape
 Matrix Layers
 -------------
 
-* :class:`.Cat`
-* :class:`.Dot`
-* :class:`.Matmul`
+These layers perform matrix- and vector-related operations.
+
+* :class:`.Cat` (concatenate vectors/matrixes)
+* :class:`.Dot` (dot product)
+* :class:`.Matmul` (matrix multiplication)
 
 
 Neural Network Layers
 ---------------------
+
+These layers perform various neural-network-related operations.  Some of them,
+including :class:`.Dense`, :class:`.BatchNormalization`, and 
+:class:`.Embedding` add new :class:`.Parameter`s to the model.
 
 * :class:`.Dense`
 * :class:`.BatchNormalization`
 * :class:`.Sequential`
 * :class:`.Gather`
 * :class:`.Embedding`
-
-
-Custom Transform Layer
-----------------------
-
-A layer which performs an elementwise transform using any arbitrairy |TensorFlow| ops. 
-
-* :class:`.Transform`
 
 ----------
 
@@ -178,7 +187,7 @@ class Input(BaseLayer):
         else:
             if self._int_cols is None:
                 raise RuntimeError('Integer columns were not set for Input')
-            return tf.transpose(tf.gather(tf.transpose(data), self._int_cols))
+            return tf.gather(data, self._int_cols, axis=1)
 
 
     def __str__(self, prepend=''):
@@ -767,7 +776,6 @@ class Dot(BaseLayer):
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        # TODO: this will only work w/ vector inputs...
         return tf.reduce_sum(args['a'] * args['b'], 
                              axis=self.kwargs['axis'],
                              keepdims=True)
@@ -803,11 +811,114 @@ class Matmul(BaseLayer):
 
 
 class Dense(BaseLayer):
-    """A densely-connected neural network layer.
+    r"""A fully-connected neural network layer.
+
+    Given a vector :math:`\mathbf{x}`, this layer first performs a linear
+    transformation on :math:`\mathbf{x}` by matrix-multiplying 
+    :math:`\mathbf{x}` by a weight matrix :math:`\mathbf{W}` and adding 
+    a bias :math:`\mathbf{b}`, and then passes the result of that linear 
+    transformation through some non-linear, elementwise activation function 
+    :math:`f`:
+
+    .. math::
+
+        \text{Dense}(\mathbf{x}) = f(\mathbf{x}^\top \mathbf{W} + \mathbf{b})
+
+    Where :math:`\mathbf{W}` is an :math:`N \times M` matrix of 
+    parameters, :math:`\mathbf{b}` is a :math:`M`-length vector of parameters,
+    :math:`N` is the length of :math:`\mathbf{x}`, and :math:`M` is the length
+    of the output vector.
+
+    Any function can be specified for :math:`f` using the ``activation`` 
+    keyword argument, but the default is to use a the rectified linear unit
+    activation function:
+
+    .. math::
+
+        f(x) = \max (0, x)
+
+    The number of input dimensions (:math:`N`) is automatically determined by
+    the shape of the ``input``, and the number of output dimensions can be set
+    using the ``units`` keyword argument.
+
+    TODO: diagram
 
 
-    TODO: More info...
+    Parameters
+    ----------
+    input : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Input to pass through the fully-connected neural network layer.
+        The default is to use all the input dimensions.
 
+
+    Keyword Arguments
+    -----------------
+    units : int
+        Number of units in the output layer (:math:`M`).
+        Default = 1.
+    name : str
+        Name for this layer.
+        Default = 'Dense'
+    activation : callable
+        Activation function to apply after the linear transformation.
+        Default = ``tf.nn.relu`` (rectified linear unit)
+    weight_posterior : |Distribution|
+        Probability distribution class to use to approximate the posterior
+        for the weight parameter(s) (:math:`\mathbf{W}`).
+        Default = :class:`.Normal`
+    bias_posterior : |Distribution|
+        Probability distribution class to use to approximate the posterior
+        for the bias parameter(s) (:math:`\mathbf{b}`).
+        Default = :class:`.Normal`
+    weight_prior : |None| or a |Distribution| object
+        Prior probability distribution for the weight parameter(s)
+        (:math:`\mathbf{W}`).  |None| or a |Distribution| function which has 
+        been instantiated with parameters.
+        Default = :class:`.Normal` ``(0,1)``
+    bias_prior : |None| or a |Distribution| object
+        Prior probability distribution for the bias parameter(s)
+        (:math:`\mathbf{b}`).  |None| or a |Distribution| function which has
+        been instantiated with parameters.
+        Default = :class:`.Normal` ``(0,1)``
+    weight_initializer : {|None| or dict or |Tensor| or |Initializer|}
+        Initializer for each of the weights' variational posterior parameters.
+        See :class:`.Parameter` for more information on how to specify a
+        custom ``initializer``.
+    bias_initializer : {|None| or dict or |Tensor| or |Initializer|}
+        Initializer for each of the weights' variational posterior parameters.
+        See :class:`.Parameter` for more information on how to specify a
+        custom ``initializer``.
+
+
+    Examples
+    --------
+
+    Creating a fully-connected neural network layer
+
+    .. code-block:: python
+
+        x = Input([0, 1, 2]
+        w = Parameter(shape=3)
+        b = Parameter()
+        out = Relu(Dot(x, w) + b)
+        ...
+
+    can be accomplished more easily using a class:`.Dense` layer:
+
+    .. code-block:: python
+
+        x = Input([0, 1, 2]
+        out = Dense(x, units=1)
+
+    Especially when the output dimensions are >1 and multiple layers are to be
+    stacked:
+
+    .. code-block:: python
+
+        x = Input([0, 1, 2]
+        l1 = Dense(x, units=128)
+        l2 = Dense(l1, units=64)
+        out = Dense(l2, units=1)
 
     """
 
@@ -821,6 +932,7 @@ class Dense(BaseLayer):
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'units': 1,
+        'name': 'Dense',
         'activation': tf.nn.relu,
         'weight_posterior': Normal,
         'bias_posterior': Normal,
@@ -837,6 +949,8 @@ class Dense(BaseLayer):
             raise TypeError('units kwarg must be an int')
         if kwargs['units'] < 1:
             raise ValueError('units kwarg must be positive')
+        if not isinstance(kwargs['name'], str):
+            raise TypeError('name kwarg must be a str')
         if not callable(kwargs['activation']):
             raise TypeError('activation must be a callable')
         if not issubclass(kwargs['weight_posterior'], BaseDistribution):
@@ -859,14 +973,14 @@ class Dense(BaseLayer):
         ndims = x_in.shape[1]
         units = self.kwargs['units']
 
-        # TODO: make a scope for this layer's variables
-
         # Create weight and bias parameters
         weight = Parameter(shape=[ndims, units],
+                           name=self.kwargs['name']+'_weight',
                            posterior_fn=self.kwargs['weight_posterior'],
                            initializer=self.kwargs['weight_initializer'],
                            prior=self.kwargs['weight_prior'])
         bias = Parameter(shape=[1, units],
+                         name=self.kwargs['name']+'_bias',
                          posterior_fn=self.kwargs['bias_posterior'],
                          initializer=self.kwargs['bias_initializer'],
                          prior=self.kwargs['bias_prior'])
@@ -903,12 +1017,7 @@ class Dense(BaseLayer):
 
 
     def _build_mean(self, args, data):
-        """Build the layer with mean parameters.
-
-        TODO: docs
-        Note that this was done in _build()
-
-        """
+        """Build the layer with mean parameters."""
         return self._mean
 
 
@@ -964,13 +1073,22 @@ class BatchNormalization(BaseLayer):
     and :math:`\gamma` and :math:`\beta` are two free parameters for each 
     element.
 
+
     Parameters
     ----------
     input : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
         Input to batch-normalize.
 
+
     Keyword Arguments
     -----------------
+    proba : bool
+        Whether to use probabilistic (True) or point estimates (False) for the
+        weight and bias parameters.
+        Default = False.
+    name : str
+        Name for this layer.
+        Default = 'BatchNormalization'
     weight_posterior : |Distribution|
         Probability distribution class to use to approximate the posterior
         for the weight parameter(s) (:math:`\gamma`).
@@ -998,8 +1116,11 @@ class BatchNormalization(BaseLayer):
         See :class:`.Parameter` for more information on how to specify a
         custom ``initializer``.
 
+
     Examples
     --------
+
+    Batch normalize the output of a :class:`.Dense` layer:
 
     .. code-block:: python
 
@@ -1008,6 +1129,7 @@ class BatchNormalization(BaseLayer):
         l1_norm = BatchNormalization(layer1)
         l2 = Dense(l1_norm, units=64)
         ...
+
 
     References
     ----------
@@ -1029,6 +1151,7 @@ class BatchNormalization(BaseLayer):
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'proba': False,
+        'name': 'BatchNormalization',
         'weight_posterior': Normal,
         'bias_posterior': Normal,
         'weight_initializer': None,
@@ -1042,6 +1165,8 @@ class BatchNormalization(BaseLayer):
         """Ensure the keyword arguments have correct types, etc."""
         if not isinstance(kwargs['proba'], bool):
             raise TypeError('proba kwarg must be a bool')
+        if not isinstance(kwargs['name'], str):
+            raise TypeError('name kwarg must be a str')
         if not issubclass(kwargs['weight_posterior'], BaseDistribution):
             raise TypeError('weight_posterior kwarg must be a Distribution')
         if not issubclass(kwargs['bias_posterior'], BaseDistribution):
@@ -1066,8 +1191,6 @@ class BatchNormalization(BaseLayer):
         x_std = tf.nn.moments(x_in, axes=[0], keepdims=True)
         x_norm = (x_in-x_mean)/x_std
 
-        # TODO: make a scope for this layer's variables
-
         # Set the variational posterior used for the bias/scaling parameters
         if self.kwargs['proba']: #use full probability distribution
             weight_posterior = self.kwargs['weight_posterior']
@@ -1078,10 +1201,12 @@ class BatchNormalization(BaseLayer):
 
         # Create weight and bias parameters
         weight = Parameter(shape=dims,
+                           name=self.kwargs['name']+'_weight',
                            posterior_fn=weight_posterior,
                            initializer=self.kwargs['weight_initializer'],
                            prior=self.kwargs['weight_prior'])
         bias = Parameter(shape=dims,
+                         name=self.kwargs['name']+'_bias',
                          posterior_fn=bias_posterior,
                          initializer=self.kwargs['bias_initializer'],
                          prior=self.kwargs['bias_prior'])
@@ -1116,12 +1241,7 @@ class BatchNormalization(BaseLayer):
 
 
     def _build_mean(self, args, data):
-        """Build the layer with mean parameters.
-
-        TODO: docs
-        Note that this was done in _build()
-
-        """
+        """Build the layer with mean parameters."""
         return self._mean
 
 
@@ -1142,11 +1262,39 @@ class BatchNormalization(BaseLayer):
 
 
 class Sequential(BaseLayer):
-    """A sequence of layers.
+    """Apply a list of layers sequentially.
 
 
-    TODO: More info...
+    Parameters
+    ----------
+    input : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Input to the sequence of layers.
 
+
+    Keyword Arguments
+    -----------------
+    layers : list of |Layer|s
+        List of layers to apply sequentially.  Each layer can take only one
+        input.
+
+
+    Examples
+    --------
+
+    Use :class:`.Sequential` to create a multi-layer dense neural network with
+    batch normalization:
+
+    .. code-block:: python
+
+        predictions = Sequential([
+            Dense(units=128),
+            BatchNormalization(),
+            Dense(units=64),
+            BatchNormalization(),
+            Dense(units=1),
+        ])
+        noise_std = ScaleParameter()
+        model = Normal(predictions, noise_std)
 
     """
 
@@ -1207,12 +1355,272 @@ class Sequential(BaseLayer):
 
 
     def _build_mean(self, args, data):
-        """Build the layer with mean parameters.
+        """Build the layer with mean parameters."""
+        return self._mean
 
-        TODO: docs
-        Note that this was done in _build()
 
-        """
+    def _log_loss(self, vals):
+        """Log loss incurred by this layer."""
+        return self._log_loss_sum
+
+
+    def _mean_log_loss(self, vals):
+        """Log loss incurred by this layer w/ mean parameters."""
+        return self._mean_log_loss_sum
+
+
+    def _kl_loss(self):
+        """The sum of divergences of variational posteriors from priors."""
+        return self._kl_loss_sum
+
+
+
+class Gather(BaseLayer):
+    """Collects slices from a layer using indexes provided by another layer.
+
+
+    Parameters
+    ----------
+    values : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Values to gather.
+    indices : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Non-negative integers corresponding to the indexes of ``values`` to 
+        get.
+
+
+    Keyword Arguments
+    -----------------
+    axis : int
+        Axis to gather on: integers in ``indices`` correspond to the indices
+        of ``values`` in the ``axis``-th dimension.
+    index_dtype : |DType|
+        Data type to cast ``indices`` to in order to index the values.
+        Default = ``tf.uint32``
+
+
+    Examples
+    --------
+
+    Use :class:`.Gather` to look up values based on an index.  For
+    example, a random effect can be modeled using :class:`.Gather`:
+
+    .. code-block:: python
+
+        df = pd.DataFrame()
+        df['subject_id'] = [0, 0, 1, 1, 2, 2]
+        df['feature'] = [1.2, 1.3, 0.1, -0.7, -0.1, 1.7]
+        df['target'] = [0.9, 0.5, -1.2, 0.1, -0.6, 0.4]
+
+        subject_id = Input('subject_id')
+        feature = Input('feature')
+        random_effect = Parameter(shape=3)
+        fixed_effect = Parameter()
+
+        predictions = (Gather(random_effect, subject_id)
+                       + fixed_effect*feature)
+        model = Normal(predictions, 1.0)
+
+        model.fit(['subject_id', 'feature'], 'target', data=df)
+
+    """
+
+
+    # Layer arguments and their default values
+    _default_args = OrderedDict([
+        ('values', REQUIRED),
+        ('indices', REQUIRED)
+    ])
+
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis': 0,
+        'index_dtype': tf.uint32,
+    }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['axis'], int):
+            raise TypeError('axis kwarg must be an int')
+        if not isinstance(kwargs['index_dtype'], tf.DType):
+            raise TypeError('index_dtype kwarg must be a tf.DType')
+
+
+    def _build(self, args, _data, _batch_shape):
+        """Build the layer."""
+        return tf.gather(args['values'], 
+                         tf.cast(args['indexes'], self.kwargs['index_dtype']), 
+                         axis=self.kwargs['axis'])
+
+
+
+class Embedding(BaseLayer):
+    r"""A categorical embedding layer.
+
+    Maps an input variable containing non-negative integers to dense vectors.
+    The length of the vectors (the dimensionality of the embedding) can be set
+    with the ``dims`` keyword argument.  The embedding is learned over the
+    course of training: if there are N unique integers in the input, and the
+    embedding dimensionality is M, a matrix of NxM free parameters is created
+    and optimized to minimize the loss.
+
+    The embeddings can be non-probabilistic (each integer corresponds to a
+    single point in M-dimensional space, the default), or probabilistic (each
+    integer corresponds to a M-dimensional multivariate distribution).
+
+    By default, a :class:`.Deterministic` distribution is used for the
+    embedding variables' posterior distributions, with :class:`.Normal`
+    ``(0, 1)`` priors.  This corresponds to normal non-probabilistic embedding
+    with L2 regularization.
+
+
+    Parameters
+    ----------
+    input : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Input non-negative integers to embed in a ``dims``-dimensional space.
+
+
+    Keyword Arguments
+    -----------------
+    dims : int > 0
+        Number of embedding dimensions.
+    name : str
+        Name for this layer.
+        Default = 'Embedding'
+    proba : bool
+        Whether to use probabilistic (True) or point estimates (False) for the
+        embeddings.
+        Default = False.
+    posterior : |Distribution|
+        Probability distribution class to use to approximate the embeddings'
+        posterior distributions.
+        Default = :class:`.Normal`
+    prior : |None| or a |Distribution| object
+        Prior probability distribution for the embeddings. |None| or a 
+        |Distribution| function which has been instantiated with parameters.
+        Default = :class:`.Normal` ``(0,1)``
+    initializer : {|None| or dict or |Tensor| or |Initializer|}
+        Initializer for the embeddings' variational posterior parameters.
+        See :class:`.Parameter` for more information on how to specify a
+        custom ``initializer``.
+    index_dtype : |DType|
+        Data type to cast input to in order to look up embedding parameters.
+        Default = ``tf.uint32``
+
+
+    Examples
+    --------
+
+    Embed word IDs into a 50-dimensional space:
+
+    .. code-block:: python
+
+        x = Input('word_id')
+        emb = Embedding(x, dims=50)
+        l1 = Dense(emb, units=128)
+        predictions = Dense(l1, units=1)
+        ...
+
+
+    Notes
+    -----
+    
+    With probabilistic embeddings (when ``proba``=``True``), the embeddings
+    parameters are created as a matrix of independent parameters.  That is,
+    the covariance structure of the embedding posteriors is not modeled.
+    A multivariate distribution is also not used because the sum of the KL
+    divergence between multiple univariate distributions is equal to the 
+    KL divergence between two multivariate distributions with zero covariance
+    (with corresponding parameters in each dimension), as is the sum of the 
+    log posterior probabilities.  In other words, we use a NxM matrix of 
+    independent parameters instead of N M-dimensional parameters.
+
+    """
+
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'dims': 5,
+        'name': 'Embedding',
+        'proba': False,
+        'posterior': Normal,
+        'initializer': None,
+        'prior': Normal(0, 1),
+        'index_dtype': tf.uint32,
+    }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if not isinstance(kwargs['dims'], int):
+            raise TypeError('dims kwarg must be an int')
+        if not isinstance(kwargs['name'], str):
+            raise TypeError('name kwarg must be a str')
+        if kwargs['dims'] < 1:
+            raise ValueError('dims kwarg must be positive')
+        if not isinstance(kwargs['proba'], bool):
+            raise ValueError('proba kwarg must be a bool')
+        if not issubclass(kwargs['posterior'], BaseDistribution):
+            raise TypeError('posterior kwarg must be a Distribution class')
+        _validate_initializer(kwargs['initializer'])
+        if not isinstance(kwargs['prior'], BaseDistribution):
+            raise TypeError('prior kwarg must be a Distribution object')
+        if not isinstance(kwargs['index_dtype'], tf.DType):
+            raise TypeError('index_dtype kwarg must be a tf.DType')
+
+
+    def _build(self, args, data, batch_shape):
+        """Build the layer."""
+
+        # Ensure arg is Input layer w/ only 1 dimension
+        if not isinstance(self.args['input'], Input):
+            raise TypeError('Embedding input must be an Input layer')
+        if isinstance(self.args['input']._int_cols, list):
+            raise RuntimeError('Embedding input must be 1-dimensional')
+
+        # Inputs
+        x_in = args['input']
+        input_dim = self.args['input']._nunique
+
+        # Set the variational posterior used for the embedding parameters
+        if self.kwargs['proba']: #use full probability distribution
+            posterior = self.kwargs['posterior']
+        else: #only estimate point values
+            posterior = Deterministic
+
+        # Create embedding parameters
+        embeddings = Parameter(shape=[input_dim, self.kwargs['dims']],
+                               name=self.kwargs['name'],
+                               posterior_fn=posterior,
+                               initializer=self.kwargs['initializer'],
+                               prior=self.kwargs['prior'])
+
+        # Build the embedding parameters
+        embeddings.build(data, batch_shape)
+
+        # Compute output using a sample from the variational posteriors
+        self._sample = tf.gather(embeddings.built_obj, 
+                                 tf.cast(x_in, self.kwargs['index_dtype']))
+
+        # Compute the output using the means of the variational posteriors
+        self._mean = tf.gather(embeddings.mean_obj, 
+                               tf.cast(x_in, self.kwargs['index_dtype']))
+
+        # Compute the losses
+        self._log_loss_sum = embeddings._log_loss(embeddings.built_obj)
+        self._mean_log_loss_sum = embeddings._log_loss(embeddings.mean_obj)
+        self._kl_loss_sum = embeddings._kl_loss()
+
+        # Store embeddings parameters as an arg
+        self.args['embeddings'] = embeddings
+
+        # Return the sample
+        return self._sample
+
+
+    def _build_mean(self, args, data):
+        """Build the layer with mean parameters."""
         return self._mean
 
 
@@ -1261,238 +1669,6 @@ class Conv2d(BaseLayer):
 
 
 # TODO: Pooling layer
-
-
-
-class Gather(BaseLayer):
-    """Collects slices from a layer using indexes provided by another layer.
-
-    TODO: docs
-
-    e.g. if 
-    vals = [1.1, 2.2, 3.3, 4.4]  (a 4x1 vector), and
-    inds = [0, 2, 1]
-    then Gather(vals, inds) returns:
-    [1.1, 3.3, 2.2] (a 3x1 vector)
-
-    """
-
-
-    # Layer arguments and their default values
-    _default_args = OrderedDict([
-        ('values', REQUIRED),
-        ('indices', REQUIRED)
-    ])
-
-
-    # Layer keyword arguments and their default values
-    _default_kwargs = {
-        'axis': 0,
-        'index_dtype': tf.uint32,
-    }
-
-
-    def _validate_kwargs(self, kwargs):
-        """Ensure the keyword arguments have correct types, etc."""
-        if not isinstance(kwargs['axis'], int):
-            raise TypeError('axis kwarg must be an int')
-        if not isinstance(kwargs['index_dtype'], tf.DType):
-            raise TypeError('index_dtype kwarg must be a tf.DType')
-
-
-    def _build(self, args, _data, _batch_shape):
-        """Build the layer."""
-        return tf.gather(args['values'], 
-                         tf.cast(args['indexes'], self.kwargs['index_dtype']), 
-                         axis=self.kwargs['axis'])
-
-
-
-class Embedding(BaseLayer):
-    r"""A categorical embedding layer.
-
-
-    TODO: More info...
-
-    TODO: prior/regularization for the embedding layer might be difficult b/c
-    we're not including the log posterior in the loss (just the divergence and
-    the likelihood).  We just want point estimates for the embeddings (not
-    variational posterior dist estimates) b/c of the rotational/multimodal
-    posterior problem.  But w/o a distribution, can't compute the divergence
-    between a point and a distribution.  May have to pretend that there are
-    variance-1 normal dists around the embedding points and compute the KL div
-    using that.
-
-    should cast input to int64 or something before using as indexes -> tf.gather
-
-    same idea as Gather (above), just it creates the embedding array for you
-    based on how many unique vals are in the training dataset
-
-    will somehow need to be made aware of how many unique values there are in
-    the column(s) the layer is embedding...
-    takes a kwarg="unique_vals" so it knows how many embedding params to create?
-    no that would be redundant for the user...
-    might just have to, from fit, recursively go thru the model and give each
-    embedding layer access to the unique values of their cols
-
-    also should take a dims kwarg (embedding dimensions)
-
-
-    Parameters
-    ----------
-    input : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
-        Input non-negative integers to embed in a ``dims``-dimensional space.
-
-    Keyword Arguments
-    -----------------
-    dims : int > 0
-        Number of embedding dimensions.
-    proba : bool
-        Whether to use probabilistic (True) or point estimates (False) for the
-        embeddings.
-        Default = False.
-    posterior : |Distribution|
-        Probability distribution class to use to approximate the embeddings'
-        posterior distributions.
-        Default = :class:`.Normal`
-    prior : |None| or a |Distribution| object
-        Prior probability distribution for the embeddings. |None| or a 
-        |Distribution| function which has been instantiated with parameters.
-        Default = :class:`.Normal` ``(0,1)``
-    initializer : {|None| or dict or |Tensor| or |Initializer|}
-        Initializer for the embeddings' variational posterior parameters.
-        See :class:`.Parameter` for more information on how to specify a
-        custom ``initializer``.
-
-    Examples
-    --------
-
-    .. code-block:: python
-
-        x = Input('word_id')
-        emb = Embedding(x, dims=50)
-        l1 = Dense(emb, units=128)
-        predictions = Dense(l1, units=1)
-        ...
-
-
-    Notes
-    -----
-    
-    With probabilistic embeddings (when ``proba``=``True``), the embeddings
-    parameters are created as a matrix of independent parameters.  That is,
-    the covariance structure of the embedding posteriors is not modeled.
-    A multivariate distribution is also not used because the sum of the KL
-    divergence between multiple univariate distributions is equal to the 
-    KL divergence between two multivariate distributions with zero covariance
-    (with corresponding parameters in each dimension), as is the sum of the 
-    log posterior probabilities.  In other words, we use a NxM matrix of 
-    independent parameters instead of N M-dimensional parameters.
-
-    """
-
-
-    # Layer keyword arguments and their default values
-    _default_kwargs = {
-        'dims': 5,
-        'proba': False,
-        'posterior': Normal,
-        'initializer': None,
-        'prior': Normal(0, 1),
-        'index_dtype': tf.uint32,
-    }
-
-
-    def _validate_kwargs(self, kwargs):
-        """Ensure the keyword arguments have correct types, etc."""
-        if not isinstance(kwargs['dims'], int):
-            raise TypeError('dims kwarg must be an int')
-        if kwargs['dims'] < 1:
-            raise ValueError('dims kwarg must be positive')
-        if not isinstance(kwargs['proba'], bool):
-            raise ValueError('proba kwarg must be a bool')
-        if not issubclass(kwargs['posterior'], BaseDistribution):
-            raise TypeError('posterior kwarg must be a Distribution class')
-        _validate_initializer(kwargs['initializer'])
-        if not isinstance(kwargs['prior'], BaseDistribution):
-            raise TypeError('prior kwarg must be a Distribution object')
-        if not isinstance(kwargs['index_dtype'], tf.DType):
-            raise TypeError('index_dtype kwarg must be a tf.DType')
-
-
-    def _build(self, args, data, batch_shape):
-        """Build the layer."""
-
-        # Ensure arg is Input layer w/ only 1 dimension
-        if not isinstance(self.args['input'], Input):
-            raise TypeError('Embedding input must be an Input layer')
-        if isinstance(self.args['input']._int_cols, list):
-            raise RuntimeError('Embedding input must be 1-dimensional')
-
-        # Inputs
-        x_in = args['input']
-        input_dim = self.args['input']._nunique
-
-        # TODO: make a scope for this layer's variables
-
-        # Set the variational posterior used for the embedding parameters
-        if self.kwargs['proba']: #use full probability distribution
-            posterior = self.kwargs['posterior']
-        else: #only estimate point values
-            posterior = Deterministic
-
-        # Create embedding parameters
-        embeddings = Parameter(shape=[input_dim, self.kwargs['dims']],
-                               posterior_fn=posterior,
-                               initializer=self.kwargs['initializer'],
-                               prior=self.kwargs['prior'])
-
-        # Build the embedding parameters
-        embeddings.build(data, batch_shape)
-
-        # Compute output using a sample from the variational posteriors
-        self._sample = tf.gather(embeddings.built_obj, 
-                                 tf.cast(x_in, self.kwargs['index_dtype']))
-
-        # Compute the output using the means of the variational posteriors
-        self._mean = tf.gather(embeddings.mean_obj, 
-                               tf.cast(x_in, self.kwargs['index_dtype']))
-
-        # Compute the losses
-        self._log_loss_sum = embeddings._log_loss(embeddings.built_obj)
-        self._mean_log_loss_sum = embeddings._log_loss(embeddings.mean_obj)
-        self._kl_loss_sum = embeddings._kl_loss()
-
-        # Store embeddings parameters as an arg
-        self.args['embeddings'] = embeddings
-
-        # Return the sample
-        return self._sample
-
-
-    def _build_mean(self, args, data):
-        """Build the layer with mean parameters.
-
-        TODO: docs
-        Note that this was done in _build()
-
-        """
-        return self._mean
-
-
-    def _log_loss(self, vals):
-        """Log loss incurred by this layer."""
-        return self._log_loss_sum
-
-
-    def _mean_log_loss(self, vals):
-        """Log loss incurred by this layer w/ mean parameters."""
-        return self._mean_log_loss_sum
-
-
-    def _kl_loss(self):
-        """The sum of divergences of variational posteriors from priors."""
-        return self._kl_loss_sum
 
 
 # TODO: LSTM

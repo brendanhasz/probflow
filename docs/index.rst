@@ -26,7 +26,7 @@ Getting Started
 
 **ProbFlow** allows you to quickly and painlessly build, fit, and evaluate custom Bayesian models (or :ref:`ready-made <ready_made_models>` ones!) which run on top of |TensorFlow| and |TensorFlow Probability|.
 
-With ProbFlow, the core building blocks of a Bayesian model are parameters, layers, and probability distributions (and, of course, the data input).  Layers define how parameters interact with the independent variables (the features) to predict the probability distribution of the dependent variables (the target).
+With ProbFlow, the core building blocks of a Bayesian model are parameters, layers, and probability distributions (and, of course, the input data).  Layers define how parameters interact with the independent variables (the features) to predict the probability distribution of the dependent variables (the target).
 
 For example, a simple Bayesian linear regression
 
