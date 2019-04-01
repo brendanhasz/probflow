@@ -1,10 +1,27 @@
-"""Abstract classes.
+"""Abstract base classes.
 
-TODO: more info...
+The :mod:`.core` module contains abstract base classes (ABC's) for all of
+ProbFlow's classes.  In other words, none of the classes in the :mod:`.core` 
+modele can be instantiated - they only exist to implement functionality 
+common to the classes which inherit them.  The :mod:`.core` module includes:
+
+* :obj:`.REQUIRED`, a sentinel object used to indicate required arguments,
+* :class:`.BaseObject`, ABC from which all ProbFlow classes inherit,
+* :class:`.BaseParameter`, ABC from which all :mod:`.parameters` inherit,
+* :class:`.BaseLayer`, ABC from which all :mod:`.layers` inherit, 
+* :class:`.BaseDistribution`, ABC from which all :mod:`.distributions` inherit, 
+* :class:`.ContinuousDistribution`, a sub-type of distribution for continuous 
+  dependent variables (such as the :class:`.Normal` and :class:`.Cauchy`
+  distributions), and 
+* :class:`.DiscreteDistribution`, a sub-type of distribution for discrete 
+  dependent variables (such as the :class:`.Bernoulli` and :class:`.Poisson`
+  distributions).
 
 ----------
 
 """
+
+
 
 __all__ = [
     'REQUIRED',
@@ -31,13 +48,14 @@ from .utils.data import generate_batch
 from .utils.plotting import plot_line, plot_dist, fill_between
 
 
-# Sentinel object for required arguments
+
+# Sentinel object to represent required arguments
 REQUIRED = object()
 
 
 
 class BaseObject(ABC):
-    """Abstract probflow object class (used as an implementation base)"""
+    """Abstract ProbFlow object class (used as an implementation base)."""
 
     def __add__(self, other):
         """Add this layer to another layer, parameter, or value."""
@@ -88,84 +106,96 @@ class BaseObject(ABC):
 
 
 class BaseParameter(BaseObject):
-    """Abstract parameter class (used as an implementation base)"""
+    """Abstract parameter class (used as an implementation base)."""
     pass
 
 
 
 class BaseLayer(BaseObject):
-    """Abstract layer class (used as an implementation base)
+    """Abstract layer class (used as an implementation base).
 
-    This is an abstract base class for a layer.  Layers are objects which take
-    other objects as input (other layers, parameters, or tensors) and output a
-    tensor.
+    This is an abstract base class for |Layers|.  Layers are objects
+    which take |Tensors|, |Parameters|, or other |Layers| as input, and output
+    a tensor.
 
-    TODO: more...
+    An inheriting class *must* define the following method:
 
+    * ``_build(self, args, data, batch_shape)``
 
-    Required attributes and methods
-    -------------------------------
-    An inheriting class must define the following properties and methods:
-    * `_default_args` (attribute)
-    * `_build` (method)
-    * `_log_loss` (method)
+    where:
 
-    The `_default_args` attribute should contain a dict whose keys are the names
-    of the layer's arguments, and whose values are the default value of each
-    argument.  Setting an argument's value in `_default_args` to `None` causes
-    that argument to be mandatory (TypeError if that argument's value is not
-    specified when instantiating the class).
+    * ``args`` is a dict of named arguments to the layer,
+    * ``data`` is a `tf.placeholder` containing the dependent variable data,
+    * ``batch_shape`` is a list containing the shape of each batch.
 
-    The `_build` method should return a `Tensor` which was built from this
-    layer's arguments. TODO: more details...
+    This ``_build`` method must return a |Tensor| which was build from the 
+    layer's ``args``, using |TensorFlow| operations.  For example, to
+    implement a layer which adds its two inputs, the ``_build`` method 
+    should look like::
 
-    The `_log_loss` method should return the log loss incurred by this layer.
+        def _build(self, args, _data, _batch_shape):
+            return tf.add(args['a'], args['b'])
 
-    TODO: more...
+    Usually |Layers| will only operate on their ``args``, and will not use the 
+    ``data`` or the ``batch_shape``.  However, those additional arguments are
+    needed for some special layers such as :class:`.Input` and 
+    :class:`.Dense`.
 
+    Also, an inheriting class may optionally override the following attributes
+    and methods:
 
-    See Also
-    --------
-    func : why you should see it
-
-
-    Notes
-    -----
-    TODO: Docs...
+    * ``_default_args`` - an attribute which stores the default arguments to
+      the layer as a dict.  The default is 
+      ``{'input': probflow.core.REQUIRED}``.  That is, the default is for a
+      layer to require one argument named ``'input'``.
+    * ``_default_kwargs`` - an attribute which stores the default *keyword*
+      arguments to the layer as a dict.  The default is an empty dict.
+      That is, the default is for a layer to take no keyword arguments.
+    * ``_build_mean(self, args, data, batch_shape)`` - a method to build the
+      "mean" model (the model with all parameter values set to the mean of
+      their variational posterior distributions).  Should return a |Tensor|
+      containing the input after performing this layer's transformation.
+      Default is to perform the same computation as ``_build``.
+    * ``_log_loss(self, vals)`` - a method to compute the log loss (the log
+      probability) incurred by the layer.  Should return a scalar |Tensor|.
+      Default is to return 0.
+    * ``_mean_log_loss(self, vals)`` - a method to compute the log loss (the
+      log probability) incurred by the layer under the mean model (the model 
+      with all parameter values set to the mean of their variational
+      posterior distributions). Should return a scalar |Tensor|.
+      Default is to return 0.
+    * ``_kl_loss(self)`` - a method to compute the Kullback–Leibler divergence
+      incurred by the layer.  Should return a scalar |Tensor|.
+      Default is to return 0.
 
 
     Examples
     --------
 
-    We can define a layer which adds two arguments like so::
+    We can define a |Layer| which adds two arguments like so::
+
+        from probflow.core import BaseLayer, REQUIRED
 
         class Add(BaseLayer):
 
-            self._default_args = {
-                'a': None,
-                'b': None
+            _default_args = {
+                'a': REQUIRED,
+                'b': REQUIRED
             }
 
             def _build(self, args, data):
                 return args['a'] + args['b']
 
-            def _log_loss(self, obj, vals):
-                return 0
-
-    then we can use that layer to add two other layers or tensors::
+    Then we can use that layer to add two other |Layers| or |Tensors|::
 
         x = Input()
         b = Parameter()
         mu = Add(x, b)
 
-    For more examples, see :class:`.Add`, :class:`.Sub`, :class:`.Mul`,
-    :class:`.Div`, :class:`.Abs`, :class:`.Exp`, and :class:`.Log`.
-
+    For more examples, see the implementations of |Layer| classes
+    such as :class:`.Input`, :class:`.Mul`, :class:`.Abs`, :class:`.Sum`, 
+    :class:`.Dot`, and :class:`.Dense`.
     """
-
-
-    # Default keyword arguments for a layer
-    _default_kwargs = dict()
 
 
     # Layer arguments and their default values
@@ -174,11 +204,28 @@ class BaseLayer(BaseObject):
     }
 
 
-    def __init__(self, *args, **kwargs):
-        """Construct layer.
+    # Default keyword arguments for a layer
+    _default_kwargs = dict()
 
-        TODO: docs. Mention that actually building the tf graph is
-        delayed until build() or fit() is called.
+
+    def __init__(self, *args, **kwargs):
+        """Construct the layer.
+
+        Initializing a layer with this method constructs the layer using 
+        the layer's :attr:`._default_args` and :attr:`._default_kwargs`.
+        Non-keyword arguments passed to this constructor method will be 
+        parsed as the :attr:`._default_args` and will override the values in
+        that attribute.  Keyword arguments passed to this constructor method
+        will be  parsed as the :attr:`._default_kwargs` and will override the
+        corresponding values in that attribute.  
+
+
+        .. admonition:: |TensorFlow| graph is not built until |Model| is fit!
+
+            Constructing a layer does not build that layer's contribution to
+            the |TensorFlow| graph.  This is delayed until :meth:`.fit` is
+            called on a |Model| which this |Layer| is a part of.
+
         """
 
         # TODO: error if no args and you pass a kwarg w/ no keyword
@@ -235,49 +282,52 @@ class BaseLayer(BaseObject):
     def _build(self, args, data, batch_shape):
         """Build layer.
 
-        Inheriting class must define this method by building the layer for that
-        class.  Should return a `Tensor` or a `tfp.distribution` using the
-        layer arguments in args (a dict).
+        Inheriting class must define this method performing some computation
+        on the input ``args`` using |TensorFlow| operations.  Usually |Layers|
+        will only operate on their ``args``, and will not use the ``data`` or
+        the ``batch_shape``.  However, those additional arguments are needed
+        for some special layers such as :class:`.Input` and  :class:`.Dense`.
 
-        TODO: docs...
 
+        Parameters
+        ----------
+        args : dict
+            Dictionary of named arguments to the layer.  Keys will contain
+            names of each argument (str), and each values will be a |Tensor|
+            with that argument's value.
+        data : |tf.placeholder|
+            Dependent variable data for a batch.
+        batch_shape : int or list
+            Shape of the batch.
+
+
+        Returns
+        -------
+        output : |Tensor| or |tfp.distribution|
+            The output |Tensor| of the layer after performing the computation
+            on its inputs.  If this |Layer| is a |Distribution| , it should
+            instead output a |tfp.distribution| .
         """
         pass
 
 
     def _build_mean(self, args, data, batch_shape):
-        """Build the layer with mean parameters.
-
-        TODO: docs. default is to just do the same thing as _build
-
-        """
+        """Build the layer with mean parameters."""
         return self._build(args, data, batch_shape)
 
 
     def _log_loss(self, vals):
-        """Compute the log loss incurred by this layer.
-
-        TODO: docs... default is no loss but can override when there is
-
-        """
+        """Compute the log loss incurred by this layer."""
         return 0
 
 
     def _mean_log_loss(self, vals):
-        """Compute the log loss incurred by this layer with mean parameters.
-
-        TODO: docs... default is no loss but can override when there is
-
-        """
+        """Compute the log loss incurred by this layer in the mean model."""
         return 0
 
 
     def _kl_loss(self):
-        """Compute the loss due to posterior divergence from priors.
-
-        TODO: docs... default is no loss but can override when there is
-
-        """
+        """Compute the loss due to posterior divergence from priors."""
         return 0
 
 
@@ -303,11 +353,7 @@ class BaseLayer(BaseObject):
 
 
     def _build_recursively(self, data, batch_shape):
-        """Build this layer's arguments and loss, and then build the layer.
-
-        TODO: actually do docs for this one...
-
-        """
+        """Recursively build this layer and its arguments and losses"""
 
         # Build each of this layer's arguments.
         self.built_args = dict()
@@ -409,19 +455,197 @@ class BaseLayer(BaseObject):
 
 
 class BaseDistribution(BaseLayer):
-    """Abstract distribution class (used as an implementation base)
+    r"""Abstract distribution class (used as an implementation base).
 
-    TODO: More info...
-    talk about how a model defines a parameterized probability distribution
-    which you can call fit on
+    This is an abstract base class for |Distributions|.  Distributions are
+    objects which take |Tensors|, |Parameters|, or |Layers| as input, and
+    output a probability distribution (unlike |Layers|, which output a 
+    tensor).  The output probability distribution is the predicted observation
+    distribution for the dependent variable given the independent variables.
+    A |Distribution| should be the *final* layer in a model, and is used to 
+    predict the dependent variable values.
+
+    An inheriting class *must* define the following attributes and methods:
+
+    * ``_default_args``
+    * ``_post_param_bounds``
+    * ``_post_param_init``    
+    * ``_build(self, args, data, batch_shape)``
+
+    The ``_default_args`` attribute should be a dict with keys containing
+    the distribution's parameter names, and values containing the default
+    value for each corresponding parameter.  To denote a required argument
+    (when no default value makes sense, for example the rate parameter of 
+    a Poisson distribution), set the value to the :obj:`.REQUIRED` object.
+
+    The ``_post_param_bounds`` attribute should be a dict with keys
+    corresponding to the distribution's parameter names, and values containing
+    the corresponding bounds as tuples, where the first element of the tuple
+    is the lower bound of that parameter, and the second element of the tuple
+    is the upper bound of that parameter.  Use |None| when there is no
+    bound on a given end.
+
+    The ``_post_param_init`` should be a dict with keys containing the 
+    distribution's parameters' names, and each corresponding value should
+    contain an |Initializer| with which to initialize that parameter.
+
+    Finally, the ``_build`` method should take input argument |Tensors| and
+    return a |tfp.distribution| which has the parameters set to those 
+    args.
+
+    The :class:`.BaseDistribution` class also contains methods for fitting
+    the model (the |Distribution| and all |Layers| and |Parameters| on which
+    it depends), viewing the posteriors and priors of |Parameters| in the
+    model, making point predictions on new data, computing predictive
+    distributions on new data, computing confidence intervals, and more.
+    These features are common to all |Distributions|, and so are implemented
+    once in this class.
+
+
+    Examples
+    --------
+
+    The Normal distribution has two parameters: :math:`\mu` and 
+    :math:`\sigma`.  Reasonable default values are :math:`\mu=0` and 
+    :math:`\sigma=1`.  So, the ``_default_args`` attribute should be::
+
+        _default_args = {
+            'mu': 0.0,
+            'sigma': 1.0
+        }
+
+    While the :math:`\mu` parameter is unbounded, the :math:`\sigma` parameter
+    cannot be negative.  Therefore, the ``_post_param_bounds`` attribute 
+    should be::
+
+        _post_param_bounds = {
+            'loc': (None, None),
+            'scale': (0, None)
+        }
+
+    A good initialization scheme for the :math:`\mu` parameter is to choose 
+    values from a normal distribution, and for the :math:`\sigma` parameter
+    we want to initialize with positive values near 1.  So, the 
+    ``_post_param_init`` attribute should be::
+
+        _post_param_init = {
+            'loc': tf.initializers.truncated_normal(mean=0.0, stddev=1.0),
+            'scale': tf.initializers.random_uniform(minval=-0.7, maxval=0.4)
+        }
+
+    Finally, the ``_build`` method just needs to construct a
+    |tfp.distribution| from the distribution's args::
+
+        def _build(self, args, _data, _batch_shape):
+            return tfd.Normal(loc=args['loc'], scale=args['scale'])
+
+    Put together, a class to represent a Normal distribution which inherits
+    from the :class:`.BaseDistribution` class should look like::
+
+        class Normal(BaseDistribution):
+
+            _default_args = {
+                'mu': 0.0,
+                'sigma': 1.0
+            }
+
+            _post_param_bounds = {
+                'loc': (None, None),
+                'scale': (0, None)
+            }
+
+            _post_param_init = {
+                'loc': tf.initializers.truncated_normal(mean=0.0, stddev=1.0),
+                'scale': tf.initializers.random_uniform(minval=-0.7, maxval=0.4)
+            }
+
+            def _build(self, args, _data, _batch_shape):
+                return tfd.Normal(loc=args['loc'], scale=args['scale'])
+
+    As a second example, we'll build a Poisson distribution.
+
+    Unlike the Normal distribution, the Poisson distribution has one parameter
+    (a rate parameter :math:`\lambda`), and that parameter has no obvious 
+    default value, so we should make that parameter required::
+
+        _default_args = {
+            'lambda': REQUIRED
+        }
+
+    Like the Normal distribution's :math:`\sigma` parameter, the rate
+    parameter :math:`\lambda` cannot be negative::
+
+        _post_param_bounds = {
+            'lambda': (0, None)
+        }
+
+    The default posterior parameter initializer is only used when the 
+    |Distribuion| is used as a variational posterior distribution.  The 
+    Poisson distribution isn't often used as a variational posterior, but 
+    we can define a default initializer anyway::
+
+        _post_param_init = {
+            'lambda': tf.initializers.random_uniform(minval=0.0, maxval=3.0),
+        }
+
+    And again, the ``_build`` method only has to return a |tfp.distribution|
+    object with the args as parameters::
+
+        def _build(self, args, _data, _batch_shape):
+            return tfd.Poisson(args['lambda'])
+
+    All together, this should look like::
+
+        class Poisson(BaseDistribution):
+
+            _default_args = {
+                'lambda': REQUIRED
+            }
+
+            _post_param_bounds = {
+                'lambda': (0, None)
+            }
+
+            _post_param_init = {
+                'lambda': tf.initializers.random_uniform(minval=0.0, maxval=3.0),
+            }
+
+            def _build(self, args, _data, _batch_shape):
+                return tfd.Poisson(args['lambda'])
+
+    Note that the actual :class:`.Normal` and :class:`.Poisson` distributions
+    inherit :class:`.ContinuousDistribution` and
+    :class:`.DiscreteDistribution`, respectively, not 
+    :class:`.BaseDistribution` (though both :class:`.ContinuousDistribution`
+    and :class:`.DiscreteDistribution` inherit from
+    :class:`.BaseDistribution`).
+
+    For more examples, see the implementations of |Distribution| classes
+    such as :class:`.Normal`, :class:`.Cauchy`, :class:`.Poisson`, and
+    :class:`.Bernoulli`.
 
     """
 
 
+    # Distribution parameters and their default values
+    @property
+    @abstractmethod
+    def _default_args(self):
+        pass
+
+
     # Posterior distribution parameter bounds (lower, upper)
-    _post_param_bounds = {
-        'input': (None, None)
-    }
+    @property
+    @abstractmethod
+    def _post_param_bounds(self):
+        pass
+
+
+    # Posterior parameter initializers
+    @property
+    @abstractmethod
+    def _post_param_init(self):
+        pass
 
 
     def _log_loss(self, vals):
@@ -447,11 +671,12 @@ class BaseDistribution(BaseLayer):
             shuffle=True,
             record=None,
             record_freq='batch'):
-        """Fit model.
+        """Fit a model using stochastic variational inference.
 
         TODO: Docs...
 
-        TODO: brief math about variational inference :ref:`[1] <ref_bbb>`
+        TODO: brief math about variational inference 
+        :doc:`mathematical details </math>``
         (just to say that the loss used is -ELBO = KL - log_likelihood)
 
         Parameters
@@ -524,13 +749,6 @@ class BaseDistribution(BaseLayer):
             will only be recorded once per epoch (which saves memory if your
             model has many parameters).
 
-
-        References
-        ----------
-        .. _ref_bbb:
-        .. [1] Charles Blundell, Julien Cornebise, Koray Kavukcuoglu, and 
-            Daan Wierstra. Weight uncertainty in neural networks. 
-            *arXiv preprint*, 2015. http://arxiv.org/abs/1505.05424
 
 
         """
@@ -763,13 +981,18 @@ class BaseDistribution(BaseLayer):
                 save_records(epoch)
 
             # Evaluate metrics
-            print(60*' '+"\r", end='')
             if metrics:
                 md = self.metrics(x_val, y_val, metrics)
-                print('  '+(4*' ').join([m+': '+str(md[m]) for m in md]))
+
+            # Print metrics
+            if verbose:
+                if metrics:
+                    print('  '+(4*' ').join([m+': '+str(md[m]) for m in md]))
+                print(60*' '+"\r", end='')
 
         # Finished!
-        print('Done!')
+        if verbose:
+            print('Done!')
 
 
     def _ensure_is_fit(self):

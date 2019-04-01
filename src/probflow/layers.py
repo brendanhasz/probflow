@@ -41,9 +41,9 @@ The output is the same size as the input.
 * :class:`.Reciprocal`
 * :class:`.Sqrt`
 * :class:`.Sigmoid`
-* :class:`.Relu` (rectified linear unit activation function)
+* :class:`.Relu` - rectified linear unit activation function
 * :class:`.Softmax`
-* :class:`.Transform` (define a custom transformation)
+* :class:`.Transform` - define a custom transformation
 
 
 Reduce Layers
@@ -67,9 +67,9 @@ Matrix Layers
 
 These layers perform matrix- and vector-related operations.
 
-* :class:`.Cat` (concatenate vectors/matrixes)
-* :class:`.Dot` (dot product)
-* :class:`.Matmul` (matrix multiplication)
+* :class:`.Cat` - concatenate vectors/matrixes
+* :class:`.Dot` - dot product
+* :class:`.Matmul` - matrix multiplication
 
 
 Neural Network Layers
@@ -77,13 +77,13 @@ Neural Network Layers
 
 These layers perform various neural-network-related operations.  Some of them,
 including :class:`.Dense`, :class:`.BatchNormalization`, and 
-:class:`.Embedding` add new :class:`.Parameter`s to the model.
+:class:`.Embedding` add new :class:`.Parameter` s to the model.
 
-* :class:`.Dense`
-* :class:`.BatchNormalization`
-* :class:`.Sequential`
-* :class:`.Gather`
-* :class:`.Embedding`
+* :class:`.Dense` - fully-connected neural network layer
+* :class:`.BatchNormalization` - normalize data per batch
+* :class:`.Sequential` - apply a list of layers sequentially
+* :class:`.Gather` - look up values based on some index
+* :class:`.Embedding` - embed categorical data in a lower-dimensional space
 
 ----------
 
@@ -1272,7 +1272,7 @@ class Sequential(BaseLayer):
 
     Keyword Arguments
     -----------------
-    layers : list of |Layer|s
+    layers : list of |Layer| s
         List of layers to apply sequentially.  Each layer can take only one
         input.
 

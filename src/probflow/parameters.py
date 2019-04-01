@@ -40,7 +40,7 @@ class Parameter(BaseParameter):
         Prior probability distribution function which has been instantiated
         with parameters.
         Default = :class:`.Normal` ``(0,1)``
-    posterior_fn : |Distribution|
+    posterior : |Distribution|
         Probability distribution class to use to approximate the posterior.
         Default = :class:`.Normal`
     seed : int, float, or |None|
@@ -535,7 +535,7 @@ class ScaleParameter(Parameter):
         Prior probability distribution function which has been instantiated
         with parameters.
         Default = |None|
-    posterior_fn : |Distribution|
+    posterior : |Distribution|
         Probability distribution class to use to approximate the posterior.
         Default = :class:`.InvGamma`
     seed : int, float, or |None|

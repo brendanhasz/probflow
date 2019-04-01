@@ -1,20 +1,31 @@
 .. Macros
 
-.. |Keras| replace:: `Keras <https://keras.io>`__
-.. |TensorFlow| replace:: `TensorFlow <https://www.tensorflow.org/>`__
-.. |TensorFlow Probability| replace:: `TensorFlow Probability <https://www.tensorflow.org/probability/>`__
+.. |Keras| replace:: `Keras <http://keras.io>`__
+.. |TensorFlow| replace:: `TensorFlow <http://www.tensorflow.org/>`__
+.. |TensorFlow Probability| replace:: `TensorFlow Probability <http://www.tensorflow.org/probability/>`__
 
-.. |Distribution| replace:: :doc:`distribution </api_distributions>`
-.. |Parameter| replace:: :class:`.Parameter`
-.. |Layer| replace:: :doc:`layer </api_layers>`
+.. |Distribution| replace:: :doc:`Distribution </api_distributions>`
+.. |Distributions| replace:: :doc:`Distributions </api_distributions>`
+.. |Parameter| replace:: :doc:`Parameter </api_parameters>`
+.. |Parameters| replace:: :doc:`Parameters </api_parameters>`
+.. |Layer| replace:: :doc:`Layer </api_layers>`
+.. |Layers| replace:: :doc:`Layers </api_layers>`
 .. |Model| replace:: :class:`Model <.BaseDistribution>`
+.. |Models| replace:: :class:`Models <.BaseDistribution>`
 
 .. |None| replace:: :obj:`None`
 .. |ndarray| replace:: :class:`ndarray <numpy.ndarray>`
+.. |ndarrays| replace:: :class:`ndarrays <numpy.ndarray>`
 .. |DataFrame| replace:: :class:`DataFrame <pandas.DataFrame>`
+.. |DataFrames| replace:: :class:`DataFrames <pandas.DataFrame>`
 
 .. TENSORFLOW LINKS
 .. |Tensor| replace:: `Tensor <http://www.tensorflow.org/api_docs/python/tf/Tensor>`__
+.. |Tensors| replace:: `Tensors <http://www.tensorflow.org/api_docs/python/tf/Tensor>`__
 .. |Variable| replace:: `Variable <http://www.tensorflow.org/api_docs/python/tf/Variable>`__
-.. |DType| replace:: `DType <https://www.tensorflow.org/api_docs/python/tf/dtypes/DType>`__
-.. |Initializer| replace:: `Initializer <https://www.tensorflow.org/api_docs/python/tf/initializers>`__
+.. |Variables| replace:: `Variables <http://www.tensorflow.org/api_docs/python/tf/Variable>`__
+.. |DType| replace:: `DType <http://www.tensorflow.org/api_docs/python/tf/dtypes/DType>`__
+.. |Initializer| replace:: `Initializer <http://www.tensorflow.org/api_docs/python/tf/initializers>`__
+.. |Initializers| replace:: `Initializers <http://www.tensorflow.org/api_docs/python/tf/initializers>`__
+.. |tf.placeholder| replace:: `tf.placeholder <http://www.tensorflow.org/api_docs/python/tf/placeholder>`__
+.. |tfp.distribution| replace:: `tfp.distribution <http://www.tensorflow.org/probability/api_docs/python/tfp/distributions>`__
