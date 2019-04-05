@@ -9,7 +9,48 @@ TODO: more info...
 
 
 import numpy as np
+import pandas as pd
 
+
+def make_col_numeric(series):
+    """Convert a non-numeric series to numeric"""
+    if (pd.api.types.is_object_dtype(series) or
+        pd.api.types.is_categorical_dtype(series) or
+        pd.api.types.is_string_dtype(series)):
+        return (series.astype('category')
+                .cat.codes.values)
+    else:
+        return series.values
+
+
+def make_numeric(cols, df, name='x'):
+    """Convert all non-numeric data to numeric
+
+    Parameters
+    ----------
+    cols : list of str or int
+        Cols of df to convert
+    df : pandas DataFrame
+        Data to convert
+    name : str
+        Name of data
+    """
+
+    # Initialize array for output
+    xo = np.full((df.shape[0], len(cols)), np.nan)
+
+    # Convert each column individually
+    for iC, col in enumerate(cols):
+        if isinstance(col, str):
+            xo[:,iC] = make_col_numeric(df[col])
+        elif isinstance(col, int):
+            xo[:,iC] = make_col_numeric(df.iloc[:,col])
+        else:
+            raise TypeError('each element of ' + name +
+                            ' must be str or int')
+
+    # Return numeric array
+    return xo
 
 
 def process_data(model, x=None, data=None, name='x'):
@@ -17,7 +58,7 @@ def process_data(model, x=None, data=None, name='x'):
 
     Parameters
     ----------
-    x : |ndarray| or int or str or list of str or int
+    x : |DataFrame| or |Series| or |ndarray| or int or str or list of str or int
         Values of the dataset to process.  If ``data`` was passed as a 
         |DataFrame|, ``x`` can be an int or string or list of ints or strings
          specifying the columns of that |DataFrame| to process.
@@ -42,23 +83,27 @@ def process_data(model, x=None, data=None, name='x'):
         except AttributeError:
             raise RuntimeError(name+' cannot be None if model is not fit')
 
-    # Numpy arrays
+    # Numpy arrays or DataFrames
     if data is None:
 
-        # Ensure data is numpy array
-        if not isinstance(x, np.ndarray):
-            raise TypeError(name+' must be a numpy ndarray')
+        # Ensure data is a numpy array or a DataFrame/Series
+        if isinstance(x, np.ndarray):
+            xo = x
+        elif isinstance(x, pd.DataFrame):
+            xo = make_numeric(x.columns.tolist(), x, name=name)
+        elif isinstance(x, pd.Series):
+            xo = make_col_numeric(x)
+        else:
+            raise TypeError(name+' must be a numpy ndarray, a pandas '
+                            'DataFrame, or a pandas Series')        
 
-        # Just return that array
-        xo = x
-
+    # x and y are str/int or list of them, data is a DataFrame
     else:
 
         # Pandas DataFrame
-        import pandas as pd
         if isinstance(data, pd.DataFrame):
 
-            # Check type
+            # Check types
             if not isinstance(x, (int, str, list)):
                 raise TypeError(name+' must be an int, string, or list')
             if isinstance(x, list):
@@ -66,23 +111,7 @@ def process_data(model, x=None, data=None, name='x'):
                     raise TypeError(name+' must be a list of int or str')
 
             # Convert categorical columns to category codes
-            xo = np.full((data.shape[0], len(x)), np.nan)
-            for iC, col in enumerate(x):
-                if isinstance(col, str):
-                    if pd.api.types.is_object_dtype(data[col]):
-                        xo[:,iC] = (data[col].astype('category')
-                                    .cat.codes.values)
-                    else:
-                        xo[:,iC] = data[col]
-                elif isinstance(col, int):
-                    if pd.api.types.is_object_dtype(data.iloc[:col]):
-                        xo[:,iC] = (data.iloc[:,col].astype('category')
-                                    .cat.codes.values)
-                    else:
-                        xo[:,iC] = data.iloc[:,col]
-                else:
-                    raise TypeError('each element of ' + name +
-                                    ' must be str or int')
+            xo = make_numeric(x, data, name=name)
 
         else:
             raise TypeError(name+' must be None or a pandas DataFrame')
@@ -101,18 +130,18 @@ def process_xy_data(self, x=None, y=None, data=None):
 
     Parameters
     ----------
-    x : |ndarray| or int or str or list of str or int
+    x : |DataFrame| or |ndarray| or int or str or list of str or int
         Values of the dataset to process.  If ``data`` was passed as a 
         |DataFrame|, ``x`` can be an int or string or list of ints or strings
-         specifying the columns of that |DataFrame| to process.
-    y : |ndarray| or int or str or list of str or int
+        specifying the columns of that |DataFrame| to process.
+    y : |Series| or |ndarray| or int or str or list of str or int
         Values of a second dataset to process.  If ``data`` was passed as a 
         |DataFrame|, ``y`` can be an int or string or list of ints or strings
-         specifying the columns of that |DataFrame| to process.
+        specifying the columns of that |DataFrame| to process.
 
     Returns
     -------
-    (|ndarray|, |ndarray|)
+    ( |ndarray| , |ndarray| )
         The processed x and y data.
     """
 

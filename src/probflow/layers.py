@@ -77,7 +77,7 @@ Neural Network Layers
 
 These layers perform various neural-network-related operations.  Some of them,
 including :class:`.Dense`, :class:`.BatchNormalization`, and 
-:class:`.Embedding` add new :class:`.Parameter` s to the model.
+:class:`.Embedding` add new |Parameters| to the model.
 
 * :class:`.Dense` - fully-connected neural network layer
 * :class:`.BatchNormalization` - normalize data per batch
@@ -702,7 +702,7 @@ class LogSumExp(BaseLayer):
 
 
 class Cat(BaseLayer):
-    """A layer which Concatenates its two inputs.
+    """A layer which concatenates its two inputs.
 
 
     TODO: More info...
@@ -1525,7 +1525,7 @@ class Embedding(BaseLayer):
     Notes
     -----
     
-    With probabilistic embeddings (when ``proba``=``True``), the embeddings
+    With probabilistic embeddings (when ``proba=True``), the embeddings
     parameters are created as a matrix of independent parameters.  That is,
     the covariance structure of the embedding posteriors is not modeled.
     A multivariate distribution is also not used because the sum of the KL

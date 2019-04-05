@@ -75,7 +75,7 @@ class Deterministic(ContinuousDistribution):
     Parameters
     ----------
     loc : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
-        Mean of the deterministic distribution (:math:`\mu`).
+        Mean of the deterministic distribution (:math:`k_0`).
         Default = 0
     """
 

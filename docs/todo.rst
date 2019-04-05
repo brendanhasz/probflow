@@ -7,7 +7,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Allow fit() to take X as a pandas DataFrame and y as a pandas Series
 * Finish BaseDistribution.fit and docs
 * Finish Parameter and docs
 * Finish Layers (up until MatMul) and docs
@@ -63,13 +62,6 @@ Backlog (long term):
 
 Notes
 -----
-
-Better parameter initialization
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Scale param should initialize w/ mean of 1 and SD of... Something reasonable.
-Also make sure the initializer your're using for parameter values is reasonable
-And make the STD devs variables also initialize to 1
 
 
 Sequential layer

@@ -18,6 +18,7 @@
 .. |ndarrays| replace:: :class:`ndarrays <numpy.ndarray>`
 .. |DataFrame| replace:: :class:`DataFrame <pandas.DataFrame>`
 .. |DataFrames| replace:: :class:`DataFrames <pandas.DataFrame>`
+.. |Series| replace:: :class:`Series <pandas.Series>`
 
 .. TENSORFLOW LINKS
 .. |Tensor| replace:: `Tensor <http://www.tensorflow.org/api_docs/python/tf/Tensor>`__

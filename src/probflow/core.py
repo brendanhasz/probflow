@@ -8,7 +8,7 @@ common to the classes which inherit them.  The :mod:`.core` module includes:
 * :obj:`.REQUIRED`, a sentinel object used to indicate required arguments,
 * :class:`.BaseObject`, ABC from which all ProbFlow classes inherit,
 * :class:`.BaseParameter`, ABC from which all :mod:`.parameters` inherit,
-* :class:`.BaseLayer`, ABC from which all :mod:`.layers` inherit, 
+* :class:`.BaseLayer`, ABC from which all |Layers| inherit, 
 * :class:`.BaseDistribution`, ABC from which all :mod:`.distributions` inherit, 
 * :class:`.ContinuousDistribution`, a sub-type of distribution for continuous 
   dependent variables (such as the :class:`.Normal` and :class:`.Cauchy`
@@ -36,6 +36,7 @@ __all__ = [
 from abc import ABC, abstractmethod
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow_probability as tfp
@@ -125,7 +126,7 @@ class BaseLayer(BaseObject):
     where:
 
     * ``args`` is a dict of named arguments to the layer,
-    * ``data`` is a `tf.placeholder` containing the dependent variable data,
+    * ``data`` is a |tf.placeholder| containing the dependent variable data,
     * ``batch_shape`` is a list containing the shape of each batch.
 
     This ``_build`` method must return a |Tensor| which was build from the 
@@ -580,7 +581,7 @@ class BaseDistribution(BaseLayer):
         }
 
     The default posterior parameter initializer is only used when the 
-    |Distribuion| is used as a variational posterior distribution.  The 
+    |Distribution| is used as a variational posterior distribution.  The 
     Poisson distribution isn't often used as a variational posterior, but 
     we can define a default initializer anyway::
 
@@ -675,18 +676,32 @@ class BaseDistribution(BaseLayer):
 
         TODO: Docs...
 
-        TODO: brief math about variational inference 
-        :doc:`mathematical details </math>``
-        (just to say that the loss used is -ELBO = KL - log_likelihood)
+        This function takes a matrix of independent variable values(``x_in``) 
+        and a matrix of corresponding dependent variable values (``y_in``)
+        and fits this |Model| to that data using variational inference.
+        Alternatively, you can pass in a |DataFrame| with the ``data`` arg,
+        and specify the variables in that DataFrame to use by passing ``x_in``
+        and ``y_in`` as strings or ints or lists of strings or ints
+        corresponding to the columns in ``data`` to use.
+
+        Variational inference 
+
+        For more information, see the sections in the user guide on
+        :doc:`Bayesian modeling </inference>` and the
+        :doc:`mathematical details </math>` behind variational inference.
+
+        You must :meth:`.fit` a model to some data before calling any of the
+        model criticism methods.
+
 
         Parameters
         ----------
-        x_in : |ndarray| or int or str or list of str or int
+        x_in : |DataFrame| or |ndarray| or int or str or list of str or int
             Independent variable values of the dataset to fit (aka the 
             "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
             an int or string or list of ints or strings specifying the columns
             of that |DataFrame| to use as independent variables.
-        y_in : |ndarray| or int or str or list of str or int
+        y_in : |DataFrame| or |Series| or |ndarray| or int or str or list of str or int
             Dependent variable values of the dataset to fit (aka the 
             "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
             an int or string or list of ints or strings specifying the columns
@@ -748,8 +763,6 @@ class BaseDistribution(BaseLayer):
             If ``record_freq`` is ``'epoch'``, variational posterior parameters
             will only be recorded once per epoch (which saves memory if your
             model has many parameters).
-
-
 
         """
 
@@ -900,7 +913,12 @@ class BaseDistribution(BaseLayer):
         shuff_ids = initialize_shuffles(N, epochs, shuffle)
 
         # Assign columns to Input objects
-        assign_input_info(x_in, x)
+        if isinstance(x_in, pd.DataFrame):
+            assign_input_info(x_in.columns.tolist(), x)
+        elif isinstance(x_in, pd.Series):
+            assign_input_info([x_in.name], x)
+        else: #x_in is list of str or int
+            assign_input_info(x_in, x)
 
         # Recursively build this model and its args
         self._build_recursively(x_data, batch_size_ph)
@@ -2362,8 +2380,10 @@ class ContinuousDistribution(BaseDistribution):
         .. admonition:: Model must be fit first!
 
             Before calling
-            :meth:`calibration_curve() <.ContinuousModel.calibration_curve>` on
-            a |Model|, you must first :meth:`.fit` it to some data.
+            :meth:`calibration_curve() <.ContinuousDistribution.calibration_curve>`
+            on a |Model|, you must first 
+            :meth:`fit() <.BaseDistribution.fit>`
+            it to some data.
 
         Parameters
         ----------
@@ -2381,7 +2401,7 @@ class ContinuousDistribution(BaseDistribution):
             will use the data the model was trained on (the default).
         data : |None| or |DataFrame|
             DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
-            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            it is assumed that ``x`` and ``y`` are |ndarrays| .  If ``data`` 
             is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
             or lists of strings containing the columns from ``data`` to use.
         split_by : int

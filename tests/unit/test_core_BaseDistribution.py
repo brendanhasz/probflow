@@ -41,6 +41,45 @@ def test_BaseDistribution_fit(LR1_novar):
     assert model.is_fit
 
 
+def test_BaseDistribution_fit_x_dataframe():
+    """Tests core.BaseDistribution.fit w/ x as a DataFrame"""
+
+    # Parameters + input data is vector of length 3
+    Nd = 3
+
+    # Model = linear regression assuming error = 1
+    weight = Parameter(name='x_df_weight', shape=Nd)
+    bias = Parameter(name='x_df_bias')
+    data = Input()
+    model = Normal(Dot(data, weight) + bias, 1.0)
+
+    # Generate data
+    N = 10
+    true_weight = np.array([0.5, -0.25, 0.0])
+    true_bias = -1.0
+    noise = np.random.randn(N)
+    x = np.random.randn(N, Nd+1)
+    x[:,0] = np.sum(true_weight*x[:,1:], axis=1) + true_bias + noise
+    df = pd.DataFrame(x, columns=['a', 'b', 'c', 'd'])
+    x = df[['b', 'c', 'd']]
+    y = df['a']
+
+    # Fit the model
+    model.fit(x, y, epochs=1)
+
+    # Check output of sample_posterior is correct
+    num_samples = 3
+    samples = model.sample_posterior(num_samples=num_samples)
+    assert isinstance(samples, dict)
+    assert len(samples) == 2
+    assert samples['x_df_weight'].ndim == 2
+    assert samples['x_df_weight'].shape[0] == num_samples
+    assert samples['x_df_weight'].shape[1] == Nd
+    assert samples['x_df_bias'].ndim == 2
+    assert samples['x_df_bias'].shape[0] == num_samples
+    assert samples['x_df_bias'].shape[1] == 1
+
+
 def test_BaseDistribution_predictive_distribution(LR3_novar, Ndata):
     """Tests core.BaseDistribution.predictive_distribution"""
 
@@ -65,6 +104,15 @@ def test_BaseDistribution_predictive_distribution(LR3_novar, Ndata):
 
     # Check predictive_distribution w/ val input and num_samples
     prd = model.predictive_distribution(x_val, num_samples=20)
+    assert isinstance(prd, np.ndarray)
+    assert prd.ndim == 3
+    assert prd.shape[0] == 20
+    assert prd.shape[1] == 4
+    assert prd.shape[2] == 1
+
+    # Check predictive distribution w/ x as a DataFrame
+    x_df = pd.DataFrame(x_val, columns=['a', 'b', 'c'])
+    prd = model.predictive_distribution(x_df, num_samples=20)
     assert isinstance(prd, np.ndarray)
     assert prd.ndim == 3
     assert prd.shape[0] == 20
@@ -521,4 +569,4 @@ def test_BaseDistribution_plot_posterior_over_training_vector(plot):
 # Tests for plot_posterior and plot_prior are in test_plot_posterior/prior
 
 
-# TODO: test predictive_distribution, predict, metrics, etc
+# TODO: test predict, metrics, etc
