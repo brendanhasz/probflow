@@ -118,7 +118,7 @@ For convenience, ProbFlow also includes several :ref:`ready-made models <ready_m
     model = LinearRegression()
     model.fit(x, y)
 
-Using parameters, layers, and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like :ref:`generalized linear models <examples_glm>`, :ref:`neural matrix factorization <examples_nmf>` models, and :ref:`mixed effects models <examples_mixed_effects>`.  Take a look at the :ref:`examples` section and the :ref:`user_guide` for more!
+Using parameters, layers, and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like :ref:`generalized linear models <example_glm>`, :ref:`neural matrix factorization <example_nmf>` models, and :ref:`mixed effects models <example_mixed_effects>`.  Take a look at the :ref:`examples` section and the :ref:`user_guide` for more!
 
 
 Installation

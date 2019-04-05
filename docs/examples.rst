@@ -6,9 +6,8 @@ Examples
 .. include:: macros.hrst
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
-   :hidden:
 
    example_linear_regression
    example_logistic_regression
@@ -23,6 +22,3 @@ Examples
    
 
 TODO: intro to examples
-
-
-.. contents:: Outline

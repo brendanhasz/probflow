@@ -4,7 +4,7 @@ User Guide
 ==========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
    :hidden:
 
@@ -17,7 +17,6 @@ User Guide
    evaluating
    inspecting
    ready_made_models
-   examples
    math
 
 .. include:: macros.hrst
