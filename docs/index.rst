@@ -7,6 +7,7 @@ ProbFlow
    :hidden:
 
    user_guide
+   examples
    api
    todo
 
