@@ -7,6 +7,7 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
+* Allow fit() to take X as a pandas DataFrame and y as a pandas Series
 * Finish BaseDistribution.fit and docs
 * Finish Parameter and docs
 * Finish Layers (up until MatMul) and docs
