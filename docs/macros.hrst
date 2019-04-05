@@ -30,3 +30,4 @@
 .. |Initializers| replace:: `Initializers <http://www.tensorflow.org/api_docs/python/tf/initializers>`__
 .. |tf.placeholder| replace:: `tf.placeholder <http://www.tensorflow.org/api_docs/python/tf/placeholder>`__
 .. |tfp.distribution| replace:: `tfp.distribution <http://www.tensorflow.org/probability/api_docs/python/tfp/distributions>`__
+.. |Optimizer| replace:: `Optimizer <https://www.tensorflow.org/api_docs/python/tf/train/Optimizer>`__

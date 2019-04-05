@@ -56,28 +56,28 @@ REQUIRED = object()
 
 
 class BaseObject(ABC):
-    """Abstract ProbFlow object class (used as an implementation base)."""
+    """Abstract base class for all ProbFlow objects"""
 
     def __add__(self, other):
-        """Add this layer to another layer, parameter, or value."""
+        """Add this layer to a |Layer|, |Parameter|, or |Tensor|."""
         from .layers import Add
         return Add(self, other)
 
 
     def __sub__(self, other):
-        """Subtract from this layer another layer, parameter, or value."""
+        """Subtract from this layer a |Layer|, |Parameter|, or |Tensor|."""
         from .layers import Sub
         return Sub(self, other)
 
 
     def __mul__(self, other):
-        """Multiply this layer by another layer, parameter, or value."""
+        """Multiply this layer by a |Layer|, |Parameter|, or |Tensor|."""
         from .layers import Mul
         return Mul(self, other)
 
 
     def __truediv__(self, other):
-        """Divide this layer by another layer, parameter, or value."""
+        """Divide this layer by a |Layer|, |Parameter|, or |Tensor|."""
         from .layers import Div
         return Div(self, other)
 
@@ -107,13 +107,13 @@ class BaseObject(ABC):
 
 
 class BaseParameter(BaseObject):
-    """Abstract parameter class (used as an implementation base)."""
+    """Abstract base class for ProbFlow |Parameters| """
     pass
 
 
 
 class BaseLayer(BaseObject):
-    """Abstract layer class (used as an implementation base).
+    """Abstract base class for ProbFlow |Layers| 
 
     This is an abstract base class for |Layers|.  Layers are objects
     which take |Tensors|, |Parameters|, or other |Layers| as input, and output
@@ -224,7 +224,8 @@ class BaseLayer(BaseObject):
         .. admonition:: |TensorFlow| graph is not built until |Model| is fit!
 
             Constructing a layer does not build that layer's contribution to
-            the |TensorFlow| graph.  This is delayed until :meth:`.fit` is
+            the |TensorFlow| graph.  This is delayed until 
+            :meth:`fit <.BaseDistribution.fit>` is
             called on a |Model| which this |Layer| is a part of.
 
         """
@@ -456,7 +457,7 @@ class BaseLayer(BaseObject):
 
 
 class BaseDistribution(BaseLayer):
-    r"""Abstract distribution class (used as an implementation base).
+    r"""Abstract base class for ProbFlow |Distributions|
 
     This is an abstract base class for |Distributions|.  Distributions are
     objects which take |Tensors|, |Parameters|, or |Layers| as input, and
@@ -663,7 +664,8 @@ class BaseDistribution(BaseLayer):
             dtype=tf.float32,
             batch_size=128,
             epochs=100,
-            optimizer='adam',
+            optimizer=tf.train.AdamOptimizer,
+            optimizer_kwargs=dict(),
             learning_rate=0.01,
             metrics=[],
             verbose=True,
@@ -674,8 +676,6 @@ class BaseDistribution(BaseLayer):
             record_freq='batch'):
         """Fit a model using stochastic variational inference.
 
-        TODO: Docs...
-
         This function takes a matrix of independent variable values(``x_in``) 
         and a matrix of corresponding dependent variable values (``y_in``)
         and fits this |Model| to that data using variational inference.
@@ -683,8 +683,6 @@ class BaseDistribution(BaseLayer):
         and specify the variables in that DataFrame to use by passing ``x_in``
         and ``y_in`` as strings or ints or lists of strings or ints
         corresponding to the columns in ``data`` to use.
-
-        Variational inference 
 
         For more information, see the sections in the user guide on
         :doc:`Bayesian modeling </inference>` and the
@@ -696,7 +694,7 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x_in : |DataFrame| or |ndarray| or int or str or list of str or int
+        x_in : |DataFrame| or |Series| or |ndarray| or int or str or list of str or int
             Independent variable values of the dataset to fit (aka the 
             "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
             an int or string or list of ints or strings specifying the columns
@@ -708,21 +706,32 @@ class BaseDistribution(BaseLayer):
             of that |DataFrame| to use as dependent variables.
         data : |None| or |DataFrame|
             Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
-            ``x`` and ``y`` are each an |ndarray|.  If ``data`` is a 
-            |DataFrame|, :meth:`.fit` assumes ``x`` and ``y`` are strings or 
-            lists of strings containing the columns from ``data`` to use.
+            ``x`` and ``y`` are each an |ndarray| or |DataFrames|.  If 
+            ``data`` is a |DataFrame|, :meth:`.fit` assumes ``x`` and ``y``
+            are strings or lists of strings containing the columns from
+            ``data`` to use.
+            Default = |None|
         dtype : |DType|
             Cast the input data to this type, and use this type for parameters.
+            Default = ``tf.float32``
         batch_size : int or None
             Number of samples per training batch.  Use None to use all samples
-            per batch.  Default = 128
+            per batch.
+            Default = 128
         epochs : int
             Number of epochs to train for (1 epoch is one full cycle through
-            all the training data).  Default = 100
-        optimizer : TODO
-            TODO
+            all the training data).
+            Default = 100
+        optimizer : |Optimizer| class
+            Optimizer to use.  Default is the
+            `Adam <https://www.tensorflow.org/api_docs/python/tf/train/AdamOptimizer>`_
+            optimizer.
+        optimizer_kwargs : dict
+            Keyword arguments to pass to the ``optimizer``.  Default is no
+            keyword arguments.
         learning_rate : float
-            TODO
+            Learning rate to use for the ``optimizer``.
+            Default = 0.01
         metrics : str or list of str
             Metrics to evaluate each epoch.  To evaluate multiple metrics, 
             pass a list of strings, where each string is a different metric.
@@ -740,6 +749,7 @@ class BaseDistribution(BaseLayer):
             Default = True
         validation_split : float between 0 and 1
             Proportion of the data to use as validation data.
+            If 0, won't evaluate metrics on the validation data.
             Default = 0
         validation_shuffle : bool
             Whether to shuffle which data is used for validation.  If False,
@@ -747,25 +757,96 @@ class BaseDistribution(BaseLayer):
             for validation.
             Default = True
         shuffle : bool
-            Whether to shuffle the training data before each trainin epoch.
+            Whether to shuffle the training data before each training epoch.
             Default = True
         record : None or str or list of str
-            Parameters to record over the course of training.  If ``record`` is
-            None, no parameter recording occurrs.  If ``record`` is ``'all'``,
-            all parameters are recorded.  If ``record`` is a string containing
-            the name of a |Parameter|, that parameter's variational posterior
-            parameters are recorded.  If ``record`` is a list, each element of
-            the list should be a string with the name of a |Parameter| to 
-            record.
-        record_freq : string {'batch' or 'epoch'}
-            Recording frequency.  If ``record_freq`` is ``'batch'``, 
+            Parameters to record over the course of training.  If ``record``
+            is |None|, no parameter recording occurrs.  If ``record`` is 
+            ``'all'``, all parameters are recorded.  If ``record`` is a string
+            containing the name of a |Parameter|, that parameter's variational
+            posterior parameters are recorded.  If ``record`` is a list, each
+            element of the list should be a string with the name of a
+            |Parameter| to record.
+            Default = |None|
+        record_freq : str {'batch' or 'epoch'}
+            Recording frequency.  If ``record_freq='batch'``, 
             variational posterior parameters will be recorded once per batch.
-            If ``record_freq`` is ``'epoch'``, variational posterior parameters
+            If ``record_freq='epoch'``, variational posterior parameters
             will only be recorded once per epoch (which saves memory if your
-            model has many parameters).
+            model has many parameters). 
+            Default = ``'batch'``
 
+        Examples
+        --------
+
+        After constructing a simple model::
+
+            from probflow import Parameter, Normal
+            x1 = Input(0)
+            x2 = Input(1)
+            w1 = Parameter()
+            w2 = Parameter()
+            bias = Parameter(name='bias')
+            predictions = x1*w1 + x2*w2 + bias
+            model = Normal(predictions, 1.0)
+
+        that model can be fit to some data. 
+        This data can be numpy |ndarrays| ::
+
+            import numpy as np
+            x = np.random.randn(100, 2)
+            w = np.array([0.5, -0.3])
+            y = w*x - 0.7 + np.random.randn(100, 1)
+
+            model.fit(x, y)
+
+        The data can also be pandas |DataFrames| or |Series| ::
+
+            import pandas as pd
+            df_x = pd.DataFrame(x)
+            df_y = pd.Series(y.ravel())
+
+            model.fit(df_x, df_y)
+
+        Or, you can pass in a single |DataFrame| using the ``data`` keyword
+        argument, and specify which columns to use as the dependent and
+        independent variables by passing strings or lists of strings 
+        corresponding to the columns to use in ``x`` and ``y`` ::
+
+            df = pd.DataFrame(x, columns=['feature1', 'feature2'])
+            df['target'] = y
+
+            model.fit(x=['feature1', 'feature2'],
+                      y='target',
+                      data=df)
+
+        The batch size, number of training epochs, and learning rate of the
+        optimizer can be set using the ``batch_size``, ``epochs``, and 
+        ``learning_rate`` parameters::
+
+            model.fit(x, y, 
+                      batch_size=1028,
+                      epochs=1000,
+                      learning_rate=0.001)
+
+        To track various metrics over training, use the ``metrics`` and 
+        ``validation_split`` arguments::
+
+            model.fit(x, y, 
+                      metrics='mse',
+                      validation_split=0.2)
+
+        To record parameters over the course of training, use the
+        ``record`` and ``record_freq`` arguments::
+
+            model.fit(x, y,
+                      record='bias',
+                      record_freq='epoch')
+
+        After fitting the model, you can call criticism methods such as
+        :meth:`.predictive_distribution`, :meth:`.predict`, 
+        and :meth:`.plot_posterior`.
         """
-
 
         def make_placeholders(x, y, dtype):
             """Create x, y, and batch_shape placeholders"""
@@ -870,10 +951,11 @@ class BaseDistribution(BaseLayer):
             raise TypeError('epochs must be an int')
         if epochs < 0:
             raise TypeError('epochs must be non-negative')
-        if not isinstance(optimizer, str):
-            raise TypeError('optimizer must be a string')
-        if optimizer not in ['adam']:
-            raise TypeError('optimizer must be one of: \'adam\'')
+        if not isinstance(optimizer, tf.train.Optimizer):
+            raise TypeError('optimizer must be a TensorFlow optimizer')
+        if not isinstance(optimizer_kwargs, dict):
+            raise TypeError('optimizer_kwargs must be a dict of keyword '
+                            'arguments to pass to the optimizer')
         if not isinstance(learning_rate, float):
             raise TypeError('learning_rate must be a float')
         if learning_rate < 0:
@@ -937,8 +1019,9 @@ class BaseDistribution(BaseLayer):
 
         # Optimizer
         with tf.name_scope('train'):
-            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-            train_op = optimizer.minimize(elbo_loss)
+            optimizer_obj = optimizer(learning_rate=learning_rate,
+                                      **optimizer_kwargs)
+            train_op = optimizer_obj.minimize(elbo_loss)
 
         # Store a list of all parameters in the model
         self._parameters = self._parameter_list()
@@ -2139,7 +2222,7 @@ class BaseDistribution(BaseLayer):
 
 
 class ContinuousDistribution(BaseDistribution):
-    """Abstract continuous model class (used as implementation base)
+    r"""Abstract base class for *continuous* ProbFlow |Distributions|
 
     TODO: More info...
 
@@ -2543,7 +2626,7 @@ class ContinuousDistribution(BaseDistribution):
 
 
 class DiscreteDistribution(BaseDistribution):
-    """Abstract categorical model class (used as implementation base)
+    r"""Abstract base class for *discrete* ProbFlow |Distributions|
 
     TODO: More info...
 

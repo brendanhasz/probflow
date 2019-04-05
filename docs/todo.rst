@@ -7,7 +7,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Finish BaseDistribution.fit and docs
 * Finish Parameter and docs
 * Finish Layers (up until MatMul) and docs
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)

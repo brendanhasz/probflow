@@ -5,9 +5,10 @@ Examples
 
 .. include:: macros.hrst
 
+TODO: intro to examples
+
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
 
    example_linear_regression
    example_logistic_regression
@@ -19,6 +20,3 @@ Examples
    example_nmf
    example_multilevel
    example_mixture_density
-   
-
-TODO: intro to examples
