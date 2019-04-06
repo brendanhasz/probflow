@@ -950,8 +950,9 @@ class Dense(BaseLayer):
             raise ValueError('units kwarg must be positive')
         if not isinstance(kwargs['name'], str):
             raise TypeError('name kwarg must be a str')
-        if not callable(kwargs['activation']):
-            raise TypeError('activation must be a callable')
+        if (kwargs['activation'] is not None and 
+            not callable(kwargs['activation'])):
+            raise TypeError('activation must be a callable or None')
         if not issubclass(kwargs['weight_posterior'], BaseDistribution):
             raise TypeError('weight_posterior kwarg must be a Distribution')
         if not issubclass(kwargs['bias_posterior'], BaseDistribution):
@@ -993,14 +994,20 @@ class Dense(BaseLayer):
         bias_samples = tf.reshape(bias.built_obj, batch_shape+[units])
         # TODO: uh, test that this is correct...
         y_out = tf.reduce_sum(weight_samples*x_in, axis=1) + bias_samples
-        self._sample = self.kwargs['activation'](y_out)
+        if self.kwargs['activation'] is None:
+            self._sample = y_out
+        else:
+            self._sample = self.kwargs['activation'](y_out)
 
         # Compute the output using the means of the variational posteriors
         weight_means = weight.mean_obj,
         bias_means = tf.reshape(bias.mean_obj, [1, units])
         mean_y_out = tf.reduce_sum(weight_means*x_in, axis=1) + bias_means
-        self._mean = self.kwargs['activation'](mean_y_out)
-
+        if self.kwargs['activation'] is None:
+            self._mean = mean_y_out
+        else:
+            self._mean = self.kwargs['activation'](mean_y_out)
+            
         # Compute the losses
         self._log_loss_sum = weight._log_loss + bias._log_loss
         self._mean_log_loss_sum = (weight._mean_log_loss +
