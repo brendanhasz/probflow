@@ -1,15 +1,15 @@
 """Abstract base classes.
 
-The :mod:`.core` module contains abstract base classes (ABC's) for all of
+The :mod:`.core` module contains abstract base classes (ABCs) for all of
 ProbFlow's classes.  In other words, none of the classes in the :mod:`.core` 
-modele can be instantiated - they only exist to implement functionality 
+module can be instantiated - they only exist to implement functionality 
 common to the classes which inherit them.  The :mod:`.core` module includes:
 
 * :obj:`.REQUIRED`, a sentinel object used to indicate required arguments,
 * :class:`.BaseObject`, ABC from which all ProbFlow classes inherit,
-* :class:`.BaseParameter`, ABC from which all :mod:`.parameters` inherit,
+* :class:`.BaseParameter`, ABC from which all |Parameters| inherit,
 * :class:`.BaseLayer`, ABC from which all |Layers| inherit, 
-* :class:`.BaseDistribution`, ABC from which all :mod:`.distributions` inherit, 
+* :class:`.BaseDistribution`, ABC from which all |Distributions| inherit, 
 * :class:`.ContinuousDistribution`, a sub-type of distribution for continuous 
   dependent variables (such as the :class:`.Normal` and :class:`.Cauchy`
   distributions), and 
@@ -46,7 +46,7 @@ from .utils.data import process_xy_data
 from .utils.data import test_train_split
 from .utils.data import initialize_shuffles
 from .utils.data import generate_batch
-from .utils.plotting import plot_line, plot_dist, fill_between
+from .utils.plotting import plot_line, plot_dist, fill_between, plot_by
 
 
 
@@ -503,6 +503,29 @@ class BaseDistribution(BaseLayer):
     These features are common to all |Distributions|, and so are implemented
     once in this class.
 
+    
+    Methods
+    -------
+
+    * :meth:`.BaseDistribution.fit`
+    * :meth:`.BaseDistribution.predict`
+    * :meth:`.BaseDistribution.metrics`
+    * :meth:`.BaseDistribution.predictive_distribution`
+    * :meth:`.BaseDistribution.plot_predictive_distribution`
+    * :meth:`.BaseDistribution.posterior_mean`
+    * :meth:`.BaseDistribution.sample_posterior`
+    * :meth:`.BaseDistribution.plot_posterior`
+    * :meth:`.BaseDistribution.sample_prior`
+    * :meth:`.BaseDistribution.plot_prior`
+    * :meth:`.BaseDistribution.plot_posterior_over_training`
+    * :meth:`.BaseDistribution.plot_posterior_args_over_training`
+    * :meth:`.BaseDistribution.prob`
+    * :meth:`.BaseDistribution.prob_by`
+    * :meth:`.BaseDistribution.log_prob`
+    * :meth:`.BaseDistribution.log_prob_by`
+    * :meth:`.BaseDistribution.cdf`
+    * :meth:`.BaseDistribution.cdf_by`
+
 
     Examples
     --------
@@ -694,11 +717,11 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x_in : |DataFrame| or |Series| or |ndarray| or int or str or list of str or int
+        x_in : |DataFrame| or |ndarray| or int or str or list of str or int
             Independent variable values of the dataset to fit (aka the 
-            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables.
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can
+            be an int or string or list of ints or strings specifying the
+            columns of that |DataFrame| to use as independent variables.
         y_in : |DataFrame| or |Series| or |ndarray| or int or str or list of str or int
             Dependent variable values of the dataset to fit (aka the 
             "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
@@ -1114,17 +1137,18 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x : |ndarray| or int or str or list of str or int
-            Independent variable values of the dataset to fit (aka the 
-            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
+        x : |ndarray| or |DataFrame| or int or str or list of str or int
+            Independent variable values of the dataset to evaluate (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can
+            be an int or string or list of ints or strings specifying the 
+            columns of that |DataFrame| to use as independent variables. If
+            |None|,  will use the data the model was trained on (the default).
         data : |None| or |DataFrame|
-            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
-            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
-            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
-            strings containing the columns from ``data`` to use.
+            Data to evaluate.  If ``data`` is |None|, it is assumed that
+            ``x`` and ``y`` are |ndarray| or |DataFrame| or |Series|.  
+            If ``data`` is a |DataFrame|, ``x`` and ``y`` are treated as
+            strings or lists of strings containing the columns from
+            ``data`` to use as in- and de-pendent variables.
         num_samples : int
             Number of samples to draw from the model given ``x``.
 
@@ -1180,17 +1204,18 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x : |ndarray| or int or str or list of str or int
-            Independent variable values of the dataset to fit (aka the 
-            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
+        x : |ndarray| or |DataFrame| or int or str or list of str or int
+            Independent variable values of the dataset to evaluate (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can
+            be an int or string or list of ints or strings specifying the 
+            columns of that |DataFrame| to use as independent variables. If
+            |None|,  will use the data the model was trained on (the default).
         data : |None| or |DataFrame|
-            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
-            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
-            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
-            strings containing the columns from ``data`` to use.
+            Data to evaluate.  If ``data`` is |None|, it is assumed that
+            ``x`` and ``y`` are |ndarray| or |DataFrame| or |Series|.  
+            If ``data`` is a |DataFrame|, ``x`` and ``y`` are treated as
+            strings or lists of strings containing the columns from
+            ``data`` to use as in- and de-pendent variables.
         num_samples : int
             Number of samples to draw from the model given ``x``.
         style : str
@@ -1245,10 +1270,10 @@ class BaseDistribution(BaseLayer):
 
 
     def predict(self, x=None, data=None):
-        """Predict dependent variable for samples in x.s
+        """Predict dependent variable using the model
 
-        TODO: explain how predictions are generated using the mean of each
-        variational distribution
+        TODO: option for whether to use the mean model, or mean of the 
+        predictive distribution
 
         .. admonition:: Model must be fit first!
 
@@ -1257,17 +1282,18 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x : |ndarray| or int or str or list of str or int
-            Independent variable values of the dataset to fit (aka the 
-            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
+        x : |ndarray| or |DataFrame| or int or str or list of str or int
+            Independent variable values of the dataset to evaluate (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can
+            be an int or string or list of ints or strings specifying the 
+            columns of that |DataFrame| to use as independent variables. If
+            |None|,  will use the data the model was trained on (the default).
         data : |None| or |DataFrame|
-            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
-            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
-            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
-            strings containing the columns from ``data`` to use.
+            Data to evaluate.  If ``data`` is |None|, it is assumed that
+            ``x`` and ``y`` are |ndarray| or |DataFrame| or |Series|.  
+            If ``data`` is a |DataFrame|, ``x`` and ``y`` are treated as
+            strings or lists of strings containing the columns from
+            ``data`` to use as in- and de-pendent variables.
 
         Returns
         -------
@@ -1322,23 +1348,24 @@ class BaseDistribution(BaseLayer):
             * 'mae': mean absolute error
 
             Default = empty list
-        x : |ndarray| or int or str or list of str or int
-            Independent variable values of the dataset to fit (aka the 
-            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+        x : |ndarray| or |DataFrame| or int or str or list of str or int
+            Independent variable values of the dataset to evaluate (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can
+            be an int or string or list of ints or strings specifying the 
+            columns of that |DataFrame| to use as independent variables. If
+            |None|,  will use the data the model was trained on (the default).
+        y : |ndarray| or |DataFrame| or |Series| or int or str or list of str or int
+            Dependent variable values of the dataset to evaluate (aka the 
+            "target"). If ``data`` was passed as a |DataFrame|, ``y`` can be
             an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
-        y : |ndarray| or int or str or list of str or int
-            Dependent variable values of the dataset (aka the 
-            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as dependent variables.  If |None|, 
+            of that |DataFrame| to use as dependent variables. If |None|, 
             will use the data the model was trained on (the default).
         data : |None| or |DataFrame|
-            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
-            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
-            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
-            strings containing the columns from ``data`` to use.
+            Data to evaluate.  If ``data`` is |None|, it is assumed that
+            ``x`` and ``y`` are |ndarray| or |DataFrame| or |Series|.  
+            If ``data`` is a |DataFrame|, ``x`` and ``y`` are treated as
+            strings or lists of strings containing the columns from
+            ``data`` to use as in- and de-pendent variables.
         """
 
         # Check types
@@ -1852,23 +1879,44 @@ class BaseDistribution(BaseLayer):
         return param_dict
 
 
-    def plot_by(self, x, data, bins=100, what='mean'):
-        """Compute and plot mean of data as a function of x.
-
-        x should be (N,1) or (N,2)
-        what can be mean, median, or count
-            if mean, plot the mean of data for each bin
-            etc
-
-        returns px, py
-        px is (Nbins,1) or (Nbins*Nbins,2) w/ bin centers
-        py is mean of data in each bin (or count or whatevs)
-
-        plots 2d plot w/ colormap where goes to black w/ less datapoints
-
-        """
-        #TODO
-        pass
+    def _int_x_by(self, x_by, x, y, data):
+        """Convert x_by argument to plot_by functions to an integer"""
+        if isinstance(x_by, list):
+            if len(x_by) == 2:
+                x_bys = list()
+                x_bys.append(self._int_x_by(x_by[0], x, y, data))
+                x_bys.append(self._int_x_by(x_by[1], x, y, data))
+                return x_bys
+            else:
+                raise ValueError('x_by must be a 2-element list')
+        elif isinstance(x_by, int):
+            return x_by
+        elif instantiated(x_by, str):
+            if isinstance(x, pd.DataFrame):
+                if x_by in x:
+                    return x.columns.tolist().index(x_by)
+                else:
+                    raise KeyError(x_by+' is not a column in x')
+                    # TODO: this'll throw an error when using training data tho...
+            elif isinstance(data, pd.DataFrame):
+                if isinstance(x, list):
+                    if all(isinstance(e, str) for e in x):
+                        return x.index(x_by)
+                    else:
+                        raise TypeError('x_by cannot be a str if all elements'
+                                        ' of x are not str')
+                elif isinstance(x, str):
+                    if x == x_by:
+                        return 0
+                    else:
+                        raise ValueError(x_by+' not in x')
+                elif isinstance(x, int):
+                    raise TypeError('x_by must be an int if x is an int')
+            else:
+                raise TypeError('x_by cannot be a string if neither x nor '
+                                'data are pandas DataFrames')
+        else:
+            raise TypeError('x_by must be a str, int, or list of str or int')
 
 
     def log_prob(self, x=None, y=None, data=None, 
@@ -1895,28 +1943,32 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x : |ndarray| or int or str or list of str or int
-            Independent variable values of the dataset to fit (aka the 
-            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+        x : |ndarray| or |DataFrame| or int or str or list of str or int
+            Independent variable values of the dataset to evaluate (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can
+            be an int or string or list of ints or strings specifying the 
+            columns of that |DataFrame| to use as independent variables. If
+            |None|,  will use the data the model was trained on (the default).
+        y : |ndarray| or |DataFrame| or |Series| or int or str or list of str or int
+            Dependent variable values of the dataset to evaluate (aka the 
+            "target"). If ``data`` was passed as a |DataFrame|, ``y`` can be
             an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
-        y : |ndarray| or int or str or list of str or int
-            Dependent variable values of the dataset to fit (aka the 
-            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
+            of that |DataFrame| to use as dependent variables. If |None|, 
             will use the data the model was trained on (the default).
         data : |None| or |DataFrame|
-            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
-            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
-            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
-            strings containing the columns from ``data`` to use.
+            Data to evaluate.  If ``data`` is |None|, it is assumed that
+            ``x`` and ``y`` are |ndarray| or |DataFrame| or |Series|.  
+            If ``data`` is a |DataFrame|, ``x`` and ``y`` are treated as
+            strings or lists of strings containing the columns from
+            ``data`` to use as in- and de-pendent variables.
 
         """
 
         # Check model has been fit
         self._ensure_is_fit()
+
+        # Process input data
+        x, y = process_xy_data(self, x, y, data)
 
         # TODO: make dataset/iterator/feed_dict of x and y
 
@@ -1941,7 +1993,7 @@ class BaseDistribution(BaseLayer):
 
 
     def log_prob_by(self, x_by, x=None, y=None, data=None, 
-                    bins=100, plot=True):
+                    bins=30, plot=True):
         """Plot the log probability of observations `y` given `x` and the model
         as a function of independent variable(s) `x_by`.
 
@@ -1955,39 +2007,43 @@ class BaseDistribution(BaseLayer):
         Parameters
         ----------
         x_by : int or string or 2-element list of int or string
-            Independent variable to plot the log probability as a function of.
-            TODO
-        x : |ndarray| or int or str or list of str or int
-            Independent variable values of the dataset to fit (aka the 
-            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            Which independent variable(s) to plot the log probability as a
+            function of.  That is, which columns in ``x`` to plot by.
+        x : |ndarray| or |DataFrame| or int or str or list of str or int
+            Independent variable values of the dataset to evaluate (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can
+            be an int or string or list of ints or strings specifying the 
+            columns of that |DataFrame| to use as independent variables. If
+            |None|,  will use the data the model was trained on (the default).
+        y : |ndarray| or |DataFrame| or |Series| or int or str or list of str or int
+            Dependent variable values of the dataset to evaluate (aka the 
+            "target"). If ``data`` was passed as a |DataFrame|, ``y`` can be
             an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
-        y : |ndarray| or int or str or list of str or int
-            Dependent variable values of the dataset to fit (aka the 
-            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
+            of that |DataFrame| to use as dependent variables. If |None|, 
             will use the data the model was trained on (the default).
         data : |None| or |DataFrame|
-            Data for the fit.  If ``data`` is |None|, :meth:`.fit` assumes 
-            ``x`` and ``y`` are |ndarray|s.  If ``data`` is a |DataFrame|,
-            :meth:`.fit` assumes ``x`` and ``y`` are strings or lists of 
-            strings containing the columns from ``data`` to use.
+            Data to evaluate.  If ``data`` is |None|, it is assumed that
+            ``x`` and ``y`` are |ndarray| or |DataFrame| or |Series|.  
+            If ``data`` is a |DataFrame|, ``x`` and ``y`` are treated as
+            strings or lists of strings containing the columns from
+            ``data`` to use as in- and de-pendent variables.
 
         """
 
-        # TODO: check types of x, y, and x_by.
-        # x + y should be able to be numpy arrays or ints or floats or pandas arrays
-        # x_by should be able to be all those OR list of strings
-        #    (length 1 or 2, col names to use if x is a pandas df)
+        # Check model has been fit
+        self._ensure_is_fit()
 
-        # Compute the model posterior probability for each observation
+        # Convert x_by to list of int
+        x_by = self._int_x_by(x_by, x, y, data)
+
+        # Compute the log model posterior probability for each observation
         probs = self.log_prob(x, y)
 
+        # Process input data
+        x, y = process_xy_data(self, x, y, data)
+
         # Plot probability as a fn of x_by cols of x
-        px, py = self.plot_by(x[:, x_by], probs,
-                              bins=bins, plot=plot)
+        px, py = plot_by(x[:, x_by], probs, bins=bins, plot=plot)
 
         return px, py
 
@@ -2007,32 +2063,37 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x : |ndarray| or int or str or list of str or int
-            Independent variable values of the dataset to fit (aka the 
-            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+        x : |ndarray| or |DataFrame| or int or str or list of str or int
+            Independent variable values of the dataset to evaluate (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can
+            be an int or string or list of ints or strings specifying the 
+            columns of that |DataFrame| to use as independent variables. If
+            |None|,  will use the data the model was trained on (the default).
+        y : |ndarray| or |DataFrame| or |Series| or int or str or list of str or int
+            Dependent variable values of the dataset to evaluate (aka the 
+            "target"). If ``data`` was passed as a |DataFrame|, ``y`` can be
             an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
-        y : |ndarray| or int or str or list of str or int
-            Dependent variable values of the dataset to fit (aka the 
-            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
+            of that |DataFrame| to use as dependent variables. If |None|, 
             will use the data the model was trained on (the default).
         data : |None| or |DataFrame|
-            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
-            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
-            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
-            or lists of strings containing the columns from ``data`` to use.
-
+            Data to evaluate.  If ``data`` is |None|, it is assumed that
+            ``x`` and ``y`` are |ndarray| or |DataFrame| or |Series|.  
+            If ``data`` is a |DataFrame|, ``x`` and ``y`` are treated as
+            strings or lists of strings containing the columns from
+            ``data`` to use as in- and de-pendent variables.
 
         """
 
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Process input data
+        x, y = process_xy_data(self, x, y, data)
+
         # TODO: evaluate log_prob w/ tf like in log_prob above
-        pass
 
 
-    def prob_by(self, x_by, x=None, y=None, data=None, bins=100, plot=True):
+    def prob_by(self, x_by, x=None, y=None, data=None, bins=30, plot=True):
         """Plot the probability of observations `y` given `x` and the model
         as a function of independent variable(s) `x_by`.
 
@@ -2045,7 +2106,9 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x_by : TODO
+        x_by : int or string or 2-element list of int or string
+            Which independent variable(s) to plot the probability as a
+            function of.  That is, which columns in ``x`` to plot by.
         x : |ndarray| or int or str or list of str or int
             Independent variable values of the dataset to fit (aka the 
             "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
@@ -2066,8 +2129,22 @@ class BaseDistribution(BaseLayer):
 
         """
 
-        # TODO: same idea as log_prob_by above
-        pass
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Convert x_by to list of int
+        x_by = self._int_x_by(x_by, x, y, data)
+
+        # Compute the model posterior probability for each observation
+        probs = self.prob(x, y)
+
+        # Process input data
+        x, y = process_xy_data(self, x, y, data)
+
+        # Plot probability as a fn of x_by cols of x
+        px, py = plot_by(x[:, x_by], probs, bins=bins, plot=plot)
+
+        return px, py
 
 
     def cdf(self, x=None, y=None, data=None):
@@ -2102,11 +2179,16 @@ class BaseDistribution(BaseLayer):
 
         """
 
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Process input data
+        x, y = process_xy_data(self, x, y, data)
+
         # TODO: same idea as log_prob above
-        pass
 
 
-    def cdf_by(self, x_by, x=None, y=None, data=None, bins=100):
+    def cdf_by(self, x_by, x=None, y=None, data=None, bins=30):
         """Plot the cumulative probability of observations `y` given `x` and
         the model as a function of independent variable(s) `x_by`.
 
@@ -2119,7 +2201,9 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        x_by : TODO
+        x_by : int or string or 2-element list of int or string
+            Which independent variable(s) to plot the cumulative probability
+            as a function of.  That is, which columns in ``x`` to plot by.
         x : |ndarray| or int or str or list of str or int
             Independent variable values of the dataset to fit (aka the 
             "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
@@ -2140,84 +2224,22 @@ class BaseDistribution(BaseLayer):
         bins : TODO
         """
 
-        # TODO: same idea as log_prob_by above
-        pass
+        # Check model has been fit
+        self._ensure_is_fit()
 
+        # Convert x_by to list of int
+        x_by = self._int_x_by(x_by, x, y, data)
 
-    def log_cdf(self, x=None, y=None, data=None):
-        """Compute the log cumulative probability of `y` given `x` and the model.
+        # Compute the cumulative posterior probability for each observation
+        probs = self.cdf(x, y)
 
-        TODO: docs...
+        # Process input data
+        x, y = process_xy_data(self, x, y, data)
 
-        .. admonition:: Model must be fit first!
+        # Plot probability as a fn of x_by cols of x
+        px, py = plot_by(x[:, x_by], probs, bins=bins, plot=plot)
 
-            Before calling :meth:`.log_cdf` on a |Model|, you must first
-            :meth:`.fit` it to some data.
-
-        Parameters
-        ----------
-        x : |ndarray| or int or str or list of str or int
-            Independent variable values of the dataset to fit (aka the 
-            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
-        y : |ndarray| or int or str or list of str or int
-            Dependent variable values of the dataset to fit (aka the 
-            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
-        data : |None| or |DataFrame|
-            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
-            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
-            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
-            or lists of strings containing the columns from ``data`` to use.
-
-        """
-
-        # TODO: same idea as log_prob above
-        pass
-
-
-    def log_cdf_by(self, x_by, x=None, y=None, data=None, bins=100):
-        """Plot the log cumulative probability of observations `y` given `x`
-        and the model as a function of independent variable(s) `x_by`.
-
-        TODO: docs...
-
-        .. admonition:: Model must be fit first!
-
-            Before calling :meth:`.log_cdf_by` on a |Model|, you must first
-            :meth:`.fit` it to some data.
-
-        Parameters
-        ----------
-        x_by : TODO
-        x : |ndarray| or int or str or list of str or int
-            Independent variable values of the dataset to fit (aka the 
-            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
-        y : |ndarray| or int or str or list of str or int
-            Dependent variable values of the dataset to fit (aka the 
-            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
-        data : |None| or |DataFrame|
-            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
-            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
-            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
-            or lists of strings containing the columns from ``data`` to use.
-        bins : TODO
-        """
-
-        # TODO: same idea as log_prob_by above
-        pass
-
-
+        return px, py
 
 
 
@@ -2226,49 +2248,44 @@ class ContinuousDistribution(BaseDistribution):
 
     TODO: More info...
 
-    Does this only work in class docs [2]_
+    Methods
+    -------
 
-    .. [2] Andrew Gelman, Ben Goodrich, Jonah Gabry, & Aki Vehtari.
-        R-squared for Bayesian regression models.
-        *The American Statistician*, 2018.
-        https://doi.org/10.1080/00031305.2018.1549100
+    :class:`.ContinuousDistribution` has all the same methods as 
+    :class:`.BaseDistribution`:
+
+    * :meth:`.BaseDistribution.fit`
+    * :meth:`.BaseDistribution.predict`
+    * :meth:`.BaseDistribution.metrics`
+    * :meth:`.BaseDistribution.predictive_distribution`
+    * :meth:`.BaseDistribution.plot_predictive_distribution`
+    * :meth:`.BaseDistribution.posterior_mean`
+    * :meth:`.BaseDistribution.sample_posterior`
+    * :meth:`.BaseDistribution.plot_posterior`
+    * :meth:`.BaseDistribution.sample_prior`
+    * :meth:`.BaseDistribution.plot_prior`
+    * :meth:`.BaseDistribution.plot_posterior_over_training`
+    * :meth:`.BaseDistribution.plot_posterior_args_over_training`
+    * :meth:`.BaseDistribution.prob`
+    * :meth:`.BaseDistribution.prob_by`
+    * :meth:`.BaseDistribution.log_prob`
+    * :meth:`.BaseDistribution.log_prob_by`
+    * :meth:`.BaseDistribution.cdf`
+    * :meth:`.BaseDistribution.cdf_by`
+
+    and in addition also has these methods:
+
+    * :meth:`.ContinuousDistribution.predictive_prc`
+    * :meth:`.ContinuousDistribution.confidence_intervals`
+    * :meth:`.ContinuousDistribution.pred_dist_covered`
+    * :meth:`.ContinuousDistribution.pred_dist_coverage`
+    * :meth:`.ContinuousDistribution.coverage_by`
+    * :meth:`.ContinuousDistribution.calibration_curve`
+    * :meth:`.ContinuousDistribution.r_squared`
+    * :meth:`.ContinuousDistribution.residuals`
+    * :meth:`.ContinuousDistribution.residuals_plot`
+
     """
-
-
-    def predictive_prc(self, x=None, y=None, data=None):
-        """Compute the percentile of each observation along the posterior
-        predictive distribution.
-
-        TODO: Docs...
-
-        .. admonition:: Model must be fit first!
-
-            Before calling :meth:`.predictive_prc` on a |Model|, you must first
-            :meth:`.fit` it to some data.
-
-        Parameters
-        ----------
-        x : |ndarray| or int or str or list of str or int
-            Independent variable values of the dataset to fit (aka the 
-            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
-        y : |ndarray| or int or str or list of str or int
-            Dependent variable values of the dataset to fit (aka the 
-            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
-            an int or string or list of ints or strings specifying the columns
-            of that |DataFrame| to use as independent variables. If |None|, 
-            will use the data the model was trained on (the default).
-        data : |None| or |DataFrame|
-            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
-            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
-            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
-            or lists of strings containing the columns from ``data`` to use.
-        """
-
-        #TODO
-        pass
 
 
     def confidence_intervals(self, x=None, data=None,
@@ -2316,9 +2333,64 @@ class ContinuousDistribution(BaseDistribution):
         # Check model has been fit
         self._ensure_is_fit()
 
+        # Process input data
+        x = process_data(self, x, data)
+
         # Compute percentiles of the predictive distribution
         pred_dist = self.predictive_distribution(x, num_samples=num_samples)
         return np.percentile(pred_dist, prcs)
+
+
+    def predictive_prc(self, x=None, y=None, data=None, num_samples=1000):
+        """Compute the percentile of each observation along the posterior
+        predictive distribution.
+
+        TODO: Docs...  Returns a percentile between 0 and 100
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.predictive_prc` on a |Model|, you must first
+            :meth:`.fit` it to some data.
+
+        Parameters
+        ----------
+        x : |ndarray| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
+        """
+
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Check types
+        if not isinstance(num_samples, int):
+            raise TypeError('num_samples must be an int')
+        if num_samples < 1:
+            raise ValueError('num_samples must be positive')
+
+        # Process input data
+        x, y = process_xy_data(self, x, y, data)
+
+        # Compute percentiles of the predictive distribution
+        pred_dist = self.predictive_distribution(x, num_samples=num_samples)
+
+        # Return percentiles of true y data along predictive distribution
+        inds = np.argmax(np.sort(pred_dist, 0) > y.reshape(1, x.shape[0], -1))
+        return float(inds)/float(num_samples)
 
 
     def pred_dist_covered(self, x=None, y=None, data=None, prc=95.0):
@@ -2354,16 +2426,30 @@ class ContinuousDistribution(BaseDistribution):
             or lists of strings containing the columns from ``data`` to use.
         """
 
+        # Check types
+        if not isinstance(prc, float):
+            if isinstance(prc, int):
+                prc = float(prc)
+            else:
+                raise TypeError('prc must be a float')
+        if prc < 0 or prc > 100:
+            raise ValueError('prc must be between 0 and 100')
+
         # Check model has been fit
         self._ensure_is_fit()
 
-        #TODO
-        pass
+        # Compute the predictive percentile of each observation
+        pred_prcs = self.predictive_prc(x, y, data)
+
+        # Determine what samples fall in the inner prc percentile
+        lb = (100.0-prc)/2.0
+        ub = 100.0-lb
+        return pred_prcs>=lb & pred_prcs<ub
 
 
     def pred_dist_coverage(self, x=None, y=None, data=None, prc=95.0):
-        """Compute the coverage of the inner `prc` percentile of the
-        posterior predictive distribution.
+        """Compute what percent of samples are covered by the inner `prc`
+        percentile of the posterior predictive distribution.
 
         TODO: Docs...
         returns a scalar (from 0 to 100)
@@ -2397,19 +2483,20 @@ class ContinuousDistribution(BaseDistribution):
         # Check model has been fit
         self._ensure_is_fit()
 
-        #TODO
-        pass
+        # Compute whether each sample was covered by the predictive interval
+        covered = self.pred_dist_covered(x, y, data, prc)
+
+        # Return the percentage of samples which were covered
+        return 100*covered.mean()
 
 
     def coverage_by(self, x_by, x=None, y=None, data=None, 
-                    prc=95.0, bins=100, plot=True):
+                    prc=95.0, bins=30, plot=True):
         """Compute and plot the coverage of the inner `prc`
         percentile of the posterior predictive distribution as a
         function of specified independent variables.
 
         TODO: Docs...
-        x_by should be int or length-2 list of ints which specifies what column of x to plot by
-        returns x and coverage matrix
 
         .. admonition:: Model must be fit first!
 
@@ -2418,7 +2505,9 @@ class ContinuousDistribution(BaseDistribution):
 
         Parameters
         ----------
-        x_by : TODO
+        x_by : int or string or 2-element list of int or string
+            Which independent variable(s) to plot the coverage as a
+            function of.  That is, which columns in ``x`` to plot by.
         x : |ndarray| or int or str or list of str or int
             Independent variable values of the dataset to fit (aka the 
             "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
@@ -2439,15 +2528,29 @@ class ContinuousDistribution(BaseDistribution):
         TODO: other args
         """
 
-        # Compute whether each sample was covered by the interval
-        covered = self.pred_dist_covered(x, y, prc)
+        # Check model has been fit
+        self._ensure_is_fit()
 
-        # TODO: alternatively, x_by should be able to be any array_like
-        # as long as it's same size as x.shape[0]
+        # Convert x_by to list of int
+        x_by = self._int_x_by(x_by, x, y, data)
 
-        # Plot probability as a fn of x_by cols of x
-        px, py = self.plot_by(x[:, x_by], covered,
-                              bins=bins, plot=plot)
+        # Compute whether each sample was covered by the predictive interval
+        covered = self.pred_dist_covered(x, y, data, prc)
+
+        # Process input data
+        x, y = process_xy_data(self, x, y, data)
+
+        # Plot coverage proportion as a fn of x_by cols of x
+        px, py = plot_by(x[:, x_by], 100*covered, bins=bins,
+                         plot=plot, label='Actual')
+
+        # Also plot ideal line
+        if isinstance(x_by, int):
+            plt.axhline(prc, '--', label='Ideal')
+
+        # Axes, legends etc
+        plt.legend()
+        plt.ylabel(str(prc)+' % predictive interval coverage')
 
         return px, py
 
@@ -2619,9 +2722,34 @@ class ContinuousDistribution(BaseDistribution):
         pass
 
 
-    def plot_residuals():
-        pass
+    def residuals_plot(self, x=None, y=None, data=None):
+        """Plot the distribution of residuals of the model's predictions.
+
+        TODO: docs...
+
+        Parameters
+        ----------
+        x : |ndarray| or |DataFrame| or int or str or list of str or int
+            Independent variable values of the dataset to fit (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        y : |ndarray| or |DataFrame| or |Series| or int or str or list of str or int
+            Dependent variable values of the dataset to fit (aka the 
+            "reponse"). If ``data`` was passed as a |DataFrame|, ``y`` can be
+            an int or string or list of ints or strings specifying the columns
+            of that |DataFrame| to use as independent variables. If |None|, 
+            will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            DataFrame containing ``x`` and ``y``.  If ``data`` is |None|, 
+            it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
+            is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
+            or lists of strings containing the columns from ``data`` to use.
+
+        """
         # TODO
+        pass
 
 
 
@@ -2629,6 +2757,35 @@ class DiscreteDistribution(BaseDistribution):
     r"""Abstract base class for *discrete* ProbFlow |Distributions|
 
     TODO: More info...
+
+    Methods
+    -------
+
+    :class:`.DiscreteDistribution` has all the same methods as 
+    :class:`.BaseDistribution`:
+
+    * :meth:`.BaseDistribution.fit`
+    * :meth:`.DiscreteDistribution.predict`
+    * :meth:`.BaseDistribution.metrics`
+    * :meth:`.BaseDistribution.predictive_distribution`
+    * :meth:`.BaseDistribution.plot_predictive_distribution`
+    * :meth:`.BaseDistribution.posterior_mean`
+    * :meth:`.BaseDistribution.sample_posterior`
+    * :meth:`.BaseDistribution.plot_posterior`
+    * :meth:`.BaseDistribution.sample_prior`
+    * :meth:`.BaseDistribution.plot_prior`
+    * :meth:`.BaseDistribution.plot_posterior_over_training`
+    * :meth:`.BaseDistribution.plot_posterior_args_over_training`
+    * :meth:`.BaseDistribution.prob`
+    * :meth:`.BaseDistribution.prob_by`
+    * :meth:`.BaseDistribution.log_prob`
+    * :meth:`.BaseDistribution.log_prob_by`
+    * :meth:`.BaseDistribution.cdf`
+    * :meth:`.BaseDistribution.cdf_by`
+
+    and in addition also has this method:
+
+    * :meth:`.ContinuousDistribution.calibration_curve`
 
     """
 
@@ -2736,10 +2893,3 @@ class DiscreteDistribution(BaseDistribution):
 
         #TODO
         pass
-
-
-    # TODO: are there categorical equivalents of predictive_prc,
-    # pred_dist_covered, pred_dist_coverage, and coverage_by?
-
-    # TODO: confusion_matrix (plot/return the confusion matrix of predictions)
-

@@ -8,10 +8,12 @@ TODO: more info...
 
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
 
 COLORS = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
 
 
 def approx_kde(data, bins=500, bw=0.075):
@@ -32,6 +34,7 @@ def approx_kde(data, bins=500, bw=0.075):
     return x_out, y_out
 
 
+
 def get_next_color(def_color, ix):
     """Get the next color in the color cycle"""
     if def_color is None:
@@ -40,6 +43,7 @@ def get_next_color(def_color, ix):
         return def_color[ix%len(def_color)]
     else:
         return def_color
+
 
 
 def get_ix_label(ix, shape):
@@ -54,6 +58,7 @@ def get_ix_label(ix, shape):
         return str(dims[0].astype('int32'))
     else:
         return str(list(dims.astype('int32')))
+
 
 
 def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075, 
@@ -152,6 +157,7 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
     plt.gca().spines['right'].set_visible(False)
 
 
+
 def plot_line(xdata, ydata, xlabel='', ylabel='', fmt='-', color=None):
     """Plot lines.
 
@@ -201,6 +207,7 @@ def plot_line(xdata, ydata, xlabel='', ylabel='', fmt='-', color=None):
     # Set axis labels
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+
 
 
 def fill_between(xdata, lb, ub, xlabel='', ylabel='', alpha=0.3, color=None):
@@ -262,9 +269,79 @@ def fill_between(xdata, lb, ub, xlabel='', ylabel='', alpha=0.3, color=None):
     plt.ylabel(ylabel)
 
 
+
 def centered_text(text):
     """Display text centered in the figure"""
     plt.gca().text(0.5, 0.5, text,
                horizontalalignment='center',
                verticalalignment='center',
                transform=plt.gca().transAxes)
+
+
+
+def plot_by(self, x, data, bins=30, func='mean', plot=True, label=''):
+    """Compute and plot some function func of data as a function of x.
+
+    x should be (N,1) or (N,2)
+    what can be mean, median, or count
+        if mean, plot the mean of data for each bin
+        etc
+
+    returns px, py
+    px is (Nbins,1) or (Nbins*Nbins,2) w/ bin centers
+    py is mean of data in each bin (or count or whatevs)
+
+    plots 2d plot w/ colormap where goes to black w/ less datapoints
+
+    """
+
+    # Check types
+    if not isinstance(bins, int):
+        raise TypeError('bins must be an int')
+    if bins < 1:
+        raise ValueError('bins must be positive')
+    if not isinstance(plot, bool):
+        raise TypeError('plot must be True or False')
+
+    # Determine what function to use
+    if callable(func):
+        pass
+    elif isinstance(func, str):
+        if func == 'mean':
+            func = np.mean
+        elif func == 'median':
+            func = np.median
+        elif func == 'count':
+            func = len
+        else:
+            raise ValueError('Unknown function name '+func)
+    else:
+        raise TypeError('func must be a callable or a function name str')
+
+    # 1 Dimensional
+    if x.shape[1] == 1:
+
+        # Create bins over x
+        edges = np.linspace(min(x), max(x), bins)
+        bins = np.digitize(x, edges)
+        x_o = (bins[:-1]+bins[1:])/2.0 #bin centers
+
+        # Compute func for data in each bin
+        data_o = pd.Series(data).groupby(bins).agg(func)
+
+        # Plot it
+        plt.plot(x_o, data_o, label=label)
+
+        # Return values
+        return x_o, data_o
+
+    # 2 Dimensional
+    elif x.shape[1] == 2:
+
+        # TODO
+        pass
+
+    else:
+        raise ValueError('x.shape[1] cannot be >2')
+
+
