@@ -7,6 +7,7 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
+* Rename plot_posterior, sample_prior etc to posterior_plot and prior_sample (so all methods having to do w/ prior start with "prior" and all methods having to do w/ posterior start w/ "posterior")
 * Finish Parameter and docs
 * Finish Layers (up until MatMul) and docs
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)

@@ -897,7 +897,7 @@ class Dense(BaseLayer):
 
     .. code-block:: python
 
-        x = Input([0, 1, 2]
+        x = Input([0, 1, 2])
         w = Parameter(shape=3)
         b = Parameter()
         out = Relu(Dot(x, w) + b)
@@ -906,7 +906,7 @@ class Dense(BaseLayer):
 
     .. code-block:: python
 
-        x = Input([0, 1, 2]
+        x = Input([0, 1, 2])
         out = Dense(x, units=1)
 
     Especially when the output dimensions are >1 and multiple layers are to be
@@ -914,7 +914,7 @@ class Dense(BaseLayer):
 
     .. code-block:: python
 
-        x = Input([0, 1, 2]
+        x = Input([0, 1, 2])
         l1 = Dense(x, units=128)
         l2 = Dense(l1, units=64)
         out = Dense(l2, units=1)
@@ -1007,7 +1007,7 @@ class Dense(BaseLayer):
             self._mean = mean_y_out
         else:
             self._mean = self.kwargs['activation'](mean_y_out)
-            
+
         # Compute the losses
         self._log_loss_sum = weight._log_loss + bias._log_loss
         self._mean_log_loss_sum = (weight._mean_log_loss +

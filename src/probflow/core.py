@@ -974,7 +974,8 @@ class BaseDistribution(BaseLayer):
             raise TypeError('epochs must be an int')
         if epochs < 0:
             raise TypeError('epochs must be non-negative')
-        if not isinstance(optimizer, tf.train.Optimizer):
+        #if not isinstance(optimizer, tf.train.Optimizer): #TODO uh this fails
+        if not callable(optimizer):
             raise TypeError('optimizer must be a TensorFlow optimizer')
         if not isinstance(optimizer_kwargs, dict):
             raise TypeError('optimizer_kwargs must be a dict of keyword '
@@ -2490,7 +2491,7 @@ class ContinuousDistribution(BaseDistribution):
         return 100*covered.mean()
 
 
-    def coverage_by(self, x_by, x=None, y=None, data=None, 
+    def coverage_by(self, x_by=0, x=None, y=None, data=None, 
                     prc=95.0, bins=30, plot=True):
         """Compute and plot the coverage of the inner `prc`
         percentile of the posterior predictive distribution as a
@@ -2508,6 +2509,7 @@ class ContinuousDistribution(BaseDistribution):
         x_by : int or string or 2-element list of int or string
             Which independent variable(s) to plot the coverage as a
             function of.  That is, which columns in ``x`` to plot by.
+            Default is to use the first column in ``x``.
         x : |ndarray| or int or str or list of str or int
             Independent variable values of the dataset to fit (aka the 
             "features").  If ``data`` was passed as a |DataFrame|, ``x`` can be

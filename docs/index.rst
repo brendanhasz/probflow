@@ -88,11 +88,17 @@ Inspect the posterior distributions of your fit model's parameters, with 95% con
    :width: 90 %
    :align: center
 
-and investigate how well your model is capturing uncertainty by examining how accurate its predictive intervals are:
+Investigate how well your model is capturing uncertainty by examining how accurate its predictive intervals are:
 
 .. code-block:: python
 
-    model.pred_dist_covered(prc=95.0)
+    model.pred_dist_coverage(prc=95.0)
+
+and diagnose *where* your model is having problems capturing uncertainty:
+
+.. code-block:: python
+
+    model.coverage_by()
 
 ProbFlow also provides more complex layers, such as those required for building Bayesian neural networks.  A multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
 
@@ -103,7 +109,7 @@ ProbFlow also provides more complex layers, such as those required for building 
     predictions = Sequential(layers=[
         Dense(units=128),
         Dense(units=64),
-        Dense(units=1)
+        Dense(units=1, activation=None)
     ])
     noise_std = ScaleParameter()
     model = Normal(predictions, noise_std)

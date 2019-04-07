@@ -512,13 +512,6 @@ class Bernoulli(DiscreteDistribution):
 
     - a probability parameter (:math:`0 \leq p \leq 1`).
 
-    The ratio of :math:`\frac{\beta}{\alpha-1}` determines the mean of the
-    distribution, and for :math:`\alpha > 2`, the variance is determined by:
-
-    .. math ::
-
-        \frac{\beta^2}{(\alpha-1)^2(\alpha-2)}
-
     A random variable :math:`x` drawn from a Bernoulli distribution
 
     .. math::
@@ -537,7 +530,7 @@ class Bernoulli(DiscreteDistribution):
         Probability parameter of the Bernoulli distribution (:math:`\p`).
     input_type : str ('logits' or 'probs')
         How to interperet the probability parameter ``p``.  If ``'probs'``,
-        ``p`` represents the raw probability.  If ``'logit'``, ``p`` 
+        ``p`` represents the raw probability.  If ``'logits'``, ``p`` 
         represents the logit-transformed probability.
     """
 

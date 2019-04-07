@@ -20,6 +20,8 @@ __all__ = [
     'DenseClassifier',
 ]
 
+import tensorflow as tf
+
 from .parameters import Parameter, ScaleParameter
 from .layers import * #TODO: only import what you need
 from .distributions import * #TODO: only import what you need
@@ -93,7 +95,7 @@ def PoissonRegression(data=None):
 
 
 
-def DenseNet(data=None, units=[1],  batch_norm=False):
+def DenseNet(data=None, units=[1],  batch_norm=False, activation=tf.nn.relu):
     """Multiple dense layers in a row.
 
     .. admonition:: Does not include an observation distribution!
@@ -116,7 +118,9 @@ def DenseNet(data=None, units=[1],  batch_norm=False):
     batch_norm : bool
         Whether to use batch normalization in between :class:`.Dense` layers.
         Default = False
-
+    activation : callable
+        Activation function to apply after the linear transformation.
+        Default = ``tf.nn.relu`` (rectified linear unit)
     """
 
     # Use default input if none specified
@@ -127,7 +131,10 @@ def DenseNet(data=None, units=[1],  batch_norm=False):
 
     # Send output of each layer into the following layer
     for i, unit in enumerate(units):
-        y_out = Dense(y_out, units=unit)
+        if i < (len(units)-1):
+            y_out = Dense(y_out, units=unit, activation=activation)
+        else:
+            y_out = Dense(y_out, units=unit, activation=None)
         if batch_norm and i < (len(units)-1):
             y_out = BatchNormalization(y_out)
 
@@ -135,7 +142,10 @@ def DenseNet(data=None, units=[1],  batch_norm=False):
 
 
 
-def DenseRegression(data=None, units=[1], batch_norm=False):
+def DenseRegression(data=None, 
+                    units=[1],
+                    batch_norm=False,
+                    activation=tf.nn.relu):
     """Regression model using a densely-connected multi-layer neural network.
 
     TODO: docs and math
@@ -150,15 +160,22 @@ def DenseRegression(data=None, units=[1], batch_norm=False):
     batch_norm : bool
         Whether to use batch normalization in between :class:`.Dense` layers.
         Default = False
-
+    activation : callable
+        Activation function to apply after the linear transformation.
+        Default = ``tf.nn.relu`` (rectified linear unit)
     """
     error = ScaleParameter()
-    predictions = DenseNet(data, units=units, batch_norm=batch_norm)
+    predictions = DenseNet(data, units=units, 
+                           batch_norm=batch_norm,
+                           activation=activation)
     return Normal(predictions, error)
 
 
 
-def DenseClassifier(data=None, units=[1], batch_norm=False):
+def DenseClassifier(data=None,
+                    units=[1],
+                    batch_norm=False,
+                    activation=tf.nn.relu):
     """Classifier model using a densely-connected multi-layer neural network.
 
     TODO: docs and math
@@ -173,7 +190,11 @@ def DenseClassifier(data=None, units=[1], batch_norm=False):
     batch_norm : bool
         Whether to use batch normalization in between :class:`.Dense` layers.
         Default = False
-
+    activation : callable
+        Activation function to apply after the linear transformation.
+        Default = ``tf.nn.relu`` (rectified linear unit)
     """
-    predictions = DenseNet(data, units=units, batch_norm=batch_norm)
+    predictions = DenseNet(data, units=units,
+                           batch_norm=batch_norm,
+                           activation=activation)
     return Bernoulli(predictions)

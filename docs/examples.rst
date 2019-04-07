@@ -5,7 +5,7 @@ Examples
 
 .. include:: macros.hrst
 
-TODO: intro to examples
+Here are some examples of how to use ProbFlow to build, fit, and diagnose several different types of Bayesian models:
 
 .. toctree::
    :maxdepth: 1

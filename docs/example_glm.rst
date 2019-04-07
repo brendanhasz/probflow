@@ -6,12 +6,16 @@ Poisson Regression (GLM)
 .. include:: macros.hrst
 
 
-TODO: description...
+TODO: description... a generalized linear model w/ a Poisson observation distribution
+
+TODO: math
+
+TODO: diagram
 
 .. code-block:: python
 
-    from probflow import Dense, Exp, Poisson
+    from probflow import Exp, Dense, Poisson
 
-    predictions = Exp(Dense())
+    predictions = Exp(Dense(activation=None))
     model = Poisson(predictions)
     model.fit(x, y)

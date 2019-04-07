@@ -8,6 +8,8 @@ Robust Density Network
 
 TODO: dual-module net which estimates predictions and uncertainty separately, and uses a t-dist for the observation dist
 
+TODO: math and diagram
+
 .. code-block:: python
 
     predictions = DenseNet(units=[128, 64, 32, 1])

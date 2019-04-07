@@ -7,4 +7,3 @@ Core API
    :members:
    :inherited-members:
    :show-inheritance:
-   :special-members:
