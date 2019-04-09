@@ -53,6 +53,7 @@ You can generate predictions for new data:
 
 .. code-block:: python
 
+    # x_test is a Numpy array or pandas DataFrame
     model.predict(x_test)
 
 Compute *probabilistic* predictions for new data, with 95% confidence intervals:
@@ -91,7 +92,11 @@ and diagnose *where* your model is having problems capturing uncertainty:
 
 .. code-block:: python
 
-    model.coverage_by()
+    model.coverage_by(prc=95.0)
+
+.. image:: img/readme/coverage.svg
+   :width: 90 %
+   :align: center
 
 ProbFlow also provides more complex layers, such as those required for building Bayesian neural networks.  A multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
 
@@ -117,6 +122,15 @@ For convenience, ProbFlow also includes several `ready-made models <http://probf
     model = LinearRegression()
     model.fit(x, y)
 
+And the multi-layer Bayesian neural net could have been made more easily by using ProbFlow's ready-made DenseRegression model:
+
+.. code-block:: python
+
+    from probflow import DenseRegression
+
+    model = DenseRegression(units=[128, 64, 1])
+    model.fit(x, y)
+
 Using parameters, layers, and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like generalized linear models, neural matrix factorization models, and mixed effects models.  Take a look at the `examples <http://probflow.readthedocs.io/en/latest/examples.html>`_ section and the `user guide <http://probflow.readthedocs.io/en/latest/user-guide.html>`_ for more!
 
 
@@ -136,6 +150,12 @@ Support
 -------
 
 Post bug reports, feature requests, and tutorial requests in `GitHub issues <http://github.com/brendanhasz/probflow/issues>`_.
+
+
+Contributing
+------------
+
+`Pull requests <https://github.com/brendanhasz/probflow/pulls>`_ are totally welcome!  Any contribution would be appreciated, from things as minor as pointing out typos to things as major as writing new layers and distributions.
 
 
 Why the name, ProbFlow?

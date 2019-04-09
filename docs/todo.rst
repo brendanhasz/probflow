@@ -7,7 +7,8 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Rename plot_posterior, sample_prior etc to posterior_plot and prior_sample (so all methods having to do w/ prior start with "prior" and all methods having to do w/ posterior start w/ "posterior")
+* Bootstrapped confidence intervals for 1D coverage plot
+* Rename plot_posterior, sample_prior etc to posterior_plot and prior_sample (so all methods having to do w/ prior start with "prior" and all methods having to do w/ posterior start w/ "posterior"), for BaseDistribution and Parameter classes
 * Finish Parameter and docs
 * Finish Layers (up until MatMul) and docs
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)
@@ -58,6 +59,7 @@ Backlog (long term):
 * Pooling layers
 * Ready-made Conv models
 * LSTM Layer
+* Support for passing x=None to do unsupervised models (e.g. Gaussian mixture models)
 
 
 Notes
@@ -327,6 +329,6 @@ Or, could just use tf.keras.constraints to bound the values...
 
 
 Dev guide
----------
+^^^^^^^^^
 
 Testing (eg --plot arg, etc), inheritance structure, etc

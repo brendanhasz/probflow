@@ -244,7 +244,7 @@ def fill_between(xdata, lb, ub, xlabel='', ylabel='', alpha=0.3, color=None):
 
     # Number of fills and datasets
     dims = lb.shape[2:]
-    Nd = np.prod(dims)
+    Nd = int(np.prod(dims))
     Np = lb.shape[0]
 
     # Flatten if >1D
@@ -279,20 +279,46 @@ def centered_text(text):
 
 
 
-def plot_by(self, x, data, bins=30, func='mean', plot=True, label=''):
+def plot_by(x, data, bins=30, func='mean', plot=True, 
+            bootstrap=100, ci=95.0, **kwargs):
     """Compute and plot some function func of data as a function of x.
 
-    x should be (N,1) or (N,2)
-    what can be mean, median, or count
-        if mean, plot the mean of data for each bin
-        etc
+    Parameters
+    ----------
+    x : |ndarray|
+        Coordinates of data to plot
+    data : |ndarray|
+        Data to plot by bins of x
+    bins : int
+        Number of bins to bin x into
+    func : callable or str
+        Function to apply on elements of data in each x bin.  Can be a
+        callable or one of the following str:
 
-    returns px, py
-    px is (Nbins,1) or (Nbins*Nbins,2) w/ bin centers
-    py is mean of data in each bin (or count or whatevs)
+        * ``'count'``
+        * ``'sum'``
+        * ``'mean'``
+        * ``'median'``
 
-    plots 2d plot w/ colormap where goes to black w/ less datapoints
+        Default = ``'mean'``
 
+    plot : bool
+        Whether to plot ``data`` as a function of ``x``
+        Default = False
+    bootstrap : None or int > 0
+        Number of bootstrap samples to use for estimating the uncertainty of 
+        the true coverage.
+    ci : list of float between 0 and 100
+        Confidence interval percentiles of coverage to show.
+    **kwargs
+        Additional arguments are passed to plt.plot or fill_between
+
+    Returns
+    -------
+    x_o : |ndarray|
+        ``x`` bin centers
+    data_o : |ndarray|
+        ``func`` applied to ``data`` values in each ``x`` bin
     """
 
     # Check types
@@ -302,6 +328,10 @@ def plot_by(self, x, data, bins=30, func='mean', plot=True, label=''):
         raise ValueError('bins must be positive')
     if not isinstance(plot, bool):
         raise TypeError('plot must be True or False')
+    if bootstrap is not None and not isinstance(bootstrap, int):
+        raise TypeError('bootstrap must be None or an int')
+    if isinstance(bootstrap, int) and bootstrap < 1:
+        raise ValueError('bootstrap must be > 0')
 
     # Determine what function to use
     if callable(func):
@@ -318,19 +348,53 @@ def plot_by(self, x, data, bins=30, func='mean', plot=True, label=''):
     else:
         raise TypeError('func must be a callable or a function name str')
 
+    # Default color
+    if 'color' in kwargs:
+        color = kwargs['color']
+    else:
+        color = COLORS[0]
+
+    # Ensure x is at least 2d
+    if x.ndim == 1:
+        x = x.reshape(-1, 1)
+
     # 1 Dimensional
     if x.shape[1] == 1:
 
         # Create bins over x
-        edges = np.linspace(min(x), max(x), bins)
-        bins = np.digitize(x, edges)
-        x_o = (bins[:-1]+bins[1:])/2.0 #bin centers
+        edges = np.linspace(min(x), max(x), bins).flatten()
+        edges[-1] += 1e-9
+        bin_id = np.digitize(x, edges)
+        x_o = (edges[:-1]+edges[1:])/2.0 #bin centers
 
-        # Compute func for data in each bin
-        data_o = pd.Series(data).groupby(bins).agg(func)
+        # Bootstrap estimate coverage uncertainty
+        if bootstrap is not None:
 
-        # Plot it
-        plt.plot(x_o, data_o, label=label)
+            # Compute func for data in each bins 
+            boots = pd.DataFrame(index=range(1, bins))
+            for iB in range(bootstrap):
+                ix = np.random.choice(range(data.size), size=data.size)
+                boots[str(iB)] = (pd.Series(data[ix].flatten())
+                                    .groupby(bin_id[ix].flatten())
+                                    .agg(func))
+
+            # Plot coverage confidence intervals
+            ci = np.array(ci)
+            ci_lb = 50.0-ci/2.0
+            ci_ub = 50.0+ci/2.0
+            boots = boots.values
+            prc_lb = np.percentile(boots, ci_lb, axis=1)
+            prc_ub = np.percentile(boots, ci_ub, axis=1)
+            plt.fill_between(x_o, prc_lb, prc_ub,
+                             alpha=0.3, facecolor=color)
+
+        # Compute func for data in each bins 
+        data_o = (pd.Series(data.flatten())
+                    .groupby(bin_id.flatten())
+                    .agg(func))
+
+        # Plot coverage
+        plt.plot(x_o, data_o, **kwargs)
 
         # Return values
         return x_o, data_o
@@ -343,5 +407,3 @@ def plot_by(self, x, data, bins=30, func='mean', plot=True, label=''):
 
     else:
         raise ValueError('x.shape[1] cannot be >2')
-
-

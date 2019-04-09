@@ -60,6 +60,7 @@ You can generate predictions for new data:
 
 .. code-block:: python
 
+    # x_test is a Numpy array or pandas DataFrame
     model.predict(x_test)
 
 Compute *probabilistic* predictions for new data, with 95% confidence intervals:
@@ -98,7 +99,11 @@ and diagnose *where* your model is having problems capturing uncertainty:
 
 .. code-block:: python
 
-    model.coverage_by()
+    model.coverage_by(prc=95.0)
+
+.. image:: img/readme/coverage.svg
+   :width: 90 %
+   :align: center
 
 ProbFlow also provides more complex layers, such as those required for building Bayesian neural networks.  A multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
 
@@ -115,7 +120,7 @@ ProbFlow also provides more complex layers, such as those required for building 
     model = Normal(predictions, noise_std)
     model.fit(x, y)
 
-For convenience, ProbFlow also includes several :ref:`ready-made models <ready_made_models>` for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made LinearRegression model:
+For convenience, ProbFlow also includes several :ref:`ready-made models <ready_made_models>` for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made :func:`.LinearRegression` model:
 
 .. code-block:: python
 
@@ -124,7 +129,16 @@ For convenience, ProbFlow also includes several :ref:`ready-made models <ready_m
     model = LinearRegression()
     model.fit(x, y)
 
-Using parameters, layers, and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like :ref:`generalized linear models <example_glm>`, :ref:`neural matrix factorization <example_nmf>` models, and :ref:`mixed effects models <example_mixed_effects>`.  Take a look at the :ref:`examples` section and the :ref:`user_guide` for more!
+And the multi-layer Bayesian neural net could have been made more easily by using ProbFlow's ready-made :func:`.DenseRegression` model:
+
+.. code-block:: python
+
+    from probflow import DenseRegression
+
+    model = DenseRegression(units=[128, 64, 1])
+    model.fit(x, y)
+
+Using parameters, layers, and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like :ref:`generalized linear models <example_glm>`, :ref:`neural matrix factorization <example_nmf>` models, and :ref:`mixed effects models <example_multilevel>`.  Take a look at the :ref:`examples` section and the :ref:`user_guide` for more!
 
 
 Installation
@@ -143,6 +157,12 @@ Support
 -------
 
 Post bug reports, feature requests, and tutorial requests in `GitHub issues <http://github.com/brendanhasz/probflow/issues>`_.
+
+
+Contributing
+------------
+
+`Pull requests <https://github.com/brendanhasz/probflow/pulls>`_ are totally welcome!  Any contribution would be appreciated, from things as minor as pointing out typos to things as major as writing new layers and distributions.
 
 
 Why the name, ProbFlow?

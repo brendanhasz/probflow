@@ -507,24 +507,24 @@ class BaseDistribution(BaseLayer):
     Methods
     -------
 
-    * :meth:`.BaseDistribution.fit`
-    * :meth:`.BaseDistribution.predict`
-    * :meth:`.BaseDistribution.metrics`
-    * :meth:`.BaseDistribution.predictive_distribution`
-    * :meth:`.BaseDistribution.plot_predictive_distribution`
-    * :meth:`.BaseDistribution.posterior_mean`
-    * :meth:`.BaseDistribution.sample_posterior`
-    * :meth:`.BaseDistribution.plot_posterior`
-    * :meth:`.BaseDistribution.sample_prior`
-    * :meth:`.BaseDistribution.plot_prior`
-    * :meth:`.BaseDistribution.plot_posterior_over_training`
-    * :meth:`.BaseDistribution.plot_posterior_args_over_training`
-    * :meth:`.BaseDistribution.prob`
-    * :meth:`.BaseDistribution.prob_by`
-    * :meth:`.BaseDistribution.log_prob`
-    * :meth:`.BaseDistribution.log_prob_by`
-    * :meth:`.BaseDistribution.cdf`
-    * :meth:`.BaseDistribution.cdf_by`
+    * :meth:`.fit`
+    * :meth:`.predict`
+    * :meth:`.metrics`
+    * :meth:`.predictive_distribution`
+    * :meth:`.plot_predictive_distribution`
+    * :meth:`.posterior_mean`
+    * :meth:`.sample_posterior`
+    * :meth:`.plot_posterior`
+    * :meth:`.sample_prior`
+    * :meth:`.plot_prior`
+    * :meth:`.plot_posterior_over_training`
+    * :meth:`.plot_posterior_args_over_training`
+    * :meth:`.prob`
+    * :meth:`.prob_by`
+    * :meth:`.log_prob`
+    * :meth:`.log_prob_by`
+    * :meth:`.cdf`
+    * :meth:`.cdf_by`
 
 
     Examples
@@ -1405,7 +1405,7 @@ class BaseDistribution(BaseLayer):
         if 'mae' in metric_list:
             metrics['mae'] = np.mean(y-y_pred)
 
-        # TODO: cross-entropy, etc
+        # TODO: r^2, cross-entropy, etc
 
         return metrics
 
@@ -2255,36 +2255,36 @@ class ContinuousDistribution(BaseDistribution):
     :class:`.ContinuousDistribution` has all the same methods as 
     :class:`.BaseDistribution`:
 
-    * :meth:`.BaseDistribution.fit`
-    * :meth:`.BaseDistribution.predict`
-    * :meth:`.BaseDistribution.metrics`
-    * :meth:`.BaseDistribution.predictive_distribution`
-    * :meth:`.BaseDistribution.plot_predictive_distribution`
-    * :meth:`.BaseDistribution.posterior_mean`
-    * :meth:`.BaseDistribution.sample_posterior`
-    * :meth:`.BaseDistribution.plot_posterior`
-    * :meth:`.BaseDistribution.sample_prior`
-    * :meth:`.BaseDistribution.plot_prior`
-    * :meth:`.BaseDistribution.plot_posterior_over_training`
-    * :meth:`.BaseDistribution.plot_posterior_args_over_training`
-    * :meth:`.BaseDistribution.prob`
-    * :meth:`.BaseDistribution.prob_by`
-    * :meth:`.BaseDistribution.log_prob`
-    * :meth:`.BaseDistribution.log_prob_by`
-    * :meth:`.BaseDistribution.cdf`
-    * :meth:`.BaseDistribution.cdf_by`
+    * :meth:`.fit`
+    * :meth:`.predict`
+    * :meth:`.metrics`
+    * :meth:`.predictive_distribution`
+    * :meth:`.plot_predictive_distribution`
+    * :meth:`.posterior_mean`
+    * :meth:`.sample_posterior`
+    * :meth:`.plot_posterior`
+    * :meth:`.sample_prior`
+    * :meth:`.plot_prior`
+    * :meth:`.plot_posterior_over_training`
+    * :meth:`.plot_posterior_args_over_training`
+    * :meth:`.prob`
+    * :meth:`.prob_by`
+    * :meth:`.log_prob`
+    * :meth:`.log_prob_by`
+    * :meth:`.cdf`
+    * :meth:`.cdf_by`
 
     and in addition also has these methods:
 
-    * :meth:`.ContinuousDistribution.predictive_prc`
-    * :meth:`.ContinuousDistribution.confidence_intervals`
-    * :meth:`.ContinuousDistribution.pred_dist_covered`
-    * :meth:`.ContinuousDistribution.pred_dist_coverage`
-    * :meth:`.ContinuousDistribution.coverage_by`
-    * :meth:`.ContinuousDistribution.calibration_curve`
-    * :meth:`.ContinuousDistribution.r_squared`
-    * :meth:`.ContinuousDistribution.residuals`
-    * :meth:`.ContinuousDistribution.residuals_plot`
+    * :meth:`.predictive_prc`
+    * :meth:`.confidence_intervals`
+    * :meth:`.pred_dist_covered`
+    * :meth:`.pred_dist_coverage`
+    * :meth:`.coverage_by`
+    * :meth:`.calibration_curve`
+    * :meth:`.r_squared`
+    * :meth:`.residuals`
+    * :meth:`.residuals_plot`
 
     """
 
@@ -2390,8 +2390,14 @@ class ContinuousDistribution(BaseDistribution):
         pred_dist = self.predictive_distribution(x, num_samples=num_samples)
 
         # Return percentiles of true y data along predictive distribution
-        inds = np.argmax(np.sort(pred_dist, 0) > y.reshape(1, x.shape[0], -1))
-        return float(inds)/float(num_samples)
+        inds = np.argmax((np.sort(pred_dist, 0) >
+                          y.reshape(1, x.shape[0], -1)),
+                         axis=0)
+        return inds/float(num_samples)
+
+        # TODO: check for when true y value is above max pred_dist val!
+        # I think argmax returns 0 when that's the case, which is
+        # obviously not what we want
 
 
     def pred_dist_covered(self, x=None, y=None, data=None, prc=95.0):
@@ -2443,9 +2449,9 @@ class ContinuousDistribution(BaseDistribution):
         pred_prcs = self.predictive_prc(x, y, data)
 
         # Determine what samples fall in the inner prc percentile
-        lb = (100.0-prc)/2.0
-        ub = 100.0-lb
-        return pred_prcs>=lb & pred_prcs<ub
+        lb = 0.01*(100.0-prc)/2.0
+        ub = 0.01*(100.0-lb)
+        return (pred_prcs>=lb) & (pred_prcs<ub)
 
 
     def pred_dist_coverage(self, x=None, y=None, data=None, prc=95.0):
@@ -2492,7 +2498,8 @@ class ContinuousDistribution(BaseDistribution):
 
 
     def coverage_by(self, x_by=0, x=None, y=None, data=None, 
-                    prc=95.0, bins=30, plot=True):
+                    prc=95.0, bins=30, plot=True,
+                    true_line_kwargs={}, ideal_line_kwargs={}):
         """Compute and plot the coverage of the inner `prc`
         percentile of the posterior predictive distribution as a
         function of specified independent variables.
@@ -2503,6 +2510,7 @@ class ContinuousDistribution(BaseDistribution):
 
             Before calling :meth:`.coverage_by` on a |Model|, you must first
             :meth:`.fit` it to some data.
+
 
         Parameters
         ----------
@@ -2527,7 +2535,28 @@ class ContinuousDistribution(BaseDistribution):
             it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
             is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
             or lists of strings containing the columns from ``data`` to use.
-        TODO: other args
+        prc : float between 0 and 100
+            Inner percentile to find the coverage of.  For example, if 
+            ``prc=95``, will compute the coverage of the inner 95% of the 
+            posterior predictive distribution.
+        bins : int
+            Number of bins to use for x_by
+        plot : bool
+            Whether to plot the coverage.  Default = True
+        true_line_kwargs : dict
+            Dict to pass to matplotlib.pyplot.plot for true coverage line
+        ideal_line_kwargs : dict
+            Dict of args to pass to matplotlib.pyplot.plot for ideal coverage
+            line.
+
+
+        Returns
+        -------
+        xo : |ndarray|
+            Values of x_by corresponding to bin centers.
+        co : |ndarray|
+            Coverage of the inner ``prc`` of the predictive distribution in 
+            each bin.
         """
 
         # Check model has been fit
@@ -2543,18 +2572,23 @@ class ContinuousDistribution(BaseDistribution):
         x, y = process_xy_data(self, x, y, data)
 
         # Plot coverage proportion as a fn of x_by cols of x
-        px, py = plot_by(x[:, x_by], 100*covered, bins=bins,
-                         plot=plot, label='Actual')
+        xo, co = plot_by(x[:, x_by], 100*covered, bins=bins,
+                         plot=plot, label='Actual', **true_line_kwargs)
+
+        # Line kwargs
+        if 'linestyle' not in ideal_line_kwargs:
+            ideal_line_kwargs['linestyle'] = '--'
+        if 'color' not in ideal_line_kwargs:
+            ideal_line_kwargs['color'] = 'k'
 
         # Also plot ideal line
-        if isinstance(x_by, int):
-            plt.axhline(prc, '--', label='Ideal')
+        if plot and isinstance(x_by, int):
+            plt.axhline(prc, label='Ideal', **ideal_line_kwargs)
+            plt.legend()
+            plt.ylabel(str(prc)+'% predictive interval coverage')
+            plt.xlabel('Value of '+str(x_by))
 
-        # Axes, legends etc
-        plt.legend()
-        plt.ylabel(str(prc)+' % predictive interval coverage')
-
-        return px, py
+        return xo, co
 
 
     def calibration_curve(self, x=None, y=None, data=None,
@@ -2766,28 +2800,28 @@ class DiscreteDistribution(BaseDistribution):
     :class:`.DiscreteDistribution` has all the same methods as 
     :class:`.BaseDistribution`:
 
-    * :meth:`.BaseDistribution.fit`
-    * :meth:`.DiscreteDistribution.predict`
-    * :meth:`.BaseDistribution.metrics`
-    * :meth:`.BaseDistribution.predictive_distribution`
-    * :meth:`.BaseDistribution.plot_predictive_distribution`
-    * :meth:`.BaseDistribution.posterior_mean`
-    * :meth:`.BaseDistribution.sample_posterior`
-    * :meth:`.BaseDistribution.plot_posterior`
-    * :meth:`.BaseDistribution.sample_prior`
-    * :meth:`.BaseDistribution.plot_prior`
-    * :meth:`.BaseDistribution.plot_posterior_over_training`
-    * :meth:`.BaseDistribution.plot_posterior_args_over_training`
-    * :meth:`.BaseDistribution.prob`
-    * :meth:`.BaseDistribution.prob_by`
-    * :meth:`.BaseDistribution.log_prob`
-    * :meth:`.BaseDistribution.log_prob_by`
-    * :meth:`.BaseDistribution.cdf`
-    * :meth:`.BaseDistribution.cdf_by`
+    * :meth:`.fit`
+    * :meth:`.predict`
+    * :meth:`.metrics`
+    * :meth:`.predictive_distribution`
+    * :meth:`.plot_predictive_distribution`
+    * :meth:`.posterior_mean`
+    * :meth:`.sample_posterior`
+    * :meth:`.plot_posterior`
+    * :meth:`.sample_prior`
+    * :meth:`.plot_prior`
+    * :meth:`.plot_posterior_over_training`
+    * :meth:`.plot_posterior_args_over_training`
+    * :meth:`.prob`
+    * :meth:`.prob_by`
+    * :meth:`.log_prob`
+    * :meth:`.log_prob_by`
+    * :meth:`.cdf`
+    * :meth:`.cdf_by`
 
     and in addition also has this method:
 
-    * :meth:`.ContinuousDistribution.calibration_curve`
+    * :meth:`.calibration_curve`
 
     """
 

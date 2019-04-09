@@ -14,7 +14,7 @@ TODO: intro, link to colab w/ these examples
 Logistic Regression
 -------------------
 
-TODO: intro to multiple linear regression
+TODO: logistic regression...
 
 .. math::
 

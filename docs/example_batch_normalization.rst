@@ -9,7 +9,7 @@ Batch Normalization
 TODO: intro, math, diagram
 
 
-Batch normalization can be performed using the :class:`.BatchNormalization` class.  For example, to add batch normalization to the dense neural network from the `previous section <example_fully_connected>`_:
+Batch normalization can be performed using the :class:`.BatchNormalization` class.  For example, to add batch normalization to the dense neural network from the :ref:`previous section <example_fully_connected>`:
 
 .. code-block:: python
 
@@ -27,7 +27,7 @@ Batch normalization can be performed using the :class:`.BatchNormalization` clas
     model.fit(x, y)
 
 
-TODO: the :class:`.DenseNet`, :class:`.DenseRegression`, and :class:`.DenseClassifier` models take a ``batch_norm`` keyword argument which specifies whether to insert batch normalization layers between each dense layer.  The network with batch normalization in the example above could have been created using :class:`.DenseNet`:
+TODO: the :func:`.DenseNet`, :func:`.DenseRegression`, and :func:`.DenseClassifier` models take a ``batch_norm`` keyword argument which specifies whether to insert batch normalization layers between each dense layer.  The network with batch normalization in the example above could have been created using :class:`.DenseNet`:
 
 .. code-block:: python
 
