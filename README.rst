@@ -94,7 +94,7 @@ and diagnose *where* your model is having problems capturing uncertainty:
 
     model.coverage_by(prc=95.0)
 
-.. image:: img/readme/coverage.svg
+.. image:: docs/img/readme/coverage.svg
    :width: 90 %
    :align: center
 
