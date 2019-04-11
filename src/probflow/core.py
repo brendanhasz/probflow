@@ -513,12 +513,12 @@ class BaseDistribution(BaseLayer):
     * :meth:`.predictive_distribution`
     * :meth:`.plot_predictive_distribution`
     * :meth:`.posterior_mean`
-    * :meth:`.sample_posterior`
-    * :meth:`.plot_posterior`
-    * :meth:`.sample_prior`
-    * :meth:`.plot_prior`
-    * :meth:`.plot_posterior_over_training`
-    * :meth:`.plot_posterior_args_over_training`
+    * :meth:`.posterior_sample`
+    * :meth:`.posterior_plot`
+    * :meth:`.prior_sample`
+    * :meth:`.prior_plot`
+    * :meth:`.posterior_plot_over_training`
+    * :meth:`.posterior_plot_args_over_training`
     * :meth:`.prob`
     * :meth:`.prob_by`
     * :meth:`.log_prob`
@@ -868,7 +868,7 @@ class BaseDistribution(BaseLayer):
 
         After fitting the model, you can call criticism methods such as
         :meth:`.predictive_distribution`, :meth:`.predict`, 
-        and :meth:`.plot_posterior`.
+        and :meth:`.posterior_plot`.
         """
 
         def make_placeholders(x, y, dtype):
@@ -1179,7 +1179,7 @@ class BaseDistribution(BaseLayer):
                        self._ph['batch_size']: [x.shape[0]]})
 
 
-    def plot_predictive_distribution(self, x=None, 
+    def predictive_distribution_plot(self, x=None, 
                                      data=None, 
                                      num_samples=1000,
                                      style='fill',
@@ -1448,14 +1448,14 @@ class BaseDistribution(BaseLayer):
         return posterior_means
 
 
-    def sample_posterior(self, params=None, num_samples=1000):
+    def posterior_sample(self, params=None, num_samples=1000):
         """Draw samples from parameter posteriors.
 
         TODO: Docs... params is a list of strings of params to plot
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.sample_posterior` on a |Model|, you must 
+            Before calling :meth:`.posterior_sample` on a |Model|, you must 
             first :meth:`.fit` it to some data.
 
         Parameters
@@ -1490,12 +1490,12 @@ class BaseDistribution(BaseLayer):
         # Get the posterior distributions
         posteriors = dict()
         for name, param in param_dict.items():
-            posteriors[name] = param.sample_posterior(num_samples=num_samples)
+            posteriors[name] = param.posterior_sample(num_samples=num_samples)
 
         return posteriors
 
 
-    def plot_posterior(self,
+    def posterior_plot(self,
                        params=None,
                        num_samples=1000,
                        style='fill',
@@ -1511,7 +1511,7 @@ class BaseDistribution(BaseLayer):
 
         .. admonition:: Model must be fit first!
 
-            Before calling :meth:`.plot_posterior` on a |Model|, you must
+            Before calling :meth:`.posterior_plot` on a |Model|, you must
             first :meth:`.fit` it to some data.
 
         Parameters
@@ -1571,141 +1571,12 @@ class BaseDistribution(BaseLayer):
         rows = np.ceil(len(param_dict)/cols)
         for ix, param in enumerate(param_dict):
             plt.subplot(rows, cols, ix+1)
-            param_dict[param].plot_posterior(num_samples=num_samples, 
+            param_dict[param].posterior_plot(num_samples=num_samples, 
                                              style=style, bins=bins, ci=ci,
                                              color=color)
 
 
-    def sample_prior(self, params=None, num_samples=10000):
-        """Draw samples from parameter priors.
-
-        TODO: Docs... params is a list of strings of params to plot
-
-        .. admonition:: Model must be fit first!
-
-            Before calling :meth:`.sample_prior` on a |Model|, you must first
-            :meth:`.fit` it to some data.
-
-        Parameters
-        ----------
-        params : list
-            List of parameter names to sample.  Each element should be a str.
-        num_samples : int
-            Number of samples to take from each prior distribution.
-            Default = 10000
-
-        Returns
-        -------
-        dict
-            Samples from the parameter prior distributions.  A dictionary
-            where the keys contain the parameter names and the values contain
-            |ndarray|s with the prior samples.  The |ndarray|s are of size
-            (``num_samples``,param.shape).
-        """
-
-        # Check model has been fit
-        self._ensure_is_fit()
-
-        # Check parameter list
-        param_dict = self._validate_params(params)
-
-        # Check other inputs
-        if not isinstance(num_samples, int):
-            raise TypeError('num_samples must be an int')
-        if num_samples < 1:
-            raise ValueError('num_samples must be greater than 0')
-
-        # Get the prior distribution samples
-        priors = dict()
-        for name, param in param_dict.items():
-            priors[name] = param.sample_prior(num_samples=num_samples)
-
-        return priors
-
-
-    def plot_prior(self,
-                   params=None,
-                   num_samples=10000,
-                   style='fill',
-                   cols=1,
-                   bins=20,
-                   ci=0.0,
-                   bw=0.075,
-                   color=None,
-                   alpha=0.4):
-        """Plot prior distributions of the model's parameters.
-
-        TODO: Docs... params is a list of strings of params to plot
-
-        .. admonition:: Model must be fit first!
-
-            Before calling :meth:`.plot_prior` on a |Model|, you must
-            first :meth:`.fit` it to some data.
-
-        Parameters
-        ----------
-        params : |None| or str or list of str
-            List of parameters to plot.  Default is to plot the prior of
-            all parameters in the model.
-        num_samples : int
-            Number of samples to take from each prior distribution.
-            Default = 10000
-        style : str
-            Which style of plot to show.  Available types are:
-
-            * ``'fill'`` - filled density plot (the default)
-            * ``'line'`` - line density plot
-            * ``'hist'`` - histogram
-
-        cols : int
-            Divide the subplots into a grid with this many columns.
-        bins : int or list or |ndarray|
-            Number of bins to use for the prior density histogram (if 
-            ``style='hist'``), or a list or vector of bin edges.
-        ci : float between 0 and 1
-            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
-        bw : float
-            Bandwidth of the kernel density estimate (if using ``style='line'``
-            or ``style='fill'``).  Default is 0.075
-        color : matplotlib color code or list of them
-            Color(s) to use to plot the distribution.
-            See https://matplotlib.org/tutorials/colors/colors.html
-            Default = use the default matplotlib color cycle
-        alpha : float between 0 and 1
-            Transparency of fill/histogram of the density
-        """
-
-        # Check model has been fit
-        self._ensure_is_fit()
-
-        # Check parameter list
-        param_dict = self._validate_params(params)
-
-        # Check other inputs
-        if not isinstance(num_samples, int):
-            raise TypeError('num_samples must be an int')
-        if num_samples < 1:
-            raise ValueError('num_samples must be greater than 0')
-        if type(style) is not str or style not in ['fill', 'line', 'hist']:
-            raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
-        if type(cols) is not int:
-            raise TypeError('cols must be an integer')
-        if not isinstance(bins, (int, float, np.ndarray)):
-            raise TypeError('bins must be an int or list or numpy vector')
-        if type(ci) is not float or ci<0.0 or ci>1.0:
-            raise TypeError('ci must be a float between 0 and 1')
-        if type(alpha) is not float or alpha<0.0 or alpha>1.0:
-            raise TypeError('alpha must be a float between 0 and 1')
-
-        # Plot each parameter's prior distribution in separate subplot
-        rows = np.ceil(len(param_dict)/cols)
-        for ix, param in enumerate(param_dict):
-            plt.subplot(rows, cols, ix+1)
-            param_dict[param].plot_prior(num_samples=num_samples, style=style, 
-                                         bins=bins, ci=ci, color=color)
-
-
-    def plot_posterior_over_training(self, 
+    def posterior_plot_over_training(self, 
                                      params=None,
                                      cols=1,
                                      ci=[0.1, 0.5, 0.95],
@@ -1718,6 +1589,11 @@ class BaseDistribution(BaseLayer):
         across training epochs.
 
         TODO: more docs... 
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.posterior_plot_over_training` on a |Model|,
+            you must first :meth:`.fit` it to some data.
 
         Parameters
         ----------
@@ -1791,13 +1667,18 @@ class BaseDistribution(BaseLayer):
             ix += 1
 
 
-    def plot_posterior_args_over_training(self, 
+    def posterior_plot_args_over_training(self, 
                                           params=None,
                                           cols=1,
                                           marker='-'):
         """Plot the variational posterior's parameters across training.
 
         TODO: more docs...
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.posterior_plot_args_over_training` on a 
+            |Model|, you must first :meth:`.fit` it to some data.
 
         Parameters
         ----------
@@ -1839,6 +1720,135 @@ class BaseDistribution(BaseLayer):
                 ix += 1
 
 
+    def prior_sample(self, params=None, num_samples=10000):
+        """Draw samples from parameter priors.
+
+        TODO: Docs... params is a list of strings of params to plot
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.prior_sample` on a |Model|, you must first
+            :meth:`.fit` it to some data.
+
+        Parameters
+        ----------
+        params : list
+            List of parameter names to sample.  Each element should be a str.
+        num_samples : int
+            Number of samples to take from each prior distribution.
+            Default = 10000
+
+        Returns
+        -------
+        dict
+            Samples from the parameter prior distributions.  A dictionary
+            where the keys contain the parameter names and the values contain
+            |ndarray|s with the prior samples.  The |ndarray|s are of size
+            (``num_samples``,param.shape).
+        """
+
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Check parameter list
+        param_dict = self._validate_params(params)
+
+        # Check other inputs
+        if not isinstance(num_samples, int):
+            raise TypeError('num_samples must be an int')
+        if num_samples < 1:
+            raise ValueError('num_samples must be greater than 0')
+
+        # Get the prior distribution samples
+        priors = dict()
+        for name, param in param_dict.items():
+            priors[name] = param.prior_sample(num_samples=num_samples)
+
+        return priors
+
+
+    def prior_plot(self,
+                   params=None,
+                   num_samples=10000,
+                   style='fill',
+                   cols=1,
+                   bins=20,
+                   ci=0.0,
+                   bw=0.075,
+                   color=None,
+                   alpha=0.4):
+        """Plot prior distributions of the model's parameters.
+
+        TODO: Docs... params is a list of strings of params to plot
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.prior_plot` on a |Model|, you must
+            first :meth:`.fit` it to some data.
+
+        Parameters
+        ----------
+        params : |None| or str or list of str
+            List of parameters to plot.  Default is to plot the prior of
+            all parameters in the model.
+        num_samples : int
+            Number of samples to take from each prior distribution.
+            Default = 10000
+        style : str
+            Which style of plot to show.  Available types are:
+
+            * ``'fill'`` - filled density plot (the default)
+            * ``'line'`` - line density plot
+            * ``'hist'`` - histogram
+
+        cols : int
+            Divide the subplots into a grid with this many columns.
+        bins : int or list or |ndarray|
+            Number of bins to use for the prior density histogram (if 
+            ``style='hist'``), or a list or vector of bin edges.
+        ci : float between 0 and 1
+            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
+        bw : float
+            Bandwidth of the kernel density estimate (if using ``style='line'``
+            or ``style='fill'``).  Default is 0.075
+        color : matplotlib color code or list of them
+            Color(s) to use to plot the distribution.
+            See https://matplotlib.org/tutorials/colors/colors.html
+            Default = use the default matplotlib color cycle
+        alpha : float between 0 and 1
+            Transparency of fill/histogram of the density
+        """
+
+        # Check model has been fit
+        self._ensure_is_fit()
+
+        # Check parameter list
+        param_dict = self._validate_params(params)
+
+        # Check other inputs
+        if not isinstance(num_samples, int):
+            raise TypeError('num_samples must be an int')
+        if num_samples < 1:
+            raise ValueError('num_samples must be greater than 0')
+        if type(style) is not str or style not in ['fill', 'line', 'hist']:
+            raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
+        if type(cols) is not int:
+            raise TypeError('cols must be an integer')
+        if not isinstance(bins, (int, float, np.ndarray)):
+            raise TypeError('bins must be an int or list or numpy vector')
+        if type(ci) is not float or ci<0.0 or ci>1.0:
+            raise TypeError('ci must be a float between 0 and 1')
+        if type(alpha) is not float or alpha<0.0 or alpha>1.0:
+            raise TypeError('alpha must be a float between 0 and 1')
+
+        # Plot each parameter's prior distribution in separate subplot
+        rows = np.ceil(len(param_dict)/cols)
+        for ix, param in enumerate(param_dict):
+            plt.subplot(rows, cols, ix+1)
+            param_dict[param].prior_plot(num_samples=num_samples, style=style, 
+                                         bins=bins, ci=ci, color=color)
+
+            
     def _validate_params(self, params, rec=False):
         """Check params list is valid."""
 
@@ -2261,12 +2271,12 @@ class ContinuousDistribution(BaseDistribution):
     * :meth:`.predictive_distribution`
     * :meth:`.plot_predictive_distribution`
     * :meth:`.posterior_mean`
-    * :meth:`.sample_posterior`
-    * :meth:`.plot_posterior`
-    * :meth:`.sample_prior`
-    * :meth:`.plot_prior`
-    * :meth:`.plot_posterior_over_training`
-    * :meth:`.plot_posterior_args_over_training`
+    * :meth:`.posterior_sample`
+    * :meth:`.posterior_plot`
+    * :meth:`.prior_sample`
+    * :meth:`.prior_plot`
+    * :meth:`.posterior_plot_over_training`
+    * :meth:`.posterior_plot_args_over_training`
     * :meth:`.prob`
     * :meth:`.prob_by`
     * :meth:`.log_prob`
@@ -2806,12 +2816,12 @@ class DiscreteDistribution(BaseDistribution):
     * :meth:`.predictive_distribution`
     * :meth:`.plot_predictive_distribution`
     * :meth:`.posterior_mean`
-    * :meth:`.sample_posterior`
-    * :meth:`.plot_posterior`
-    * :meth:`.sample_prior`
-    * :meth:`.plot_prior`
-    * :meth:`.plot_posterior_over_training`
-    * :meth:`.plot_posterior_args_over_training`
+    * :meth:`.posterior_sample`
+    * :meth:`.posterior_plot`
+    * :meth:`.prior_sample`
+    * :meth:`.prior_plot`
+    * :meth:`.posterior_plot_over_training`
+    * :meth:`.posterior_plot_args_over_training`
     * :meth:`.prob`
     * :meth:`.prob_by`
     * :meth:`.log_prob`

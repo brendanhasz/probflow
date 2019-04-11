@@ -67,9 +67,9 @@ def test_BaseDistribution_fit_x_dataframe():
     # Fit the model
     model.fit(x, y, epochs=1)
 
-    # Check output of sample_posterior is correct
+    # Check output of posterior_sample is correct
     num_samples = 3
-    samples = model.sample_posterior(num_samples=num_samples)
+    samples = model.posterior_sample(num_samples=num_samples)
     assert isinstance(samples, dict)
     assert len(samples) == 2
     assert samples['x_df_weight'].ndim == 2
@@ -120,20 +120,20 @@ def test_BaseDistribution_predictive_distribution(LR3_novar, Ndata):
     assert prd.shape[2] == 1
 
 
-def test_BaseDistribution_plot_predictive_distribution(LR3_novar, plot):
-    """Tests core.BaseDistribution.plot_predictive_distribution"""
+def test_BaseDistribution_predictive_distribution_plot(LR3_novar, plot):
+    """Tests core.BaseDistribution.predictive_distribution_plot"""
 
     model = LR3_novar #fixture from conftest.py
     x_val = np.random.rand(10, 3)
 
     # Check predictive_distribution with no input
-    prd = model.plot_predictive_distribution(x_val, style='line')
+    prd = model.predictive_distribution_plot(x_val, style='line')
     if plot:
         plt.suptitle('should show 10 line dists')
         plt.show()
 
     # Check predictive_distribution with no input
-    prd = model.plot_predictive_distribution(x_val, individually=True, cols=2)
+    prd = model.predictive_distribution_plot(x_val, individually=True, cols=2)
     if plot:
         plt.suptitle('should show 5x2 grid of 10 fill dists')
         plt.tight_layout()
@@ -141,25 +141,25 @@ def test_BaseDistribution_plot_predictive_distribution(LR3_novar, plot):
 
     # Check predictive_distribution with validation input
     x_val = np.random.rand(1, 3)
-    prd = model.plot_predictive_distribution(x_val)
+    prd = model.predictive_distribution_plot(x_val)
     if plot:
         plt.suptitle('should show a single fill dist')
         plt.show()
 
     # Check predictive_distribution with conf intervals
-    prd = model.plot_predictive_distribution(x_val, ci=0.95)
+    prd = model.predictive_distribution_plot(x_val, ci=0.95)
     if plot:
         plt.suptitle('should show a single fill dist w/ 95prc ci')
         plt.show()
 
 
-def test_BaseDistribution_sample_posterior_scalar(LR1_novar):
-    """Tests core.BaseDistribution.sample_posterior w/ scalar params"""
+def test_BaseDistribution_posterior_sample_scalar(LR1_novar):
+    """Tests core.BaseDistribution.posterior_sample w/ scalar params"""
 
     model = LR1_novar #fixture from conftest.py
 
-    # Check output of sample_posterior is correct
-    samples = model.sample_posterior(num_samples=3)
+    # Check output of posterior_sample is correct
+    samples = model.posterior_sample(num_samples=3)
     assert isinstance(samples, dict)
     assert len(samples) == 2
     assert 'LR1_novar_weight' in samples
@@ -174,14 +174,14 @@ def test_BaseDistribution_sample_posterior_scalar(LR1_novar):
     assert samples['LR1_novar_bias'].shape[1] == 1
 
 
-def test_BaseDistribution_sample_posterior_vector(LR3_novar):
-    """Tests core.BaseDistribution.sample_posterior w/ vector params"""
+def test_BaseDistribution_posterior_sample_vector(LR3_novar):
+    """Tests core.BaseDistribution.posterior_sample w/ vector params"""
 
     model = LR3_novar #fixture from conftest.py
 
-    # Check output of sample_posterior is correct
+    # Check output of posterior_sample is correct
     num_samples = 4
-    samples = model.sample_posterior(num_samples=num_samples)
+    samples = model.posterior_sample(num_samples=num_samples)
     assert isinstance(samples, dict)
     assert len(samples) == 2
     assert samples['LR3_novar_weight'].ndim == 2
@@ -192,8 +192,8 @@ def test_BaseDistribution_sample_posterior_vector(LR3_novar):
     assert samples['LR3_novar_bias'].shape[1] == 1
 
 
-def test_BaseDistribution_sample_posterior_vector_pandas():
-    """Tests core.BaseDistribution.sample_posterior + fit w/ pandas input"""
+def test_BaseDistribution_posterior_sample_vector_pandas():
+    """Tests core.BaseDistribution.posterior_sample + fit w/ pandas input"""
 
     # Parameters + input data is vector of length 3
     Nd = 3
@@ -216,9 +216,9 @@ def test_BaseDistribution_sample_posterior_vector_pandas():
     # Fit the model
     model.fit(['b', 'c', 'd'], 'a', data=df, epochs=1)
 
-    # Check output of sample_posterior is correct
+    # Check output of posterior_sample is correct
     num_samples = 3
-    samples = model.sample_posterior(num_samples=num_samples)
+    samples = model.posterior_sample(num_samples=num_samples)
     assert isinstance(samples, dict)
     assert len(samples) == 2
     assert samples['pd_weight'].ndim == 2
@@ -443,8 +443,8 @@ def test_BaseDistribution_fit_record():
     assert model._records['record_bias']['scale'].shape[1] == 1
 
 
-def test_BaseDistribution_plot_posterior_args_over_training(LR3_var, plot):
-    """Tests core.BaseDistribution.plot_posterior_args_over_training"""
+def test_BaseDistribution_posterior_plot_args_over_training(LR3_var, plot):
+    """Tests core.BaseDistribution.posterior_plot_args_over_training"""
 
     # Parameters + input data is vector of length 3
     Nd = 3
@@ -466,13 +466,13 @@ def test_BaseDistribution_plot_posterior_args_over_training(LR3_var, plot):
 
     # All params, once per epoch
     model.fit(x, y, epochs=EPOCHS, record='all', record_freq='epoch')
-    model.plot_posterior_args_over_training()
+    model.posterior_plot_args_over_training()
     if plot:
         plt.show()
 
 
-def test_BaseDistribution_posterior_args_over_training_batch(LR3_var, plot):
-    """Tests core.BaseDistribution.plot_posterior_args_over_training"""
+def test_BaseDistribution_posterior_plot_args_over_training_batch(LR3_var, plot):
+    """Tests core.BaseDistribution.posterior_plot_args_over_training"""
 
     # Parameters + input data is vector of length 3
     Nd = 3
@@ -494,20 +494,20 @@ def test_BaseDistribution_posterior_args_over_training_batch(LR3_var, plot):
 
     # All params, once per batch
     model.fit(x, y, epochs=20, record='all', record_freq='batch')
-    model.plot_posterior_args_over_training(marker='.')
+    model.posterior_plot_args_over_training(marker='.')
     if plot:
         plt.show()
 
     # Just weight params
-    model.plot_posterior_args_over_training('ppot_weight1')
+    model.posterior_plot_args_over_training('ppot_weight1')
     if plot:
         plt.show()
 
     # TODO: test w/ 2d params
 
 
-def test_BaseDistribution_plot_posterior_over_training_scalar(plot):
-    """Tests core.BaseDistribution.plot_posterior_over_training 
+def test_BaseDistribution_posterior_plot_over_training_scalar(plot):
+    """Tests core.BaseDistribution.posterior_plot_over_training 
     w/ scalar params
     """
 
@@ -529,13 +529,13 @@ def test_BaseDistribution_plot_posterior_over_training_scalar(plot):
     model.fit(x, y, epochs=EPOCHS, record='all', record_freq='epoch')
 
     # Plot
-    model.plot_posterior_over_training()
+    model.posterior_plot_over_training()
     if plot:
         plt.show()
 
 
-def test_BaseDistribution_plot_posterior_over_training_vector(plot):
-    """Tests core.BaseDistribution.plot_posterior_over_training 
+def test_BaseDistribution_posterior_plot_over_training_vector(plot):
+    """Tests core.BaseDistribution.posterior_plot_over_training 
     w/ prob=true and vector params
     """
 
@@ -560,13 +560,13 @@ def test_BaseDistribution_plot_posterior_over_training_vector(plot):
     model.fit(x, y, epochs=EPOCHS, record='all', record_freq='epoch')
 
     # Plot
-    model.plot_posterior_over_training()
+    model.posterior_plot_over_training()
     if plot:
         plt.show()
 
 
 
-# Tests for plot_posterior and plot_prior are in test_plot_posterior/prior
+# Tests for posterior_plot and prior_plot are in test_posterior_plot/prior_plot
 
 
 # TODO: test predict, metrics, etc

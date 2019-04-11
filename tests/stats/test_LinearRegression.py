@@ -49,7 +49,7 @@ def test_LR_scalar_no_variance(plot):
 
     # Plot
     if plot:
-        model.plot_posterior(ci=0.95)
+        model.posterior_plot(ci=0.95)
         plt.suptitle('Linear Regression - ' + 
                      'weight=' + str(true_weight) +
                      ', bias=' + str(true_bias))
@@ -86,7 +86,7 @@ def test_LR_scalar(plot):
 
     # Plot
     if plot:
-        model.plot_posterior(ci=0.95)
+        model.posterior_plot(ci=0.95)
         plt.suptitle('Linear Regression - ' + 
                      'weight=' + str(true_weight) +
                      ', bias=' + str(true_bias) +
@@ -128,7 +128,7 @@ def test_LR_vector(plot):
 
     # Plot
     if plot:
-        model.plot_posterior(ci=0.95)
+        model.posterior_plot(ci=0.95)
         plt.suptitle('Linear Regression - ' + 
                      'weights=' + str(true_weight) +
                      ', bias=' + str(true_bias) +

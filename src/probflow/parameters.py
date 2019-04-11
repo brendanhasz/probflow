@@ -323,7 +323,7 @@ class Parameter(BaseParameter):
         return mean
 
 
-    def sample_posterior(self, num_samples=1000):
+    def posterior_sample(self, num_samples=1000):
         """Sample from the posterior distribution.
 
         TODO: this is similar to _sample(), but returns a numpy array
@@ -344,7 +344,7 @@ class Parameter(BaseParameter):
         return samples
 
 
-    def sample_prior(self, num_samples=1000):
+    def prior_sample(self, num_samples=1000):
         """Sample from the prior distribution.
 
         TODO: docs
@@ -370,7 +370,7 @@ class Parameter(BaseParameter):
         return samples
 
 
-    def plot_posterior(self, num_samples=1000, style='fill', bins=20, ci=0.0,
+    def posterior_plot(self, num_samples=1000, style='fill', bins=20, ci=0.0,
                        bw=0.075, alpha=0.4, color=None):
         """Plot distribution of samples from the posterior distribution.
 
@@ -417,14 +417,14 @@ class Parameter(BaseParameter):
             raise TypeError('alpha must be a float between 0 and 1')
 
         # Sample from the posterior
-        samples = self.sample_posterior(num_samples=num_samples)
+        samples = self.posterior_sample(num_samples=num_samples)
         
         # Plot the posterior densities
         plot_dist(samples, xlabel=self.name, style=style, bins=bins, 
                   ci=ci, bw=bw, alpha=alpha, color=color)
 
 
-    def plot_prior(self, num_samples=10000, style='fill', bins=20, ci=0.0,
+    def prior_plot(self, num_samples=10000, style='fill', bins=20, ci=0.0,
                        bw=0.075, alpha=0.4, color=None):
         """Plot distribution of samples from the prior distribution.
 
@@ -469,7 +469,7 @@ class Parameter(BaseParameter):
             return
 
         # Sample from the posterior
-        samples = self.sample_prior(num_samples=num_samples)
+        samples = self.prior_sample(num_samples=num_samples)
         
         # Plot the posterior densities
         plot_dist(samples, xlabel='Prior on '+self.name, style=style, 

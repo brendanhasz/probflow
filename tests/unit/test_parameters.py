@@ -116,8 +116,8 @@ def test_parameter_losses():
     assert o1.shape[0] == 2 #batch_size = 2
 
 
-def test_parameter_sample_posterior():
-    """Tests probflow.parameters.Parameter.sample_posterior"""
+def test_parameter_posterior_sample():
+    """Tests probflow.parameters.Parameter.posterior_sample"""
 
     # Scalar parameter
     p1 = Parameter(name='test_parameter_posterior')
@@ -126,7 +126,7 @@ def test_parameter_sample_posterior():
     the_sess = tf.Session()
     the_sess.run(init_op)
     p1._session = the_sess
-    samples = p1.sample_posterior(num_samples=10)
+    samples = p1.posterior_sample(num_samples=10)
     assert isinstance(samples, np.ndarray)
     assert samples.ndim==2
     assert samples.shape[0]==10
@@ -140,7 +140,7 @@ def test_parameter_sample_posterior():
     the_sess = tf.Session()
     the_sess.run(init_op)
     p1._session = the_sess
-    samples = p1.sample_posterior(num_samples=10)
+    samples = p1.posterior_sample(num_samples=10)
     assert isinstance(samples, np.ndarray)
     assert samples.ndim==3
     assert samples.shape[0]==10
@@ -155,7 +155,7 @@ def test_parameter_sample_posterior():
     the_sess = tf.Session()
     the_sess.run(init_op)
     p1._session = the_sess
-    samples = p1.sample_posterior(num_samples=10)
+    samples = p1.posterior_sample(num_samples=10)
     assert isinstance(samples, np.ndarray)
     assert samples.ndim==3
     assert samples.shape[0]==10
