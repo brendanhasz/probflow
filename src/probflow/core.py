@@ -712,7 +712,10 @@ class BaseDistribution(BaseLayer):
         :doc:`mathematical details </math>` behind variational inference.
 
         You must :meth:`.fit` a model to some data before calling any of the
-        model criticism methods.
+        model evaluation methods (such as :meth:`.predict` and 
+        :meth:`.log_prob`) or criticism methods (such as 
+        :meth:`.DiscreteDistribution.calibration_curve` or 
+        :meth:`.ContinuousDistribution.coverage_by`).
 
 
         Parameters
@@ -1848,7 +1851,7 @@ class BaseDistribution(BaseLayer):
             param_dict[param].prior_plot(num_samples=num_samples, style=style, 
                                          bins=bins, ci=ci, color=color)
 
-            
+
     def _validate_params(self, params, rec=False):
         """Check params list is valid."""
 

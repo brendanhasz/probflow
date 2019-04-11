@@ -1,6 +1,29 @@
 """Parameters.
 
-TODO: more info...
+Parameters are values which characterize the behavior of a model.  When
+fitting a model, we want to find the values of the parameters which
+best allow the model to explain the data.  However, with Bayesian modeling
+we want not only to find the single *best* value for each parameter, but a 
+probability distribution which describes how likely any given value of 
+a parameter is to be the best or true value.
+
+Parameters have both priors (probability distributions which describe how
+likely we think different values for the parameter are *before* taking into
+consideration the current data), and posteriors (probability distributions 
+which describe how likely we think different values for the parameter are
+*after* taking into consideration the current data).  The prior is set 
+to a specific distribution before fitting the model.  While the *type* of 
+distribution used for the posterior is set before fitting the model, the 
+shape of that distribution is determined while fitting the model.
+See the :ref:`math` section for more info.
+
+The :class:`.Parameter` class can be used to create any probabilistic
+parameter. 
+
+For convenience, ProbFlow also includes some classes which are special cases
+of a :class:`.Parameter`:
+
+* :class:`.ScaleParameter` - standard deviation parameter
 
 ----------
 
@@ -25,7 +48,23 @@ from .utils.plotting import plot_dist, centered_text
 class Parameter(BaseParameter):
     r"""Parameter(s) drawn from variational distribution(s).
 
-    TODO: describe...
+    A probabilistic parameter $\beta$.  The default posterior distribution
+    is the Normal distribution, and the default prior is a Normal 
+    distribution with a mean of 0 and a standard deviation of 1.
+
+    The prior for a |Parameter| can be set to any |Distribution| object
+    (via the ``prior`` argument), and the type of distribution to use for the
+    posterior can be set to any |Distribution| class (using the ``posterior``
+    argument).
+
+    The parameter can be given a specific name using the ``name`` argument.
+    This makes it easier to access specific parameters after fitting the
+    model (e.g. in order to view the posterior distribution).
+
+    The number of independent parameters represented by this 
+    :class:`.Parameter` object can be set using the ``shape`` argument.  For 
+    example, to create a vector of 5 parameters, set ``shape=5``, or to create
+    a 20x7 matrix of parameters set ``shape=[20,7]``.
 
 
     Parameters
@@ -73,8 +112,45 @@ class Parameter(BaseParameter):
 
     Examples
     --------
-    TODO
 
+    Create a scalar parameter which represents the slope of a line::
+
+        from probflow import Parameter, Input, Normal
+
+        slope = Parameter()
+        feature = Input()
+        model = Normal(slope*feature + 3, 1.0)
+
+    Create a vector of parameters which represent coefficients for each 
+    feature dimension::
+
+        from probflow import Parameter, Input, Normal
+
+        weights = Parameter(shape=3)
+        features = Input([0, 1, 2])
+        model = Normal(Dot(weights, features) + 3, 1.0)
+
+    Create a parameter which has a Cauchy prior and posterior, instead of the
+    default Normal::
+
+        from probflow import Parameter, Cauchy, Input, Normal
+
+        weight = Parameter(prior=Cauchy(0, 1),
+                           posterior=Cauchy)
+        feature = Input()
+        model = Normal(weight*feature + 3, 1.0)
+
+    View the prior distribution which was used for a parameter::
+
+        weight.prior_plot()
+
+    View the posterior distribution for the parameter after fitting the
+    model::
+
+        # x and y are Numpy arrays or pandas DataFrame/Series
+        model.fit(x, y)
+
+        weight.posterior_plot()
 
     """
 
@@ -145,7 +221,11 @@ class Parameter(BaseParameter):
     def _bound(self, data, lb, ub):
         """Bound data by applying a transformation.
 
-        TODO: docs... explain exp for bound on one side, sigmoid for both lb+ub
+        Bound distribution arguments by applying a transformation: an 
+        exponential transformation when there is a bound on one side, or a 
+        sigmoid transformation when both sides are bounded.
+
+        TODO: just use tf constraints
 
         Parameters
         ----------
@@ -174,14 +254,14 @@ class Parameter(BaseParameter):
 
 
     def _build_recursively(self, data, batch_shape):
-        """Build the parameter.
-
-        TODO: docs
+        """Build the parameter and all elements of its priors and posteriors.
 
         Parameters
         ----------
         data : |Tensor|
             Data for this batch.
+        batch_shape : |Tensor|
+            Batch shape.
         """
         self._make_name_unique()
         self._build_prior(data, batch_shape)
@@ -308,12 +388,17 @@ class Parameter(BaseParameter):
     def posterior_mean(self):
         """Get the mean of the posterior distribution(s).
 
-        TODO: docs: returns a numpy array
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.posterior_mean` on a |Parameter|, you must
+            first :meth:`fit <.BaseDistribution.fit>` the model to which it
+            belongs to some data.
 
         Returns
         -------
         |ndarray|
-            Mean of the parameter posterior distribution.  Size ``self.shape``.
+            Mean of the parameter posterior distribution.  
+            Size ``self.shape``.
         """
         self._ensure_is_built()
         self._ensure_is_fit()
@@ -326,18 +411,36 @@ class Parameter(BaseParameter):
     def posterior_sample(self, num_samples=1000):
         """Sample from the posterior distribution.
 
-        TODO: this is similar to _sample(), but returns a numpy array
-        (meant to be used by the user to examine the posterior dist)
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.posterior_sample` on a |Parameter|, you
+            must first :meth:`fit <.BaseDistribution.fit>` the model to which
+            it belongs to some data.
+
+        Parameters
+        ----------
+        num_samples : int > 0
+            Number of samples to draw from the posterior distribution.
+            Default = 1000
 
         Returns
         -------
         |ndarray|
             Samples from the parameter posterior distribution.  Of size
-            ``(num_samples,self.shape)``.
-
+            ``(num_samples, self.shape)``.
         """
+
+        # Check num_samples
+        if not isinstance(num_samples, int):
+            raise TypeError('num_samples must be an int')
+        if num_samples < 1:
+            raise ValueError('num_samples must be positive')
+
+        # Ensure model is fit
         self._ensure_is_built()
         self._ensure_is_fit()
+
+        # Return the samples
         samples_op = self._built_posterior.sample(sample_shape=num_samples)
         samples_op = self.transform(samples_op)
         samples = self._session.run(samples_op)
@@ -347,7 +450,17 @@ class Parameter(BaseParameter):
     def prior_sample(self, num_samples=1000):
         """Sample from the prior distribution.
 
-        TODO: docs
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.prior_sample` on a |Parameter|, you must
+            first :meth:`fit <.BaseDistribution.fit>` the model to which it
+            belongs to some data.
+
+        Parameters
+        ----------
+        num_samples : int > 0
+            Number of samples to draw from the posterior distribution.
+            Default = 1000
 
         Returns
         -------
@@ -356,6 +469,12 @@ class Parameter(BaseParameter):
             ``(num_samples,self.shape)``.  If this parameter has not prior, 
             returns an empty list.
         """
+
+        # Check num_samples
+        if not isinstance(num_samples, int):
+            raise TypeError('num_samples must be an int')
+        if num_samples < 1:
+            raise ValueError('num_samples must be positive')
 
         # Return empty list if there is no prior
         if self.prior is None:
@@ -374,7 +493,11 @@ class Parameter(BaseParameter):
                        bw=0.075, alpha=0.4, color=None):
         """Plot distribution of samples from the posterior distribution.
 
-        TODO: docs
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.posterior_plot` on a |Parameter|, you
+            must first :meth:`fit <.BaseDistribution.fit>` the model to which
+            it belongs to some data.
 
         Parameters
         ----------
@@ -396,17 +519,19 @@ class Parameter(BaseParameter):
         bw : float
             Bandwidth of the kernel density estimate (if using ``style='line'``
             or ``style='fill'``).  Default is 0.075
+        alpha : float between 0 and 1
+            Transparency of fill/histogram
         color : matplotlib color code or list of them
             Color(s) to use to plot the distribution.
             See https://matplotlib.org/tutorials/colors/colors.html
             Default = use the default matplotlib color cycle
-        alpha : float between 0 and 1
-            Transparency of fill/histogram
         """
 
         # Check inputs
-        if type(num_samples) is not int or num_samples < 1:
-            raise TypeError('num_samples must be an int greater than 0')
+        if not isinstance(num_samples, int):
+            raise TypeError('num_samples must be an int')
+        if num_samples < 1:
+            raise ValueError('num_samples must be positive')
         if type(style) is not str or style not in ['fill', 'line', 'hist']:
             raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
         if not isinstance(bins, (int, float, np.ndarray)):
@@ -424,18 +549,15 @@ class Parameter(BaseParameter):
                   ci=ci, bw=bw, alpha=alpha, color=color)
 
 
-    def prior_plot(self, num_samples=10000, style='fill', bins=20, ci=0.0,
-                       bw=0.075, alpha=0.4, color=None):
+    def prior_plot(self, num_samples=1000, style='fill', bins=20, ci=0.0,
+                   bw=0.075, alpha=0.4, color=None):
         """Plot distribution of samples from the prior distribution.
 
-        TODO: docs
+        .. admonition:: Model must be fit first!
 
-        NOTE that really you could have just evaluated the prior fn @ x values
-        and plotted a deterministic line.
-        BUT that only works for simple priors (e.g. Normal(0,1))
-        Since probflow allows (non-deterministic) parameterized priors, e.g.:
-        prior = Parameter()*Input()+Parameter()
-        it's simpler just to sample here instead of checking which is the case
+            Before calling :meth:`.prior_plot` on a |Parameter|, you
+            must first :meth:`fit <.BaseDistribution.fit>` the model to which
+            it belongs to some data.
 
         Parameters
         ----------
@@ -457,6 +579,8 @@ class Parameter(BaseParameter):
         bw : float
             Bandwidth of the kernel density estimate (if using ``style='line'``
             or ``style='fill'``).  Default is 0.075
+        alpha : float between 0 and 1
+            Transparency of fill/histogram
         color : matplotlib color code or list of them
             Color(s) to use to plot the distribution.
             See https://matplotlib.org/tutorials/colors/colors.html
@@ -555,8 +679,15 @@ class ScaleParameter(Parameter):
 
     Examples
     --------
-    TODO
 
+    Use :class:`.ScaleParameter` to create a standard deviation parameter
+    for a :class:`.Normal` distribution::
+
+        from probflow import ScaleParameter, Normal
+
+        std_dev = ScaleParameter()
+        model = Normal(0.0, std_dev)
+        model.fit(x, y)
     """
 
     def __init__(self,
@@ -584,3 +715,8 @@ class ScaleParameter(Parameter):
 # and transform them according to the additive logistic transformation?
 # to get probs of categories
 # https://en.wikipedia.org/wiki/Logit-normal_distribution#Probability_density_function_2
+
+# TODO: DeterministicParameter
+# no distribution, just a single value (using Deterministic distribution)
+# just a convenience so user doesn't have to manually set the posterior
+# to Deterministic
