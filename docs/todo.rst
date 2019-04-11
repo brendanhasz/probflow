@@ -7,7 +7,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Bootstrapped confidence intervals for 1D coverage plot
 * Rename plot_posterior, sample_prior etc to posterior_plot and prior_sample (so all methods having to do w/ prior start with "prior" and all methods having to do w/ posterior start w/ "posterior"), for BaseDistribution and Parameter classes
 * Finish Parameter and docs
 * Finish Layers (up until MatMul) and docs

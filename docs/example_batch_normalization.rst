@@ -9,7 +9,7 @@ Batch Normalization
 TODO: intro, math, diagram
 
 
-Batch normalization can be performed using the :class:`.BatchNormalization` class.  For example, to add batch normalization to the dense neural network from the :ref:`previous section <example_fully_connected>`:
+Batch normalization can be performed using the :class:`.BatchNormalization` class.  For example, to add batch normalization to the dense neural network from the :ref:`previous example <example_fully_connected>`:
 
 .. code-block:: python
 
@@ -27,7 +27,7 @@ Batch normalization can be performed using the :class:`.BatchNormalization` clas
     model.fit(x, y)
 
 
-TODO: the :func:`.DenseNet`, :func:`.DenseRegression`, and :func:`.DenseClassifier` models take a ``batch_norm`` keyword argument which specifies whether to insert batch normalization layers between each dense layer.  The network with batch normalization in the example above could have been created using :class:`.DenseNet`:
+Batch normalization can also be automatically inserted into several ready-made models.  The :func:`.DenseNet`, :func:`.DenseRegression`, and :func:`.DenseClassifier` models take a ``batch_norm`` keyword argument which specifies whether to insert batch normalization layers between each dense layer.  The network with batch normalization in the example above could have been created using :class:`.DenseNet`:
 
 .. code-block:: python
 
@@ -38,9 +38,7 @@ TODO: the :func:`.DenseNet`, :func:`.DenseRegression`, and :func:`.DenseClassifi
     model = Normal(predictions, noise_std)
     model.fit(x, y)
 
-This inserts a batch normalization layer after each dense layer, except the last layer.
-
-:class:`.DenseRegression` and :class:`.DenseClassifier` work in the same way:
+:class:`.DenseRegression` works in the same way:
 
 .. code-block:: python
 
@@ -49,7 +47,7 @@ This inserts a batch normalization layer after each dense layer, except the last
     model = DenseRegression(units=[128, 64, 1], batch_norm=True)
     model.fit(x, y)
 
-TODO: DenseClassifier (adds a Bernoulli observation dist):
+As does :class:`.DenseClassifier`:
 
 .. code-block:: python
 

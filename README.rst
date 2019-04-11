@@ -131,7 +131,7 @@ And the multi-layer Bayesian neural net could have been made more easily by usin
     model = DenseRegression(units=[128, 64, 1])
     model.fit(x, y)
 
-Using parameters, layers, and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like generalized linear models, neural matrix factorization models, and mixed effects models.  Take a look at the `examples <http://probflow.readthedocs.io/en/latest/examples.html>`_ section and the `user guide <http://probflow.readthedocs.io/en/latest/user-guide.html>`_ for more!
+Using parameters, layers, and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like `generalized linear models <http://probflow.readthedocs.io/en/latest/example_glm.html>`_, `neural matrix factorization <http://probflow.readthedocs.io/en/latest/example_nmf.html>`_ models, and `mixed effects models <http://probflow.readthedocs.io/en/latest/example_multilevel.html>`_.  Take a look at the `examples <http://probflow.readthedocs.io/en/latest/examples.html>`_ section and the `user guide <http://probflow.readthedocs.io/en/latest/user_guide.html>`_ for more!
 
 
 Installation

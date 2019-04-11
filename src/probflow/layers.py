@@ -1099,11 +1099,11 @@ class BatchNormalization(BaseLayer):
     weight_posterior : |Distribution|
         Probability distribution class to use to approximate the posterior
         for the weight parameter(s) (:math:`\gamma`).
-        Default = :class:`.Normal`
+        Default = :class:`.Deterministic`
     bias_posterior : |Distribution|
         Probability distribution class to use to approximate the posterior
         for the bias parameter(s) (:math:`\beta`).
-        Default = :class:`.Normal`
+        Default = :class:`.Deterministic`
     weight_prior : |None| or a |Distribution| object
         Prior probability distribution for the weight parameter(s)
         (:math:`\gamma`).  |None| or a |Distribution| function which has been

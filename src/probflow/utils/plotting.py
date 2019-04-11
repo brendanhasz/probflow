@@ -309,7 +309,7 @@ def plot_by(x, data, bins=30, func='mean', plot=True,
         Number of bootstrap samples to use for estimating the uncertainty of 
         the true coverage.
     ci : list of float between 0 and 100
-        Confidence interval percentiles of coverage to show.
+        Bootstrapped confidence interval percentiles of coverage to show.
     **kwargs
         Additional arguments are passed to plt.plot or fill_between
 
@@ -389,9 +389,11 @@ def plot_by(x, data, bins=30, func='mean', plot=True,
                              alpha=0.3, facecolor=color)
 
         # Compute func for data in each bins 
-        data_o = (pd.Series(data.flatten())
-                    .groupby(bin_id.flatten())
-                    .agg(func))
+        data_o = pd.DataFrame(index=range(1, bins))
+        data_o['data'] = (pd.Series(data.flatten())
+                            .groupby(bin_id.flatten())
+                            .agg(func))
+        data_o = data_o['data']
 
         # Plot coverage
         plt.plot(x_o, data_o, **kwargs)
