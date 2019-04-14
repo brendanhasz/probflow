@@ -1,8 +1,10 @@
 """Layers.
 
-Layers take one or more tensors as input arguments, perform some computation
-on them, and output a single tensor.  They can additionally take keyword
-arguments which control how the computation is performed.
+Layers are objects which take one or more tensors as input arguments, 
+perform some computation on them, and output a single tensor.  The input 
+tensor(s) can be the input data, constants, or the outputs of other layers.
+Layers can additionally take keyword arguments which control how the 
+computation is performed.
 
 
 Data Layers
@@ -151,10 +153,115 @@ def _validate_initializer(initializer):
 class Input(BaseLayer):
     """Layer which represents the input data.
 
+    This layer represents the input data, either all of it, or a subset of
+    specific columns.  Which columns to use for this ``Input``` can be 
+    specified using the ``cols`` keyword argument.  You can use integers
+    to specify which column of the input matrix to use if the input 
+    data is an |ndarray|.  Or, you can use strings or a list of strings
+    when your input data is a |DataFrame|.  See the examples for more.
 
-    TODO: More info...
+
+    Keyword Arguments
+    -----------------
+    cols : None or int or str or list of int or str
+        Columns of the independent variables matrix to use.
 
 
+    Examples
+    --------
+
+    To create an object which corresponds to *all* the columns of the input
+    data, call :class:`.Input` with no arguments::
+
+        from probflow import Input
+
+        features = Input()
+
+    To use one specific column from the data matrix, use the ``cols``
+    keyword argument::
+
+        x0 = Input(cols=0)
+        x1 = Input(cols=1)
+
+    Then you can use these subsets of the data as input to different parts of
+    the model::
+
+        w0 = Parameter() #weight for data in 1st col
+        w1 = Parameter() #weight for data in 2nd col
+        b = Parameter() #bias
+
+        predictions = w0*x0 + w1*x1 + b
+        model = Normal(predictions, 1.0)
+
+    When you fit the model, the data from the appropriate columns will be 
+    piped to the appropriate places::
+
+        # generate dummy data
+        X = np.random.randn(1000, 2)
+        w = np.array([[-0.3], [0.5]])
+        y = np.sum(X*w, axis=1) + 1.0 + np.random.randn(1000)
+
+        model.fit(X, y)
+        #x0 contains data in X[:, 0]
+        #x1 contains data in X[:, 1]
+
+    To use multiple columns in a single ``Input`` object, set ``cols`` to be
+    a list of integers::
+
+        x_lin = Input(cols=[0, 1])
+        x_exp = Input(cols=2)
+
+    Then the data in that ``Input`` object is multidimensional::
+
+        w_lin = Parameter(shape=2)
+        w_exp = Parameter()
+
+        predictions = Dot(w_lin, x_lin) + Exp(w_exp*x_exp)
+        model = Normal(predictions, 1.0)
+
+    ``Input`` layers can also take string arguments to make working with 
+    |DataFrames| easier.  Supposing we have a DataFrame with information about
+    housing prices::
+
+        import pandas as pd
+        df = pd.DataFrame()
+        df['price'] = [0.1, 0.2, 0.3, 0.5] #(in millions)
+        df['sq_ft'] = [1500, 2000, 2500, 3000]
+        df['floors'] = [2, 2, 1, 3]
+        df['state'] = ['VT', 'MA', 'MN', 'WA']
+
+    When passing the dependent variable data as a |DataFrame|, you can use 
+    a string to specify what column this ``Input`` should correspond to::
+
+        x_sq_ft = Input(cols='sq_ft')
+        x_floors = Input(cols='floors')
+
+        w_sq_ft = Parameter()
+        w_floors = Parameter()
+        baseline = Parameter()
+
+        predictions = w_sq_ft*x_sq_ft + w_floors*x_floors + baseline
+        model = Normal(predictions, 1.0)
+
+    Then when fitting the model, you can pass ``x`` as a |DataFrame| and 
+    ``y`` as a |Series|::
+
+        model.fit(df[['sq_ft', 'floors']], df['price'])
+
+    Multiple columns can also be specified for a single input using a list of
+    strings::
+
+        x_cont = Input(cols=['sq_ft', 'floors'])
+        x_cat = Input(cols='state')
+
+        w_cont = Parameter(shape=2)
+        state_effect = Embedding(x_cat, dims=1)
+
+        predictions = Dot(w_cont, x_cont) + state_effect
+        model = Normal(predictions, 1.0)
+
+    With this method you must again pass ``x`` and ``y`` as |DataFrames| or
+    |Series|.
     """
 
 
