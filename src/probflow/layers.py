@@ -151,7 +151,7 @@ def _validate_initializer(initializer):
 
 
 class Input(BaseLayer):
-    """Layer which represents the input data.
+    r"""Layer which represents the input data.
 
     This layer represents the input data, either all of it, or a subset of
     specific columns.  Which columns to use for this ``Input``` can be 
@@ -307,12 +307,44 @@ class Input(BaseLayer):
 
 
 class Add(BaseLayer):
-    """A layer which adds two inputs.
+    r"""A layer which adds two inputs, elementwise.
+
+    Given :math:`a` and :math:`b`, this layer returns 
+    :math:`a+b`, elementwise.
 
 
-    TODO: More info... (elementwise)
+    Examples
+    --------
 
+    Use the ``Add`` layer to add two inputs, elementwise::
 
+        from probflow import Input, Add, Parameter, Exp
+
+        x0 = Input(0)
+        x1 = Input(1)
+        sum1 = Add(x0, x1) # x0+x1
+
+    The ``Add`` layer can also take |Parameters| as input::
+
+        w1 = Parameter()
+        sum2 = Add(sum1, w1)
+
+    As well as |Tensors|::
+
+        sum3 = Add(tf.constant(1.0), sum2)
+
+    or other |Layers|::
+
+        sum4 = Add(sum3, Exp(sum3))
+
+    ProbFlow objects overload the ``__add__`` method to use this layer.  That
+    is::
+
+        x0+x1
+
+    is equivalent to::
+
+        Add(x0, x1)
     """
 
 
@@ -330,12 +362,44 @@ class Add(BaseLayer):
 
 
 class Sub(BaseLayer):
-    """A layer which subtracts one input from another.
+    r"""A layer which subtracts one input from another, elementwise.
+
+    Given :math:`a` and :math:`b`, this layer returns 
+    :math:`a-b`, elementwise.
 
 
-    TODO: More info... (elementwise)
+    Examples
+    --------
 
+    Use the ``Sub`` layer to subtract one input from another, elementwise::
 
+        from probflow import Input, Sub, Parameter, Exp
+
+        x0 = Input(0)
+        x1 = Input(1)
+        diff1 = Sub(x0, x1) # x0 - x1
+
+    The ``Sub`` layer can also take |Parameters| as input::
+
+        w1 = Parameter()
+        diff2 = Sub(diff1, w1)
+
+    As well as |Tensors|::
+
+        diff3 = Sub(tf.constant(1.0), diff2)
+
+    or other |Layers|::
+
+        diff4 = Sub(diff3, Exp(diff3))
+
+    ProbFlow objects overload the ``__sub__`` method to use this layer.  That
+    is::
+
+        x0-x1
+
+    is equivalent to::
+
+        Sub(x0, x1)
     """
 
 
@@ -353,12 +417,44 @@ class Sub(BaseLayer):
 
 
 class Mul(BaseLayer):
-    """A layer which multiplies two inputs.
+    r"""A layer which multiplies two inputs, elementwise.
+
+    Given :math:`a` and :math:`b`, this layer returns 
+    :math:`a*b`, elementwise.
 
 
-    TODO: More info... (elementwise)
+    Examples
+    --------
 
+    Use the ``Mul`` layer to multiply two inputs, elementwise::
 
+        from probflow import Input, Mul, Parameter, Exp
+
+        x0 = Input(0)
+        x1 = Input(1)
+        prod1 = Mul(x0, x1) # x0*x1
+
+    The ``Mul`` layer can also take |Parameters| as input::
+
+        w1 = Parameter()
+        prod2 = Mul(prod1, w1)
+
+    As well as |Tensors|::
+
+        prod3 = Mul(tf.constant(1.0), prod2)
+
+    or other |Layers|::
+
+        prod4 = Mul(prod3, Exp(prod3))
+
+    ProbFlow objects overload the ``__mul__`` method to use this layer.  That
+    is::
+
+        x0*x1
+
+    is equivalent to::
+
+        Mul(x0, x1)
     """
 
 
@@ -377,12 +473,44 @@ class Mul(BaseLayer):
 
 
 class Div(BaseLayer):
-    """A layer which divides one input by another.
+    r"""A layer which divides one input by another, elementwise.
+
+    Given :math:`a` and :math:`b`, this layer returns 
+    :math:`a/b`, elementwise.
 
 
-    TODO: More info... (elementwise)
+    Examples
+    --------
 
+    Use the ``Div`` layer to multiply two inputs, elementwise::
 
+        from probflow import Input, Div, Parameter, Exp
+
+        x0 = Input(0)
+        x1 = Input(1)
+        ratio1 = Div(x0, x1) # x0/x1
+
+    The ``Div`` layer can also take |Parameters| as input::
+
+        w1 = Parameter()
+        ratio2 = Div(ratio1, w1)
+
+    As well as |Tensors|::
+
+        prod3 = Div(tf.constant(1.0), ratio2)
+
+    or other |Layers|::
+
+        ratio4 = Div(ratio3, Exp(ratio3))
+
+    ProbFlow objects overload the ``__div__`` method to use this layer.  That
+    is::
+
+        x0/x1
+
+    is equivalent to::
+
+        Div(x0, x1)
     """
 
 
@@ -400,12 +528,42 @@ class Div(BaseLayer):
 
 
 class Neg(BaseLayer):
-    """A layer which outputs the negative of its input.
+    r"""A layer which outputs the negative of its input.
+
+    Given :math:`x`, this layer returns :math:`-x`, elementwise.
 
 
-    TODO: More info... (elementwise)
+    Examples
+    --------
 
+    Use the ``Neg`` layer to negate an input, elementwise::
 
+        from probflow import Input, Neg, Parameter, Exp
+
+        x0 = Input(0)
+        neg1 = Neg(x0)
+
+    The ``Neg`` layer can also take |Parameters| as input::
+
+        w1 = Parameter()
+        neg2 = Neg(w1)
+
+    As well as |Tensors|::
+
+        neg3 = Neg(tf.constant(1.0))
+
+    or other |Layers|::
+
+        neg4 = Neg(neg1+neg2)
+
+    ProbFlow objects overload the ``__neg__`` method to use this layer.  That
+    is::
+
+        -x0
+
+    is equivalent to::
+
+        Neg(x0)
     """
 
     def _build(self, args, _data, _batch_shape):
@@ -415,12 +573,43 @@ class Neg(BaseLayer):
 
 
 class Abs(BaseLayer):
-    """A layer which outputs the absolute value of its input.
+    r"""A layer which outputs the absolute value of its input.
+
+    Given :math:`x`, this layer returns :math:`\abs x`, elementwise.
 
 
-    TODO: More info... (elementwise)
+    Examples
+    --------
 
+    Use the ``Abs`` layer to take the absolute value of an input, 
+    elementwise::
 
+        from probflow import Input, Abs, Parameter, Exp
+
+        x0 = Input(0)
+        abs1 = Abs(x0)
+
+    The ``Abs`` layer can also take |Parameters| as input::
+
+        w1 = Parameter()
+        abs2 = Abs(w1)
+
+    As well as |Tensors|::
+
+        abs3 = Abs(tf.constant(1.0))
+
+    or other |Layers|::
+
+        abs4 = Abs(Sub(abs1, abs2))
+
+    ProbFlow objects overload the ``__abs__`` method to use this layer.  That
+    is::
+
+        abs(x0)
+
+    is equivalent to::
+
+        Abs(x0)
     """
 
     def _build(self, args, _data, _batch_shape):
@@ -432,10 +621,31 @@ class Abs(BaseLayer):
 class Exp(BaseLayer):
     r"""A layer which outputs the natural exponent of its input.
 
-    TODO: More info...
-
     Given :math:`x`, this layer returns :math:`\exp x`, elementwise.
 
+
+    Examples
+    --------
+
+    Use the ``Exp`` layer to compute :math:`e` to the power of some data::
+
+        from probflow import Input, Exp, Parameter
+
+        x0 = Input(0)
+        exp1 = Exp(x0)
+
+    The ``Exp`` layer can also take |Parameters| as input::
+
+        w1 = Parameter()
+        exp2 = Exp(w1)
+
+    As well as |Tensors|::
+
+        exp3 = Exp(tf.constant(1.0))
+
+    or other |Layers|::
+
+        exp4 = Exp(Sub(exp1, exp2))
     """
 
     def _build(self, args, _data, _batch_shape):
@@ -447,11 +657,31 @@ class Exp(BaseLayer):
 class Log(BaseLayer):
     r"""A layer which outputs the natural log of its input.
 
+    Given :math:`x`, this layer returns :math:`\ln x`, elementwise.
 
-    TODO: More info...
 
-    Given :math:`x`, this layer returns :math:`\log x`, elementwise.
+    Examples
+    --------
 
+    Use the ``Log`` layer to compute the natural log of some data::
+
+        from probflow import Input, Log, Parameter
+
+        x0 = Input(0)
+        log1 = Log(x0)
+
+    The ``Log`` layer can also take |Parameters| as input::
+
+        w1 = Parameter()
+        log2 = Log(w1)
+
+    As well as |Tensors|::
+
+        log3 = Log(tf.constant(1.0))
+
+    or other |Layers|::
+
+        log4 = Log(Add(log1, log2))
     """
 
     def _build(self, args, _data, _batch_shape):
@@ -463,15 +693,35 @@ class Log(BaseLayer):
 class Reciprocal(BaseLayer):
     r"""A layer which outputs the reciprocal of its input.
 
-
-    TODO: More info...
-
     Given :math:`x`, this layer returns (elementwise):
 
     .. math::
 
         \text{Reciprocal}(x) = \frac{1}{x}
 
+
+    Examples
+    --------
+
+    Use the ``Reciprocal`` layer to compute the inverse of some data::
+
+        from probflow import Input, Reciprocal, Parameter
+
+        x0 = Input(0)
+        inv1 = Reciprocal(x0)
+
+    The ``Reciprocal`` layer can also take |Parameters| as input::
+
+        w1 = Parameter()
+        inv2 = Reciprocal(w1)
+
+    As well as |Tensors|::
+
+        inv3 = Reciprocal(tf.constant(1.0))
+
+    or other |Layers|::
+
+        inv4 = Reciprocal(Add(inv1, inv2))
     """
 
     def _build(self, args, _data, _batch_shape):
@@ -483,15 +733,35 @@ class Reciprocal(BaseLayer):
 class Sqrt(BaseLayer):
     r"""A layer which outputs the square root of its input.
 
-
-    TODO: More info...
-
     Given :math:`x`, this layer returns (elementwise):
 
     .. math::
 
         \text{Sqrt}(x) = \sqrt{x}
 
+
+    Examples
+    --------
+
+    Use the ``Sqrt`` layer to compute the square root of some data::
+
+        from probflow import Input, Sqrt, Parameter
+
+        x0 = Input(0)
+        sqrt1 = Sqrt(x0)
+
+    The ``Sqrt`` layer can also take |Parameters| as input::
+
+        w1 = Parameter()
+        sqrt2 = Sqrt(w1)
+
+    As well as |Tensors|::
+
+        sqrt3 = Sqrt(tf.constant(1.0))
+
+    or other |Layers|::
+
+        sqrt4 = Sqrt(Add(sqrt1, sqrt2))
     """
 
     def _build(self, args, _data, _batch_shape):
@@ -503,12 +773,34 @@ class Sqrt(BaseLayer):
 class Transform(BaseLayer):
     r"""Performs an elementwise transform using arbitrairy |TensorFlow| ops. 
 
-
-    TODO: More info...
-
     Given :math:`x`, and some function :math:`f`, this layer returns 
     :math:`f(x)`, elementwise.
 
+
+    Keyword Arguments
+    -----------------
+    func : callable
+        Funtion to use to transform the input data.  Should use only 
+        |TensorFlow| ops.
+
+
+    Examples
+    --------
+
+    Use the ``Transform`` layer to implement custom transformation not 
+    implemented in ProbFlow.  For example, to create a layer which takes the
+    floor of its input (rounds down to the next lowest integer, a transform
+    which is not included in ProbFlow), use the ``Transform`` layer::
+
+        import tensorflow as tf
+        from probflow import Input, Transform
+
+        x0 = Input(0)
+        floored = Transform(x0, func=lambda x: tf.floor(x))
+
+    Or, to create a layer which computes the :math:`sin` of the input::
+
+        sinx = Transform(x0, func=lambda x: tf.sin(x))
     """
 
     # Layer keyword arguments and their default values
@@ -530,9 +822,6 @@ class Transform(BaseLayer):
 class Sigmoid(BaseLayer):
     r"""A layer which passes its input through a sigmoid function, elementwise.
 
-
-    TODO: More info...
-
     Given :math:`x`, this layer returns (elementwise):
 
     .. math::
@@ -548,10 +837,7 @@ class Sigmoid(BaseLayer):
 
 
 class Relu(BaseLayer):
-    r"""A layer which linearly rectifies its input.
-
-
-    TODO: More info...
+    r"""A layer which linearly rectifies its input, elementwise.
 
     Given :math:`x`, this layer returns (elementwise):
 
@@ -570,9 +856,6 @@ class Relu(BaseLayer):
 class Softmax(BaseLayer):
     r"""A layer which outputs the softmax of its input.
 
-
-    TODO: More info...
-
     Given a vector :math:`\mathbf{x}`, this layer returns:
 
     .. math::
@@ -585,6 +868,12 @@ class Softmax(BaseLayer):
 
         \sigma_i = \frac{\exp (x_i)}{\sum_j \exp (x_j)}
 
+    
+    Keyword Arguments
+    -----------------
+    axis : int
+        What axis to compute the operation along.  
+        Default is -1 (the last dimension).
     """
 
 
@@ -609,15 +898,18 @@ class Softmax(BaseLayer):
 class Sum(BaseLayer):
     r"""A layer which outputs the sum of its inputs.
 
-
-    TODO: More info...
-
     Given a vector :math:`\mathbf{x}`, this layer returns:
 
     .. math::
 
         \text{Sum}(\mathbf{x}) = \sum_i x_i
 
+
+    Keyword Arguments
+    -----------------
+    axis : int
+        What axis to compute the operation along.  
+        Default is -1 (the last dimension).
     """
 
 
@@ -644,15 +936,18 @@ class Sum(BaseLayer):
 class Mean(BaseLayer):
     r"""A layer which outputs the mean of its inputs.
 
-
-    TODO: More info...
-
     Given a vector :math:`\mathbf{x}`, this layer returns:
 
     .. math::
 
         \text{Mean}(\mathbf{x}) = \frac{1}{N} \sum_{i=1}^N x_i
 
+
+    Keyword Arguments
+    -----------------
+    axis : int
+        What axis to compute the operation along.  
+        Default is -1 (the last dimension).
     """
 
 
@@ -677,12 +972,19 @@ class Mean(BaseLayer):
 
 
 class Min(BaseLayer):
-    """A layer which outputs the minimum of its inputs.
+    r"""A layer which outputs the minimum of its inputs.
+
+    Given a vector :math:`\mathbf{x}`, this layer returns 
+    :math:`\min \mathbf{x}` along one dimension.  
+    The dimensionality of the output of this layer is less than the 
+    dimensionality of the input.
 
 
-    TODO: More info...
-
-
+    Keyword Arguments
+    -----------------
+    axis : int
+        What axis to compute the operation along.  
+        Default is -1 (the last dimension).
     """
 
 
@@ -707,12 +1009,19 @@ class Min(BaseLayer):
 
 
 class Max(BaseLayer):
-    """A layer which outputs the maximum of its inputs.
+    r"""A layer which outputs the maximum of its inputs.
+
+    Given a vector :math:`\mathbf{x}`, this layer returns 
+    :math:`\max \mathbf{x}` along one dimension.  
+    The dimensionality of the output of this layer is less than the 
+    dimensionality of the input.
 
 
-    TODO: More info...
-
-
+    Keyword Arguments
+    -----------------
+    axis : int
+        What axis to compute the operation along.  
+        Default is -1 (the last dimension).
     """
 
 
@@ -739,15 +1048,21 @@ class Max(BaseLayer):
 class Prod(BaseLayer):
     r"""A layer which outputs the product of its inputs.
 
-
-    TODO: More info...
-
     Given a vector :math:`\mathbf{x}`, this layer returns:
 
     .. math::
 
         \text{Sum}(\mathbf{x}) = \prod_i x_i
 
+    The dimensionality of the output of this layer is less than the 
+    dimensionality of the input.
+
+
+    Keyword Arguments
+    -----------------
+    axis : int
+        What axis to compute the operation along.  
+        Default is -1 (the last dimension).
     """
 
 
@@ -772,12 +1087,7 @@ class Prod(BaseLayer):
 
 
 class LogSumExp(BaseLayer):
-    r"""A layer which outputs the log(sum(exp(inputs))).
-
-
-    TODO: More info...
-
-    TODO: explain why this is useful when working in log space, numerical stability etc
+    r"""A layer which outputs log(sum(exp(inputs))).
 
     Given a vector :math:`\mathbf{x}`, this layer returns:
 
@@ -785,6 +1095,17 @@ class LogSumExp(BaseLayer):
 
         \text{LogSumExp}(\mathbf{x}) = \log \left( \sum_i \exp x_i \right)
 
+    The dimensionality of the output of this layer is less than the 
+    dimensionality of the input.
+    
+    TODO: explain why this is useful when working in log space, numerical stability etc
+
+
+    Keyword Arguments
+    -----------------
+    axis : int
+        What axis to compute the operation along.  
+        Default is -1 (the last dimension).
     """
 
 
@@ -809,8 +1130,7 @@ class LogSumExp(BaseLayer):
 
 
 class Cat(BaseLayer):
-    """A layer which concatenates its two inputs.
-
+    r"""A layer which concatenates its two inputs.
 
     TODO: More info...
 
@@ -847,9 +1167,6 @@ class Cat(BaseLayer):
 class Dot(BaseLayer):
     r"""A layer which outputs the dot product of its two inputs.
 
-
-    TODO: More info...
-
     Given a two vectors :math:`\mathbf{a}` and :math:`\mathbf{b}`,
     this layer returns:
 
@@ -859,6 +1176,12 @@ class Dot(BaseLayer):
         \mathbf{a} \cdot \mathbf{b} =
         \sum_i ( a_i b_i )
 
+
+    Keyword Arguments
+    -----------------
+    axis : int
+        What axis to compute the operation along.  
+        Default is -1 (the last dimension).
     """
 
 
@@ -890,7 +1213,7 @@ class Dot(BaseLayer):
 
 
 class Matmul(BaseLayer):
-    """A layer which outputs the matrix multiplication of its two inputs.
+    r"""A layer which outputs the matrix multiplication of its two inputs.
 
 
     TODO: More info...
@@ -1375,7 +1698,7 @@ class BatchNormalization(BaseLayer):
 
 
 class Sequential(BaseLayer):
-    """Apply a list of layers sequentially.
+    r"""Apply a list of layers sequentially.
 
 
     Parameters
@@ -1489,7 +1812,7 @@ class Sequential(BaseLayer):
 
 
 class Gather(BaseLayer):
-    """Collects slices from a layer using indexes provided by another layer.
+    r"""Collects slices from a layer using indexes provided by another layer.
 
 
     Parameters
@@ -1757,7 +2080,7 @@ class Embedding(BaseLayer):
 
 
 class Conv1d(BaseLayer):
-    """A 1-dimensional convolutional neural network layer.
+    r"""A 1-dimensional convolutional neural network layer.
 
 
     TODO: More info...
@@ -1771,7 +2094,7 @@ class Conv1d(BaseLayer):
 
 
 class Conv2d(BaseLayer):
-    """A 2-dimensional convolutional neural network layer.
+    r"""A 2-dimensional convolutional neural network layer.
 
 
     TODO: More info...
