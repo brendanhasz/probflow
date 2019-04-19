@@ -1401,7 +1401,8 @@ class Dense(BaseLayer):
         # Inputs
         ndims = args['input'].shape[1].value
         units = self.kwargs['units']
-        x_in = tf.reshape(args['input'], batch_shape+[ndims, 1])
+        x_shape = tf.concat([batch_shape, [ndims], [1]], axis=0)
+        x_in = tf.reshape(args['input'], x_shape)
 
         # Create weight and bias parameters
         weight = Parameter(shape=[ndims, units],
@@ -1421,8 +1422,8 @@ class Dense(BaseLayer):
 
         # Compute output using a sample from the variational posteriors
         weight_samples = weight.built_obj
-        bias_samples = tf.reshape(bias.built_obj, batch_shape+[units])
-        # TODO: uh, test that this is correct...
+        bias_samples_shape = tf.concat([batch_shape, [units]], axis=0)
+        bias_samples = tf.reshape(bias.built_obj, bias_samples_shape)
         y_out = tf.reduce_sum(weight_samples*x_in, axis=1) + bias_samples
         if self.kwargs['activation'] is None:
             self._sample = y_out
@@ -1430,8 +1431,9 @@ class Dense(BaseLayer):
             self._sample = self.kwargs['activation'](y_out)
 
         # Compute the output using the means of the variational posteriors
-        weight_means = weight.mean_obj,
-        bias_means = tf.reshape(bias.mean_obj, [1, units])
+        weight_means = weight.mean_obj
+        bias_means_shape = tf.concat([[1], [units]], axis=0)
+        bias_means = tf.reshape(bias.mean_obj, bias_means_shape)
         mean_y_out = tf.reduce_sum(weight_means*x_in, axis=1) + bias_means
         if self.kwargs['activation'] is None:
             self._mean = mean_y_out

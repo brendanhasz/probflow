@@ -7,6 +7,7 @@ import tensorflow as tf
 from probflow.layers import Add, Sub, Mul, Div, Neg, Abs, Exp, Log
 from probflow.layers import Dense
 from probflow.parameters import Parameter
+from probflow.distributions import Normal
 
 def isclose(a, b, tol=1e-7):
     """Returns true if a and b are w/i tol"""
@@ -684,6 +685,26 @@ def test_dense_layer():
 
     # Reset the graph
     tf.reset_default_graph()
+
+
+def test_dense_layer_fit():
+    """Tests probflow.layers.Dense"""
+
+    # TODO move test to tests/integration
+
+    # Dummy data
+    x = np.random.randn(100, 4)
+    w = np.random.randn(1, 4)
+    b = np.random.randn()
+    y = np.sum(x*w, axis=1) + b
+
+    # Model 
+    l1 = Dense()
+    model = Normal(l1, 1.0)
+
+    # Fit the model
+    model.fit(x, y, epochs=10)
+
 
 # TODO: check broadcasting works correctly
 
