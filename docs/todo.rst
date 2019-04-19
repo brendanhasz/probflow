@@ -7,6 +7,8 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
+* Make confidence interval/prc consistent (should be *either* "prc" or "ci" for all methods, and *either* 0-1 or 0-100 for all methods)
+* Make separate predictive_distribution_plot methods for Continuous and Discrete distributions
 * Finish Layers (up until MatMul) and docs
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)
 * Docs for distributions (including distribution diagrams)

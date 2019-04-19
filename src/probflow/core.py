@@ -1184,7 +1184,7 @@ class BaseDistribution(BaseLayer):
 
     def predictive_distribution_plot(self, x=None, 
                                      data=None, 
-                                     num_samples=1000,
+                                     num_samples=10000,
                                      style='fill',
                                      cols=1,
                                      bins=20,
@@ -1500,7 +1500,7 @@ class BaseDistribution(BaseLayer):
 
     def posterior_plot(self,
                        params=None,
-                       num_samples=1000,
+                       num_samples=10000,
                        style='fill',
                        cols=1,
                        bins=20,
@@ -1577,6 +1577,9 @@ class BaseDistribution(BaseLayer):
             param_dict[param].posterior_plot(num_samples=num_samples, 
                                              style=style, bins=bins, ci=ci,
                                              color=color)
+
+        # Figure formatting
+        plt.tight_layout()
 
 
     def posterior_plot_over_training(self, 

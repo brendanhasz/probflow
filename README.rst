@@ -8,7 +8,7 @@ ProbFlow
     :scale: 100%
     :target: http://probflow.readthedocs.io
 
-ProbFlow is a Python package for building Bayesian models with `TensorFlow Probability <http://www.tensorflow.org/probability>`_, performing variational inference with those models, and evaluating the models' inferences.
+ProbFlow is a Python package for building probabilistic Bayesian models with `TensorFlow Probability <http://www.tensorflow.org/probability>`_, performing variational inference with those models, and evaluating the models' inferences.
 
 It's very much still a work in progress.
 
