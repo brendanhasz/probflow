@@ -27,10 +27,10 @@ TODO: diagram
     from probflow import Input, Parameter, Dot, Bernoulli
 
     features = Input()
-    weight = Parameter(shape=5)
+    weights = Parameter(shape=5)
     bias = Parameter()
 
-    logits = Dot(features, weight) + bias
+    logits = Dot(features, weights) + bias
     model = Bernoulli(logits)
     model.fit(x, y)
 

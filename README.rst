@@ -86,13 +86,13 @@ Investigate how well your model is capturing uncertainty by examining how accura
 
 .. code-block:: python
 
-    model.pred_dist_coverage(prc=95.0)
+    model.pred_dist_coverage(ci=0.95)
 
 and diagnose *where* your model is having problems capturing uncertainty:
 
 .. code-block:: python
 
-    model.coverage_by(prc=95.0)
+    model.coverage_by(ci=0.95)
 
 .. image:: docs/img/readme/coverage.svg
    :width: 90 %

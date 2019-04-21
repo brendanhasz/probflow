@@ -2306,7 +2306,7 @@ class ContinuousDistribution(BaseDistribution):
 
 
     def confidence_intervals(self, x=None, data=None,
-                             prcs=[2.5, 97.5], num_samples=1000):
+                             ci=0.95, num_samples=1000):
         """Compute confidence intervals on predictions for `x`.
 
         TODO: docs, prcs contains percentiles of predictive_distribution to use
@@ -2329,9 +2329,9 @@ class ContinuousDistribution(BaseDistribution):
             it is assumed that ``x`` is a |ndarray|.  If ``data`` 
             is a |DataFrame|, it is assumed that ``x`` is a string
             or list of strings containing the columns from ``data`` to use.
-        prcs : list of float, or np.ndarray
-            Percentiles to use as bounds of the confidence interval, between 0
-            and 100.
+        ci : float between 0 and 1
+            Inner proportion of predictive distribution to use a the
+            confidence interval.
             Default = [2.5, 97.5]
         num_samples : int
             Number of samples from the posterior predictive distribution to
@@ -2355,6 +2355,8 @@ class ContinuousDistribution(BaseDistribution):
 
         # Compute percentiles of the predictive distribution
         pred_dist = self.predictive_distribution(x, num_samples=num_samples)
+        lb = (1.0-ci)/2.0
+        prcs = [lb, 1.0-lb]
         return np.percentile(pred_dist, prcs)
 
 
@@ -2388,6 +2390,10 @@ class ContinuousDistribution(BaseDistribution):
             it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
             is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
             or lists of strings containing the columns from ``data`` to use.
+
+        Returns
+        -------
+        prcs : |ndarray| of float between 0 and 1
         """
 
         # Check model has been fit
@@ -2416,10 +2422,9 @@ class ContinuousDistribution(BaseDistribution):
         # obviously not what we want
 
 
-    def pred_dist_covered(self, x=None, y=None, data=None, prc=95.0):
-        """Compute whether each observation was covered by the
-        inner `prc` percentile of the posterior predictive
-        distribution.
+    def pred_dist_covered(self, x=None, y=None, data=None, ci=0.95):
+        """Compute whether each observation was covered by a given confidence
+        interval.
 
         TODO: Docs...
 
@@ -2447,16 +2452,18 @@ class ContinuousDistribution(BaseDistribution):
             it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
             is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
             or lists of strings containing the columns from ``data`` to use.
+        ci : float between 0 and 1
+            Confidence interval to use.
         """
 
         # Check types
-        if not isinstance(prc, float):
-            if isinstance(prc, int):
-                prc = float(prc)
+        if not isinstance(ci, float):
+            if isinstance(ci, int):
+                ci = float(ci)
             else:
-                raise TypeError('prc must be a float')
-        if prc < 0 or prc > 100:
-            raise ValueError('prc must be between 0 and 100')
+                raise TypeError('ci must be a float')
+        if ci < 0 or ci > 1.0:
+            raise ValueError('ci must be between 0 and 1')
 
         # Check model has been fit
         self._ensure_is_fit()
@@ -2464,15 +2471,15 @@ class ContinuousDistribution(BaseDistribution):
         # Compute the predictive percentile of each observation
         pred_prcs = self.predictive_prc(x, y, data)
 
-        # Determine what samples fall in the inner prc percentile
-        lb = 0.01*(100.0-prc)/2.0
-        ub = 0.01*(100.0-lb)
+        # Determine what samples fall in the inner ci proportion
+        lb = (1.0-ci)/2.0
+        ub = 1.0-lb
         return (pred_prcs>=lb) & (pred_prcs<ub)
 
 
-    def pred_dist_coverage(self, x=None, y=None, data=None, prc=95.0):
-        """Compute what percent of samples are covered by the inner `prc`
-        percentile of the posterior predictive distribution.
+    def pred_dist_coverage(self, x=None, y=None, data=None, ci=0.95):
+        """Compute what percent of samples are covered by a given confidence
+        interval.
 
         TODO: Docs...
         returns a scalar (from 0 to 100)
@@ -2501,23 +2508,31 @@ class ContinuousDistribution(BaseDistribution):
             it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
             is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
             or lists of strings containing the columns from ``data`` to use.
+        ci : float between 0 and 1
+            Confidence interval to use.
+
+        Returns
+        -------
+        prc_covered : float between 0 and 1
+            Proportion of the samples which were covered by the predictive
+            distribution's confidence interval.
         """
 
         # Check model has been fit
         self._ensure_is_fit()
 
         # Compute whether each sample was covered by the predictive interval
-        covered = self.pred_dist_covered(x, y, data, prc)
+        covered = self.pred_dist_covered(x, y, data, ci)
 
         # Return the percentage of samples which were covered
-        return 100*covered.mean()
+        return covered.mean()
 
 
     def coverage_by(self, x_by=0, x=None, y=None, data=None, 
-                    prc=95.0, bins=30, plot=True,
+                    ci=0.95, bins=30, plot=True,
                     true_line_kwargs={}, ideal_line_kwargs={}):
-        """Compute and plot the coverage of the inner `prc`
-        percentile of the posterior predictive distribution as a
+        """Compute and plot the coverage of a given confidence interval
+        of the posterior predictive distribution as a
         function of specified independent variables.
 
         TODO: Docs...
@@ -2551,9 +2566,9 @@ class ContinuousDistribution(BaseDistribution):
             it is assumed that ``x`` and ``y`` are |ndarray|s.  If ``data`` 
             is a |DataFrame|, it is assumed that ``x`` and ``y`` are strings
             or lists of strings containing the columns from ``data`` to use.
-        prc : float between 0 and 100
+        ci : float between 0 and 1
             Inner percentile to find the coverage of.  For example, if 
-            ``prc=95``, will compute the coverage of the inner 95% of the 
+            ``ci=0.95``, will compute the coverage of the inner 95% of the 
             posterior predictive distribution.
         bins : int
             Number of bins to use for x_by
@@ -2571,8 +2586,8 @@ class ContinuousDistribution(BaseDistribution):
         xo : |ndarray|
             Values of x_by corresponding to bin centers.
         co : |ndarray|
-            Coverage of the inner ``prc`` of the predictive distribution in 
-            each bin.
+            Coverage of the ``ci`` confidence interval of the predictive
+            distribution in each bin.
         """
 
         # Check model has been fit
@@ -2582,7 +2597,7 @@ class ContinuousDistribution(BaseDistribution):
         x_by = self._int_x_by(x_by, x, y, data)
 
         # Compute whether each sample was covered by the predictive interval
-        covered = self.pred_dist_covered(x, y, data, prc)
+        covered = self.pred_dist_covered(x, y, data, ci)
 
         # Process input data
         x, y = process_xy_data(self, x, y, data)
@@ -2599,9 +2614,9 @@ class ContinuousDistribution(BaseDistribution):
 
         # Also plot ideal line
         if plot and isinstance(x_by, int):
-            plt.axhline(prc, label='Ideal', **ideal_line_kwargs)
+            plt.axhline(100*ci, label='Ideal', **ideal_line_kwargs)
             plt.legend()
-            plt.ylabel(str(prc)+'% predictive interval coverage')
+            plt.ylabel(str(100*ci)+'% predictive interval coverage')
             plt.xlabel('Value of '+str(x_by))
 
         return xo, co

@@ -7,7 +7,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Make confidence interval/prc consistent (should be *either* "prc" or "ci" for all methods, and *either* 0-1 or 0-100 for all methods)
 * Make separate predictive_distribution_plot methods for Continuous and Discrete distributions
 * Finish Layers (up until MatMul) and docs
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)
@@ -35,6 +34,7 @@ Backlog (short term):
 Backlog (long term):
 --------------------
 
+* `Flipout`_
 * `Parameter sharing`_
 * `Slicing`_
 * `Embedding layer`_
@@ -45,11 +45,11 @@ Backlog (long term):
 * Multivariate Normal, StudentT, and Cauchy dists
 * `Tensorflow graph view`_
 * `Tensorflow dashboard`_
-* Support other optimizers
 * `Saving and loading and initializing parameters`_
 * `Transfer learning`_
 * `Bijector support`_? e.g so you can do ``model=Exp(Normal()); model.fit()``
 * `Input data as tf dataset iterators`_
+* `Loss or cost functions`_
 * `Model comparison`_
 * `Optimize bounding`_
 * `Dev guide`_
@@ -59,6 +59,7 @@ Backlog (long term):
 * Ready-made Conv models
 * LSTM Layer
 * Support for passing x=None to do unsupervised models (e.g. Gaussian mixture models)
+* `Option to use dropout instead of weight sampling`_
 
 
 Notes
@@ -95,6 +96,12 @@ Model classes should be consistent with a sklearn estimator.
 Should support predict_proba().
 Or if that won't work, include a sklearn Estimator which takes a model obj.
 https://scikit-learn.org/dev/developers/contributing.html#rolling-your-own-estimator
+
+
+Flipout
+^^^^^^^
+
+Add support for flipout, expecially for use w/ Dense/conv layers.  Might have to make Parameters be able to return a sample of size batch_size or a sample of size 1 (which you can then use w/ flipout).  https://arxiv.org/abs/1803.04386
 
 
 Slicing
@@ -284,6 +291,13 @@ And should be able to make multilevel model with that: eg individuals drawn from
 Perhaps make a RandomVariable() which takes a slice of the x_values placeholder? (as individual/group id or whatever)
 
 
+
+Loss or cost functions
+^^^^^^^^^^^^^^^^^^^^^^
+
+Add support for loss (cost) functions, computing the expected loss, and Bayes estimator (ie finding the optimal Bayes action).
+
+
 Model comparison
 ^^^^^^^^^^^^^^^^
 
@@ -331,3 +345,9 @@ Dev guide
 ^^^^^^^^^
 
 Testing (eg --plot arg, etc), inheritance structure, etc
+
+
+Option to use dropout instead of weight sampling
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Would fit a lot faster... https://arxiv.org/abs/1506.02142

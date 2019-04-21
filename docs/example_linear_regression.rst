@@ -60,11 +60,11 @@ TODO: diagram
     from probflow import Input, Parameter, ScaleParameter, Dot, Normal
 
     features = Input()
-    weight = Parameter(shape=5)
+    weights = Parameter(shape=5)
     bias = Parameter()
     noise_std = ScaleParameter()
 
-    predictions = Dot(features, weight) + bias
+    predictions = Dot(features, weights) + bias
     model = Normal(predictions, noise_std)
     model.fit(x, y)
 
