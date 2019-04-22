@@ -46,7 +46,11 @@ from .utils.data import process_xy_data
 from .utils.data import test_train_split
 from .utils.data import initialize_shuffles
 from .utils.data import generate_batch
-from .utils.plotting import plot_line, plot_dist, fill_between, plot_by
+from .utils.plotting import plot_line
+from .utils.plotting import plot_dist
+from .utils.plotting import fill_between
+from .utils.plotting import plot_by
+from .utils.plotting import plot_discrete_dist
 
 
 
@@ -511,7 +515,6 @@ class BaseDistribution(BaseLayer):
     * :meth:`.predict`
     * :meth:`.metrics`
     * :meth:`.predictive_distribution`
-    * :meth:`.plot_predictive_distribution`
     * :meth:`.posterior_mean`
     * :meth:`.posterior_sample`
     * :meth:`.posterior_plot`
@@ -1182,97 +1185,6 @@ class BaseDistribution(BaseLayer):
                        self._ph['batch_size']: [x.shape[0]]})
 
 
-    def predictive_distribution_plot(self, x=None, 
-                                     data=None, 
-                                     num_samples=10000,
-                                     style='fill',
-                                     cols=1,
-                                     bins=20,
-                                     ci=0.0,
-                                     bw=0.075,
-                                     color=None,
-                                     alpha=0.4,
-                                     individually=False):
-        """Plot samples from the model given x.
-
-        TODO: Docs...
-
-        .. admonition:: Model must be fit first!
-
-            Before calling :meth:`.plot_predictive_distribution` on a |Model|,
-            you must first :meth:`.fit` it to some data.
-
-        TODO: another admonition about how this only works with
-        a continuous model whose y-variable is 1D.
-        TODO: or, could have separate ones for ContinuousModel and Discrete...
-
-        Parameters
-        ----------
-        x : |ndarray| or |DataFrame| or int or str or list of str or int
-            Independent variable values of the dataset to evaluate (aka the 
-            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can
-            be an int or string or list of ints or strings specifying the 
-            columns of that |DataFrame| to use as independent variables. If
-            |None|,  will use the data the model was trained on (the default).
-        data : |None| or |DataFrame|
-            Data to evaluate.  If ``data`` is |None|, it is assumed that
-            ``x`` and ``y`` are |ndarray| or |DataFrame| or |Series|.  
-            If ``data`` is a |DataFrame|, ``x`` and ``y`` are treated as
-            strings or lists of strings containing the columns from
-            ``data`` to use as in- and de-pendent variables.
-        num_samples : int
-            Number of samples to draw from the model given ``x``.
-        style : str
-            Which style of plot to show.  Available types are:
-
-            * ``'fill'`` - filled density plot (the default)
-            * ``'line'`` - line density plot
-            * ``'hist'`` - histogram
-
-        cols : int
-            Divide the subplots into a grid with this many columns (if 
-            ``individually=True``.
-        bins : int or list or |ndarray|
-            Number of bins to use for the posterior density histogram (if 
-            ``style='hist'``), or a list or vector of bin edges.
-        ci : float between 0 and 1
-            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
-        bw : float
-            Bandwidth of the kernel density estimate (if using ``style='line'``
-            or ``style='fill'``).  Default is 0.075
-        color : matplotlib color code or list of them
-            Color(s) to use to plot the distribution.
-            See https://matplotlib.org/tutorials/colors/colors.html
-            Default = use the default matplotlib color cycle
-        alpha : float between 0 and 1
-            Transparency of fill/histogram of the density
-        individually : bool
-            If ``True``, plot one subplot per datapoint in ``x``, otherwise
-            plot all the predictive distributions on the same plot.
-        """
-
-        # Sample from the predictive distribution
-        pred_dist = self.predictive_distribution(x=x, data=data, 
-                                                 num_samples=num_samples)
-
-        # Squeeze singleton dimension (assumes dep var is scalar)
-        pred_dist = pred_dist[...,0]
-        # TODO: ensure y is scalar
-
-        # Plot the predictive distributions
-        N = pred_dist.shape[1]
-        if individually:
-            rows = np.ceil(N/cols)
-            for i in range(N):
-                plt.subplot(rows, cols, i+1)
-                plot_dist(pred_dist[:,i], xlabel='Datapoint '+str(i), 
-                          style=style, bins=bins, ci=ci, bw=bw, alpha=alpha, 
-                          color=color)
-        else:
-            plot_dist(pred_dist, xlabel='Dependent Variable', style=style, 
-                      bins=bins, ci=ci, bw=bw, alpha=alpha, color=color)
-
-
     def predict(self, x=None, data=None):
         """Predict dependent variable using the model
 
@@ -1577,9 +1489,6 @@ class BaseDistribution(BaseLayer):
             param_dict[param].posterior_plot(num_samples=num_samples, 
                                              style=style, bins=bins, ci=ci,
                                              color=color)
-
-        # Figure formatting
-        plt.tight_layout()
 
 
     def posterior_plot_over_training(self, 
@@ -2275,7 +2184,6 @@ class ContinuousDistribution(BaseDistribution):
     * :meth:`.predict`
     * :meth:`.metrics`
     * :meth:`.predictive_distribution`
-    * :meth:`.plot_predictive_distribution`
     * :meth:`.posterior_mean`
     * :meth:`.posterior_sample`
     * :meth:`.posterior_plot`
@@ -2292,6 +2200,7 @@ class ContinuousDistribution(BaseDistribution):
 
     and in addition also has these methods:
 
+    * :meth:`.predictive_distribution_plot`
     * :meth:`.predictive_prc`
     * :meth:`.confidence_intervals`
     * :meth:`.pred_dist_covered`
@@ -2303,6 +2212,97 @@ class ContinuousDistribution(BaseDistribution):
     * :meth:`.residuals_plot`
 
     """
+
+
+    def predictive_distribution_plot(self, x=None, 
+                                     data=None, 
+                                     num_samples=10000,
+                                     style='fill',
+                                     cols=1,
+                                     bins=20,
+                                     ci=0.0,
+                                     bw=0.075,
+                                     color=None,
+                                     alpha=0.4,
+                                     individually=False):
+        """Plot posterior predictive distribution from the model given ``x``.
+
+        TODO: Docs...
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.plot_predictive_distribution` on a |Model|,
+            you must first :meth:`.fit` it to some data.
+
+        TODO: another admonition about how this only works with
+        a continuous model whose y-variable is 1D.
+        TODO: or, could have separate ones for ContinuousModel and Discrete...
+
+        Parameters
+        ----------
+        x : |ndarray| or |DataFrame| or int or str or list of str or int
+            Independent variable values of the dataset to evaluate (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can
+            be an int or string or list of ints or strings specifying the 
+            columns of that |DataFrame| to use as independent variables. If
+            |None|,  will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            Data to evaluate.  If ``data`` is |None|, it is assumed that
+            ``x`` and ``y`` are |ndarray| or |DataFrame| or |Series|.  
+            If ``data`` is a |DataFrame|, ``x`` and ``y`` are treated as
+            strings or lists of strings containing the columns from
+            ``data`` to use as in- and de-pendent variables.
+        num_samples : int
+            Number of samples to draw from the model given ``x``.
+        style : str
+            Which style of plot to show.  Available types are:
+
+            * ``'fill'`` - filled density plot (the default)
+            * ``'line'`` - line density plot
+            * ``'hist'`` - histogram
+
+        cols : int
+            Divide the subplots into a grid with this many columns (if 
+            ``individually=True``.
+        bins : int or list or |ndarray|
+            Number of bins to use for the posterior density histogram (if 
+            ``style='hist'``), or a list or vector of bin edges.
+        ci : float between 0 and 1
+            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
+        bw : float
+            Bandwidth of the kernel density estimate (if using ``style='line'``
+            or ``style='fill'``).  Default is 0.075
+        color : matplotlib color code or list of them
+            Color(s) to use to plot the distribution.
+            See https://matplotlib.org/tutorials/colors/colors.html
+            Default = use the default matplotlib color cycle
+        alpha : float between 0 and 1
+            Transparency of fill/histogram of the density
+        individually : bool
+            If ``True``, plot one subplot per datapoint in ``x``, otherwise
+            plot all the predictive distributions on the same plot.
+        """
+
+        # Sample from the predictive distribution
+        pred_dist = self.predictive_distribution(x=x, data=data, 
+                                                 num_samples=num_samples)
+
+        # Squeeze singleton dimension (assumes dep var is scalar)
+        pred_dist = pred_dist[...,0]
+        # TODO: ensure y is scalar
+
+        # Plot the predictive distributions
+        N = pred_dist.shape[1]
+        if individually:
+            rows = np.ceil(N/cols)
+            for i in range(N):
+                plt.subplot(rows, cols, i+1)
+                plot_dist(pred_dist[:,i], xlabel='Datapoint '+str(i), 
+                          style=style, bins=bins, ci=ci, bw=bw, alpha=alpha, 
+                          color=color)
+        else:
+            plot_dist(pred_dist, xlabel='Dependent Variable', style=style, 
+                      bins=bins, ci=ci, bw=bw, alpha=alpha, color=color)
 
 
     def confidence_intervals(self, x=None, data=None,
@@ -2835,7 +2835,6 @@ class DiscreteDistribution(BaseDistribution):
     * :meth:`.predict`
     * :meth:`.metrics`
     * :meth:`.predictive_distribution`
-    * :meth:`.plot_predictive_distribution`
     * :meth:`.posterior_mean`
     * :meth:`.posterior_sample`
     * :meth:`.posterior_plot`
@@ -2852,9 +2851,69 @@ class DiscreteDistribution(BaseDistribution):
 
     and in addition also has this method:
 
+    * :meth:`.predictive_distribution_plot`
     * :meth:`.calibration_curve`
 
     """
+
+
+    def predictive_distribution_plot(self, x=None, 
+                                     data=None, 
+                                     num_samples=10000,
+                                     cols=1,
+                                     individually=False):
+        """Plot posterior predictive distribution from the model given ``x``.
+
+        TODO: Docs...
+
+        .. admonition:: Model must be fit first!
+
+            Before calling :meth:`.plot_predictive_distribution` on a |Model|,
+            you must first :meth:`.fit` it to some data.
+
+        TODO: another admonition about how this only works with
+        a continuous model whose y-variable is 1D.
+        TODO: or, could have separate ones for ContinuousModel and Discrete...
+
+        Parameters
+        ----------
+        x : |ndarray| or |DataFrame| or int or str or list of str or int
+            Independent variable values of the dataset to evaluate (aka the 
+            "features").  If ``data`` was passed as a |DataFrame|, ``x`` can
+            be an int or string or list of ints or strings specifying the 
+            columns of that |DataFrame| to use as independent variables. If
+            |None|,  will use the data the model was trained on (the default).
+        data : |None| or |DataFrame|
+            Data to evaluate.  If ``data`` is |None|, it is assumed that
+            ``x`` and ``y`` are |ndarray| or |DataFrame| or |Series|.  
+            If ``data`` is a |DataFrame|, ``x`` and ``y`` are treated as
+            strings or lists of strings containing the columns from
+            ``data`` to use as in- and de-pendent variables.
+        num_samples : int
+            Number of samples to draw from the model given ``x``
+        cols : int
+            Divide the subplots into a grid with this many columns (if 
+            ``individually=True``.
+        individually : bool
+            If ``True``, plot one subplot per datapoint in ``x``, otherwise
+            plot all the predictive distributions on the same plot.
+        """
+
+        # Sample from the predictive distribution
+        pred_dist = self.predictive_distribution(x=x, data=data, 
+                                                 num_samples=num_samples)
+
+        # Squeeze singleton dimension (assumes dep var is scalar)
+        pred_dist = pred_dist[...,0]
+        # TODO: ensure y is scalar
+
+        # Plot the predictive distributions
+        N = pred_dist.shape[1]
+        rows = np.ceil(N/cols)
+        for i in range(N):
+            plt.subplot(rows, cols, i+1)
+            plot_discrete_dist(pred_dist[:, i])
+
 
     def predict(self, x=None, data=None):
         """Predict discrete dependent variable for independent var samples in x.

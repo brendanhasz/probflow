@@ -6,6 +6,7 @@ from probflow import *
 from probflow.utils.plotting import plot_dist
 from probflow.utils.plotting import get_ix_label
 from probflow.utils.plotting import fill_between
+from probflow.utils.plotting import plot_discrete_dist
 
 
 def test_get_ix_label():
@@ -108,5 +109,18 @@ def test_fill_between_matrix(plot):
     ub[0,:,2, 1] = np.linspace(2, 0, 10) + 5 + 10
     ub[1,:,2, 1] = np.linspace(1, 0, 10) + 5 + 10
     fill_between(xdata, lb, ub)
+    if plot:
+        plt.show()
+
+
+
+def test_plot_discrete_dist(plot):
+    """Tests utils.plotting.plot_discrete_dist"""
+
+    # Dummy data
+    x = np.array([0, 0, 1, 3, 3, 3, 5])
+
+    # Test discrete hist
+    plot_discrete_dist(x)
     if plot:
         plt.show()

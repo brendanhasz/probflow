@@ -279,6 +279,16 @@ def centered_text(text):
 
 
 
+def plot_discrete_dist(x):
+    """Plot histogram of discrete variable"""
+
+    xc = pd.Series(x.ravel()).value_counts()
+    xc = xc/xc.sum() #normalize
+    plt.bar(xc.index, xc.data)
+    plt.xticks(xc.index, [str(e) for e in xc.index])
+
+
+
 def plot_by(x, data, bins=30, func='mean', plot=True, 
             bootstrap=100, ci=95.0, **kwargs):
     """Compute and plot some function func of data as a function of x.

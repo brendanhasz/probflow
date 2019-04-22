@@ -120,38 +120,6 @@ def test_BaseDistribution_predictive_distribution(LR3_novar, Ndata):
     assert prd.shape[2] == 1
 
 
-def test_BaseDistribution_predictive_distribution_plot(LR3_novar, plot):
-    """Tests core.BaseDistribution.predictive_distribution_plot"""
-
-    model = LR3_novar #fixture from conftest.py
-    x_val = np.random.rand(10, 3)
-
-    # Check predictive_distribution with no input
-    prd = model.predictive_distribution_plot(x_val, style='line')
-    if plot:
-        plt.suptitle('should show 10 line dists')
-        plt.show()
-
-    # Check predictive_distribution with no input
-    prd = model.predictive_distribution_plot(x_val, individually=True, cols=2)
-    if plot:
-        plt.suptitle('should show 5x2 grid of 10 fill dists')
-        plt.tight_layout()
-        plt.show()
-
-    # Check predictive_distribution with validation input
-    x_val = np.random.rand(1, 3)
-    prd = model.predictive_distribution_plot(x_val)
-    if plot:
-        plt.suptitle('should show a single fill dist')
-        plt.show()
-
-    # Check predictive_distribution with conf intervals
-    prd = model.predictive_distribution_plot(x_val, ci=0.95)
-    if plot:
-        plt.suptitle('should show a single fill dist w/ 95prc ci')
-        plt.show()
-
 
 def test_BaseDistribution_posterior_sample_scalar(LR1_novar):
     """Tests core.BaseDistribution.posterior_sample w/ scalar params"""
@@ -174,6 +142,7 @@ def test_BaseDistribution_posterior_sample_scalar(LR1_novar):
     assert samples['LR1_novar_bias'].shape[1] == 1
 
 
+
 def test_BaseDistribution_posterior_sample_vector(LR3_novar):
     """Tests core.BaseDistribution.posterior_sample w/ vector params"""
 
@@ -190,6 +159,7 @@ def test_BaseDistribution_posterior_sample_vector(LR3_novar):
     assert samples['LR3_novar_bias'].ndim == 2
     assert samples['LR3_novar_bias'].shape[0] == num_samples
     assert samples['LR3_novar_bias'].shape[1] == 1
+
 
 
 def test_BaseDistribution_posterior_sample_vector_pandas():

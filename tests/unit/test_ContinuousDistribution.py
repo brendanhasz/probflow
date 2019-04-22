@@ -17,6 +17,40 @@ N = 10
 
 
 
+def test_ContinuousDistribution_predictive_distribution_plot(LR3_novar, plot):
+    """Tests core.ContinuousDistribution.predictive_distribution_plot"""
+
+    model = LR3_novar #fixture from conftest.py
+    x_val = np.random.rand(10, 3)
+
+    # Check predictive_distribution with no input
+    prd = model.predictive_distribution_plot(x_val, style='line')
+    if plot:
+        plt.suptitle('should show 10 line dists')
+        plt.show()
+
+    # Check predictive_distribution with no input
+    prd = model.predictive_distribution_plot(x_val, individually=True, cols=2)
+    if plot:
+        plt.suptitle('should show 5x2 grid of 10 fill dists')
+        plt.tight_layout()
+        plt.show()
+
+    # Check predictive_distribution with validation input
+    x_val = np.random.rand(1, 3)
+    prd = model.predictive_distribution_plot(x_val)
+    if plot:
+        plt.suptitle('should show a single fill dist')
+        plt.show()
+
+    # Check predictive_distribution with conf intervals
+    prd = model.predictive_distribution_plot(x_val, ci=0.95)
+    if plot:
+        plt.suptitle('should show a single fill dist w/ 95prc ci')
+        plt.show()
+
+
+
 def test_ContinuousDistribution_coverage_by(plot):
     """Tests core.test_ContinuousDistribution.coverage_by"""
 
