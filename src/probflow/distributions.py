@@ -34,6 +34,7 @@ __all__ = [
     'Gamma',
     'InvGamma',
     'Bernoulli',
+    'Categorical',
     'Poisson',
 ]
 
@@ -559,10 +560,108 @@ class Bernoulli(DiscreteDistribution):
         if self.kwargs['input_type'] == 'logits': #p arg is the logits
             return tfd.Bernoulli(logits=args['p'])
         elif self.kwargs['input_type'] == 'probs': #p arg is the raw probs
-            return tfd.Bernoulli(logits=args['p'])
+            return tfd.Bernoulli(probs=args['p'])
         else:
             raise TypeError('Bernoulli kwarg input_type must be either ' +
                             '\'logits\' or \'probs\'')
+
+
+
+class Categorical(DiscreteDistribution):
+    r"""The Categorical distribution.
+
+    The 
+    `Categorical distribution <https://en.wikipedia.org/wiki/Categorical_distribution>`_
+    is a discrete distribution defined over :math:`N` integers: 0 through 
+    :math:`N-1`.  It has :math:`N-1` parameters: :math:`\theta_j` for
+    :math:`j \in {1,...,N-1}`.  These parameters are transformed into
+    :math:`N` category probabilities (:math:`p_i` for :math:`i \in {1,...,N}`)
+    using the additive logistic transformation:
+
+    .. math::
+
+        p_i = \frac{\exp \theta_i}{1+\sum_{j=1}^{N-1} \exp \theta_j}
+        ~ \text{for} ~ i \in \{ 1, ..., N-1 \}
+
+    and
+
+    .. math::
+
+        p_N = \frac{1}{1+\sum_{j=1}^{N-1} \exp \theta_j}
+
+    A random variable :math:`x` drawn from a Categorical distribution
+
+    .. math::
+
+        x \sim \text{Categorical}(\mathbf{\theta})
+
+    has probability
+
+    .. math::
+
+        p(x=i) = p_i
+
+    You can define the distribution using either the :math:`N-1` raw
+    parameters (:math:`\mathbf{\theta}`), the category probabilities
+    (:math:`\mathbf{p}`), or the logit-transformed category probabilities.
+    Use the ``input_type`` keyword argument to set 
+    which way the inputs are interpereted.
+
+    TODO: example image of the distribution
+
+
+    Parameters
+    ----------
+    p : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+        Event probability parameter distribution (:math:`\mathbf{\theta}` if
+        ``input_type='raw'`` or :math:`\mathbf{p}` if ``input_type='probs'``).
+    input_type : str ('raw' or 'logits' or 'probs')
+        How to interperet the probability parameter ``p``.  
+
+        * ``'raw'``: ``p`` represents the untransformed parameters
+          :math:`\mathbf{\theta}`.
+        * ``'probs'``: ``p`` represents the category probabilities 
+          :math:`\mathbf{p}`.
+        * ``'logits'``: ``p`` represents the logit-transformed category 
+          probabilities :math:`\frac{\mathbf{p}}{1-\mathbf{p}}`.
+
+    """
+
+    # Default kwargs
+    _default_kwargs = {
+        'input_type': 'raw'
+    }
+
+    # Distribution parameters and their default values
+    _default_args = OrderedDict([
+        ('p', REQUIRED),
+    ])
+
+    # Posterior distribution parameter bounds (lower, upper)
+    _post_param_bounds = {
+        'p': (None, None)
+    }
+
+    # Posterior parameter initializers
+    _post_param_init = {
+        'p': tf.initializers.truncated_normal(mean=0.0, stddev=1.0),
+    }
+
+    def _build(self, args, _data, _batch_shape):
+        """Build the distribution model."""
+        if self.kwargs['input_type'] == 'raw': #p arg is the raw parameters
+            dims = [d.value for d in args['p'].shape[:-1]]      #apply
+            zeros = tf.zeros(dims+[1], dtype=args['p'].dtype)   #logistic
+            xo = tf.exp(tf.concat([args['p'], zeros], axis=-1)) #additive
+            xo = xo/tf.reduce_sum(xo, axis=-1, keepdims=True)   #transform
+            return tfd.Categorical(probs=xo)
+        elif self.kwargs['input_type'] == 'logits': #p arg is the logits
+            return tfd.Categorical(logits=args['p'])
+        elif self.kwargs['input_type'] == 'probs': #p arg is the event probs
+            return tfd.Categorical(probs=args['p'])
+        else:
+            raise TypeError('Categorical kwarg input_type must be either ' +
+                            '\'raw\' or \'logits\' or \'probs\'')
 
 
 

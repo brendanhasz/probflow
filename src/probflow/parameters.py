@@ -32,6 +32,7 @@ of a :class:`.Parameter`:
 __all__ = [
     'Parameter',
     'ScaleParameter',
+    'CategoricalParameter',
 ]
 
 import numpy as np
@@ -41,7 +42,7 @@ tfd = tfp.distributions
 from tensorflow_probability.python.math import random_rademacher
 
 from .core import BaseParameter, BaseDistribution
-from .distributions import Normal, StudentT, Cauchy, InvGamma
+from .distributions import Normal, StudentT, Cauchy, InvGamma, Categorical
 from .utils.plotting import plot_dist, centered_text
 
 
@@ -704,6 +705,140 @@ class ScaleParameter(Parameter):
                          seed=seed,
                          transform=lambda x: tf.sqrt(x),
                          inv_transform=lambda x: tf.square(x),
+                         initializer=initializer)
+
+
+
+class CategoricalParameter(Parameter):
+    r"""Categorical parameter.
+
+    This is a convenience class for creating a categorical parameter.
+    It is created by first constructing :math:`N-1` variables :math:`\theta_j` 
+    for :math:`j \in {1,...,N-1}`.  These variables are transformed into
+    :math:`N` category probabilities :math:`p_i` for :math:`i \in {1,...,N}`
+    using the additive logistic transformation:
+
+    .. math::
+
+        p_i = \frac{\exp \theta_i}{1+\sum_{j=1}^{N-1} \exp \theta_j}
+        ~ \text{for} ~ i \in \{ 1, ..., N-1 \}
+
+    and
+
+    .. math::
+
+        p_N = \frac{1}{1+\sum_{j=1}^{N-1} \exp \theta_j}
+
+    By default, a uniform prior is used.
+
+    The category values can be set using the ``values`` keyword argument.
+    By default, the emitted category values are integers starting at 0.
+
+
+    Parameters
+    ----------
+    values : int or list of float or 1D |ndarray|
+        Values corresponding to each category, or the number of unique values.
+        If an integer, parameter has ``values`` categories, and category
+        values are integers starting at 0.  I.e., the first category has value
+        0, the second category has value 1, etc.  If ``values`` is a list or
+        an |ndarray|, these are the values corresponding to each category,
+        such that there are ``len(values)`` unique categories.
+    shape : int, list of int, or 1D |ndarray|
+        Shape of the array containing the parameters.
+        Default = ``1``
+    name : str
+        Name of the parameter(s).
+        Default = ``'Parameter'``
+    prior : |None| or a |Distribution| object
+        Prior probability distribution function which has been instantiated
+        with parameters.
+        Default = |None|
+    posterior : |Distribution|
+        Probability distribution class to use to approximate the posterior.
+        Default = :class:`.InvGamma`
+    seed : int, float, or |None|
+        Seed for the random number generator.
+        Set to |None| to use the global seed.
+        Default = |None|
+    initializer : {|None| or dict or |Tensor| or |Initializer|}
+        Initializer for each variational posterior parameter.  To use the same
+        initializer for each variational posterior parameter, pass a |Tensor|
+        or an |Initializer|.  Set a different initializer for each variational
+        posterior parameter by passing a dict with keys containing the 
+        parameter names, and values containing the |Tensor| or |Initializer| 
+        with which to initialize each parameter.
+        Default is to initialize both the ``shape`` and ``rate`` parameters
+        of the :class:`.InvGamma` variational posterior to the default for
+        that distribution (see :class:`.InvGamma`).
+
+
+    Examples
+    --------
+
+    Create a :class:`.CategoricalParameter` with 5 unique categories::
+
+        from probflow import CategoricalParameter
+
+        theta = CategoricalParameter(5)
+
+    Use :class:`.CategoricalParameter` to create a parameter which only takes
+    values of -1, 0, or 1::
+
+        from probflow import CategoricalParameter, Normal
+
+        theta = CategoricalParameter([-1, 0, 1])
+
+    Use :class:`.CategoricalParameter` to create a 10-by-3 array of 
+    parameters, each of which can take one of 5 unique categories::
+
+        from probflow import CategoricalParameter
+
+        theta = CategoricalParameter(5, shape=[10, 3])
+    """
+
+    def __init__(self, values,
+                 shape=1,
+                 name='CategoricalParameter',
+                 prior=None,
+                 posterior=Categorical,
+                 seed=None,
+                 initializer=None):
+
+        # Make shape a list
+        if isinstance(shape, int):
+            shape = [shape]
+
+        # Create ``values`` unique categories
+        if isinstance(values, int):
+            Nc = values
+            transform = lambda x: x
+            inv_transform = lambda x: x
+
+        # Create ``len(values)`` categories with specific output values
+        elif isinstance(values, (list, np.ndarray)):
+            Nc = len(values)
+            shape = shape+[Nc]
+            transform = lambda x: tf.gather(values, x)
+            table = tf.HashTable( #inverse transform using lookup
+                tf.KeyValueTensorInitializer(values, range(Nc)), values[0])
+            inv_transform = lambda x: table.lookup(x)
+
+        else:
+            raise TypeError('values must be an int, list, or ndarray')
+
+        # Set uniform prior if none passed
+        if prior is None:
+            prior = Categorical(np.full(shape, 1.0/Nc),
+                                input_type='probs')
+
+        super().__init__(shape=shape,
+                         name=name,
+                         prior=prior,
+                         posterior=posterior,
+                         seed=seed,
+                         transform=transform,
+                         inv_transform=inv_transform,
                          initializer=initializer)
 
 
