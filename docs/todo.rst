@@ -33,7 +33,7 @@ Backlog (short term):
 Backlog (long term):
 --------------------
 
-* `Flipout`_
+* `Flipout and LRT`_
 * `Parameter sharing`_
 * `Slicing`_
 * `Embedding layer`_
@@ -97,10 +97,13 @@ Or if that won't work, include a sklearn Estimator which takes a model obj.
 https://scikit-learn.org/dev/developers/contributing.html#rolling-your-own-estimator
 
 
-Flipout
-^^^^^^^
+Flipout and LRT
+^^^^^^^^^^^^^^^
 
 Add support for flipout, expecially for use w/ Dense/conv layers.  Might have to make Parameters be able to return a sample of size batch_size or a sample of size 1 (which you can then use w/ flipout).  https://arxiv.org/abs/1803.04386
+
+Also/instead the local reparameterization trick
+https://arxiv.org/abs/1506.02557
 
 
 Slicing

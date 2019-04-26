@@ -24,6 +24,7 @@ For convenience, ProbFlow also includes some classes which are special cases
 of a :class:`.Parameter`:
 
 * :class:`.ScaleParameter` - standard deviation parameter
+* :class:`.CategoricalParameter` - categorical parameter
 
 ----------
 
@@ -311,13 +312,16 @@ class Parameter(BaseParameter):
                 if self.initializer is None: #use default initializer
                     init = self.posterior_fn._post_param_init[arg]
                     params[arg] = tf.get_variable(arg, shape=self.shape,
-                                                  initializer=init)
+                                                  initializer=init,
+                                                  dtype=data.dtype)
                 elif isinstance(self.initializer, dict):
                     params[arg] = \
-                        tf.get_variable(arg, initializer=self.initializer[arg])
+                        tf.get_variable(arg, dtype=data.dtype,
+                                        initializer=self.initializer[arg])
                 else:
                     params[arg] = \
-                        tf.get_variable(arg, initializer=self.initializer)
+                        tf.get_variable(arg, dtype=data.dtype,
+                                        initializer=self.initializer)
 
         # Transform posterior parameters
         for arg in self.posterior_fn._post_param_bounds:
@@ -334,7 +338,11 @@ class Parameter(BaseParameter):
 
     def _build_mean(self):
         """Build the mean model."""
-        self._mean_obj_raw = tf.expand_dims(self._built_posterior.mean(), 0)
+        try:
+            built_mean = self._built_posterior.mean()
+        except NotImplementedError:
+            built_mean = self._built_posterior.mode()
+        self._mean_obj_raw = tf.expand_dims(built_mean, 0)
         self.mean_obj = self.transform(self._mean_obj_raw)
 
 
@@ -403,7 +411,10 @@ class Parameter(BaseParameter):
         """
         self._ensure_is_built()
         self._ensure_is_fit()
-        mean_op = self._built_posterior.mean()
+        try:
+            mean_op = self._built_posterior.mean()
+        except NotImplementedError:
+            mean_op = self._built_posterior.mode()
         mean_op = self.transform(mean_op)
         mean = self._session.run(mean_op)
         return mean
@@ -818,10 +829,10 @@ class CategoricalParameter(Parameter):
         # Create ``len(values)`` categories with specific output values
         elif isinstance(values, (list, np.ndarray)):
             Nc = len(values)
-            shape = shape+[Nc]
             transform = lambda x: tf.gather(values, x)
-            table = tf.HashTable( #inverse transform using lookup
-                tf.KeyValueTensorInitializer(values, range(Nc)), values[0])
+            table = tf.contrib.lookup.HashTable( #inverse transform w/ lookup
+                tf.contrib.lookup.KeyValueTensorInitializer(
+                    values, np.arange(Nc)), values[0])
             inv_transform = lambda x: table.lookup(x)
 
         else:
@@ -829,9 +840,15 @@ class CategoricalParameter(Parameter):
 
         # Set uniform prior if none passed
         if prior is None:
-            prior = Categorical(np.full(shape, 1.0/Nc),
+            # TODO: won't work if data to fit isn't float32
+            # need to somehow dynamically cast the logits correctly...
+            prior = Categorical(np.full(shape+[Nc], 1.0/Nc).astype('float32'),
                                 input_type='probs')
 
+        # Posterior logits include each class
+        shape = shape+[Nc-1]
+
+        # Call Parameter's init
         super().__init__(shape=shape,
                          name=name,
                          prior=prior,
