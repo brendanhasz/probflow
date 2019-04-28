@@ -8,6 +8,7 @@ Backlog (short term):
 ---------------------
 
 * Finish Layers (up until MatMul) and docs
+* MatMul layers and tests (using tensordot?)
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)
 * Docs for distributions (including distribution diagrams)
 * Finish BaseDistribution critisism methods
@@ -15,6 +16,7 @@ Backlog (short term):
 * Docs for BaseDistribution critisism methods
 * Dense layer
 * Test for Dense, add Dense test to stats/test_LinearRegression
+* Test 2-layer dense network (w/ sin(x)/x or something function)
 * `Sequential layer`_
 * Tests
 * Models which only use Dense

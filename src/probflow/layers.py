@@ -337,8 +337,8 @@ class Add(BaseLayer):
 
         sum4 = Add(sum3, Exp(sum3))
 
-    ProbFlow objects overload the ``__add__`` method to use this layer.  That
-    is::
+    ProbFlow objects define the ``__add__`` special method to use this layer.
+    That is::
 
         x0+x1
 
@@ -392,8 +392,8 @@ class Sub(BaseLayer):
 
         diff4 = Sub(diff3, Exp(diff3))
 
-    ProbFlow objects overload the ``__sub__`` method to use this layer.  That
-    is::
+    ProbFlow objects define the ``__sub__`` special method to use this layer.
+    That is::
 
         x0-x1
 
@@ -447,8 +447,8 @@ class Mul(BaseLayer):
 
         prod4 = Mul(prod3, Exp(prod3))
 
-    ProbFlow objects overload the ``__mul__`` method to use this layer.  That
-    is::
+    ProbFlow objects define the ``__mul__`` special method to use this layer.
+    That is::
 
         x0*x1
 
@@ -503,8 +503,8 @@ class Div(BaseLayer):
 
         ratio4 = Div(ratio3, Exp(ratio3))
 
-    ProbFlow objects overload the ``__div__`` method to use this layer.  That
-    is::
+    ProbFlow objects define the ``__div__`` special method to use this layer.
+    That is::
 
         x0/x1
 
@@ -532,6 +532,8 @@ class Neg(BaseLayer):
 
     Given :math:`x`, this layer returns :math:`-x`, elementwise.
 
+    TODO: diagram
+
 
     Examples
     --------
@@ -556,8 +558,8 @@ class Neg(BaseLayer):
 
         neg4 = Neg(neg1+neg2)
 
-    ProbFlow objects overload the ``__neg__`` method to use this layer.  That
-    is::
+    ProbFlow objects define the ``__neg__`` special method to use this layer.
+    That is::
 
         -x0
 
@@ -577,6 +579,8 @@ class Abs(BaseLayer):
 
     Given :math:`x`, this layer returns :math:`\abs x`, elementwise.
 
+    TODO: diagram
+    
 
     Examples
     --------
@@ -602,8 +606,8 @@ class Abs(BaseLayer):
 
         abs4 = Abs(Sub(abs1, abs2))
 
-    ProbFlow objects overload the ``__abs__`` method to use this layer.  That
-    is::
+    ProbFlow objects define the ``__abs__`` special method to use this layer.
+    That is::
 
         abs(x0)
 
@@ -622,6 +626,8 @@ class Exp(BaseLayer):
     r"""A layer which outputs the natural exponent of its input.
 
     Given :math:`x`, this layer returns :math:`\exp x`, elementwise.
+
+    TODO: diagram
 
 
     Examples
@@ -658,6 +664,8 @@ class Log(BaseLayer):
     r"""A layer which outputs the natural log of its input.
 
     Given :math:`x`, this layer returns :math:`\ln x`, elementwise.
+
+    TODO: diagram
 
 
     Examples
@@ -699,6 +707,8 @@ class Reciprocal(BaseLayer):
 
         \text{Reciprocal}(x) = \frac{1}{x}
 
+    TODO: diagram
+
 
     Examples
     --------
@@ -738,6 +748,8 @@ class Sqrt(BaseLayer):
     .. math::
 
         \text{Sqrt}(x) = \sqrt{x}
+
+    TODO: diagram
 
 
     Examples
@@ -828,6 +840,33 @@ class Sigmoid(BaseLayer):
 
         \text{Sigmoid}(x) = \frac{1}{1 + \exp (-x)}
 
+    TODO: diagram
+
+
+    Examples
+    --------
+
+    Use the ``Sigmoid`` layer to pass some data through a sigmoid::
+
+        from probflow import Input, Dense, Sigmoid, Bernoulli
+
+        x0 = Input(0)
+        logits = Dense(x0)
+        probs = Sigmoid(logits)
+        model = Bernoulli(probs, input_type='probs')
+
+    The ``Sigmoid`` layer can also take |Parameters| as input::
+
+        w1 = Parameter()
+        sig1 = Sigmoid(w1)
+
+    As well as |Tensors|::
+
+        sig2 = Sigmoid(tf.constant(1.0))
+
+    or other |Layers|::
+
+        sig3 = Sigmoid(Add(1.0, 2.0))
     """
 
     def _build(self, args, _data, _batch_shape):
@@ -845,6 +884,31 @@ class Relu(BaseLayer):
 
         \text{Relu}(x) = \max (x, 0)
 
+    TODO: diagram
+
+
+    Examples
+    --------
+
+    Use the ``Relu`` layer to linearly rectify some input::
+
+        from probflow import Input, Dense, Sigmoid, Bernoulli
+
+        x0 = Input()
+        activations = Relu(Dense(x0))
+
+    The ``Relu`` layer can also take |Parameters| as input::
+
+        w1 = Parameter()
+        relu1 = Relu(w1)
+
+    As well as |Tensors|::
+
+        relu2 = Relu(tf.constant(1.0))
+
+    or other |Layers|::
+
+        relu3 = Relu(Add(1.0, 2.0))
     """
 
     def _build(self, args, _data, _batch_shape):
@@ -868,12 +932,31 @@ class Softmax(BaseLayer):
 
         \sigma_i = \frac{\exp (x_i)}{\sum_j \exp (x_j)}
 
+    The default is to compute the softmax along the the last dimension of the 
+    input |Tensor|, but this can be set with the ``axis`` keyword argument.
     
+
     Keyword Arguments
     -----------------
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+
+    Examples
+    --------
+
+    Use the ``Softmax`` layer to normalize vector(s) such that elements of the
+    vector sum to 1.  For example, to convert the output of a fully-connected
+    layer to class probabilities::
+
+        from probflow import Input, Softmax, Bernoulli
+
+        x0 = Input()
+        raw_vals = Dense(x0, units=10)
+        probs = Softmax(raw_vals)
+        model = Bernoulli(probs, input_type='probs')
+
+    TODO: over multiple dims/non-default dims
     """
 
 
