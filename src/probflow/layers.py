@@ -942,6 +942,7 @@ class Softmax(BaseLayer):
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
 
+
     Examples
     --------
 
@@ -956,7 +957,11 @@ class Softmax(BaseLayer):
         probs = Softmax(raw_vals)
         model = Bernoulli(probs, input_type='probs')
 
-    TODO: over multiple dims/non-default dims
+    To compute the softmax over a specific dimension, use the ``axis`` keyword
+    argument.  For example, to perform the softmax along the *second*-to-last 
+    dimension::
+
+        probs = Softmax(raw_vals, axis=-2)
     """
 
 
@@ -1209,6 +1214,68 @@ class LogSumExp(BaseLayer):
         return tf.reduce_logsumexp(args['input'], 
                                    axis=self.kwargs['axis'],
                                    keepdims=True)
+
+
+
+class Reshape(BaseLayer):
+    r"""A layer which reshapes its input.
+
+    Reshapes a tensor.  The default is to flatten the tensor (make it 1D).
+    
+
+    Keyword Arguments
+    -----------------
+    shape : list of int
+        What the new shape of the tensor should be.
+        Use -1 to force all remaining dimensions into one dimension.
+
+
+    Examples
+    --------
+
+    Use the ``Reshape`` layer to change the shape of a tensor::
+
+        from probflow import Parameter, Reshape
+
+        weights = Parameter(shape=[4, 3, 2])
+        reshaped_weights = Reshape(weights, shape=[4, 6])
+
+    Use a shape of -1 to force all remaining dimensions into one dimension::
+        
+        weights = Parameter(shape=[4, 3, 2, 1])
+        reshaped_weights = Reshape(weights, shape=[4, -1])
+        # reshaped_weights has shape (4, 6)
+    """
+
+
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'shape': None,
+    }
+
+
+    def _validate_kwargs(self, kwargs):
+        """Ensure the keyword arguments have correct types, etc."""
+        if kwargs['shape'] is not None and 
+            not isinstance(kwargs['shape'], (list, int)):
+            raise ValueError('shape kwarg must be a list or an int')
+        if isinstance(kwargs['shape'], list):
+            for e in kwargs['shape']:
+                if not isinstance(e, int):
+                    raise TypeError('each element of shape kwarg must be int')
+
+
+    def _build(self, args, _data, batch_shape):
+        """Build the layer."""
+        if isinstance(kwargs['shape'], list):
+            new_shape = tf.concat([batch_shape, kwargs['shape']], axis=0)
+            return tf.reshape(args['input'], new_shape)
+        elif isinstance(kwargs['shape'], int):
+            new_shape = tf.concat([batch_shape, [kwargs['shape']]], axis=0)
+            return tf.reshape(args['input'], new_shape)
+        else:
+            new_shape = tf.concat([batch_shape, [-1]], axis=0)
+            return tf.reshape(args['input'], new_shape)
 
 
 
