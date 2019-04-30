@@ -149,6 +149,22 @@ def _validate_initializer(initializer):
                                 'None, a Tensor, or an Initializer')
 
 
+def _broadcast2(a, b, op):
+    """Attempt to broadcast two |Tensors|"""
+    try:
+        return op(a, b)
+    except:
+        if isinstance(a, tf.Tensor) and isinstance(b, tf.Tensor):
+            if len(a.shape) > len(b.shape):
+                return op(a, tf.broadcast_to(b, a.shape))
+            elif len(a.shape) < len(b.shape):
+                return op(tf.broadcast_to(a, b.shape), b)
+            else:
+                raise
+        else:
+            raise
+
+
 
 class Input(BaseLayer):
     r"""Layer which represents the input data.
@@ -357,7 +373,8 @@ class Add(BaseLayer):
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        return args['a'] + args['b']
+        op = lambda a, b: a + b
+        return _broadcast2(args['a'], args['b'], op)
 
 
 
@@ -412,9 +429,8 @@ class Sub(BaseLayer):
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        return args['a'] - args['b']
-
-
+        op = lambda a, b: a - b
+        return _broadcast2(args['a'], args['b'], op)
 
 class Mul(BaseLayer):
     r"""A layer which multiplies two inputs, elementwise.
@@ -467,9 +483,8 @@ class Mul(BaseLayer):
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        # TODO: have to distinguish between matrix and elementwise mult somehow?
-        return args['a'] * args['b']
-
+        op = lambda a, b: a * b
+        return _broadcast2(args['a'], args['b'], op)
 
 
 class Div(BaseLayer):
@@ -523,8 +538,8 @@ class Div(BaseLayer):
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        return args['a'] / args['b']
-
+        op = lambda a, b: a / b
+        return _broadcast2(args['a'], args['b'], op)
 
 
 class Neg(BaseLayer):
@@ -934,6 +949,7 @@ class Softmax(BaseLayer):
 
     The default is to compute the softmax along the the last dimension of the 
     input |Tensor|, but this can be set with the ``axis`` keyword argument.
+    The output has the same shape as the input.
     
 
     Keyword Arguments
@@ -992,12 +1008,46 @@ class Sum(BaseLayer):
 
         \text{Sum}(\mathbf{x}) = \sum_i x_i
 
+    The default is to compute the sum along the the last dimension of the 
+    input |Tensor|, but this can be set with the ``axis`` keyword argument.
+    The output is *not* the same shape as the input - that is, this is a
+    reduction layer.
+
 
     Keyword Arguments
     -----------------
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+
+
+    Examples
+    --------
+
+    Use ``Sum`` to sum elements of a vector.  For example, when doing a linear
+    regression, we sum the weight-feature products::
+
+        from probflow import Input, Parameter, Sum
+
+        features = Input([0, 1, 2, 3, 4])
+        weights = Parameter(shape=5)
+        bias = Parameter()
+
+        predictions = Sum(weights*features) + bias
+
+    This layer sums along the last dimension by default::
+
+        vals = tf.random.normal([2, 3, 4])
+        # vals has shape (2, 3, 4)
+        summed = Sum(vals)
+        # summed has shape (2, 3)
+
+    However this can be changed by setting the ``axis`` keyword argument::
+
+        vals = tf.random.normal([2, 3, 4])
+        # vals has shape (2, 3, 4)
+        summed = Sum(vals, axis=-2)
+        # summed has shape (2, 4)
     """
 
 
@@ -1030,12 +1080,36 @@ class Mean(BaseLayer):
 
         \text{Mean}(\mathbf{x}) = \frac{1}{N} \sum_{i=1}^N x_i
 
+    The default is to compute the mean along the the last dimension of the 
+    input |Tensor|, but this can be set with the ``axis`` keyword argument.
+    The output is *not* the same shape as the input - that is, this is a
+    reduction layer.
+
 
     Keyword Arguments
     -----------------
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+
+
+    Examples
+    --------
+
+    Use ``Mean`` to take the average of elements in a vector.  By default,
+    this layer takes the average along the last dimension::
+
+        vals = tf.random.normal([2, 3, 4])
+        # vals has shape (2, 3, 4)
+        average = Mean(vals)
+        # average has shape (2, 3)
+
+    However this can be changed by setting the ``axis`` keyword argument::
+
+        vals = tf.random.normal([2, 3, 4])
+        # vals has shape (2, 3, 4)
+        summed = Mean(vals, axis=-2)
+        # summed has shape (2, 4)
     """
 
 
@@ -1067,12 +1141,36 @@ class Min(BaseLayer):
     The dimensionality of the output of this layer is less than the 
     dimensionality of the input.
 
+    The default is to compute the minimum along the the last dimension of the 
+    input |Tensor|, but this can be set with the ``axis`` keyword argument.
+    The output is *not* the same shape as the input - that is, this is a
+    reduction layer.
+
 
     Keyword Arguments
     -----------------
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+
+
+    Examples
+    --------
+
+    Use ``Min`` to take the minimum of elements in a vector.  By default,
+    this layer takes the minimum along the last dimension::
+
+        vals = tf.random.normal([2, 3, 4])
+        # vals has shape (2, 3, 4)
+        minimum = Min(vals)
+        # minimum has shape (2, 3)
+
+    However this can be changed by setting the ``axis`` keyword argument::
+
+        vals = tf.random.normal([2, 3, 4])
+        # vals has shape (2, 3, 4)
+        minimum = Min(vals)
+        # minimum has shape (2, 4)
     """
 
 
@@ -1104,12 +1202,36 @@ class Max(BaseLayer):
     The dimensionality of the output of this layer is less than the 
     dimensionality of the input.
 
+    The default is to compute the maximum along the the last dimension of the 
+    input |Tensor|, but this can be set with the ``axis`` keyword argument.
+    The output is *not* the same shape as the input - that is, this is a
+    reduction layer.
+
 
     Keyword Arguments
     -----------------
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+
+
+    Examples
+    --------
+
+    Use ``Max`` to take the maximum of elements in a vector.  By default,
+    this layer takes the maximum along the last dimension::
+
+        vals = tf.random.normal([2, 3, 4])
+        # vals has shape (2, 3, 4)
+        maximum = Max(vals)
+        # maximum has shape (2, 3)
+
+    However this can be changed by setting the ``axis`` keyword argument::
+
+        vals = tf.random.normal([2, 3, 4])
+        # vals has shape (2, 3, 4)
+        maximum = Max(vals)
+        # maximum has shape (2, 4)
     """
 
 
@@ -1145,12 +1267,36 @@ class Prod(BaseLayer):
     The dimensionality of the output of this layer is less than the 
     dimensionality of the input.
 
+    The default is to compute the product along the the last dimension of the 
+    input |Tensor|, but this can be set with the ``axis`` keyword argument.
+    The output is *not* the same shape as the input - that is, this is a
+    reduction layer.
+
 
     Keyword Arguments
     -----------------
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+
+
+    Examples
+    --------
+
+    Use ``Prod`` to take the product of elements in a vector.  By default,
+    this layer takes the product along the last dimension::
+
+        vals = tf.random.normal([2, 3, 4])
+        # vals has shape (2, 3, 4)
+        product = Prod(vals)
+        # product has shape (2, 3)
+
+    However this can be changed by setting the ``axis`` keyword argument::
+
+        vals = tf.random.normal([2, 3, 4])
+        # vals has shape (2, 3, 4)
+        product = Prod(vals)
+        # product has shape (2, 4)
     """
 
 
@@ -1183,17 +1329,53 @@ class LogSumExp(BaseLayer):
 
         \text{LogSumExp}(\mathbf{x}) = \log \left( \sum_i \exp x_i \right)
 
-    The dimensionality of the output of this layer is less than the 
-    dimensionality of the input.
-    
-    TODO: explain why this is useful when working in log space, numerical stability etc
+    but using a method robust to underflow when you're working with values
+    in log-space.  Specifically, it first computes the maximum of the vector
 
+    .. math::
+
+        m = \max \mathbf{x}
+
+    and then computes the natural exponent of the values after subtracting the
+    max, sums the result, computes the natural log of the result, and then 
+    adds the max back in logspace:
+
+    .. math::
+
+        \text{LogSumExp}(\mathbf{x}) = 
+        \log \left( \sum_i \exp x_i-m \right) + m
+
+    The default is to compute the operation along the the last dimension of 
+    the input |Tensor|, but this can be set with the ``axis`` keyword
+    argument. The output is *not* the same shape as the input - that is, this
+    is a reduction layer.
+    
 
     Keyword Arguments
     -----------------
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+
+
+    Examples
+    --------
+
+    Use ``LogSumExp`` to the sum of elements in a vector in non-log space when
+    your values are in log-space, in a numerically robust way.  The default is
+    to perform the operation along the last dimension::
+
+        vals = tf.random.normal([2, 3, 4])
+        # vals has shape (2, 3, 4)
+        out = LogSumExp(vals)
+        # out has shape (2, 3)
+
+    However this can be changed by setting the ``axis`` keyword argument::
+
+        vals = tf.random.normal([2, 3, 4])
+        # vals has shape (2, 3, 4)
+        out = LogSumExp(vals, axis=-2)
+        # out has shape (2, 4)
     """
 
 
@@ -1256,8 +1438,8 @@ class Reshape(BaseLayer):
 
     def _validate_kwargs(self, kwargs):
         """Ensure the keyword arguments have correct types, etc."""
-        if kwargs['shape'] is not None and 
-            not isinstance(kwargs['shape'], (list, int)):
+        if (kwargs['shape'] is not None and
+                not isinstance(kwargs['shape'], (list, int))):
             raise ValueError('shape kwarg must be a list or an int')
         if isinstance(kwargs['shape'], list):
             for e in kwargs['shape']:
@@ -1282,10 +1464,46 @@ class Reshape(BaseLayer):
 class Cat(BaseLayer):
     r"""A layer which concatenates its two inputs.
 
-    TODO: More info...
+    Given two tensors, whose shapes must be the same in every dimension except
+    the ``axis``-th dimension (where ``axis`` is a keyword argument), this
+    layer concatenates the two tensors along the ``axis``-th dimension.
+    The default is to concatenate along the last dimension.
 
-    TODO: really we want to be able to pass a LIST of inputs, not just 2
+    TODO: really we want to be able to pass a LIST of inputs, not just 2...
 
+
+    Keyword Arguments
+    -----------------
+    axis : int
+        What axis to compute the operation along.  
+        Default is -1 (the last dimension).
+
+
+    Examples
+    --------
+
+    Use ``Cat`` to concatenate two tensors.  By default, ``Cat`` concatenates
+    on the last dimension::
+
+        a = tf.random.normal([2, 3, 4])
+        b = tf.random.normal([2, 3, 5])
+        concat = Cat(a, b)
+        # concat has shape (2, 3, 9)
+
+    However, this can be changed using the ``axis`` keyword argument::
+
+        a = tf.random.normal([2, 4, 3])
+        b = tf.random.normal([2, 5, 3])
+        concat = Cat(a, b, axis=-2)
+        # concat has shape (2, 9, 3)
+
+    Note that the dimensions of both tensors must be equal for all dimensions
+    except the ``axis``-th dimension::
+
+        a = tf.random.normal([2, 3, 4])
+        b = tf.random.normal([2, 6, 5])
+        concat = Cat(a, b, axis=-1)
+        # ERROR!
     """
 
 
@@ -1326,12 +1544,33 @@ class Dot(BaseLayer):
         \mathbf{a} \cdot \mathbf{b} =
         \sum_i ( a_i b_i )
 
+    The default is to compute the dot product along the the last dimension of 
+    the input |Tensor|, but this can be set with the ``axis`` keyword
+    argument. The output is *not* the same shape as the input - that is, this 
+    is a reduction layer.
+
 
     Keyword Arguments
     -----------------
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+
+
+    Examples
+    --------
+
+    Use ``Dot`` to take the dot product of two vectors.  For example, in a 
+    multiple linear regression, take the dot product of the weights and the
+    features::
+
+        from probflow import Input, Parameter, Dot
+
+        features = Input([0, 1, 2, 3, 4])
+        weights = Parameter(shape=5)
+        bias = Parameter()
+
+        predictions = Dot(features, weights) + bias
     """
 
 
@@ -1356,6 +1595,7 @@ class Dot(BaseLayer):
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
+        # TODO: use tf.tensordot
         return tf.reduce_sum(args['a'] * args['b'], 
                              axis=self.kwargs['axis'],
                              keepdims=True)

@@ -624,8 +624,8 @@ def test_log_layer():
     assert isclose(l2_out[1][0], 1.0)
 
 
-def test_layer_ops_overloading():
-    """Tests the basic arithmetic ops (__add__, etc) are overloaded"""
+def test_layer_special_methods():
+    """Tests the arithmetic ops (__add__, etc) defined as special methods"""
 
     # Two layers to work with
     l1 = Add(1.0, 2.0)
@@ -668,48 +668,129 @@ def test_layer_ops_overloading():
     assert l3.built_obj == 1.0
 
 
-def test_dense_layer():
-    """Tests probflow.layers.Dense"""
+def test_layer_broadcasting():
+    """Tests broadcasting works w/ layers of different shapes"""
 
-    # Float/int inputs
-    l1 = Dense(units=4)
-    l1._build_recursively(tf.placeholder(tf.float32, [2, 3]), [2])
+    # Single dimension
+    a = tf.random.normal([1])
+    b = tf.random.normal([2])
+    l1 = Add(a, b)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert l1.built_obj.shape[0].value == 2
+
+    # Two dimensions
+    c = tf.random.normal([2, 1])
+    d = tf.random.normal([2, 3])
+    l2 = Add(c, d)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 3
+
+    # Two layers
+    l3 = Add(Add(d, c), Add(c, d))
+    l3._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert l3.built_obj.shape[0].value == 2
+    assert l3.built_obj.shape[1].value == 3
+
+    # Different number of dimensions
+    e = tf.random.normal([3])
+    f = tf.random.normal([2, 3])
+    l4 = Add(e, f)
+    l4._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert l4.built_obj.shape[0].value == 2
+    assert l4.built_obj.shape[1].value == 3
+
+
+
+# TODO: 
+# Reciprocal
+# Sqrt
+# Transform
+# Sigmoid
+# Relu
+# Softmax
+#
+# Sum, Mean, Min, Max, Prod, LogSumExp
+#
+# Reshape
+# Cat
+# Dot
+
+"""
+def test_log_layer():
+    Tests probflow.layers.Log
+
+    # Int input
+    l1 = Log(1)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
     assert isinstance(l1.built_obj, tf.Tensor)
-    assert l1.built_obj.shape.ndims == 2
-    assert l1.built_obj.shape.dims[0].value == 2
-    assert l1.built_obj.shape.dims[1].value == 4
-    assert len(l1.args) == 3
-    assert 'input' in l1.args
-    assert 'weight' in l1.args
-    assert 'bias' in l1.args
+    with tf.Session() as sess:
+        l1_out = sess.run(l1.built_obj)
+    assert l1_out == 0
 
-    # Reset the graph
-    tf.reset_default_graph()
+    # Float inputs
+    l1 = Log(2.718281828459045)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l1_out = sess.run(l1.built_obj)
+    assert isclose(l1_out, 1.0)
 
+    # Numpy array inputs
+    a = np.array([[1], [2.718281828459045]]).astype('float32')
+    l2 = Log(a)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert isclose(l2_out[0][0], 0.0)
+    assert isclose(l2_out[1][0], 1.0)
 
-def test_dense_layer_fit():
-    """Tests probflow.layers.Dense"""
+    # With another Layer as input
+    l3 = Log(Add(0.3, 0.7))
+    l3._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l3.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l3_out = sess.run(l3.built_obj)
+    assert isclose(l3_out, 0.0)
 
-    # TODO move test to tests/integration
+    # With a tf.Tensor as input
+    a = tf.constant([[1], [2.718281828459045]], dtype=tf.float32)
+    l2 = Log(a)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert isclose(l2_out[0][0], 0.0)
+    assert isclose(l2_out[1][0], 1.0)
 
-    # Dummy data
-    x = np.random.randn(100, 4)
-    w = np.random.randn(1, 4)
-    b = np.random.randn()
-    y = np.sum(x*w, axis=1) + b
-
-    # Model 
-    l1 = Dense()
-    model = Normal(l1, 1.0)
-
-    # Fit the model
-    model.fit(x, y, epochs=10)
-
-
-# TODO: check broadcasting works correctly
-
-# TODO: Input layer
-
-# TODO: Dense layer
-
-# TODO: other layers
+    # With a tf.Variable as input
+    a = tf.Variable([[1], [2.718281828459045]], dtype=tf.float32)
+    l2 = Log(a)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    init_op = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init_op)
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert isclose(l2_out[0][0], 0.0)
+    assert isclose(l2_out[1][0], 1.0)
+"""
