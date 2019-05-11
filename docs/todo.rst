@@ -278,11 +278,15 @@ Input data as tf dataset iterators
 
 The big advantage of bayes by backprop w/ tensorflow is your data doesn't have
 to fit into memory.  Right now, ``BaseDistribution.fit`` assumes its inputs
-``x`` and ``y`` are numpy arrays (or pandas arrays).  
+``x`` and ``y`` are numpy arrays (or pandas arrays).... Which need to fit in 
+memory.
 Though I guess you could use memory mapping if it won't fit in memory.
 Distributed arrays would be hard though.  Dask maybe?
 Anyway, it would be nice 
 to let it take dataset iterators so users can define their own data pipelines.
+
+Maybe define data generators like in keras?  https://keras.io/models/model/#fit_generator
+PyTorch also has a similar thing with torch.utils.data.Dataset
 
 
 Support for random effects and multilevel models

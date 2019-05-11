@@ -432,6 +432,8 @@ class Sub(BaseLayer):
         op = lambda a, b: a - b
         return _broadcast2(args['a'], args['b'], op)
 
+
+
 class Mul(BaseLayer):
     r"""A layer which multiplies two inputs, elementwise.
 
@@ -487,6 +489,7 @@ class Mul(BaseLayer):
         return _broadcast2(args['a'], args['b'], op)
 
 
+
 class Div(BaseLayer):
     r"""A layer which divides one input by another, elementwise.
 
@@ -540,6 +543,7 @@ class Div(BaseLayer):
         """Build the layer."""
         op = lambda a, b: a / b
         return _broadcast2(args['a'], args['b'], op)
+
 
 
 class Neg(BaseLayer):
@@ -1545,15 +1549,27 @@ class Dot(BaseLayer):
         \sum_i ( a_i b_i )
 
     The default is to compute the dot product along the the last dimension of 
-    the input |Tensor|, but this can be set with the ``axis`` keyword
-    argument. The output is *not* the same shape as the input - that is, this 
-    is a reduction layer.
+    the input |Tensor|, but this can be set with the ``axis1`` keyword
+    argument (to set the axis of the first input), and the ``axis2`` keyword
+    argument (to set the axis of the second input). The output is *not* the
+    same shape as the input - that is, this is a reduction layer.
+
+
+    Parameters
+    ----------
+    a : float, |Tensor|, |Layer|, or |Parameter|
+        First input
+    b : float, |Tensor|, |Layer|, or |Parameter|
+        Second input
 
 
     Keyword Arguments
     -----------------
-    axis : int
-        What axis to compute the operation along.  
+    axis1 : int
+        What axis to compute the operation along for the first input ``a``. 
+        Default is -1 (the last dimension).
+    axis2 : int
+        What axis to compute the operation along for the second input ``b``. 
         Default is -1 (the last dimension).
 
 
@@ -1584,6 +1600,7 @@ class Dot(BaseLayer):
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'axis': -1,
+        'keepdims': True,
     }
 
 
@@ -1591,14 +1608,15 @@ class Dot(BaseLayer):
         """Ensure the keyword arguments have correct types, etc."""
         if not isinstance(kwargs['axis'], int):
             raise ValueError('axis kwarg must be an int')
+        if not isinstance(kwargs['keepdims'], bool):
+            raise ValueError('keepdims kwarg must be an boool')
 
 
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        # TODO: use tf.tensordot
-        return tf.reduce_sum(args['a'] * args['b'], 
+        return tf.reduce_sum(args['a'] * args['b'],
                              axis=self.kwargs['axis'],
-                             keepdims=True)
+                             keepdims=self.kwargs['keepdims'])
 
 
 
@@ -1619,10 +1637,18 @@ class Matmul(BaseLayer):
     ])
 
 
+    # Layer keyword arguments and their default values
+    _default_kwargs = {
+        'axis1': -1,
+        'axis2': -2,
+    }
+
+
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        return tf.matmul(args['a'], args['b'])
-        # TODO: don't think this will work w/ tensors of >2 dims...
+        return tf.tensordot(args['a'], args['b'], 
+                            axes=[[self.kwargs['axis1']], 
+                                  [self.kwargs['axis2']]])
 
 
 
