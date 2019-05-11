@@ -45,7 +45,7 @@ or for neural matrix factorization https://arxiv.org/abs/1708.05031
     # Matrix Factorization
     user_vec_mf = Embedding(users, dims=50)
     item_vec_mf = Embedding(items, dims=50)
-    predictions_mf = Dot(user_vec_mf, item_vec_mf)
+    predictions_mf = user_vec_mf*item_vec_mf
 
     # Neural Collaborative Filtering
     user_vec_ncf = Embedding(users, dims=50)
