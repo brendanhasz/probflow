@@ -22,33 +22,42 @@ TODO: diagram
 
 TODO: this is a lot to do manually, below we'll see how to do it much more easily...
 
+Note that we're using the matrix multiplication infix operator
+https://docs.python.org/3/whatsnew/3.5.html#whatsnew-pep-465
+though we could have used the Matmul layer.
+
 .. code-block:: python
 
-    from probflow import Input, Parameter, ScaleParameter
-    from probflow import Relu, Matmul, Dot
+    from probflow import Input, Reshape, Relu
+    from probflow import Parameter, ScaleParameter
     from probflow import Normal
 
     # Input (D dimensions)
-    features = Input()
+    D = 3
+    features = Reshape(Input(), shape=[D, 1])
 
     # First layer
-    weights1 = Parameter(shape=[D, 128])
+    weights1 = Parameter(shape=[128, D])
     bias1 = Parameter(shape=128)
-    layer1 = Relu(Matmul(features, weights1) + bias1)
+    layer1 = Relu(weights1@features + bias1)
 
     # Second layer
-    weights2 = Parameter(shape=[128, 64])
+    weights2 = Parameter(shape=[64, 128])
     bias2 = Parameter(shape=64)
-    layer2 = Relu(Matmul(layer1, weights2) + bias2)
+    layer2 = Relu(weights2@layer1 + bias2)
 
     # Last layer
-    weights3 = Parameter(shape=64)
+    weights3 = Parameter(shape=[1, 64])
     bias3 = Parameter()
-    predictions = Dot(layer2, weights3) + bias3
+    predictions = weights3@layer2 + bias3
 
     # Observation distribution
     noise_std = ScaleParameter()
     model = Normal(predictions, noise_std)
+
+    # Fit the model
+    # x is an ndarray of shape (N,D)
+    # y is an ndarray of shape (N,)
     model.fit(x, y)
 
 

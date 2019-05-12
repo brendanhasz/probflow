@@ -7,8 +7,8 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Finish Layers (up until MatMul) and docs
-* MatMul layers and tests (using tensordot?)
+* Docs for Matmul layer
+* Tests for layers: Reciprocal thru Cat
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)
 * Docs for distributions (including distribution diagrams)
 * Finish BaseDistribution critisism methods
@@ -18,16 +18,16 @@ Backlog (short term):
 * Test for Dense, add Dense test to stats/test_LinearRegression
 * Test 2-layer dense network (w/ sin(x)/x or something function)
 * `Sequential layer`_
-* Tests
+* Tests for sequential layer
 * Models which only use Dense
-* Tests
+* Tests for those models
 * Bernoulli and Poisson dists
 * Models which use them (Classifiers, GLMs)
 * `Mean alias for discrete dists`_
 * Tests for Bernoulli + Poisson dists + models
 * Write the user guide
 * Write the examples
-* Fix parameter naming problem (right now you get an error if you try to name two parameters the same thing)
+* Fix parameter naming problem (right now you get an error if you try to name two parameters the same thing!)
 * `Reset method`_
 * `Sklearn support`_
 
@@ -35,12 +35,14 @@ Backlog (short term):
 Backlog (long term):
 --------------------
 
-* `Flipout and LRT`_
+* `Flipout and estimator options`_
 * `Parameter sharing`_
 * `Slicing`_
 * `Embedding layer`_
 * Neural Matrix Factorization (model, tests, and example)
 * `Mixture distribution`_
+* Mixture density network example
+* `Callbacks`_
 * `Separate model from noise uncertainty`_ 
 * `Support for random effects and multilevel models`_
 * Multivariate Normal, StudentT, and Cauchy dists
@@ -55,7 +57,6 @@ Backlog (long term):
 * `Optimize bounding`_
 * `Dev guide`_
 * Conv layers
-* Flipout estimator
 * Pooling layers
 * Ready-made Conv models
 * LSTM Layer
@@ -99,13 +100,12 @@ Or if that won't work, include a sklearn Estimator which takes a model obj.
 https://scikit-learn.org/dev/developers/contributing.html#rolling-your-own-estimator
 
 
-Flipout and LRT
-^^^^^^^^^^^^^^^
+Flipout and estimator options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Add support for flipout, expecially for use w/ Dense/conv layers.  Might have to make Parameters be able to return a sample of size batch_size or a sample of size 1 (which you can then use w/ flipout).  https://arxiv.org/abs/1803.04386
+Add support for what estimator to use.  Now the default is to draw a random sample from the posterior for each *sample* in the batch, but that's really inefficient.  Should be able to also just draw one sample per batch and use that sample for all samples in the batch.
 
-Also/instead the local reparameterization trick
-https://arxiv.org/abs/1506.02557
+Also add support for flipout, expecially for use w/ Dense + conv layers.  Might have to make Parameters be able to return a sample of size batch_size or a sample of size 1 (which you can then use w/ flipout).  https://arxiv.org/abs/1803.04386
 
 
 Slicing
@@ -203,7 +203,13 @@ And finally open a web browser to the tensorboard w/ the webbrowser package (als
 Embedding layer
 ^^^^^^^^^^^^^^^
 
-With priors on the embedding vectors to regularize.  
+With priors on the embedding vectors to regularize.
+
+
+Callbacks
+^^^^^^^^^
+
+Callbacks would be good to have, especially to adjust learning rate throughout training, and to do early stopping (not for regularization purposes but just to not waste time).
 
 
 Separate model from noise uncertainty

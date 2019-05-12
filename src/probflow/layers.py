@@ -69,6 +69,7 @@ Matrix Layers
 
 These layers perform matrix- and vector-related operations.
 
+* :class:`.Reshape` - reshape vectors/matrixes
 * :class:`.Cat` - concatenate vectors/matrixes
 * :class:`.Dot` - dot product
 * :class:`.Matmul` - matrix multiplication
@@ -113,6 +114,7 @@ __all__ = [
     'Max',
     'Prod',
     'LogSumExp',
+    'Reshape',
     'Cat',
     'Dot',
     'Matmul',
@@ -151,18 +153,17 @@ def _validate_initializer(initializer):
 
 def _broadcast2(a, b, op):
     """Attempt to broadcast two |Tensors|"""
-    try:
-        return op(a, b)
-    except:
-        if isinstance(a, tf.Tensor) and isinstance(b, tf.Tensor):
-            if len(a.shape) > len(b.shape):
-                return op(a, tf.broadcast_to(b, a.shape))
-            elif len(a.shape) < len(b.shape):
-                return op(tf.broadcast_to(a, b.shape), b)
-            else:
-                raise
+    if isinstance(a, tf.Tensor) and isinstance(b, tf.Tensor):
+        if len(a.shape) > len(b.shape):
+            #return op(a, tf.broadcast_to(b, new_shape))
+            return op(a, b[..., tf.newaxis])
+        elif len(a.shape) < len(b.shape):
+            #return op(tf.broadcast_to(a, b.shape), b)
+            return op(a[..., tf.newaxis], b)
         else:
-            raise
+            return op(a, b)
+    else:
+        return op(a, b)
 
 
 
@@ -1453,11 +1454,12 @@ class Reshape(BaseLayer):
 
     def _build(self, args, _data, batch_shape):
         """Build the layer."""
-        if isinstance(kwargs['shape'], list):
-            new_shape = tf.concat([batch_shape, kwargs['shape']], axis=0)
+        if isinstance(self.kwargs['shape'], list):
+            new_shape = tf.concat([batch_shape, self.kwargs['shape']], axis=0)
             return tf.reshape(args['input'], new_shape)
-        elif isinstance(kwargs['shape'], int):
-            new_shape = tf.concat([batch_shape, [kwargs['shape']]], axis=0)
+        elif isinstance(self.kwargs['shape'], int):
+            new_shape = tf.concat([batch_shape, [self.kwargs['shape']]], 
+                                  axis=0)
             return tf.reshape(args['input'], new_shape)
         else:
             new_shape = tf.concat([batch_shape, [-1]], axis=0)
@@ -1609,7 +1611,7 @@ class Dot(BaseLayer):
         if not isinstance(kwargs['axis'], int):
             raise ValueError('axis kwarg must be an int')
         if not isinstance(kwargs['keepdims'], bool):
-            raise ValueError('keepdims kwarg must be an boool')
+            raise ValueError('keepdims kwarg must be an bool')
 
 
     def _build(self, args, _data, _batch_shape):
@@ -1637,18 +1639,13 @@ class Matmul(BaseLayer):
     ])
 
 
-    # Layer keyword arguments and their default values
-    _default_kwargs = {
-        'axis1': -1,
-        'axis2': -2,
-    }
-
-
     def _build(self, args, _data, _batch_shape):
         """Build the layer."""
-        return tf.tensordot(args['a'], args['b'], 
-                            axes=[[self.kwargs['axis1']], 
-                                  [self.kwargs['axis2']]])
+        # NOTE: tf.matmul only supports broadcasting as of Apr 2019 nightly!
+        op = lambda a, b: tf.reduce_sum(a[..., tf.newaxis] *
+                                        b[..., tf.newaxis, :, :],
+                                        axis=-2)
+        return _broadcast2(args['a'], args['b'], op)
 
 
 

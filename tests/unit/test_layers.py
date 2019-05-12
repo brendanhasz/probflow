@@ -700,7 +700,7 @@ def test_layer_broadcasting():
     assert l3.built_obj.shape[1].value == 3
 
     # Different number of dimensions
-    e = tf.random.normal([3])
+    e = tf.random.normal([2])
     f = tf.random.normal([2, 3])
     l4 = Add(e, f)
     l4._build_recursively(tf.placeholder(tf.float32, [1]), [1])
@@ -717,10 +717,40 @@ def test_layer_broadcasting():
 # Relu
 # Softmax
 #
-# Sum, Mean, Min, Max, Prod, LogSumExp
-#
-# Reshape
-# Cat
+# Sum
+# Mean
+# Min
+# Max
+# Prod
+# LogSumExp
+
+
+
+def test_layer_reshape():
+    """Tests probflow.layers.Reshape"""
+
+    # Single dimension
+    a = tf.constant([[1, 2], [3, 4], [5, 6]], dtype=tf.float32)
+    l1 = Reshape(a, shape=[1, 2])
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [3])
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 3
+    assert l1.built_obj.shape[1].value == 1
+    assert l1.built_obj.shape[2].value == 2
+    with tf.Session() as sess:
+        out = sess.run(l1.built_obj)
+    assert out[0, 0, 0] == 1.0
+    assert out[0, 0, 1] == 2.0
+    assert out[1, 0, 0] == 3.0
+    assert out[1, 0, 1] == 4.0
+    assert out[2, 0, 0] == 5.0
+    assert out[2, 0, 1] == 6.0
+
+
+
+# TODO: Cat
+
+
 
 def test_layer_dot():
     """Tests probflow.layers.Dot"""
@@ -782,7 +812,7 @@ def test_layer_dot():
 def test_layer_matmul():
     """Tests probflow.layers.Matmul"""
 
-    # Single dimension
+    # Single dimension, batch size of 1
     a = tf.constant([[1, 2], [3, 4], [5, 6]], dtype=tf.float32)
     b = tf.constant([[7, 8], [9, 10]], dtype=tf.float32)
     a = tf.reshape(a, [1, 3, 2])
@@ -795,50 +825,84 @@ def test_layer_matmul():
     assert l1.built_obj.shape[2].value == 2
     with tf.Session() as sess:
         out = sess.run(l1.built_obj)
-    assert out[0, 0] == 25.0
-    assert out[0, 1] == 28.0
-    assert out[1, 0] == 57.0
-    assert out[1, 1] == 64.0
-    assert out[2, 0] == 89.0
-    assert out[2, 1] == 100.0
+    assert out[0, 0, 0] == 25.0
+    assert out[0, 0, 1] == 28.0
+    assert out[0, 1, 0] == 57.0
+    assert out[0, 1, 1] == 64.0
+    assert out[0, 2, 0] == 89.0
+    assert out[0, 2, 1] == 100.0
 
+    # Single dimension, batch size of 2 (should do each sample independently)
+    a = tf.constant([[[1, 2], [3, 4], [5, 6]], 
+                     [[2, 3], [4, 5], [6, 7]]],
+                    dtype=tf.float32)
+    b = tf.constant([[[7, 8], [9, 10]],
+                     [[8, 9], [10, 11]]],
+                    dtype=tf.float32)
+    l1 = Matmul(a, b)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [2])
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 2
+    assert l1.built_obj.shape[1].value == 3
+    assert l1.built_obj.shape[2].value == 2
+    with tf.Session() as sess:
+        out = sess.run(l1.built_obj)
+    assert out[0, 0, 0] == 25.0
+    assert out[0, 0, 1] == 28.0
+    assert out[0, 1, 0] == 57.0
+    assert out[0, 1, 1] == 64.0
+    assert out[0, 2, 0] == 89.0
+    assert out[0, 2, 1] == 100.0
+    assert out[1, 0, 0] == 46.0
+    assert out[1, 0, 1] == 51.0
+    assert out[1, 1, 0] == 82.0
+    assert out[1, 1, 1] == 91.0
+    assert out[1, 2, 0] == 118.0
+    assert out[1, 2, 1] == 131.0
 
-    """
-    # With parameters, single dimension
-    a = Parameter(shape=4)
-    b = Parameter(shape=4)
-    l1 = Dot(a, b)
-    l1._build_recursively(tf.placeholder(tf.float32, [1]), [3])
-    assert len(l1.built_obj.shape) == 2
-    assert l1.built_obj.shape[0].value == 3
-    assert l1.built_obj.shape[1].value == 1
-
-    # With parameters, multiple dimensions
+    # With parameters, 2D
     a = Parameter(shape=[4, 5])
-    b = Parameter(shape=[4, 5])
-    l1 = Dot(a, b)
+    b = Parameter(shape=[5, 6])
+    l1 = Matmul(a, b)
     l1._build_recursively(tf.placeholder(tf.float32, [1]), [3])
     assert len(l1.built_obj.shape) == 3
     assert l1.built_obj.shape[0].value == 3
     assert l1.built_obj.shape[1].value == 4
-    assert l1.built_obj.shape[2].value == 1
+    assert l1.built_obj.shape[2].value == 6
 
-    # With parameters, multiple dimensions, different axis
-    a = Parameter(shape=[4, 5])
-    b = Parameter(shape=[4, 5])
-    l1 = Dot(a, b, axis=-2)
+    # With parameters, >2D (should only do last 2 dimensions)
+    a = Parameter(shape=[2, 4, 5])
+    b = Parameter(shape=[2, 5, 6])
+    l1 = Matmul(a, b)
     l1._build_recursively(tf.placeholder(tf.float32, [1]), [3])
+    assert len(l1.built_obj.shape) == 4
+    assert l1.built_obj.shape[0].value == 3
+    assert l1.built_obj.shape[1].value == 2
+    assert l1.built_obj.shape[2].value == 4
+    assert l1.built_obj.shape[3].value == 6
+
+    # Should be able to broadcast across the batch!
+    a = tf.constant([[[1, 2], [3, 4], [5, 6]], 
+                     [[2, 3], [4, 5], [6, 7]]],
+                    dtype=tf.float32)
+    b = tf.constant([[[7, 8], [9, 10]]], dtype=tf.float32)
+    l1 = Matmul(a, b)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [2])
     assert len(l1.built_obj.shape) == 3
-    assert l1.built_obj.shape[0].value == 3
-    assert l1.built_obj.shape[1].value == 1
-    assert l1.built_obj.shape[2].value == 5
-
-    # With parameters, multiple dimensions, different axis, no keepdims
-    a = Parameter(shape=[4, 5])
-    b = Parameter(shape=[4, 5])
-    l1 = Dot(a, b, axis=-2, keepdims=False)
-    l1._build_recursively(tf.placeholder(tf.float32, [1]), [3])
-    assert len(l1.built_obj.shape) == 2
-    assert l1.built_obj.shape[0].value == 3
-    assert l1.built_obj.shape[1].value == 5
-    """
+    assert l1.built_obj.shape[0].value == 2
+    assert l1.built_obj.shape[1].value == 3
+    assert l1.built_obj.shape[2].value == 2
+    with tf.Session() as sess:
+        out = sess.run(l1.built_obj)
+    assert out[0, 0, 0] == 25.0
+    assert out[0, 0, 1] == 28.0
+    assert out[0, 1, 0] == 57.0
+    assert out[0, 1, 1] == 64.0
+    assert out[0, 2, 0] == 89.0
+    assert out[0, 2, 1] == 100.0
+    assert out[1, 0, 0] == 41.0
+    assert out[1, 0, 1] == 46.0
+    assert out[1, 1, 0] == 73.0
+    assert out[1, 1, 1] == 82.0
+    assert out[1, 2, 0] == 105.0
+    assert out[1, 2, 1] == 118.0

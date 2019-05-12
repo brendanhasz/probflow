@@ -26,7 +26,9 @@ With ProbFlow, the core building blocks of a Bayesian model are parameters, laye
 
 For example, a simple Bayesian linear regression
 
-.. image:: http://latex.codecogs.com/gif.latex?\large&space;y&space;\sim&space;\text{Normal}(w&space;x&space;&plus;&space;b,&space;\sigma)
+.. image:: docs/img/readme/regression_equation.svg
+   :width: 30 %
+   :align: center
 
 can be built with ProbFlow by:
 
