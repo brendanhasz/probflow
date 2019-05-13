@@ -35,6 +35,7 @@ Backlog (short term):
 Backlog (long term):
 --------------------
 
+* Refactor layers so they each have their own init...
 * `Flipout and estimator options`_
 * `Parameter sharing`_
 * `Slicing`_

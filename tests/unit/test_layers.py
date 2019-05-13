@@ -748,7 +748,56 @@ def test_layer_reshape():
 
 
 
-# TODO: Cat
+def test_layer_cat():
+    """Tests probflow.layers.Cat"""
+
+    # Single dimension (besides batch dim)
+    a = tf.constant([[1, 2], [3, 4], [5, 6]], dtype=tf.float32)
+    b = tf.constant([[7, 77, 777], 
+                     [8, 88, 888],
+                     [9, 99, 999]], dtype=tf.float32)
+    l1 = Cat(a, b)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [3])
+    assert len(l1.built_obj.shape) == 2
+    assert l1.built_obj.shape[0].value == 3
+    assert l1.built_obj.shape[1].value == 5
+    with tf.Session() as sess:
+        out = sess.run(l1.built_obj)
+    assert out[0, 0] == 1.0
+    assert out[0, 1] == 2.0
+    assert out[0, 2] == 7.0
+    assert out[0, 3] == 77.0
+    assert out[0, 4] == 777.0
+    assert out[1, 0] == 3.0
+    assert out[1, 1] == 4.0
+    assert out[1, 2] == 8.0
+    assert out[1, 3] == 88.0
+    assert out[1, 4] == 888.0
+    assert out[2, 0] == 5.0
+    assert out[2, 1] == 6.0
+    assert out[2, 2] == 9.0
+    assert out[2, 3] == 99.0
+    assert out[2, 4] == 999.0
+
+    # Should concatenate along the last dimensions for multiple dims
+    a = tf.random.normal((10, 5, 3))
+    b = tf.random.normal((10, 5, 4))
+    l1 = Cat(a, b)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [10])
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 10
+    assert l1.built_obj.shape[1].value == 5
+    assert l1.built_obj.shape[2].value == 7
+
+    # Should concatenate along the ``axis``-th dimension
+    a = tf.random.normal((10, 3, 5))
+    b = tf.random.normal((10, 4, 5))
+    l1 = Cat(a, b, axis=-2)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [10])
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 10
+    assert l1.built_obj.shape[1].value == 7
+    assert l1.built_obj.shape[2].value == 5
 
 
 
