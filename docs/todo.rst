@@ -7,7 +7,7 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Docs for Matmul layer
+* Docs for Matmul layer (include diagram)
 * Tests for layers: Reciprocal thru Cat
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)
 * Docs for distributions (including distribution diagrams)

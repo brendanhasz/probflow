@@ -709,10 +709,273 @@ def test_layer_broadcasting():
 
 
 
+def test_layer_reciprocal():
+    """Tests probflow.layers.Reciprocal"""
+
+    # Int input
+    l1 = Reciprocal(2)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l1_out = sess.run(l1.built_obj)
+    assert isclose(l1_out, 0.5) 
+
+    # Float inputs
+    l1 = Reciprocal(2.0)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l1_out = sess.run(l1.built_obj)
+    assert isclose(l1_out, 0.5)
+
+    # Numpy array inputs
+    a = np.array([[10], [2.0]]).astype('float32')
+    l2 = Reciprocal(a)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert isclose(l2_out[0][0], 0.1)
+    assert isclose(l2_out[1][0], 0.5)
+
+    # With another Layer as input
+    l3 = Reciprocal(Add(1.3, 0.7))
+    l3._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l3.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l3_out = sess.run(l3.built_obj)
+    assert isclose(l3_out, 0.5)
+
+    # With a tf.Tensor as input
+    a = tf.constant([[10], [2.0]], dtype=tf.float32)
+    l2 = Reciprocal(a)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert isclose(l2_out[0][0], 0.1)
+    assert isclose(l2_out[1][0], 0.5)
+
+    # With a tf.Variable as input
+    a = tf.Variable([[10], [2.0]], dtype=tf.float32)
+    l2 = Reciprocal(a)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    init_op = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init_op)
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert isclose(l2_out[0][0], 0.1)
+    assert isclose(l2_out[1][0], 0.5)
+
+    # Should be elementwise
+    a = tf.random.normal((5, 4, 3))
+    l1 = Reciprocal(a)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 5
+    assert l1.built_obj.shape[1].value == 4
+    assert l1.built_obj.shape[2].value == 3
+
+
+
+def test_layer_sqrt():
+    """Tests probflow.layers.Sqrt"""
+
+    # Int input
+    l1 = Sqrt(4)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l1_out = sess.run(l1.built_obj)
+    assert isclose(l1_out, 2.0) 
+
+    # Float inputs
+    l1 = Sqrt(4.0)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l1_out = sess.run(l1.built_obj)
+    assert isclose(l1_out, 2.0)
+
+    # Numpy array inputs
+    a = np.array([[100], [4.0]]).astype('float32')
+    l2 = Sqrt(a)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert isclose(l2_out[0][0], 10.0)
+    assert isclose(l2_out[1][0], 2.0)
+
+    # With another Layer as input
+    l3 = Sqrt(Add(3.3, 0.7))
+    l3._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l3.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l3_out = sess.run(l3.built_obj)
+    assert isclose(l3_out, 2.0)
+
+    # With a tf.Tensor as input
+    a = tf.constant([[100], [4.0]], dtype=tf.float32)
+    l2 = Sqrt(a)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert isclose(l2_out[0][0], 10.0)
+    assert isclose(l2_out[1][0], 2.0)
+
+    # With a tf.Variable as input
+    a = tf.Variable([[100], [4.0]], dtype=tf.float32)
+    l2 = Sqrt(a)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    init_op = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init_op)
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert isclose(l2_out[0][0], 10.0)
+    assert isclose(l2_out[1][0], 2.0)
+
+    # Should be elementwise
+    a = tf.random.normal((5, 4, 3))
+    l1 = Sqrt(a)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 5
+    assert l1.built_obj.shape[1].value == 4
+    assert l1.built_obj.shape[2].value == 3
+
+
+
+def test_layer_transform():
+    """Tests probflow.layers.Transform"""
+
+    # Int input
+    l1 = Transform(0, func=lambda x: tf.sin(x))
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l1_out = sess.run(l1.built_obj)
+    assert isclose(l1_out, 0.0) 
+
+    # Float inputs
+    l1 = Transform(np.pi/2.0, func=lambda x: tf.sin(x))
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l1_out = sess.run(l1.built_obj)
+    assert isclose(l1_out, 1.0)
+
+    # Numpy array inputs
+    a = np.array([[0], [np.pi/2.0]]).astype('float32')
+    l2 = Transform(a, func=lambda x: tf.sin(x))
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert isclose(l2_out[0][0], 0.0)
+    assert isclose(l2_out[1][0], 1.0)
+
+    # With another Layer as input
+    l3 = Transform(Add(0, np.pi/2.0), func=lambda x: tf.sin(x))
+    l3._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l3.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l3_out = sess.run(l3.built_obj)
+    assert isclose(l3_out, 1.0)
+
+    # With a tf.Tensor as input
+    a = tf.constant([[0], [np.pi/2.0]], dtype=tf.float32)
+    l2 = Transform(a, func=lambda x: tf.sin(x))
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert isclose(l2_out[0][0], 0.0)
+    assert isclose(l2_out[1][0], 1.0)
+
+    # With a tf.Variable as input
+    a = tf.Variable([[0], [np.pi/2.0]], dtype=tf.float32)
+    l2 = Transform(a, func=lambda x: tf.sin(x))
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    assert len(l2.built_obj.shape) == 2
+    assert l2.built_obj.shape[0].value == 2
+    assert l2.built_obj.shape[1].value == 1
+    init_op = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init_op)
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == 2
+    assert l2_out.shape[0] == 2
+    assert l2_out.shape[1] == 1
+    assert isclose(l2_out[0][0], 0.0)
+    assert isclose(l2_out[1][0], 1.0)
+
+    # Should be elementwise
+    a = tf.random.normal((5, 4, 3))
+    l1 = Transform(a, func=lambda x: tf.sin(x))
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 5
+    assert l1.built_obj.shape[1].value == 4
+    assert l1.built_obj.shape[2].value == 3
+
+
 # TODO: 
-# Reciprocal
-# Sqrt
-# Transform
 # Sigmoid
 # Relu
 # Softmax
