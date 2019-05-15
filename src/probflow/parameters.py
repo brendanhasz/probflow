@@ -168,11 +168,11 @@ class Parameter(BaseParameter):
         """Construct an array of Parameter(s)."""
 
         # Check types
-        if not isinstance(shape, (int, list, np.ndarray)):
+        if not isinstance(shape, (int, tuple, list, np.ndarray)):
             raise TypeError('shape must be int, list of ints, or ndarray')
         if isinstance(shape, int) and shape < 1:
             raise ValueError('shape must be positive')
-        if isinstance(shape, list):
+        if isinstance(shape, (tuple, list)):
             for t_shape in shape:
                 if not isinstance(t_shape, int):
                     raise TypeError('each element of shape must be an int')
@@ -201,6 +201,8 @@ class Parameter(BaseParameter):
                                     'None, a Tensor, or an Initializer')
 
         # Make shape a list
+        if isinstance(shape, tuple):
+            shape = list(shape)
         if isinstance(shape, int):
             shape = [shape]
         if isinstance(shape, np.ndarray):

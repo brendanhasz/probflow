@@ -1024,6 +1024,9 @@ class Sum(BaseLayer):
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+    keepdims : bool
+        Whether the output should keep the dimensions of the input (but with
+        a size in the ``axis`` dimension of 1) or reduce the dimensions.
 
 
     Examples
@@ -1059,6 +1062,7 @@ class Sum(BaseLayer):
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'axis': -1,
+        'keepdims': True,
     }
 
 
@@ -1072,7 +1076,7 @@ class Sum(BaseLayer):
         """Build the layer."""
         return tf.reduce_sum(args['input'], 
                              axis=self.kwargs['axis'], 
-                             keepdims=True)
+                             keepdims=self.kwargs['keepdims'])
 
 
 
@@ -1096,6 +1100,9 @@ class Mean(BaseLayer):
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+    keepdims : bool
+        Whether the output should keep the dimensions of the input (but with
+        a size in the ``axis`` dimension of 1) or reduce the dimensions.
 
 
     Examples
@@ -1121,6 +1128,7 @@ class Mean(BaseLayer):
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'axis': -1,
+        'keepdims': True,
     }
 
 
@@ -1134,7 +1142,7 @@ class Mean(BaseLayer):
         """Build the layer."""
         return tf.reduce_mean(args['input'], 
                               axis=self.kwargs['axis'],
-                              keepdims=True)
+                              keepdims=self.kwargs['keepdims'])
 
 
 
@@ -1157,6 +1165,9 @@ class Min(BaseLayer):
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+    keepdims : bool
+        Whether the output should keep the dimensions of the input (but with
+        a size in the ``axis`` dimension of 1) or reduce the dimensions.
 
 
     Examples
@@ -1182,6 +1193,7 @@ class Min(BaseLayer):
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'axis': -1,
+        'keepdims': True,
     }
 
 
@@ -1195,7 +1207,7 @@ class Min(BaseLayer):
         """Build the layer."""
         return tf.reduce_min(args['input'], 
                              axis=self.kwargs['axis'],
-                             keepdims=True)
+                             keepdims=self.kwargs['keepdims'])
 
 
 
@@ -1218,6 +1230,9 @@ class Max(BaseLayer):
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+    keepdims : bool
+        Whether the output should keep the dimensions of the input (but with
+        a size in the ``axis`` dimension of 1) or reduce the dimensions.
 
 
     Examples
@@ -1243,6 +1258,7 @@ class Max(BaseLayer):
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'axis': -1,
+        'keepdims': True,
     }
 
 
@@ -1256,7 +1272,7 @@ class Max(BaseLayer):
         """Build the layer."""
         return tf.reduce_max(args['input'], 
                              axis=self.kwargs['axis'],
-                             keepdims=True)
+                             keepdims=self.kwargs['keepdims'])
 
 
 
@@ -1283,6 +1299,9 @@ class Prod(BaseLayer):
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+    keepdims : bool
+        Whether the output should keep the dimensions of the input (but with
+        a size in the ``axis`` dimension of 1) or reduce the dimensions.
 
 
     Examples
@@ -1308,6 +1327,7 @@ class Prod(BaseLayer):
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'axis': -1,
+        'keepdims': True,
     }
 
 
@@ -1321,7 +1341,7 @@ class Prod(BaseLayer):
         """Build the layer."""
         return tf.reduce_prod(args['input'], 
                               axis=self.kwargs['axis'],
-                              keepdims=True)
+                              keepdims=self.kwargs['keepdims'])
 
 
 
@@ -1361,6 +1381,9 @@ class LogSumExp(BaseLayer):
     axis : int
         What axis to compute the operation along.  
         Default is -1 (the last dimension).
+    keepdims : bool
+        Whether the output should keep the dimensions of the input (but with
+        a size in the ``axis`` dimension of 1) or reduce the dimensions.
 
 
     Examples
@@ -1387,6 +1410,7 @@ class LogSumExp(BaseLayer):
     # Layer keyword arguments and their default values
     _default_kwargs = {
         'axis': -1,
+        'keepdims': True,
     }
 
 
@@ -1400,7 +1424,7 @@ class LogSumExp(BaseLayer):
         """Build the layer."""
         return tf.reduce_logsumexp(args['input'], 
                                    axis=self.kwargs['axis'],
-                                   keepdims=True)
+                                   keepdims=self.kwargs['keepdims'])
 
 
 

@@ -8,7 +8,6 @@ Backlog (short term):
 ---------------------
 
 * Docs for Matmul layer (include diagram)
-* Tests for layers: Reciprocal thru Cat
 * Tests which cover distributions, layers, and core elements that have been written (ensure right shapes, can take any valid combo of types as args, etc)
 * Docs for distributions (including distribution diagrams)
 * Finish BaseDistribution critisism methods
@@ -35,6 +34,7 @@ Backlog (short term):
 Backlog (long term):
 --------------------
 
+* `Optimize bounding`_
 * Refactor layers so they each have their own init...
 * `Flipout and estimator options`_
 * `Parameter sharing`_
@@ -55,7 +55,6 @@ Backlog (long term):
 * `Input data as tf dataset iterators`_
 * `Loss or cost functions`_
 * `Model comparison`_
-* `Optimize bounding`_
 * `Dev guide`_
 * Conv layers
 * Pooling layers
