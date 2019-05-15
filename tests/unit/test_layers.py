@@ -1408,7 +1408,7 @@ def test_layer_logsumexp():
     d_out = [[np.log(1+np.e+np.e**2)], 
              [np.log(2+np.e**3)]]
     _test_reduce_layer(LogSumExp, d_in, d_out)
-    
+
 
 
 def test_layer_reshape():
@@ -1621,6 +1621,106 @@ def test_layer_matmul():
                     dtype=tf.float32)
     b = tf.constant([[[7, 8], [9, 10]]], dtype=tf.float32)
     l1 = Matmul(a, b)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [2])
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 2
+    assert l1.built_obj.shape[1].value == 3
+    assert l1.built_obj.shape[2].value == 2
+    with tf.Session() as sess:
+        out = sess.run(l1.built_obj)
+    assert out[0, 0, 0] == 25.0
+    assert out[0, 0, 1] == 28.0
+    assert out[0, 1, 0] == 57.0
+    assert out[0, 1, 1] == 64.0
+    assert out[0, 2, 0] == 89.0
+    assert out[0, 2, 1] == 100.0
+    assert out[1, 0, 0] == 41.0
+    assert out[1, 0, 1] == 46.0
+    assert out[1, 1, 0] == 73.0
+    assert out[1, 1, 1] == 82.0
+    assert out[1, 2, 0] == 105.0
+    assert out[1, 2, 1] == 118.0
+
+
+
+def test_layer_matmul_infix_op():
+    """Tests probflow.layers.Matmul using the infix operator @"""
+
+    # Single dimension, batch size of 1
+    a = tf.constant([[1, 2], [3, 4], [5, 6]], dtype=tf.float32)
+    b = tf.constant([[7, 8], [9, 10]], dtype=tf.float32)
+    a = tf.reshape(a, [1, 3, 2])
+    b = tf.reshape(b, [1, 2, 2])
+    l1 = Add(a, 0) @ b
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 1
+    assert l1.built_obj.shape[1].value == 3
+    assert l1.built_obj.shape[2].value == 2
+    with tf.Session() as sess:
+        out = sess.run(l1.built_obj)
+    assert out[0, 0, 0] == 25.0
+    assert out[0, 0, 1] == 28.0
+    assert out[0, 1, 0] == 57.0
+    assert out[0, 1, 1] == 64.0
+    assert out[0, 2, 0] == 89.0
+    assert out[0, 2, 1] == 100.0
+
+    # Single dimension, batch size of 2 (should do each sample independently)
+    a = tf.constant([[[1, 2], [3, 4], [5, 6]], 
+                     [[2, 3], [4, 5], [6, 7]]],
+                    dtype=tf.float32)
+    b = tf.constant([[[7, 8], [9, 10]],
+                     [[8, 9], [10, 11]]],
+                    dtype=tf.float32)
+    l1 = Add(a, 0) @ b
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [2])
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 2
+    assert l1.built_obj.shape[1].value == 3
+    assert l1.built_obj.shape[2].value == 2
+    with tf.Session() as sess:
+        out = sess.run(l1.built_obj)
+    assert out[0, 0, 0] == 25.0
+    assert out[0, 0, 1] == 28.0
+    assert out[0, 1, 0] == 57.0
+    assert out[0, 1, 1] == 64.0
+    assert out[0, 2, 0] == 89.0
+    assert out[0, 2, 1] == 100.0
+    assert out[1, 0, 0] == 46.0
+    assert out[1, 0, 1] == 51.0
+    assert out[1, 1, 0] == 82.0
+    assert out[1, 1, 1] == 91.0
+    assert out[1, 2, 0] == 118.0
+    assert out[1, 2, 1] == 131.0
+
+    # With parameters, 2D
+    a = Parameter(shape=[4, 5])
+    b = Parameter(shape=[5, 6])
+    l1 = a @ b
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [3])
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 3
+    assert l1.built_obj.shape[1].value == 4
+    assert l1.built_obj.shape[2].value == 6
+
+    # With parameters, >2D (should only do last 2 dimensions)
+    a = Parameter(shape=[2, 4, 5])
+    b = Parameter(shape=[2, 5, 6])
+    l1 = a @ b
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [3])
+    assert len(l1.built_obj.shape) == 4
+    assert l1.built_obj.shape[0].value == 3
+    assert l1.built_obj.shape[1].value == 2
+    assert l1.built_obj.shape[2].value == 4
+    assert l1.built_obj.shape[3].value == 6
+
+    # Should be able to broadcast across the batch!
+    a = tf.constant([[[1, 2], [3, 4], [5, 6]], 
+                     [[2, 3], [4, 5], [6, 7]]],
+                    dtype=tf.float32)
+    b = tf.constant([[[7, 8], [9, 10]]], dtype=tf.float32)
+    l1 = Add(a, 0) @ b
     l1._build_recursively(tf.placeholder(tf.float32, [1]), [2])
     assert len(l1.built_obj.shape) == 3
     assert l1.built_obj.shape[0].value == 2
