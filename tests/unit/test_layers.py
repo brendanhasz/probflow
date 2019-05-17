@@ -23,7 +23,7 @@ def isclose(a, b, tol=1e-7):
 
 def allclose(a, b, tol=1e-7):
     """Returns true if all elements of a and b are w/i tol"""
-    return all(abs(a-b) < tol)
+    return np.all(abs(a-b) < tol)
 
 
 
@@ -325,9 +325,99 @@ def test_div_layer():
     assert l2_out[1][0] == 0.5
 
 
+
+def _test_elementwise_layer(layer, d_in, d_out):
+    """Tests probflow layers which perform elementwise operations"""
+
+    data = np.array(d_in).astype('float32')
+    data_t = tf.convert_to_tensor(data)
+    data_out = np.array(d_out).astype('float32')
+
+    # Numpy array inputs
+    l2 = layer(data_t)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), 
+                          [data.shape[0]])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == data_out.ndim
+    for iD in range(data_out.ndim):
+        assert l2_out.shape[iD] == data_out.shape[iD]
+    assert allclose(l2_out, data_out)
+
+    # With another Layer as input
+    l2 = layer(Add(data_t, 0))
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), 
+                          [data.shape[0]])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == data_out.ndim
+    for iD in range(data_out.ndim):
+        assert l2_out.shape[iD] == data_out.shape[iD]
+    assert allclose(l2_out, data_out)
+
+    # With a tf.Tensor as input
+    a = tf.constant(data, dtype=tf.float32)
+    l2 = layer(a)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), 
+                          [data.shape[0]])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    with tf.Session() as sess:
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == data_out.ndim
+    for iD in range(data_out.ndim):
+        assert l2_out.shape[iD] == data_out.shape[iD]
+    assert allclose(l2_out, data_out)
+
+    # With a tf.Variable as input
+    a = tf.Variable(data, dtype=tf.float32)
+    l2 = layer(a)
+    l2._build_recursively(tf.placeholder(tf.float32, [1]), 
+                          [data.shape[0]])
+    assert isinstance(l2.built_obj, tf.Tensor)
+    init_op = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init_op)
+        l2_out = sess.run(l2.built_obj)
+    assert isinstance(l2_out, np.ndarray)
+    assert l2_out.ndim == data_out.ndim
+    for iD in range(data_out.ndim):
+        assert l2_out.shape[iD] == data_out.shape[iD]
+    assert allclose(l2_out, data_out)
+
+    # Should not change the dimensions
+    a = tf.random.normal((5, 4, 3))
+    l1 = layer(a)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [5])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 5
+    assert l1.built_obj.shape[1].value == 4
+    assert l1.built_obj.shape[2].value == 3
+
+    # With a Parameter as input
+    a = Parameter(shape=[4, 3])
+    l1 = layer(a)
+    l1._build_recursively(tf.placeholder(tf.float32, [1]), [5])
+    assert isinstance(l1.built_obj, tf.Tensor)
+    assert len(l1.built_obj.shape) == 3
+    assert l1.built_obj.shape[0].value == 5
+    assert l1.built_obj.shape[1].value == 4
+    assert l1.built_obj.shape[2].value == 3
+
+
+
 def test_neg_layer():
     """Tests probflow.layers.Neg"""
+    d_in = [[1, -2, 3], [0, 4, -5]]
+    d_out = [[-1, 2, -3], [0, -4, 5]]
+    _test_elementwise_layer(Neg, d_in, d_out)
 
+    """
     # Int inputs
     l1 = Neg(2)
     l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
@@ -392,11 +482,16 @@ def test_neg_layer():
     assert l2_out.shape[1] == 1
     assert l2_out[0][0] == -1.0
     assert l2_out[1][0] == 2.0
+    """
 
 
 def test_abs_layer():
     """Tests probflow.layers.Abs"""
+    d_in = [[1, -2, 3], [0, 4, -5]]
+    d_out = [[1, 2, 3], [0, 4, 5]]
+    _test_elementwise_layer(Abs, d_in, d_out)
 
+    """
     # Positive Int input
     l1 = Abs(2)
     l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
@@ -479,11 +574,17 @@ def test_abs_layer():
     assert l2_out.shape[1] == 1
     assert l2_out[0][0] == 1.0
     assert l2_out[1][0] == 2.0
-
+    """
 
 def test_exp_layer():
     """Tests probflow.layers.Exp"""
+    d_in = [[1, -2, 0], [0, 1, -2]]
+    d_out = [[2.718281828459045, 0.1353352832366127, 1], 
+             [1, 2.718281828459045, 0.1353352832366127]]
+    _test_elementwise_layer(Exp, d_in, d_out)
 
+
+    """
     # Int input
     l1 = Exp(1)
     l1._build_recursively(tf.placeholder(tf.float32, [1]), [1])
@@ -557,6 +658,7 @@ def test_exp_layer():
     assert l2_out.shape[1] == 1
     assert isclose(l2_out[0][0], 2.718281828459045)
     assert isclose(l2_out[1][0], 0.1353352832366127)
+    """
 
 
 def test_log_layer():
