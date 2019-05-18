@@ -1583,9 +1583,9 @@ class Dot(BaseLayer):
 
     Parameters
     ----------
-    a : float, |Tensor|, |Layer|, or |Parameter|
+    a : float, |ndarray|, |Tensor|, |Layer|, or |Parameter|
         First input
-    b : float, |Tensor|, |Layer|, or |Parameter|
+    b : float, |ndarray|, |Tensor|, |Layer|, or |Parameter|
         Second input
 
 
@@ -1649,10 +1649,63 @@ class Dot(BaseLayer):
 class Matmul(BaseLayer):
     r"""A layer which outputs the matrix multiplication of its two inputs.
 
+    Given two matrixes :math:`\mathbf{A}` of shape (N,M) and 
+    :math:`\mathbf{B}` of shape (M,P), this layer returns the matrix
+    multiplication of the two, a matrix :math:`\mathbf{C}`, of shape (N,P):
 
-    TODO: More info...
+    .. math::
+
+        \text{Matmul}(\mathbf{A},\mathbf{B}) =
+        \mathbf{A} \mathbf{B} = \mathbf{C}
+
+    where 
+
+        \mathbf{C}_{i,j} = \sum_{k=1}^M \mathbf{A}_{i,k} \mathbf{B}_{k,j}
+
+    .. image:: img/layers/matmul.svg
+        :width: 50 %
+        :align: center
+
+    Note that this layer can be applied using the matrix multiplication infix
+    operator (``@``).  That is, if one has two matrixes::
+
+        A = Parameter(shape=[4, 2])
+        B = Parameter(shape=[2, 3])
+
+    Then::
+
+        C = Matmul(A, B)
+
+    is equivalent to::
+
+        C = A @ B
 
 
+    Parameters
+    ----------
+    a : |ndarray|, |Tensor|, |Layer|, or |Parameter|
+        First input
+    b : |ndarray|, |Tensor|, |Layer|, or |Parameter|
+        Second input
+
+
+    Examples
+    --------
+
+    Use ``Matmul`` to matrix-multiply two matrices.  For example, in a 
+    fully-connected neural network, multiply the input feature vectors by a 
+    weight matrix to produce the raw activation values::
+
+        from probflow import Input, Reshape, Parameter, Matmul, Relu
+
+        # Input (D dimensions)
+        D = 3
+        features = Reshape(Input(), shape=[D, 1])
+
+        # First layer
+        weights1 = Parameter(shape=[128, D])
+        bias1 = Parameter(shape=128)
+        layer1 = Relu(Matmul(weights1, features) + bias1)
     """
 
 
