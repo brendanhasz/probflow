@@ -1660,6 +1660,8 @@ class Matmul(BaseLayer):
 
     where 
 
+    .. math::
+
         \mathbf{C}_{i,j} = \sum_{k=1}^M \mathbf{A}_{i,k} \mathbf{B}_{k,j}
 
     .. image:: img/layers/matmul.svg
