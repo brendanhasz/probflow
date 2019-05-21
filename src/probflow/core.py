@@ -1013,6 +1013,11 @@ class BaseDistribution(BaseLayer):
         # Process the input data
         x, y = process_xy_data(self, x_in, y_in, data)
 
+        # TODO: check if observation distribution is one for which the 
+        # observed values have a different dimensionality than the parrameters
+        # e.g. Categorical
+        # and if so, squeeze the last axis of y (if y is 2 dimensional)
+
         # Split data into training and validation data
         N, x_train, y_train, x_val, y_val = \
             test_train_split(x, y, validation_split, validation_shuffle)

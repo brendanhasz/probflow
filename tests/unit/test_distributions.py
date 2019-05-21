@@ -29,13 +29,18 @@ def lhnormal(sig, x):
 
 
 
+def logit(a):
+    return np.log(a) - np.log(1.0-a)
+
+
+
 def isclose(a, b, tol=1e-6):
     """Returns true if a and b are w/i tol"""
     return abs(a-b) < tol
 
 
 
-def allclose(a, b, tol=1e-7):
+def allclose(a, b, tol=1e-6):
     """Returns true if all elements of a and b are w/i tol"""
     return np.all((abs(a-b) < tol) | (a == b) | (np.isnan(a) & np.isnan(b)))
 
@@ -331,3 +336,222 @@ def test_cauchy():
     lp = [[-1.144729886], 
           [-3.125731354]]
     _test_dist(Cauchy, tfd.Cauchy, [loc, scale], x, lp)
+
+
+
+def test_gamma():
+    """Tests probflow.distributions.Gamma"""
+
+    shape = [[1], [5]]
+    rate = [[0.5], [1]]
+
+    x = [[2], [4]]
+    lp = [[-1.693147181], 
+          [-1.632876386]]
+    _test_dist(Gamma, tfd.Gamma, [shape, rate], x, lp)
+
+    x = [[4], [2]]
+    lp = [[-2.693147181], 
+          [-2.405465108]]
+    _test_dist(Gamma, tfd.Gamma, [shape, rate], x, lp)
+
+
+
+def test_invgamma():
+    """Tests probflow.distributions.InvGamma"""
+
+    shape = [[1], [3]]
+    rate = [[1], [0.5]]
+
+    x = [[0.5], [0.25]]
+    lp = [[-0.6137056389], 
+          [0.7725887222]]
+    _test_dist(InvGamma, tfd.InverseGamma, [shape, rate], x, lp)
+
+    x = [[0.25], [0.5]]
+    lp = [[-1.227411278], 
+          [-1.0]]
+    _test_dist(InvGamma, tfd.InverseGamma, [shape, rate], x, lp)
+
+
+
+def test_poisson():
+    """Tests probflow.distributions.Poisson"""
+
+    rate = [[1], [10]]
+
+    x = [[2], [5]]
+    lp = [[-1.693147181], 
+          [-3.274566278]]
+    _test_dist(Poisson, tfd.Poisson, [rate], x, lp)
+
+    x = [[5], [2]]
+    lp = [[-5.787491743], 
+          [-6.087976995]]
+    _test_dist(Poisson, tfd.Poisson, [rate], x, lp)
+
+
+
+def test_bernoulli():
+    """Tests probflow.distributions.Bernoulli"""
+
+    # Test w/ input_type=probs
+    prob = [[0.5], [0.1], [0.1]]
+    x = [[0], [0], [1]]
+    prob_out = [[np.log(0.5)], [np.log(0.9)], [np.log(0.1)]]
+    the_dist = lambda v: Bernoulli(v, input_type='probs')
+    _test_dist(the_dist, tfd.Bernoulli, [prob], x, prob_out)
+
+    # Test w/ input_type=logits
+    prob = [[logit(0.5)], [logit(0.1)], [logit(0.1)]]
+    x = [[0], [0], [1]]
+    prob_out = [[np.log(0.5)], [np.log(0.9)], [np.log(0.1)]]
+    the_dist = lambda v: Bernoulli(v, input_type='logits')
+    _test_dist(the_dist, tfd.Bernoulli, [prob], x, prob_out)
+
+    # Default should be input_type=logits
+    prob = [[logit(0.5)], [logit(0.1)], [logit(0.1)]]
+    x = [[0], [0], [1]]
+    prob_out = [[np.log(0.5)], [np.log(0.9)], [np.log(0.1)]]
+    _test_dist(Bernoulli, tfd.Bernoulli, [prob], x, prob_out)
+
+
+
+def test_categorical():
+    """Tests probflow.distributions.Categorical"""
+
+    # Test w/ input_type=probs
+    probs_in = np.array([[0.3, 0.2, 0.5], [0.7, 0.2, 0.1]])
+    x_eval = np.array([0, 1])
+    d1 = Categorical(probs_in, input_type='probs')
+    d1._build_recursively(tf.placeholder(tf.float32, [1]), [2])
+    assert isinstance(d1.built_obj, tfd.Categorical)
+    with tf.Session() as sess:
+        [
+            rp,
+            lp
+        ] = sess.run([
+            d1.built_obj.prob(x_eval),
+            d1.built_obj.log_prob(x_eval)
+        ])
+    assert isinstance(rp, np.ndarray)
+    assert isinstance(lp, np.ndarray)
+    assert rp.ndim == 1
+    assert lp.ndim == 1
+    assert rp.shape[0] == 2
+    assert lp.shape[0] == 2
+    assert isclose(rp[0], 0.3)
+    assert isclose(rp[1], 0.2)
+    assert isclose(lp[0], np.log(0.3))
+    assert isclose(lp[1], np.log(0.2))
+
+    # Test w/ input_type=logits
+    probs_in = np.log(np.array([[0.3, 0.2, 0.5], [0.7, 0.2, 0.1]]))
+    x_eval = np.array([0, 1])
+    d1 = Categorical(probs_in, input_type='logits')
+    d1._build_recursively(tf.placeholder(tf.float32, [1]), [2])
+    assert isinstance(d1.built_obj, tfd.Categorical)
+    with tf.Session() as sess:
+        [
+            rp,
+            lp
+        ] = sess.run([
+            d1.built_obj.prob(x_eval),
+            d1.built_obj.log_prob(x_eval)
+        ])
+    assert isinstance(rp, np.ndarray)
+    assert isinstance(lp, np.ndarray)
+    assert rp.ndim == 1
+    assert lp.ndim == 1
+    assert rp.shape[0] == 2
+    assert lp.shape[0] == 2
+    assert isclose(rp[0], 0.3)
+    assert isclose(rp[1], 0.2)
+    assert isclose(lp[0], np.log(0.3))
+    assert isclose(lp[1], np.log(0.2))
+
+    # Test w/ input_type=raw and input as a numpy array
+    probs_in = np.log(np.array([[0.3, 0.5], 
+                                [0.7, 0.3], 
+                                [0.7, 0.3], 
+                                [0.7, 0.3]]))
+    x_eval = np.array([0, 0, 1, 2])
+    d1 = Categorical(probs_in, input_type='raw')
+    d1._build_recursively(tf.placeholder(tf.float32, [1]), [4])
+    assert isinstance(d1.built_obj, tfd.Categorical)
+    with tf.Session() as sess:
+        [
+            rp,
+            lp
+        ] = sess.run([
+            d1.built_obj.prob(x_eval),
+            d1.built_obj.log_prob(x_eval)
+        ])
+    assert isinstance(rp, np.ndarray)
+    assert isinstance(lp, np.ndarray)
+    assert rp.ndim == 1
+    assert lp.ndim == 1
+    assert rp.shape[0] == 4
+    assert lp.shape[0] == 4
+    assert isclose(rp[0], 0.3/(0.3+0.5+1))
+    assert isclose(rp[1], 0.7/(0.7+0.3+1))
+    assert isclose(rp[2], 0.3/(0.7+0.3+1))
+    assert isclose(rp[3], 1.0/(0.7+0.3+1))
+    assert isclose(lp[0], np.log(0.3/(0.3+0.5+1)))
+    assert isclose(lp[1], np.log(0.7/(0.7+0.3+1)))
+    assert isclose(lp[2], np.log(0.3/(0.7+0.3+1)))
+    assert isclose(lp[3], np.log(1.0/(0.7+0.3+1)))
+
+    # Test w/ input_type=raw and input as a TF tensor
+    probs_in = tf.constant(np.log(np.array([[0.3, 0.5], 
+                                            [0.7, 0.3], 
+                                            [0.7, 0.3], 
+                                            [0.7, 0.3]])), dtype=tf.float32)
+    x_eval = np.array([0, 0, 1, 2])
+    d1 = Categorical(probs_in, input_type='raw')
+    d1._build_recursively(tf.placeholder(tf.float32, [1]), [4])
+    assert isinstance(d1.built_obj, tfd.Categorical)
+    with tf.Session() as sess:
+        [
+            rp,
+            lp
+        ] = sess.run([
+            d1.built_obj.prob(x_eval),
+            d1.built_obj.log_prob(x_eval)
+        ])
+    assert isinstance(rp, np.ndarray)
+    assert isinstance(lp, np.ndarray)
+    assert rp.ndim == 1
+    assert lp.ndim == 1
+    assert rp.shape[0] == 4
+    assert lp.shape[0] == 4
+    assert isclose(rp[0], 0.3/(0.3+0.5+1))
+    assert isclose(rp[1], 0.7/(0.7+0.3+1))
+    assert isclose(rp[2], 0.3/(0.7+0.3+1))
+    assert isclose(rp[3], 1.0/(0.7+0.3+1))
+    assert isclose(lp[0], np.log(0.3/(0.3+0.5+1)))
+    assert isclose(lp[1], np.log(0.7/(0.7+0.3+1)))
+    assert isclose(lp[2], np.log(0.3/(0.7+0.3+1)))
+    assert isclose(lp[3], np.log(1.0/(0.7+0.3+1)))
+
+    # Test w/ input_type=raw and input as a parameter
+    probs_in = Parameter(shape=(4, 2))
+    x_eval = np.array([[0, 1, 2, 1],
+                       [0, 1, 2, 1],
+                       [0, 1, 2, 1],
+                       [0, 1, 2, 1],
+                       [0, 1, 2, 1]])
+    d1 = Categorical(probs_in, input_type='raw')
+    d1._build_recursively(tf.placeholder(tf.float32, [1]), [5])
+    assert isinstance(d1.built_obj, tfd.Categorical)
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        [
+            rp,
+        ] = sess.run([
+            d1.built_obj.prob(x_eval),
+        ])
+    assert isinstance(rp, np.ndarray)
+    assert rp.ndim == 2
+    assert rp.shape[0] == 5
+    assert rp.shape[1] == 4

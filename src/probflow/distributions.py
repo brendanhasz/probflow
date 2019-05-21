@@ -40,6 +40,7 @@ __all__ = [
 
 from collections import OrderedDict
 
+import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 tfd = tfp.distributions
@@ -603,7 +604,7 @@ class Categorical(DiscreteDistribution):
 
     You can define the distribution using either the :math:`N-1` raw
     parameters (:math:`\mathbf{\theta}`), the category probabilities
-    (:math:`\mathbf{p}`), or the logit-transformed category probabilities.
+    (:math:`\mathbf{p}`), or the log category probabilities.
     Use the ``input_type`` keyword argument to set 
     which way the inputs are interpereted.
 
@@ -622,9 +623,10 @@ class Categorical(DiscreteDistribution):
           :math:`\mathbf{\theta}`.
         * ``'probs'``: ``p`` represents the category probabilities 
           :math:`\mathbf{p}`.
-        * ``'logits'``: ``p`` represents the logit-transformed category 
+        * ``'logits'``: ``p`` represents the log category 
           probabilities :math:`\frac{\mathbf{p}}{1-\mathbf{p}}`.
-
+          These values will be passed through a softmax to generate the raw
+          category probabilities (so they're not "logits" per se).
     """
 
     # Default kwargs
@@ -650,7 +652,12 @@ class Categorical(DiscreteDistribution):
     def _build(self, args, _data, _batch_shape):
         """Build the distribution model."""
         if self.kwargs['input_type'] == 'raw': #p arg is the raw parameters
-            dims = [d.value for d in args['p'].shape[:-1]]      #apply
+            if isinstance(args['p'], np.ndarray):
+                dims = [d for d in args['p'].shape[:-1]]
+            elif isinstance(args['p'], tf.Tensor):
+                dims = [d.value for d in args['p'].shape[:-1]]
+            else:
+                raise TypeError('p argument must be a ndarray or a Tensor')
             zeros = tf.zeros(dims+[1], dtype=args['p'].dtype)   #logistic
             xo = tf.exp(tf.concat([args['p'], zeros], axis=-1)) #additive
             xo = xo/tf.reduce_sum(xo, axis=-1, keepdims=True)   #transform
