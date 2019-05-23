@@ -67,7 +67,7 @@ Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
 .. code-block:: python
 
-    model.plot_predictive_distribution(x_test, ci=0.95)
+    model.predictive_distribution_plot(x_test, ci=0.95)
 
 .. image:: img/readme/pred_dist.svg
    :width: 90 %
@@ -83,7 +83,7 @@ Inspect the posterior distributions of your fit model's parameters, with 95% con
 
 .. code-block:: python
 
-    model.plot_posterior(ci=0.95)
+    model.posterior_plot(ci=0.95)
 
 .. image:: img/readme/posteriors.svg
    :width: 90 %
