@@ -552,7 +552,9 @@ class Neg(BaseLayer):
 
     Given :math:`x`, this layer returns :math:`-x`, elementwise.
 
-    TODO: diagram
+    .. image:: img/layers/neg.svg
+        :width: 50 %
+        :align: center
 
 
     Examples
@@ -599,8 +601,10 @@ class Abs(BaseLayer):
 
     Given :math:`x`, this layer returns :math:`\abs x`, elementwise.
 
-    TODO: diagram
-    
+    .. image:: img/layers/abs.svg
+        :width: 50 %
+        :align: center    
+
 
     Examples
     --------
@@ -647,7 +651,9 @@ class Exp(BaseLayer):
 
     Given :math:`x`, this layer returns :math:`\exp x`, elementwise.
 
-    TODO: diagram
+    .. image:: img/layers/exp.svg
+        :width: 50 %
+        :align: center
 
 
     Examples
@@ -685,7 +691,9 @@ class Log(BaseLayer):
 
     Given :math:`x`, this layer returns :math:`\ln x`, elementwise.
 
-    TODO: diagram
+    .. image:: img/layers/log.svg
+        :width: 50 %
+        :align: center
 
 
     Examples
@@ -727,7 +735,9 @@ class Reciprocal(BaseLayer):
 
         \text{Reciprocal}(x) = \frac{1}{x}
 
-    TODO: diagram
+    .. image:: img/layers/reciprocal.svg
+        :width: 50 %
+        :align: center
 
 
     Examples
@@ -769,7 +779,9 @@ class Sqrt(BaseLayer):
 
         \text{Sqrt}(x) = \sqrt{x}
 
-    TODO: diagram
+    .. image:: img/layers/sqrt.svg
+        :width: 50 %
+        :align: center
 
 
     Examples
@@ -860,7 +872,9 @@ class Sigmoid(BaseLayer):
 
         \text{Sigmoid}(x) = \frac{1}{1 + \exp (-x)}
 
-    TODO: diagram
+    .. image:: img/layers/sigmoid.svg
+        :width: 50 %
+        :align: center
 
 
     Examples
@@ -904,7 +918,9 @@ class Relu(BaseLayer):
 
         \text{Relu}(x) = \max (x, 0)
 
-    TODO: diagram
+    .. image:: img/layers/relu.svg
+        :width: 50 %
+        :align: center
 
 
     Examples
