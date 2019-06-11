@@ -5,7 +5,7 @@ from matplotlib import rc
 
 def plot_func(x, y):
     plt.figure(figsize=(5, 3))
-    plt.plot(x, y, 'k')
+    plt.plot(x, y, 'k', linewidth=2)
     plt.gca().spines['left'].set_position('zero')
     plt.gca().spines['bottom'].set_position('zero')
     plt.gca().spines['right'].set_color('none')
@@ -76,6 +76,6 @@ plt.show()
 # Relu
 plot_func(xx, np.maximum(xx, 0.0))
 plt.yticks([1, 2, 3])
-plt.ylim([0.0, 3.05])
+plt.ylim([-0.05, 3.05])
 plt.savefig("relu.svg")
 plt.show()

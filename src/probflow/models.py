@@ -98,7 +98,7 @@ def PoissonRegression(data=None):
 def DenseNet(data=None, units=[1],  batch_norm=False, activation=tf.nn.relu):
     """Multiple dense layers in a row.
 
-    .. admonition:: Does not include an observation distribution!
+    .. warning:: Does not include an observation distribution!
 
         :func:`.DenseNet` returns a |Layer|, unlike other ready-made models
         like :func:`.DenseRegression` which return a |Model|.  This means you

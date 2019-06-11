@@ -599,7 +599,7 @@ class Neg(BaseLayer):
 class Abs(BaseLayer):
     r"""A layer which outputs the absolute value of its input.
 
-    Given :math:`x`, this layer returns :math:`\abs x`, elementwise.
+    Given :math:`x`, this layer returns :math:`|x|`, elementwise.
 
     .. image:: img/layers/abs.svg
         :width: 50 %
@@ -649,7 +649,7 @@ class Abs(BaseLayer):
 class Exp(BaseLayer):
     r"""A layer which outputs the natural exponent of its input.
 
-    Given :math:`x`, this layer returns :math:`\exp x`, elementwise.
+    Given :math:`x`, this layer returns :math:`e^x`, elementwise.
 
     .. image:: img/layers/exp.svg
         :width: 50 %
@@ -1384,7 +1384,7 @@ class LogSumExp(BaseLayer):
     .. math::
 
         \text{LogSumExp}(\mathbf{x}) = 
-        \log \left( \sum_i \exp x_i-m \right) + m
+        \log \left( \sum_i \exp (x_i-m) \right) + m
 
     The default is to compute the operation along the the last dimension of 
     the input |Tensor|, but this can be set with the ``axis`` keyword

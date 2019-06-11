@@ -7,7 +7,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Tests for Distributions
 * Diagrams for layers in docs
 * Docs for distributions (including distribution diagrams)
 * Finish BaseDistribution critisism methods
