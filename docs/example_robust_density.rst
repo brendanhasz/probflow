@@ -13,6 +13,6 @@ TODO: math and diagram
 .. code-block:: python
 
     predictions = DenseNet(units=[128, 64, 32, 1])
-    noise_std = DenseNet(units=[128, 64, 32, 1])
+    noise_std = Exp(DenseNet(units=[128, 64, 32, 1]))
     model = Cauchy(predictions, noise_std)
     model.fit(x, y)
