@@ -7,7 +7,6 @@ This page has a list of planned improvements, in order of when I plan to get to 
 Backlog (short term):
 ---------------------
 
-* Diagrams for layers in docs
 * Docs for distributions (including distribution diagrams)
 * Finish BaseDistribution critisism methods
 * Tests for BaseDistribution critisism methods
@@ -42,8 +41,9 @@ Backlog (long term):
 * Neural Matrix Factorization (model, tests, and example)
 * `Mixture distribution`_
 * Mixture density network example
+* `Separate model from noise uncertainty`_
+* `Bayesian decision support`_
 * `Callbacks`_
-* `Separate model from noise uncertainty`_ 
 * `Support for random effects and multilevel models`_
 * Multivariate Normal, StudentT, and Cauchy dists
 * `Tensorflow graph view`_
@@ -59,8 +59,9 @@ Backlog (long term):
 * Pooling layers
 * Ready-made Conv models
 * LSTM Layer
-* Support for passing x=None to do unsupervised models (e.g. Gaussian mixture models)
-* `Option to use dropout instead of weight sampling`_
+* Support for passing x=None to do unsupervised models (e.g. Gaussian mixture models, Bayesian nets, LDA, variational autoencoders)
+* Separate Layers into Transforms (e.g. Exp, Add) and Layer (e.g. Dense, BatchNormalization, which create parameters and return a Transform)
+* `Module class`_
 
 
 Notes
@@ -205,6 +206,13 @@ Embedding layer
 With priors on the embedding vectors to regularize.
 
 
+Bayesian decision support
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Add methods to base dists which implement finding the optimal bayes action given a loss function, etc
+https://en.wikipedia.org/wiki/Bayes_estimator
+
+
 Callbacks
 ^^^^^^^^^
 
@@ -290,7 +298,7 @@ Distributed arrays would be hard though.  Dask maybe?
 Anyway, it would be nice 
 to let it take dataset iterators so users can define their own data pipelines.
 
-Maybe define data generators like in keras?  https://keras.io/models/model/#fit_generator
+Maybe just define data generators like in keras?  https://keras.io/models/model/#fit_generator
 PyTorch also has a similar thing with torch.utils.data.Dataset
 
 
@@ -329,29 +337,7 @@ Optimize bounding
 ^^^^^^^^^^^^^^^^^
 
 In Parameter._bound, ``exp`` and ``sigmoid`` are used just to bound the 
-variational posterior args within a certain range.  Could just as easily
-use an approximation w/o losing anything.  Could use a fast approximation 
-for the exp at least.  Since
-
-.. math::
-
-   e^x = \lim_{n \to \infty} \left( 1 + \frac{x}{n} \right)^n
-
-You can approximate it just by using a large enough :math:`n`.  E.g. w/ :math:`n=256`:
-
-.. code-block:: python
-
-   def fast_exp256(x):
-       e_x = 1.0 + x / 256
-       for i in range(8):
-           e_x *= e_x
-       return e_x
-
-(but obvi not in python haha).  Not sure if that would actually end up being faster in tensorflow or not.
-
-Could use tf.hard_sigmoid to approximate the sigmoid.
-
-Or, could just use tf.keras.constraints to bound the values...
+variational posterior args within a certain range.  Should just use tf.keras.constraints to bound the values...
 
 
 Dev guide
@@ -360,7 +346,9 @@ Dev guide
 Testing (eg --plot arg, etc), inheritance structure, etc
 
 
-Option to use dropout instead of weight sampling
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Module class
+^^^^^^^^^^^^
 
-Would fit a lot faster... https://arxiv.org/abs/1506.02142
+So more complicated networks can be defined w/ building blocks.  User can define the `__init__` and `__call__` methods.
+
+Then will also want to re-define the "models" (DenseNet, DenseRegression, LinearRegression, etc) as Modules.

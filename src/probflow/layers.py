@@ -2262,7 +2262,7 @@ class Sequential(BaseLayer):
         if not isinstance(kwargs['layers'], list):
             raise ValueError('layers kwarg must be a list of layers')
         for layer in kwargs['layers']:
-            if not isinstance(kwargs['layers'], BaseLayer):
+            if not isinstance(layer, BaseLayer):
                 raise ValueError('each element of layers must be a BaseLayer')
             if len(layer._default_args) > 1:
                 raise RuntimeError('each layer must take only 1 input')
