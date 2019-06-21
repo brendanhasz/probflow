@@ -1321,9 +1321,9 @@ class BaseDistribution(BaseLayer):
         if 'sse' in metric_list:
             metrics['sse'] = np.sum(np.square(y-y_pred))
 
-        # Compute mean squared error
+        # Compute mean abssolute error
         if 'mae' in metric_list:
-            metrics['mae'] = np.mean(y-y_pred)
+            metrics['mae'] = np.mean(np.abs(y-y_pred))
 
         # TODO: r^2, cross-entropy, etc
 
