@@ -1118,7 +1118,7 @@ class BaseDistribution(BaseLayer):
 
             # Evaluate metrics
             if metrics:
-                md = self.metrics(x_val, y_val, metrics)
+                md = self.metrics(metrics, x_val, y_val)
 
             # Print metrics
             if verbose:
@@ -1257,18 +1257,6 @@ class BaseDistribution(BaseLayer):
 
         Parameters
         ----------
-        metric_list : str or list of str
-            Metrics to evaluate each epoch.  To evaluate multiple metrics, 
-            pass a list of strings, where each string is a different metric.
-            Available metrics:
-
-            * 'acc': accuracy
-            * 'accuracy': accuracy
-            * 'mse': mean squared error
-            * 'sse': sum of squared errors
-            * 'mae': mean absolute error
-
-            Default = empty list
         x : |ndarray| or |DataFrame| or int or str or list of str or int
             Independent variable values of the dataset to evaluate (aka the 
             "features").  If ``data`` was passed as a |DataFrame|, ``x`` can
@@ -1287,6 +1275,18 @@ class BaseDistribution(BaseLayer):
             If ``data`` is a |DataFrame|, ``x`` and ``y`` are treated as
             strings or lists of strings containing the columns from
             ``data`` to use as in- and de-pendent variables.
+        metric_list : str or list of str
+            Metrics to evaluate each epoch.  To evaluate multiple metrics, 
+            pass a list of strings, where each string is a different metric.
+            Available metrics:
+
+            * 'acc': accuracy
+            * 'accuracy': accuracy
+            * 'mse': mean squared error
+            * 'sse': sum of squared errors
+            * 'mae': mean absolute error
+
+            Default = empty list
         """
 
         # Check types

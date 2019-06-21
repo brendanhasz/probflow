@@ -2272,7 +2272,7 @@ class Sequential(BaseLayer):
         """Build the layer."""
 
         # List of layers
-        layers = kwargs['layers']
+        layers = self.kwargs['layers']
 
         # Connect the layers
         output = args['input']
@@ -2300,7 +2300,7 @@ class Sequential(BaseLayer):
         return self._sample
 
 
-    def _build_mean(self, args, data):
+    def _build_mean(self, args, data, batch_shape):
         """Build the layer with mean parameters."""
         return self._mean
 
