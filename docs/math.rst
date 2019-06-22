@@ -10,25 +10,25 @@ ProbFlow fits Bayesian models to data using stochastic variational inference [1]
 
 Notation:
 
-- Variables: :math:`v`
+- Parameters: :math:`\beta`
 - Data: :math:`\mathcal{D}`
-- Prior: :math:`p(v)`
-- Likelihood: :math:`p(\mathcal{D}|v)`
-- Posterior: :math:`p(v|\mathcal{D})`
+- Prior: :math:`p(\beta)`
+- Likelihood: :math:`p(\mathcal{D}|\beta)`
+- Posterior: :math:`p(\beta|\mathcal{D})`
 
-With variational inference we approximate the posterior for each variable with a "variational posterior distribution" :math:`q`. That variational distribution has some parameters :math:`\theta`.  For example, if we use a normal distribution as our variational distribution, it has two parameters (:math:`\mu` and :math:`\sigma`).  So, :math:`\theta = \{ \mu, \sigma \}` and 
-
-.. math::
-
-    q(v|\theta) = q(v|\mu,\sigma) = \mathcal{N}(v | \mu, \sigma)
-
-To "fit" a Bayesian model with this method, we want to find the values of :math:`\theta` such that the difference between :math:`q(v|\theta)` (the variational distribution) and :math:`p(v|\mathcal{D})` (the true posterior distribution) is as small as possible.
-
-If we use `Kullback-Leibler divergence <http://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence>`_ as our measure of "difference", then we want to find the best values for our variational distribution parameters (:math:`\hat{\theta}`) which give the lowest KL divergence between the variational distribution and the true posterior:
+With variational inference we approximate the posterior for each parameter with a "variational posterior distribution" :math:`q`. That variational distribution has some variables :math:`\theta`.  For example, if we use a normal distribution as our variational distribution, it has two variables: :math:`\mu` and :math:`\sigma`.  So, :math:`\theta = \{ \mu, \sigma \}` and 
 
 .. math::
 
-    \hat{\theta} = \arg \min_\theta ~ \text{KL}(~q(v|\theta)~||~p(v|\mathcal{D})~) 
+    q(\beta|\theta) = q(\beta|\mu,\sigma) = \mathcal{N}(\beta | \mu, \sigma)
+
+To "fit" a Bayesian model with this method, we want to find the values of :math:`\theta` such that the difference between :math:`q(\beta|\theta)` (the variational distribution) and :math:`p(\beta|\mathcal{D})` (the true posterior distribution) is as small as possible.
+
+If we use `Kullback-Leibler divergence <http://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence>`_ as our measure of "difference", then we want to find the best values for our variational distribution variables (:math:`\hat{\theta}`) which give the lowest KL divergence between the variational distribution and the true posterior:
+
+.. math::
+
+    \hat{\theta} = \arg \min_\theta ~ \text{KL}(~q(\beta|\theta)~||~p(\beta|\mathcal{D})~) 
 
 The problem is, we don't know what the true posterior looks like - that's what we're trying to solve!  Luckily, this divergence between the variational and true posteriors can be broken down into the sum of three terms [3]_:
 
@@ -40,34 +40,34 @@ Proof:
 
 .. math::
 
-    \text{KL}(~q(v|\theta)~||~p(v|\mathcal{D})~) =& \int q(v|\theta) \log \frac{q(v|\theta)}{p(v|\mathcal{D})} dv \\
-    ~ =& \int q(v|\theta) \log \frac{q(v|\theta) ~ p(\mathcal{D})}{p(\mathcal{D}|v)~p(v)} dv \\
-    ~ =& \int q(v|\theta) 
-        \left( \log \frac{q(v|\theta)}{p(v)} - \log p(\mathcal{D}|v) + \log p(\mathcal{D}) \right) dv \\
-    ~ =& \int \left( q(v|\theta) 
-         \log \frac{q(v|\theta)}{p(v)} - q(v|\theta) \log p(\mathcal{D}|v) + q(v|\theta) \log p(\mathcal{D}) \right) dv \\
-    ~ =& \int q(v|\theta) \log \frac{q(v|\theta)}{p(v)} dv
-        - \int q(v|\theta) \log p(\mathcal{D}|v) dv
-        + \int q(v|\theta) \log p(\mathcal{D}) dv \\
-    ~ =& \int q(v|\theta) \log \frac{q(v|\theta)}{p(v)} dv
-        - \int q(v|\theta) \log p(\mathcal{D}|v) dv
+    \text{KL}(~q(\beta|\theta)~||~p(\beta|\mathcal{D})~) =& \int q(\beta|\theta) \log \frac{q(\beta|\theta)}{p(\beta|\mathcal{D})} d\beta \\
+    ~ =& \int q(\beta|\theta) \log \frac{q(\beta|\theta) ~ p(\mathcal{D})}{p(\mathcal{D}|\beta)~p(\beta)} d\beta \\
+    ~ =& \int q(\beta|\theta) 
+        \left( \log \frac{q(\beta|\theta)}{p(\beta)} - \log p(\mathcal{D}|\beta) + \log p(\mathcal{D}) \right) d\beta \\
+    ~ =& \int \left( q(\beta|\theta) 
+         \log \frac{q(\beta|\theta)}{p(\beta)} - q(\beta|\theta) \log p(\mathcal{D}|\beta) + q(\beta|\theta) \log p(\mathcal{D}) \right) d\beta \\
+    ~ =& \int q(\beta|\theta) \log \frac{q(\beta|\theta)}{p(\beta)} d\beta
+        - \int q(\beta|\theta) \log p(\mathcal{D}|\beta) d\beta
+        + \int q(\beta|\theta) \log p(\mathcal{D}) d\beta \\
+    ~ =& \int q(\beta|\theta) \log \frac{q(\beta|\theta)}{p(v)} d\beta
+        - \int q(\beta|\theta) \log p(\mathcal{D}|\beta) d\beta
         + \log p(\mathcal{D}) \\
-    ~ =& ~ \text{KL} (~q(v|\theta)~||~p(v)~)
-        - \int q(v|\theta) \log p(\mathcal{D}|v) dv 
+    ~ =& ~ \text{KL} (~q(\beta|\theta)~||~p(\beta)~)
+        - \int q(\beta|\theta) \log p(\mathcal{D}|\beta) dv 
         + \log p(\mathcal{D}) \\
-    ~ =& ~ \text{KL} (~q(v|\theta)~||~p(v)~)
-        - \mathbb{E}_{q(v|\theta)} [~\log p(\mathcal{D}|v)~] 
+    ~ =& ~ \text{KL} (~q(\beta|\theta)~||~p(\beta)~)
+        - \mathbb{E}_{q(\beta|\theta)} [~\log p(\mathcal{D}|\beta)~] 
         + \log p(\mathcal{D})
 
 The model evidence (:math:`\log p(\mathcal{D})`) is a constant, so in order to minimize the divergence between the variational and true posteriors, we can just minimize the right-hand side of the equation, ignoring the model evidence:
 
 .. math::
 
-    \hat{\theta} = \arg \min_\theta ~ \text{KL} (~q(v|\theta)~||~p(v)~) - \mathbb{E}_{q(v|\theta)} [~\log p(\mathcal{D}|v)~]
+    \hat{\theta} = \arg \min_\theta ~ \text{KL} (~q(\beta|\theta)~||~p(\beta)~) - \mathbb{E}_{q(\beta|\theta)} [~\log p(\mathcal{D}|\beta)~]
 
 These two terms are known as the "variational free energy", or the (negative) "evidence lower bound" (ELBO).
 
-During optimization, we can analytically compute the divergence between the priors and the variational posteriors (:math:`\text{KL} (~q(v|\theta)~||~p(v)~)`), assuming this is possible given the types of distributions we used for the prior and posterior (e.g. Normal distributions).  We can estimate the expected log likelihood (:math:`\mathbb{E}_{q(v|\theta)} [~\log p(\mathcal{D}|v)~]`) by sampling parameter values from the variational distribution for each datapoint in our batch, and then computing the average log likelihood for those samples.  That is, we estimate it via Monte Carlo.
+During optimization, we can analytically compute the divergence between the priors and the variational posteriors (:math:`\text{KL} (~q(\beta|\theta)~||~p(\beta)~)`), assuming this is possible given the types of distributions we used for the prior and posterior (e.g. Normal distributions).  We can estimate the expected log likelihood (:math:`\mathbb{E}_{q(\beta|\theta)} [~\log p(\mathcal{D}|\beta)~]`) by sampling parameter values from the variational distribution for each datapoint in our batch, and then computing the average log likelihood for those samples.  That is, we estimate it via Monte Carlo.
 
 When creating a loss function to maximize the ELBO, we need to be careful about batching.  The above minimization equation assumes all samples are being used, but when using stochastic gradient descent, we have only a subset of the samples at any given time.  So, we need to ensure the contribution of the log likelihood and the KL divergence are scaled similarly.  Since we're using a Monte Carlo estimation of the expected log likelihood anyway, with batching we can still just take the mean log likelihood of our samples as the contribution of the log likelihood term.  However, the divergence term should be applied once per *pass through the data*, so we need to normalize it by the *total number of datapoints*, not by the numeber of datapoints in the batch.  With TensorFlow, this looks like:
 
