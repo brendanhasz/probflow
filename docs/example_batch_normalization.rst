@@ -18,9 +18,11 @@ Batch normalization can be performed using the :class:`.BatchNormalization` clas
     predictions = Sequential(layers=[
         Dense(units=128),
         BatchNormalization(),
+        Relu(),
         Dense(units=64),
         BatchNormalization(),
-        Dense(units=1, activation=None)
+        Relu(),
+        Dense(units=1)
     ])
     noise_std = ScaleParameter()
     model = Normal(predictions, noise_std)

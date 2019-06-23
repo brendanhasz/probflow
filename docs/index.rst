@@ -112,9 +112,9 @@ ProbFlow also provides more complex layers, such as those required for building 
     from probflow import Sequential, Dense, ScaleParameter, Normal
 
     predictions = Sequential(layers=[
-        Dense(units=128),
-        Dense(units=64),
-        Dense(units=1, activation=None)
+        Dense(units=128, activation='relu'),
+        Dense(units=64, activation='relu'),
+        Dense(units=1)
     ])
     noise_std = ScaleParameter()
     model = Normal(predictions, noise_std)

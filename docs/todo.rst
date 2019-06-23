@@ -12,7 +12,6 @@ Backlog (short term):
 * Tests for BaseDistribution critisism methods
 * Docs for BaseDistribution critisism methods
 * Dense layer
-* Make default dense activation None!
 * Test for Dense, add Dense test to stats/test_LinearRegression
 * Test 2-layer dense network (w/ sin(x)/x or something function)
 * `Sequential layer`_

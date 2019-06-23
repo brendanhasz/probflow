@@ -69,9 +69,9 @@ TODO: the Dense layer automatically handles creating the parameters, performing 
 
     from probflow import Dense, ScaleParameter, Normal
 
-    layer1 = Dense(units=128)
-    layer2 = Dense(layer1, units=64)
-    predictions = Dense(layer2, units=1, activation=None)
+    layer1 = Dense(units=128, activation='relu')
+    layer2 = Dense(layer1, units=64, activation='relu')
+    predictions = Dense(layer2, units=1)
     noise_std = ScaleParameter()
     model = Normal(predictions, noise_std)
     model.fit(x, y)
@@ -87,9 +87,9 @@ TODO: the Sequential layer takes a list of layers and pipes the output of each i
     from probflow import Sequential, Dense, ScaleParameter, Normal
 
     predictions = Sequential(layers=[
-        Dense(units=128),
-        Dense(units=64),
-        Dense(units=1, activation=None)
+        Dense(units=128, activation='relu'),
+        Dense(units=64, activation='relu'),
+        Dense(units=1)
     ])
     noise_std = ScaleParameter()
     model = Normal(predictions, noise_std)

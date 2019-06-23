@@ -1754,22 +1754,28 @@ class Dense(BaseLayer):
     Given a vector :math:`\mathbf{x}`, this layer first performs a linear
     transformation on :math:`\mathbf{x}` by matrix-multiplying 
     :math:`\mathbf{x}` by a weight matrix :math:`\mathbf{W}` and adding 
-    a bias :math:`\mathbf{b}`, and then passes the result of that linear 
-    transformation through some non-linear, elementwise activation function 
-    :math:`f`:
+    a bias :math:`\mathbf{b}`.  
 
     .. math::
 
-        \text{Dense}(\mathbf{x}) = f(\mathbf{x}^\top \mathbf{W} + \mathbf{b})
+        \text{Dense}(\mathbf{x}) = \mathbf{x}^\top \mathbf{W} + \mathbf{b}
 
     Where :math:`\mathbf{W}` is an :math:`N \times M` matrix of 
     parameters, :math:`\mathbf{b}` is a :math:`M`-length vector of parameters,
     :math:`N` is the length of :math:`\mathbf{x}`, and :math:`M` is the length
     of the output vector.
 
+    Optionally, this layer can also pass the result of that linear 
+    transformation through some non-linear, elementwise activation function 
+    :math:`f` (see the ``activation`` keyword argument):
+
+    .. math::
+
+        \text{Dense}(\mathbf{x}) = f(\mathbf{x}^\top \mathbf{W} + \mathbf{b})
+
     Any function can be specified for :math:`f` using the ``activation`` 
-    keyword argument, but the default is to use a the rectified linear unit
-    activation function:
+    keyword argument.  Or, use a string to specify common activation functions
+    For example, set ``activation = 'relu'`` to use a the rectified linear unit activation function:
 
     .. math::
 
@@ -1797,9 +1803,9 @@ class Dense(BaseLayer):
     name : str
         Name for this layer.
         Default = 'Dense'
-    activation : callable
+    activation : callable or str {'relu', 'elu', 'sigmoid', or 'tanh'}
         Activation function to apply after the linear transformation.
-        Default = ``tf.nn.relu`` (rectified linear unit)
+        Default = None
     weight_posterior : |Distribution|
         Probability distribution class to use to approximate the posterior
         for the weight parameter(s) (:math:`\mathbf{W}`).
@@ -1845,7 +1851,7 @@ class Dense(BaseLayer):
     .. code-block:: python
 
         x = Input([0, 1, 2])
-        out = Dense(x, units=1)
+        out = Dense(x, activation='relu')
 
     Especially when the output dimensions are >1 and multiple layers are to be
     stacked:
@@ -1853,8 +1859,8 @@ class Dense(BaseLayer):
     .. code-block:: python
 
         x = Input([0, 1, 2])
-        l1 = Dense(x, units=128)
-        l2 = Dense(l1, units=64)
+        l1 = Dense(x, units=128, activation='relu')
+        l2 = Dense(l1, units=64, activation='relu')
         out = Dense(l2, units=1)
 
     """
@@ -1870,7 +1876,7 @@ class Dense(BaseLayer):
     _default_kwargs = {
         'units': 1,
         'name': 'Dense',
-        'activation': tf.nn.relu,
+        'activation': None,
         'weight_posterior': Normal,
         'bias_posterior': Normal,
         'weight_initializer': None,
@@ -1888,9 +1894,14 @@ class Dense(BaseLayer):
             raise ValueError('units kwarg must be positive')
         if not isinstance(kwargs['name'], str):
             raise TypeError('name kwarg must be a str')
-        if (kwargs['activation'] is not None and 
-            not callable(kwargs['activation'])):
-            raise TypeError('activation must be a callable or None')
+        if isinstance(kwargs['activation'], str):
+            if kwargs['activation'] not in ['relu', 'elu', 'sigmoid', 'tanh']:
+                raise ValueError('activation must be relu, elu, '
+                                 'sigmoid, or tanh')
+        else:
+            if (kwargs['activation'] is not None and 
+                not callable(kwargs['activation'])):
+                raise TypeError('activation must be a callable, str, or None')
         if not issubclass(kwargs['weight_posterior'], BaseDistribution):
             raise TypeError('weight_posterior kwarg must be a Distribution')
         if not issubclass(kwargs['bias_posterior'], BaseDistribution):
@@ -1928,25 +1939,33 @@ class Dense(BaseLayer):
         weight._build_recursively(data, batch_shape)
         bias._build_recursively(data, batch_shape)
 
+        # Activation
+        if self.kwargs['activation'] is None:
+            activation = lambda x: x
+        elif isinstance(self.kwargs['activation'], str):
+            act_dict = {
+                'relu': tf.nn.relu,
+                'elu': tf.nn.elu,
+                'sigmoid': tf.math.sigmoid,
+                'tanh': tf.math.tanh,
+            }
+            activation = act_dict[self.kwargs['activation']]
+        else:
+            activation = self.kwargs['activation']
+
         # Compute output using a sample from the variational posteriors
         weight_samples = weight.built_obj
         bias_samples_shape = tf.concat([batch_shape, [units]], axis=0)
         bias_samples = tf.reshape(bias.built_obj, bias_samples_shape)
         y_out = tf.reduce_sum(weight_samples*x_in, axis=1) + bias_samples
-        if self.kwargs['activation'] is None:
-            self._sample = y_out
-        else:
-            self._sample = self.kwargs['activation'](y_out)
+        self._sample = activation(y_out)
 
         # Compute the output using the means of the variational posteriors
         weight_means = weight.mean_obj
         bias_means_shape = tf.concat([[1], [units]], axis=0)
         bias_means = tf.reshape(bias.mean_obj, bias_means_shape)
         mean_y_out = tf.reduce_sum(weight_means*x_in, axis=1) + bias_means
-        if self.kwargs['activation'] is None:
-            self._mean = mean_y_out
-        else:
-            self._mean = self.kwargs['activation'](mean_y_out)
+        self._mean = activation(mean_y_out)
 
         # Compute the losses
         self._log_loss_sum = weight._log_loss + bias._log_loss

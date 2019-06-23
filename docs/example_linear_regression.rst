@@ -80,7 +80,7 @@ TODO: with Dense (which automatically uses x as input if none is specified, defa
 
     from probflow import Dense, ScaleParameter, Normal
 
-    predictions = Dense(activation=None)
+    predictions = Dense()
     noise_std = ScaleParameter()
 
     model = Normal(predictions, noise_std)

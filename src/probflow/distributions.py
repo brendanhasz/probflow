@@ -654,7 +654,7 @@ class Categorical(DiscreteDistribution):
         if self.kwargs['input_type'] == 'raw': #p arg is the raw parameters
             if isinstance(args['p'], np.ndarray):
                 dims = [d for d in args['p'].shape[:-1]]
-            elif isinstance(args['p'], tf.Tensor):
+            elif isinstance(args['p'], (tf.Tensor, tf.Variable)):
                 dims = [d.value for d in args['p'].shape[:-1]]
             else:
                 raise TypeError('p argument must be a ndarray or a Tensor')

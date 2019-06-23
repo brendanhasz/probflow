@@ -14,7 +14,7 @@ from probflow.distributions import Normal
 def test_sequential_layer_fit():
     """Tests probflow.layers.Sequential"""
 
-    # TODO move test to tests/integration
+    # TODO move test to tests/integration and just do unit tests here
 
     # Dummy data
     x = np.random.randn(100, 4)
@@ -24,13 +24,12 @@ def test_sequential_layer_fit():
 
     # Model 
     preds = Sequential(layers=[
-        Dense(units=64),
-        Dense(units=32),
-        Dense(units=1, activation=None),
+        Dense(units=64, activation='relu'),
+        Dense(units=32, activation='relu'),
+        Dense(units=1),
     ])
     std_dev = ScaleParameter()
     model = Normal(preds, std_dev)
 
     # Fit the model
     model.fit(x, y, epochs=10)
-

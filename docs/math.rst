@@ -49,11 +49,11 @@ Proof:
     ~ =& \int q(\beta|\theta) \log \frac{q(\beta|\theta)}{p(\beta)} d\beta
         - \int q(\beta|\theta) \log p(\mathcal{D}|\beta) d\beta
         + \int q(\beta|\theta) \log p(\mathcal{D}) d\beta \\
-    ~ =& \int q(\beta|\theta) \log \frac{q(\beta|\theta)}{p(v)} d\beta
+    ~ =& \int q(\beta|\theta) \log \frac{q(\beta|\theta)}{p(\beta)} d\beta
         - \int q(\beta|\theta) \log p(\mathcal{D}|\beta) d\beta
         + \log p(\mathcal{D}) \\
     ~ =& ~ \text{KL} (~q(\beta|\theta)~||~p(\beta)~)
-        - \int q(\beta|\theta) \log p(\mathcal{D}|\beta) dv 
+        - \int q(\beta|\theta) \log p(\mathcal{D}|\beta) d\beta 
         + \log p(\mathcal{D}) \\
     ~ =& ~ \text{KL} (~q(\beta|\theta)~||~p(\beta)~)
         - \mathbb{E}_{q(\beta|\theta)} [~\log p(\mathcal{D}|\beta)~] 

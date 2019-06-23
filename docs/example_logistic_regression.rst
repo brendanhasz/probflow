@@ -54,7 +54,7 @@ TODO: with Dense (which automatically uses x as input if none is specified, defa
 
     from probflow import Dense, Bernoulli
 
-    logits = Dense(activation=None)
+    logits = Dense()
     model = Bernoulli(logits)
     model.fit(x, y)
 

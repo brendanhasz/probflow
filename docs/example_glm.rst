@@ -16,6 +16,6 @@ TODO: diagram
 
     from probflow import Exp, Dense, Poisson
 
-    predictions = Exp(Dense(activation=None))
+    predictions = Exp(Dense())
     model = Poisson(predictions)
     model.fit(x, y)
