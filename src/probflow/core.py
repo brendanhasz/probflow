@@ -2175,7 +2175,7 @@ class BaseDistribution(BaseLayer):
 
 
 class ContinuousDistribution(BaseDistribution):
-    r"""Abstract base class for *continuous* ProbFlow |Distributions|
+    r"""Abstract base class for continuous ProbFlow |Distributions|
 
     TODO: More info...
 
@@ -2826,7 +2826,7 @@ class ContinuousDistribution(BaseDistribution):
 
 
 class DiscreteDistribution(BaseDistribution):
-    r"""Abstract base class for *discrete* ProbFlow |Distributions|
+    r"""Abstract base class for discrete ProbFlow |Distributions|
 
     TODO: More info...
 

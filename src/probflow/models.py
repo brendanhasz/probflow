@@ -1,6 +1,8 @@
 """Common already-made models.
 
-TODO: more info...
+Finally, the :mod:`.models` module contains several common ready-made models,
+such as a linear regression, a logistic regression, and a multilayer
+fully-connected neural network.
 
 * :func:`.LinearRegression`
 * :func:`.LogisticRegression`
@@ -37,6 +39,20 @@ def LinearRegression(data=None):
     ----------
     data : |None| or a |Layer|
         Independent variable data to regress.
+
+    Examples
+    --------
+
+    To create a linear regression which uses all the input variables as 
+    predictors:
+
+    .. code-block:: python
+
+        from probflow import LinearRegression
+        model = LinearRegression()
+
+        # x and y are numpy arrays
+        model.fit(x, y)
 
     """
 

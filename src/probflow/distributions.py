@@ -1,6 +1,10 @@
 """Probability distributions.
 
-TODO: more info
+The :mod:`.distributions` module contains classes to instantiate probability
+distributions, which describe the likelihood of either a parameter or a
+datapoint taking any given value.  Distribution objects are used to represent
+both the predicted probability distribution of the data, and also the
+parameters' posteriors and priors.
 
 Continuous Distributions
 ------------------------
@@ -17,9 +21,8 @@ Discrete Distributions
 ----------------------
 
 * :class:`.Bernoulli`
+* :class:`.Categorical`
 * :class:`.Poisson`
-
-TODO: Categorical, etc
 
 ----------
 
