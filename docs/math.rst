@@ -6,7 +6,7 @@ Mathematical Details
 .. include:: macros.hrst
 
 
-ProbFlow fits Bayesian models to data using stochastic variational inference [1]_, specifically by performing "Bayes by backprop" [2]_.
+ProbFlow fits Bayesian models to data using stochastic variational inference [1]_ [2]_, specifically via "Bayes by Backprop" [3]_.
 
 Notation:
 
@@ -30,7 +30,7 @@ If we use `Kullback-Leibler divergence <http://en.wikipedia.org/wiki/Kullback%E2
 
     \hat{\theta} = \arg \min_\theta ~ \text{KL}(~q(\beta|\theta)~||~p(\beta|\mathcal{D})~) 
 
-The problem is, we don't know what the true posterior looks like - that's what we're trying to solve!  Luckily, this divergence between the variational and true posteriors can be broken down into the sum of three terms [3]_:
+The problem is, we don't know what the true posterior looks like - that's what we're trying to solve!  Luckily, this divergence between the variational and true posteriors can be broken down into the sum of three terms:
 
 1. the divergence between the prior and the variational distribution
 2. the (negative) expected log likelihood
@@ -82,14 +82,14 @@ When creating a loss function to maximize the ELBO, we need to be careful about 
 
 References
 ----------
-.. [1] Matthew D. Hoffman, David M. Blei, Chong Wang, and John Paisley.
+.. [1] Alex Graves.
+    Practical Variational Inference for Neural Networks.
+    In *Advances in Neural Information Processing Systems (NIPS)*, pages 2348–2356, 2011
+    http://papers.nips.cc/paper/4329-practical-variational-inference-for-neural-networks
+.. [2] Matthew D. Hoffman, David M. Blei, Chong Wang, and John Paisley.
     Stochastic Variational Inference.
     *Journal of Machine Learning Research* 14:1303−1347, 2013.
     http://jmlr.org/papers/v14/hoffman13a.html
-.. [2] Charles Blundell, Julien Cornebise, Koray Kavukcuoglu, and Daan Wierstra. 
+.. [3] Charles Blundell, Julien Cornebise, Koray Kavukcuoglu, and Daan Wierstra. 
     Weight uncertainty in neural networks. 
     *arXiv preprint*, 2015. http://arxiv.org/abs/1505.05424
-.. [3] Michael I. Jordan, Zoubin Ghahramani, Tommi S. Jaakkola, and Lawrence K. Saul.
-    An Introduction to Variational Methods for Graphical Models.
-    *Machine Learning* 37:183, 1999.
-    http://doi.org/10.1023/A:1007665907178
