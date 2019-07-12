@@ -41,18 +41,23 @@ __all__ = [
     'Poisson',
 ]
 
-from collections import OrderedDict
 
-import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
-tfd = tfp.distributions
-
-from .core import ContinuousDistribution, DiscreteDistribution, REQUIRED
+from probflow.core.settings import get_backend
+from probflow.core.base import BaseDistribution
 
 
+# Import the relevant backend
+if get_backend() == 'pytorch':
+    import torch
+    tod = torch.distributions
+else:
+    import tensorflow as tf
+    import tensorflow_probability as tfp
+    tfd = tfp.distributions
 
-class Deterministic(ContinuousDistribution):
+
+
+class Deterministic(BaseDistribution):
     r"""A deterministic distribution.
 
     A 
@@ -79,33 +84,27 @@ class Deterministic(ContinuousDistribution):
 
     Parameters
     ----------
-    loc : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    loc : int, float, |ndarray|, or |Tensor|
         Mean of the deterministic distribution (:math:`k_0`).
         Default = 0
     """
 
-    # Distribution parameters and their default values
-    _default_args = OrderedDict([
-        ('loc', 0),
-    ])
 
-    # Posterior distribution parameter bounds (lower, upper)
-    _post_param_bounds = {
-        'loc': (None, None),
-    }
+    def __init__(self, loc=0):
+        # TODO: type check?
+        self.loc = loc
 
-    # Posterior parameter initializers
-    _post_param_init = {
-        'loc': tf.initializers.truncated_normal(mean=0.0, stddev=1.0),
-    }
 
-    def _build(self, args, _data, _batch_shape):
-        """Build the distribution model."""
-        return tfd.Deterministic(loc=args['loc'])
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        if get_backend() == 'pytorch':
+            raise NotImplementedError
+        else:
+            return tfd.Deterministic(self.loc)
 
 
 
-class Normal(ContinuousDistribution):
+class Normal(BaseDistribution):
     r"""The Normal distribution.
 
     The 
@@ -144,90 +143,23 @@ class Normal(ContinuousDistribution):
         Default = 1
     """
 
-    # Distribution parameters and their default values
-    _default_args = OrderedDict([
-        ('loc', 0),
-        ('scale', 1)
-    ])
 
-    # Posterior distribution parameter bounds (lower, upper)
-    _post_param_bounds = {
-        'loc': (None, None),
-        'scale': (0, None)
-    }
+    def __init__(self, loc=0, scale=1):
+        # TODO: type checks?
+        self.loc = loc
+        self.scale = scale
 
-    # Posterior parameter initializers
-    _post_param_init = {
-        'loc': tf.initializers.truncated_normal(mean=0.0, stddev=1.0),
-        'scale': tf.initializers.random_uniform(minval=-0.7, maxval=0.4)
-    }
 
-    def _build(self, args, _data, _batch_shape):
-        """Build the distribution model."""
-        return tfd.Normal(loc=args['loc'], scale=args['scale'])
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        if get_backend() == 'pytorch':
+            return tod.Normal(self.loc, self.scale)
+        else:
+            return tfd.Normal(self.loc, self.scale)
 
 
 
-class HalfNormal(ContinuousDistribution):
-    r"""The Half-normal distribution.
-
-    The half-normal distribution is a continuous distribution defined over all
-    positive real numbers, and has one parameter:
-
-    - a scale parameter (``scale`` or :math:`\sigma > 0`) which determines the
-      standard deviation of the distribution.
-
-    A random variable :math:`x` drawn from a half-normal distribution
-
-    .. math::
-
-        x \sim \text{HalfNormal}(\sigma)
-
-    has probability
-
-    .. math::
-
-        p(x) =
-        \begin{cases}
-            0, & \text{if}~x<0 \\
-            \frac{2}{\sqrt{2 \pi \sigma^2}}
-            \exp \left( -\frac{(x-\mu)^2}{2 \sigma^2} \right),
-            & \text{otherwise}
-        \end{cases}
-
-    TODO: example image of the distribution
-
-
-    Parameters
-    ----------
-    scale : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
-        Standard deviation of the underlying normal distribution 
-        (:math:`\sigma`).
-        Default = 1
-    """
-
-    # Distribution parameter and the default value
-    _default_args = {
-        'scale': 1
-    }
-
-    # Posterior distribution parameter bounds (lower, upper)
-    _post_param_bounds = {
-        'scale': (0, None)
-    }
-
-    # Posterior parameter initializers
-    _post_param_init = {
-        'scale': tf.initializers.random_uniform(minval=-0.7, maxval=0.4)
-    }
-
-    def _build(self, args, _data, _batch_shape):
-        """Build the distribution model."""
-        return tfd.HalfNormal(scale=args['scale'])
-
-
-
-class StudentT(ContinuousDistribution):
+class StudentT(BaseDistribution):
     r"""The Student-t distribution.
 
     The 
@@ -275,34 +207,24 @@ class StudentT(ContinuousDistribution):
         Default = 1
     """
 
-    # Distribution parameters and their default values
-    _default_args = OrderedDict([
-        ('df', 1),
-        ('loc', 0),
-        ('scale', 1)
-    ])
 
-    # Posterior distribution parameter bounds (lower, upper)
-    _post_param_bounds = {
-        'df': (0, None),
-        'loc': (None, None),
-        'scale': (0, None)
-    }
+    def __init__(self, df=1, loc=0, scale=1):
+        # TODO: type checks?
+        self.df = df
+        self.loc = loc
+        self.scale = scale
 
-    # Posterior parameter initializers
-    _post_param_init = {
-        'df': tf.keras.initializers.Constant(value=1),
-        'loc': tf.initializers.truncated_normal(mean=0.0, stddev=1.0),
-        'scale': tf.initializers.random_uniform(minval=-0.7, maxval=0.4)
-    }
 
-    def _build(self, args, _data, _batch_shape):
-        """Build the distribution model."""
-        return tfd.StudentT(args['df'], args['loc'], args['scale'])
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        if get_backend() == 'pytorch':
+            return tod.StudentT(self.df, self.loc, self.scale)
+        else:
+            return tfd.StudentT(self.df, self.loc, self.scale)
 
 
 
-class Cauchy(ContinuousDistribution):
+class Cauchy(BaseDistribution):
     r"""The Cauchy distribution.
 
     The 
@@ -344,31 +266,23 @@ class Cauchy(ContinuousDistribution):
         Default = 1
     """
 
-    # Distribution parameters and their default values
-    _default_args = OrderedDict([
-        ('loc', 0),
-        ('scale', 1)
-    ])
 
-    # Posterior distribution parameter bounds (lower, upper)
-    _post_param_bounds = {
-        'loc': (None, None),
-        'scale': (0, None)
-    }
+    def __init__(self, loc=0, scale=1):
+        # TODO: type checks?
+        self.loc = loc
+        self.scale = scale
 
-    # Posterior parameter initializers
-    _post_param_init = {
-        'loc': tf.initializers.truncated_normal(mean=0.0, stddev=1.0),
-        'scale': tf.initializers.random_uniform(minval=-0.7, maxval=0.4)
-    }
 
-    def _build(self, args, _data, _batch_shape):
-        """Build the distribution model."""
-        return tfd.Cauchy(args['loc'], args['scale'])
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        if get_backend() == 'pytorch':
+            return tod.Cauchy(self.loc, self.scale)
+        else:
+            return tfd.Cauchy(self.loc, self.scale)
 
 
 
-class Gamma(ContinuousDistribution):
+class Gamma(BaseDistribution):
     r"""The Gamma distribution.
 
     The 
@@ -405,38 +319,28 @@ class Gamma(ContinuousDistribution):
 
     Parameters
     ----------
-    shape : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    shape : int, float, |ndarray|, or |Tensor|
         Shape parameter of the gamma distribution (:math:`\alpha`).
-    rate : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    rate : int, float, |ndarray|, or |Tensor|
         Rate parameter of the gamma distribution (:math:`\beta`).
 
     """
 
-    # Distribution parameters and their default values
-    _default_args = OrderedDict([
-        ('shape', REQUIRED),
-        ('rate', REQUIRED)
-    ])
-
-    # Posterior distribution parameter bounds (lower, upper)
-    _post_param_bounds = {
-        'shape': (0, None),
-        'rate': (0, None)
-    }
-
-    # Posterior parameter initializers
-    _post_param_init = {
-        'shape': tf.initializers.truncated_normal(mean=1.6, stddev=0.1),
-        'rate': tf.initializers.truncated_normal(mean=1.6, stddev=0.1)
-    }
-
-    def _build(self, args, _data, _batch_shape):
-        """Build the distribution model."""
-        return tfd.Gamma(concentration=args['shape'], rate=args['rate'])
+    def __init__(self, concentration, rate):
+        # TODO: type checks?
+        self.concentration = concentration
+        self.rate = rate
 
 
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        if get_backend() == 'pytorch':
+            return tod.Gamma(self.concentration, self.rate)
+        else:
+            return tfd.Gamma(self.concentration, self.rate) 
 
-class InvGamma(ContinuousDistribution):
+
+class InverseGamma(BaseDistribution):
     r"""The Inverse-gamma distribution.
 
     The 
@@ -476,38 +380,30 @@ class InvGamma(ContinuousDistribution):
 
     Parameters
     ----------
-    shape : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    concentration : int, float, |ndarray|, or |Tensor|
         Shape parameter of the inverse gamma distribution (:math:`\alpha`).
-    rate : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    scale : int, float, |ndarray|, or |Tensor|
         Rate parameter of the inverse gamma distribution (:math:`\beta`).
 
     """
 
-    # Distribution parameters and their default values
-    _default_args = OrderedDict([
-        ('shape', REQUIRED),
-        ('rate', REQUIRED)
-    ])
 
-    # Posterior distribution parameter bounds (lower, upper)
-    _post_param_bounds = {
-        'shape': (0, None),
-        'rate': (0, None)
-    }
+    def __init__(self, concentration, scale):
+        # TODO: type checks?
+        self.concentration = concentration
+        self.scale = scale
 
-    # Posterior parameter initializers
-    _post_param_init = {
-        'shape': tf.initializers.truncated_normal(mean=1.6, stddev=0.1),
-        'rate': tf.initializers.truncated_normal(mean=1.6, stddev=0.1)
-    }
 
-    def _build(self, args, _data, _batch_shape):
-        """Build the distribution model."""
-        return tfd.InverseGamma(concentration=args['shape'], rate=args['rate'])
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        if get_backend() == 'pytorch':
+            raise NotImplementedError
+        else:
+            return tfd.InverseGamma(self.concentration, self.scale) 
 
 
 
-class Bernoulli(DiscreteDistribution):
+class Bernoulli(BaseDistribution):
     r"""The Bernoulli distribution.
 
     The 
@@ -528,72 +424,42 @@ class Bernoulli(DiscreteDistribution):
 
     TODO: example image of the distribution
 
+    TODO: specifying either logits or probs
+
 
     Parameters
     ----------
-    p : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
-        Probability parameter of the Bernoulli distribution (:math:`\p`).
-    input_type : str ('logits' or 'probs')
-        How to interperet the probability parameter ``p``.  If ``'probs'``,
-        ``p`` represents the raw probability.  If ``'logits'``, ``p`` 
-        represents the logit-transformed probability.
+    logits : int, float, |ndarray|, or |Tensor|
+        Logit-transformed probability parameter of the  Bernoulli 
+        distribution (:math:`\p`)
+    probs : int, float, |ndarray|, or |Tensor|
+        Logit-transformed probability parameter of the  Bernoulli 
+        distribution (:math:`\p`)
     """
 
-    # Default kwargs
-    _default_kwargs = {
-        'input_type': 'logits'
-    }
+    def __init__(self, logits=None, probs=None):
+        # TODO: type checks?
+        self.logits = logits
+        self.probs = probs
 
-    # Distribution parameters and their default values
-    _default_args = OrderedDict([
-        ('p', REQUIRED),
-    ])
 
-    # Posterior distribution parameter bounds (lower, upper)
-    _post_param_bounds = {
-        'p': (None, None)
-    }
-
-    # Posterior parameter initializers
-    _post_param_init = {
-        'p': tf.initializers.truncated_normal(mean=0.0, stddev=1.0),
-    }
-
-    def _build(self, args, _data, _batch_shape):
-        """Build the distribution model."""
-        if self.kwargs['input_type'] == 'logits': #p arg is the logits
-            return tfd.Bernoulli(logits=args['p'])
-        elif self.kwargs['input_type'] == 'probs': #p arg is the raw probs
-            return tfd.Bernoulli(probs=args['p'])
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        if get_backend() == 'pytorch':
+            return tod.Bernoulli(logits=self.logits, probs=self.probs) 
         else:
-            raise TypeError('Bernoulli kwarg input_type must be either ' +
-                            '\'logits\' or \'probs\'')
+            return tfd.Bernoulli(logits=self.logits, probs=self.probs) 
 
 
 
-class Categorical(DiscreteDistribution):
+class Categorical(BaseDistribution):
     r"""The Categorical distribution.
 
     The 
     `Categorical distribution <https://en.wikipedia.org/wiki/Categorical_distribution>`_
     is a discrete distribution defined over :math:`N` integers: 0 through 
-    :math:`N-1`.  It has :math:`N-1` parameters: :math:`\theta_j` for
-    :math:`j \in {1,...,N-1}`.  These parameters are transformed into
-    :math:`N` category probabilities (:math:`p_i` for :math:`i \in {1,...,N}`)
-    using the additive logistic transformation:
-
-    .. math::
-
-        p_i = \frac{\exp \theta_i}{1+\sum_{j=1}^{N-1} \exp \theta_j}
-        ~ \text{for} ~ i \in \{ 1, ..., N-1 \}
-
-    and
-
-    .. math::
-
-        p_N = \frac{1}{1+\sum_{j=1}^{N-1} \exp \theta_j}
-
-    A random variable :math:`x` drawn from a Categorical distribution
+    :math:`N-1`. A random variable :math:`x` drawn from a Categorical
+    distribution
 
     .. math::
 
@@ -605,77 +471,36 @@ class Categorical(DiscreteDistribution):
 
         p(x=i) = p_i
 
-    You can define the distribution using either the :math:`N-1` raw
-    parameters (:math:`\mathbf{\theta}`), the category probabilities
-    (:math:`\mathbf{p}`), or the log category probabilities.
-    Use the ``input_type`` keyword argument to set 
-    which way the inputs are interpereted.
-
     TODO: example image of the distribution
+
+    TODO: logits vs probs
 
 
     Parameters
     ----------
-    p : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
-        Event probability parameter distribution (:math:`\mathbf{\theta}` if
-        ``input_type='raw'`` or :math:`\mathbf{p}` if ``input_type='probs'``).
-    input_type : str ('raw' or 'logits' or 'probs')
-        How to interperet the probability parameter ``p``.  
-
-        * ``'raw'``: ``p`` represents the untransformed parameters
-          :math:`\mathbf{\theta}`.
-        * ``'probs'``: ``p`` represents the category probabilities 
-          :math:`\mathbf{p}`.
-        * ``'logits'``: ``p`` represents the log category 
-          probabilities :math:`\frac{\mathbf{p}}{1-\mathbf{p}}`.
-          These values will be passed through a softmax to generate the raw
-          category probabilities (so they're not "logits" per se).
+    logits : int, float, |ndarray|, or |Tensor|
+        Logit-transformed category probabilities 
+        (:math:`\frac{\mathbf{\theta}}{1-\mathbf{\theta}}`)
+    probs : int, float, |ndarray|, or |Tensor|
+        Raw category probabilities (:math:`\mathbf{\theta}`)
     """
 
-    # Default kwargs
-    _default_kwargs = {
-        'input_type': 'raw'
-    }
+    def __init__(self, logits=None, probs=None):
+        # TODO: type checks?
+        self.logits = logits
+        self.probs = probs
 
-    # Distribution parameters and their default values
-    _default_args = OrderedDict([
-        ('p', REQUIRED),
-    ])
 
-    # Posterior distribution parameter bounds (lower, upper)
-    _post_param_bounds = {
-        'p': (None, None)
-    }
-
-    # Posterior parameter initializers
-    _post_param_init = {
-        'p': tf.initializers.truncated_normal(mean=0.0, stddev=1.0),
-    }
-
-    def _build(self, args, _data, _batch_shape):
-        """Build the distribution model."""
-        if self.kwargs['input_type'] == 'raw': #p arg is the raw parameters
-            if isinstance(args['p'], np.ndarray):
-                dims = [d for d in args['p'].shape[:-1]]
-            elif isinstance(args['p'], (tf.Tensor, tf.Variable)):
-                dims = [d.value for d in args['p'].shape[:-1]]
-            else:
-                raise TypeError('p argument must be a ndarray or a Tensor')
-            zeros = tf.zeros(dims+[1], dtype=args['p'].dtype)   #logistic
-            xo = tf.exp(tf.concat([args['p'], zeros], axis=-1)) #additive
-            xo = xo/tf.reduce_sum(xo, axis=-1, keepdims=True)   #transform
-            return tfd.Categorical(probs=xo)
-        elif self.kwargs['input_type'] == 'logits': #p arg is the logits
-            return tfd.Categorical(logits=args['p'])
-        elif self.kwargs['input_type'] == 'probs': #p arg is the event probs
-            return tfd.Categorical(probs=args['p'])
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        if get_backend() == 'pytorch':
+            return tod.Categorical(logits=self.logits, probs=self.probs) 
         else:
-            raise TypeError('Categorical kwarg input_type must be either ' +
-                            '\'raw\' or \'logits\' or \'probs\'')
+            return tfd.Categorical(logits=self.logits, probs=self.probs) 
 
 
 
-class Poisson(DiscreteDistribution):
+class Poisson(BaseDistribution):
     r"""The Poisson distribution.
 
     The 
@@ -707,24 +532,17 @@ class Poisson(DiscreteDistribution):
         Rate parameter of the Poisson distribution (:math:`\lambda`).
     """
 
-    # Distribution parameter and the default value
-    _default_args = {
-        'rate': REQUIRED
-    }
+    def __init__(self, rate):
+        # TODO: type checks?
+        self.rate = rate
 
-    # Posterior distribution parameter bounds (lower, upper)
-    _post_param_bounds = {
-        'rate': (0, None)
-    }
 
-    # Posterior parameter initializers
-    _post_param_init = {
-        'rate': tf.initializers.random_uniform(minval=0.0, maxval=3.0),
-    }
-
-    def _build(self, args, _data, _batch_shape):
-        """Build the distribution model."""
-        return tfd.Poisson(args['rate'])
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        if get_backend() == 'pytorch':
+            return tod.Poisson(self.rate) 
+        else:
+            return tfd.Poisson(self.rate) 
 
 
 

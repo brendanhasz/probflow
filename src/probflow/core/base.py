@@ -6,7 +6,19 @@ ProbFlow’s classes.
 """
 
 
-from abc import ABC
+from abc import ABC, abstractmethod
+
+from probflow.core.settings import get_backend
+
+
+# Import the relevant backend
+if get_backend() == 'pytorch':
+    import torch
+    tod = torch.distributions
+else:
+    import tensorflow as tf
+    import tensorflow_probability as tfp
+    tfd = tfp.distributions
 
 
 
@@ -18,7 +30,44 @@ class BaseParameter(ABC):
 
 class BaseDistribution(ABC):
     """Abstract base class for ProbFlow Distributions"""
-    pass
+
+
+    @abstractmethod
+    def __init__(self, *args):
+        pass
+
+
+    @abstractmethod
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        pass
+
+
+    def prob(self, y):
+        """Compute the probability of some data given this distribution"""
+        if get_backend() == 'pytorch':
+            return self.__call__().log_prob(y).exp()
+        else:
+            return self.__call__().prob(y)
+
+
+    def log_prob(self, y):
+        """Compute the log probability of some data given this distribution"""
+        return self.__call__().log_prob(y)
+
+
+    def sample(self, n=1):
+        """Compute the probability of some data given this distribution"""
+        if get_backend() == 'pytorch':
+            if isinstance(n, int) and n > 1:
+                return self.__call__().rsample()
+            else:
+                return self.__call__().rsample(n)
+        else:
+            if isinstance(n, int) and n > 1:
+                return self.__call__().sample()
+            else:
+                return self.__call__().sample(n)
 
 
 
