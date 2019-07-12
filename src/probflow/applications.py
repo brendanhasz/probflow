@@ -67,9 +67,9 @@ class PoissonRegression(DiscreteModel):
 class DenseNetwork(Module):
     """TODO"""
 
-    def __init__(self, dims):
-        self.activations = [O.relu for i in range(len(dims)-1)]
-        self.activations[-1] = lambda x: x
+    def __init__(self, dims, activation=O.relu):
+        self.activations = [activation for i in range(len(dims)-2)]
+        self.activations += [lambda x: x]
         self.layers = [Dense(dims[i], dims[i+1])
                        for i in range(len(dims)-1)]
 
