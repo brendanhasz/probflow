@@ -85,6 +85,24 @@ def prod(val):
 
 
 
+def mean(val, axis=None):
+    """The mean."""
+    if get_backend() == 'pytorch':
+        return torch.mean(val, dim=axis)
+    else:
+        return tf.reduce_mean(val, axis=axis)
+
+
+
+def std(val, axis=None):
+    """The standard deviation."""
+    if get_backend() == 'pytorch':
+        return torch.std(val, dim=axis)
+    else:
+        return tf.reduce_std(val, axis=axis)
+
+
+
 def exp(val):
     """The natural exponent."""
     if get_backend() == 'pytorch':
@@ -127,3 +145,11 @@ def sigmoid(val):
         return torch.nn.Sigmoid()(val)
     else:
         return tf.math.sigmoid(val)
+
+
+def gather(vals, inds, axis=0):
+    """Gather values by index"""
+    if get_backend() == 'pytorch':
+        return torch.gather(vals, axis, inds)
+    else:
+        return tf.gather(vals, inds, axis=axis)

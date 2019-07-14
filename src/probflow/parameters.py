@@ -159,15 +159,21 @@ class Parameter(BaseParameter):
                 self.variables[var] = tf.Variable(init(shape))
 
 
+    def _t_vars(self):
+        """Variables after applying their respective transformations"""
+        return {name: self.var_transform[name](val)
+                for name, val in self.variables.items()}
+
+
     def __call__(self):
         """Return a sample from or the MAP estimate of this parameter.
 
         TODO
         """
         if get_sampling():
-            return self.posterior(**self.variables).sample()
+            return self.transform(self.posterior(**self._t_vars()).sample())
         else:
-            return self.posterior(**self.variables).mean()
+            return self.transform(self.posterior(**self._t_vars()).mean())
 
 
     def kl_loss(self):
@@ -181,7 +187,7 @@ class Parameter(BaseParameter):
 
         TODO
         """
-        return self.posterior(**self.variables).mean()
+        return self.transform(self.posterior(**self._t_vars()).mean())
 
 
     def posterior_sample(self, n=1):
@@ -198,9 +204,9 @@ class Parameter(BaseParameter):
         TODO
         """
         if n==1:
-            return self.posterior(**self.variables).sample()
+            return self.transform(self.posterior(**self._t_vars()).sample())
         else:
-            return self.posterior(**self.variables).sample(n)
+            return self.transform(self.posterior(**self._t_vars()).sample(n))
 
 
     def prior_sample(self, n=1):
@@ -226,9 +232,9 @@ class Parameter(BaseParameter):
             ``(self.prior.shape)``.
         """
         if n==1:
-            return self.prior.sample()
+            return self.transform(self.prior.sample())
         else:
-            return self.prior.sample(n)
+            return self.transform(self.prior.sample(n))
 
 
     def posterior_ci(self, ci=0.95, n=10000):
