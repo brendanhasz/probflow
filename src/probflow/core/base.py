@@ -56,6 +56,11 @@ class BaseDistribution(ABC):
         return self.__call__().log_prob(y)
 
 
+    def mean(self):
+        """Compute the mean of this distribution"""
+        return self.__call__().mean()
+
+
     def sample(self, n=1):
         """Compute the probability of some data given this distribution"""
         if get_backend() == 'pytorch':

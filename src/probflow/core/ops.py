@@ -49,8 +49,53 @@ def kl_divergence(P, Q):
 # TODO: all other ops used by probflow internals
 
 
+def ones(ones):
+    """Tensor full of ones."""
+    if get_backend() == 'pytorch':
+        return torch.ones(shape)
+    else:
+        return tf.ones(shape)
+
+
+
+def zeros(shape):
+    """Tensor full of zeros."""
+    if get_backend() == 'pytorch':
+        return torch.zeros(shape)
+    else:
+        return tf.zeros(shape)
+
+
+
+def sum(val):
+    """The sum."""
+    if get_backend() == 'pytorch':
+        return torch.sum(val)
+    else:
+        return tf.reduce_sum(val)
+
+
+
+def prod(val):
+    """The product."""
+    if get_backend() == 'pytorch':
+        return torch.prod(val)
+    else:
+        return tf.reduce_prod(val)
+
+
+
 def exp(val):
     """The natural exponent."""
+    if get_backend() == 'pytorch':
+        return torch.prod(val)
+    else:
+        return tf.exp(val)
+
+
+
+def sqrt(val):
+    """The square root."""
     if get_backend() == 'pytorch':
         return torch.exp(val)
     else:
@@ -64,3 +109,21 @@ def relu(val):
         return torch.exp(val)
     else:
         return tf.exp(val)
+
+
+
+def softplus(val):
+    """Linear rectification."""
+    if get_backend() == 'pytorch':
+        return torch.nn.Softplus()(val)
+    else:
+        return tf.math.softplus(val)
+
+
+
+def sigmoid(val):
+    """Sigmoid function."""
+    if get_backend() == 'pytorch':
+        return torch.nn.Sigmoid()(val)
+    else:
+        return tf.math.sigmoid(val)

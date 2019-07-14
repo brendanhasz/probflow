@@ -135,10 +135,10 @@ class Normal(BaseDistribution):
 
     Parameters
     ----------
-    loc : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    loc : int, float, |ndarray|, or |Tensor|
         Mean of the normal distribution (:math:`\mu`).
         Default = 0
-    scale : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    scale : int, float, |ndarray|, or |Tensor|
         Standard deviation of the normal distribution (:math:`\sigma`).
         Default = 1
     """
@@ -153,7 +153,7 @@ class Normal(BaseDistribution):
     def __call__(self):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
-            return tod.Normal(self.loc, self.scale)
+            return tod.normal.Normal(self.loc, self.scale)
         else:
             return tfd.Normal(self.loc, self.scale)
 
@@ -196,13 +196,13 @@ class StudentT(BaseDistribution):
 
     Parameters
     ----------
-    df : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    df : int, float, |ndarray|, or |Tensor|
         Degrees of freedom of the t-distribution (:math:`\nu`).
         Default = 1
-    loc : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    loc : int, float, |ndarray|, or |Tensor|
         Median of the t-distribution (:math:`\mu`).
         Default = 0
-    scale : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    scale : int, float, |ndarray|, or |Tensor|
         Spread of the t-distribution (:math:`\sigma`).
         Default = 1
     """
@@ -218,7 +218,7 @@ class StudentT(BaseDistribution):
     def __call__(self):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
-            return tod.StudentT(self.df, self.loc, self.scale)
+            return tod.studentT.StudentT(self.df, self.loc, self.scale)
         else:
             return tfd.StudentT(self.df, self.loc, self.scale)
 
@@ -258,10 +258,10 @@ class Cauchy(BaseDistribution):
 
     Parameters
     ----------
-    loc : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    loc : int, float, |ndarray|, or |Tensor|
         Median of the Cauchy distribution (:math:`\mu`).
         Default = 0
-    scale : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    scale : int, float, |ndarray|, or |Tensor|
         Spread of the Cauchy distribution (:math:`\gamma`).
         Default = 1
     """
@@ -276,7 +276,7 @@ class Cauchy(BaseDistribution):
     def __call__(self):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
-            return tod.Cauchy(self.loc, self.scale)
+            return tod.cauchy.Cauchy(self.loc, self.scale)
         else:
             return tfd.Cauchy(self.loc, self.scale)
 
@@ -335,7 +335,7 @@ class Gamma(BaseDistribution):
     def __call__(self):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
-            return tod.Gamma(self.concentration, self.rate)
+            return tod.gamma.Gamma(self.concentration, self.rate)
         else:
             return tfd.Gamma(self.concentration, self.rate) 
 
@@ -446,7 +446,7 @@ class Bernoulli(BaseDistribution):
     def __call__(self):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
-            return tod.Bernoulli(logits=self.logits, probs=self.probs) 
+            return tod.bernoulli.Bernoulli(logits=self.logits, probs=self.probs) 
         else:
             return tfd.Bernoulli(logits=self.logits, probs=self.probs) 
 
@@ -494,7 +494,8 @@ class Categorical(BaseDistribution):
     def __call__(self):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
-            return tod.Categorical(logits=self.logits, probs=self.probs) 
+            return tod.categorical.Categorical(logits=self.logits,
+                                               probs=self.probs) 
         else:
             return tfd.Categorical(logits=self.logits, probs=self.probs) 
 
@@ -528,7 +529,7 @@ class Poisson(BaseDistribution):
 
     Parameters
     ----------
-    rate : int, float, |ndarray|, |Tensor|, |Variable|, |Parameter|, or |Layer|
+    rate : int, float, |ndarray|, or |Tensor|
         Rate parameter of the Poisson distribution (:math:`\lambda`).
     """
 
@@ -540,23 +541,57 @@ class Poisson(BaseDistribution):
     def __call__(self):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
-            return tod.Poisson(self.rate) 
+            return tod.poisson.Poisson(self.rate) 
         else:
             return tfd.Poisson(self.rate) 
 
 
 
-# TODO: will have to be some way to distinguish batch_size from dimensions from
-# number of independent dists?
-# e.g. a MultivariateNormal dist w/ shape (3, 4, 5).
-# Is that batch_size=3, dimensions=4, and 5 independent dists?
-# or should the last 2 be flipped?  TFP uses batch_shape and event_shape
-# will have the same problem w/ any multidim dist, e.g. Dirichlet, Multinomial
+class Dirichlet(BaseDistribution):
+    r"""The Dirichlet distribution.
 
-# TODO: other common distributions, esp Categorical, Binomial
-# and really there's Discrete models but then there's Categorical models...
-# ie you can get the cum prob value on a poisson but not on a categorical...
+    The 
+    `Dirichlet distribution <http://en.wikipedia.org/wiki/Dirichlet_distribution>`_
+    is a continuous distribution defined over the :math:`k`-simplex, and has
+    one vector of parameters: 
 
-# also at some point:
-# MultivariateNormal, mvt, mvc, Exponential, Beta, Gamma
-# Binomial, BetaBinomial
+    - concentration parameters (``concentration`` or :math:`\mathbf{\alpha}`),
+    a vector of positive numbers which determine the relative likelihoods of 
+    different categories represented by the distribution.
+
+    A random variable (a vector) :math:`\mathbf{x}` drawn from a Dirichlet
+    distribution
+
+    .. math::
+
+        \mathbf{x} \sim \text{Dirichlet}(\mathbf{\alpha})
+
+    has probability
+
+    .. math::
+
+        p(\mathbf{x}) = \frac{1}{\mathbf{\text{B}}(\mathbf{\alpha})} 
+                        \prod_{i=1}^K x_i^{\alpha_i-1}
+
+    where :math:`\mathbf{\text{B}}` is the multivariate beta function.
+
+    TODO: example image of the distribution
+
+
+    Parameters
+    ----------
+    concentration : |ndarray|, or |Tensor|
+        Concentration parameter of the Dirichlet distribution (:math:`\alpha`).
+    """
+
+    def __init__(self, rate):
+        # TODO: type checks?
+        self.concentration = concentration
+
+
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        if get_backend() == 'pytorch':
+            return tod.dirichlet.Dirichlet(self.concentration) 
+        else:
+            return tfd.Dirichlet(self.concentration) 
