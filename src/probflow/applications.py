@@ -7,6 +7,11 @@ The applications module contains pre-built |Models| and |Modules|.
 
 __all__ = [
     'LinearRegression',
+    'LogisticRegression',
+    'PoissonRegression',
+    'DenseNetwork',
+    'DenseRegression',
+    'DenseClassifier',
 ]
 
 

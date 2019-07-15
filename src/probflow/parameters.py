@@ -45,7 +45,7 @@ __all__ = [
 import probflow.core.ops as O
 from probflow.core.settings import get_sampling
 from probflow.core.settings import get_backend
-from probflow.plotting import plot_dist
+from probflow.utils.plotting import plot_dist
 from probflow.utils.initializers import xavier
 from probflow.utils.initializers import scale_xavier
 from probflow.utils.initializers import pos_xavier

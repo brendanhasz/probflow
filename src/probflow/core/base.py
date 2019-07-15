@@ -8,6 +8,8 @@ ProbFlow’s classes.
 
 from abc import ABC, abstractmethod
 
+import numpy as np
+
 from probflow.core.settings import get_backend
 
 
@@ -90,7 +92,40 @@ class BaseModel(ABC):
 
 class BaseDataGenerator(ABC):
     """Abstract base class for ProbFlow DataGenerators"""
-    pass
+
+    @abstractmethod
+    def __init__(self, *args):
+        pass
+
+
+    @property
+    @abstractmethod
+    def n_samples(self):
+        """Number of samples in the dataset"""
+        pass
+
+
+    @property
+    @abstractmethod
+    def batch_size(self):
+        """Number of samples per batch"""
+        pass
+
+
+    @abstractmethod
+    def __getitem__(self, index):
+        """Generate one batch of data"""
+        pass
+
+
+    def __len__(self):
+        """Number of batches per epoch"""
+        return int(np.ceil(self.n_samples/self.batch_size))
+
+
+    def on_epoch_end(self):
+        """Will be called at the end of each training epoch"""
+        pass
 
 
 
