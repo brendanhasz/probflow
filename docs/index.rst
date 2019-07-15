@@ -144,13 +144,23 @@ Using parameters, layers, and distributions as simple building blocks, ProbFlow 
 Installation
 ------------
 
-Before installing ProbFlow, you'll first need to install `TensorFlow <http://www.tensorflow.org/install/>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability/install>`_.
+Before installing ProbFlow, you'll first need to either `PyTorch <>`, or `TensorFlow <http://www.tensorflow.org/install/>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability/install>`_.  PyTorch, TensorFlow, and TensorFlow Probability are not included in ProbFlow's `requirements.txt` file, so that you can choose which you want to use (and whether to use the GPU or CPU versions).
 
-Then, you can use `pip <https://pypi.org/project/pip/>`_ to install ProbFlow itself from the GitHub source:
+Then, you can use `pip <http://pypi.org/project/pip/>`_ to install ProbFlow itself from the GitHub source:
 
-.. code-block:: bash
+.. code-block::
     
     pip install git+http://github.com/brendanhasz/probflow.git
+
+
+Version 1.0 vs 2.0
+------------------
+
+The latest version of ProbFlow (version 2) was built to work with eager execution in TensorFlow 2.0 and PyTorch.  Version 1 does not work with eager execution, and only works with TensorFlow 1.0 (and not PyTorch).  The v2 interface is significantly different from v1, based on a subclassing API instead of the more declarative API of v1.  I won't be supporting v1 moving forward, but if you want to install ProbFlow 1.0:
+
+.. code-block::
+    
+    pip install git+http://github.com/brendanhasz/probflow.git@v1.0
 
 
 Support
@@ -168,4 +178,4 @@ Contributing
 Why the name, ProbFlow?
 -----------------------
 
-Because it's a package for probabilistic modeling, and it's built on TensorFlow.  ¯\\_(ツ)_/¯
+Because it's a package for probabilistic modeling, and it was originally built on TensorFlow.  ¯\\_(ツ)_/¯

@@ -24,7 +24,7 @@ copyright = '2019, Brendan Hasz'
 author = 'Brendan Hasz'
 
 # The short X.Y version
-version = '0.1'
+version = '2.0'
 # The full version, including alpha/beta/rc tags
 release = ''
 
