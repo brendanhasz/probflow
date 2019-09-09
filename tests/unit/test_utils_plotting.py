@@ -1,126 +1,148 @@
+"""Tests probflow.utils.plotting module and methods which use it"""
+
+
+
+import pytest
 
 import numpy as np
 import matplotlib.pyplot as plt
-from probflow import *
+import tensorflow as tf
 
-from probflow.utils.plotting import plot_dist
-from probflow.utils.plotting import get_ix_label
-from probflow.utils.plotting import fill_between
-from probflow.utils.plotting import plot_discrete_dist
+import probflow as pf
+
+
+
+def test_approx_kde(plot):
+    """Tests utils.plotting.approx_kde"""
+    data = np.random.randn(1000)
+    x, y = pf.utils.plotting.approx_kde(data)
+    assert x.shape[0] == y.shape[0]
+    if plot:
+        plt.plot(x, y)
+        plt.title('should be kde density of samples from norm dist')
+        plt.show()
+
+
+
+def test_get_next_color():
+    """Tests utils.plotting.get_next_color"""
+    col = pf.utils.plotting.get_next_color(None, 0)
+    assert isinstance(col, str)
+    assert col[0] == '#'
+
 
 
 def test_get_ix_label():
     """Tests utils.plotting.get_ix_label"""
-    assert get_ix_label(0, [3, 5, 2]) == '[0, 0, 0]'
-    assert get_ix_label(1, [3, 5, 2]) == '[1, 0, 0]'
-    assert get_ix_label(3, [3, 5, 2]) == '[0, 1, 0]'
-    assert get_ix_label(4, [3, 5, 2]) == '[1, 1, 0]'
-    assert get_ix_label(15, [3, 5, 2]) == '[0, 0, 1]'
-    assert get_ix_label(16, [3, 5, 2]) == '[1, 0, 1]'
-    assert get_ix_label(19, [3, 5, 2]) == '[1, 1, 1]'
-    assert get_ix_label(29, [3, 5, 2]) == '[2, 4, 1]'
+
+    # 1d
+    lab = pf.utils.plotting.get_ix_label(2, [3])
+    assert isinstance(lab, str)
+    assert lab == '2'
+
+    # 2d
+    lab = pf.utils.plotting.get_ix_label(5, [3, 3])
+    assert isinstance(lab, str)
+    assert lab == '[2, 1]'
+
+    # 3d
+    lab = pf.utils.plotting.get_ix_label(5, [3, 3, 3])
+    assert isinstance(lab, str)
+    assert lab == '[2, 1, 0]'
+
 
 
 def test_plot_dist(plot):
     """Tests utils.plotting.plot_dist"""
-    data = np.random.randn(100)
-    plot_dist(data, xlabel='the x label')
+    data = np.random.randn(1000)
+    pf.utils.plotting.plot_dist(data)
     if plot:
+        plt.title('should be kde density (filled) of samples from norm dist')
         plt.show()
 
 
-def test_fill_between_scalar(plot):
-    """Tests utils.plotting.fill_between"""
 
-    xdata = np.linspace(0, 1, 10)
-    lb = np.empty([3, 10, 1])
-    ub = np.empty([3, 10, 1])
-    lb[0,:,0] = np.linspace(-5, 0, 10)
-    lb[1,:,0] = np.linspace(-3, 0, 10)
-    lb[2,:,0] = np.linspace(-1, 0, 10)
-    ub[0,:,0] = np.linspace(10, 0, 10)
-    ub[1,:,0] = np.linspace(5, 0, 10)
-    ub[2,:,0] = np.linspace(1, 0, 10)
+def test_posterior_plot(plot):
+    """Tests posterior_plot method of parameter and model"""
 
-    fill_between(xdata, lb, ub)
+    class MyModel(pf.Model):
+
+        def __init__(self):
+            self.weight = pf.Parameter(name='Weight')
+            self.bias = pf.Parameter(name='Bias')
+            self.std = pf.ScaleParameter(name='Noise Std Dev')
+
+        def __call__(self, x):
+            return pf.Normal(x*self.weight() + self.bias(), self.std())
+
+    # Create the model
+    model = MyModel()
+
+    # Plot posterior for a parameter
+    model.weight.posterior_plot()
     if plot:
         plt.show()
 
-
-def test_fill_between_vector(plot):
-    """Tests utils.plotting.fill_between w/ multiple datasets"""
-
-    xdata = np.linspace(0, 1, 10)
-    lb = np.empty([2, 10, 3])
-    ub = np.empty([2, 10, 3])
-    lb[0,:,0] = np.linspace(-1, 0, 10)
-    lb[1,:,0] = np.linspace(-0.5, 0, 10)
-    ub[0,:,0] = np.linspace(2, 0, 10)
-    ub[1,:,0] = np.linspace(1, 0, 10)
-
-    lb[0,:,1] = np.linspace(0, -1, 10) + 3
-    lb[1,:,1] = np.linspace(0, -0.5, 10) + 3
-    ub[0,:,1] = np.linspace(0, 2, 10) + 3
-    ub[1,:,1] = np.linspace(0, 1, 10) + 3
-
-    lb[0,:,2] = np.linspace(-1, 0, 10) + 5
-    lb[1,:,2] = np.linspace(-0.5, 0, 10) + 5
-    ub[0,:,2] = np.linspace(2, 0, 10) + 5
-    ub[1,:,2] = np.linspace(1, 0, 10) + 5
-
-    fill_between(xdata, lb, ub)
+    # Plot posteriors for all params in the model
+    model.posterior_plot()
     if plot:
         plt.show()
 
+    # Should be able to pass kwargs to posterior_plot
+    model.posterior_plot(ci=0.95)
+    if plot:
+        plt.show()
 
-def test_fill_between_matrix(plot):
-    """Tests utils.plotting.fill_between w/ 2d datasets"""
+    # Should be able to plot just some params
+    model.posterior_plot(params=['Weight', 'Bias'], ci=0.95)
+    if plot:
+        plt.show()
 
-    xdata = np.linspace(0, 1, 10)
-    lb = np.empty([2, 10, 3, 2])
-    ub = np.empty([2, 10, 3, 2])
-    lb[0,:,0, 0] = np.linspace(-1, 0, 10)
-    lb[1,:,0, 0] = np.linspace(-0.5, 0, 10)
-    ub[0,:,0, 0] = np.linspace(2, 0, 10)
-    ub[1,:,0, 0] = np.linspace(1, 0, 10)
-
-    lb[0,:,1, 0] = np.linspace(0, -1, 10) + 3
-    lb[1,:,1, 0] = np.linspace(0, -0.5, 10) + 3
-    ub[0,:,1, 0] = np.linspace(0, 2, 10) + 3
-    ub[1,:,1, 0] = np.linspace(0, 1, 10) + 3
-
-    lb[0,:,2, 0] = np.linspace(-1, 0, 10) + 5
-    lb[1,:,2, 0] = np.linspace(-0.5, 0, 10) + 5
-    ub[0,:,2, 0] = np.linspace(2, 0, 10) + 5
-    ub[1,:,2, 0] = np.linspace(1, 0, 10) + 5
-
-    lb[0,:,0, 1] = np.linspace(-1, 0, 10) + 10
-    lb[1,:,0, 1] = np.linspace(-0.5, 0, 10) + 10
-    ub[0,:,0, 1] = np.linspace(2, 0, 10) + 10
-    ub[1,:,0, 1] = np.linspace(1, 0, 10) + 10
-
-    lb[0,:,1, 1] = np.linspace(0, -1, 10) + 3 + 10
-    lb[1,:,1, 1] = np.linspace(0, -0.5, 10) + 3 + 10
-    ub[0,:,1, 1] = np.linspace(0, 2, 10) + 3 + 10
-    ub[1,:,1, 1] = np.linspace(0, 1, 10) + 3 + 10
-
-    lb[0,:,2, 1] = np.linspace(-1, 0, 10) + 5 + 10
-    lb[1,:,2, 1] = np.linspace(-0.5, 0, 10) + 5 + 10
-    ub[0,:,2, 1] = np.linspace(2, 0, 10) + 5 + 10
-    ub[1,:,2, 1] = np.linspace(1, 0, 10) + 5 + 10
-    fill_between(xdata, lb, ub)
+    # Should be able to change number of columns
+    model.posterior_plot(cols=2)
     if plot:
         plt.show()
 
 
 
-def test_plot_discrete_dist(plot):
-    """Tests utils.plotting.plot_discrete_dist"""
+def test_prior_plot(plot):
+    """Tests prior_plot method of parameter and model"""
 
-    # Dummy data
-    x = np.array([0, 0, 1, 3, 3, 3, 5])
+    class MyModel(pf.Model):
 
-    # Test discrete hist
-    plot_discrete_dist(x)
+        def __init__(self):
+            self.weight = pf.Parameter(name='Weight')
+            self.bias = pf.Parameter(name='Bias')
+            self.std = pf.ScaleParameter(name='Noise Std Dev')
+
+        def __call__(self, x):
+            return pf.Normal(x*self.weight() + self.bias(), self.std())
+
+    # Create the model
+    model = MyModel()
+
+    # Plot posterior for a parameter
+    model.weight.prior_plot()
     if plot:
         plt.show()
+
+    # Plot posteriors for all params in the model
+    model.prior_plot()
+    if plot:
+        plt.show()
+
+    # Should be able to pass kwargs to posterior_plot
+    model.prior_plot(ci=0.95)
+    if plot:
+        plt.show()
+
+    # Should be able to plot just some params
+    model.prior_plot(params=['Weight', 'Bias'], ci=0.95)
+    if plot:
+        plt.show()
+
+    # Should be able to change number of columns
+    model.prior_plot(cols=2)
+    if plot:
+        plt.show()
+
