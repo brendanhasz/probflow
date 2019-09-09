@@ -16,7 +16,8 @@ Here are some examples of how to use ProbFlow to build, fit, and diagnose severa
    example_batch_normalization
    example_robust_density
    example_glm
+   example_gmm
+   example_correlation
    example_embedding
    example_nmf
-   example_multilevel
    example_mixture_density

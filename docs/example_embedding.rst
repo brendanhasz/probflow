@@ -6,5 +6,5 @@ Entity Embeddings
 .. include:: macros.hrst
 
 
-TODO: using the :class:`.Embedding` layer
+TODO: using the :class:`.Embedding` module
 

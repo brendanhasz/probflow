@@ -12,7 +12,15 @@ TODO: math and diagram
 
 .. code-block:: python
 
-    predictions = DenseNet(units=[128, 64, 32, 1])
-    noise_std = Exp(DenseNet(units=[128, 64, 32, 1]))
-    model = Cauchy(predictions, noise_std)
-    model.fit(x, y)
+    class RobustDensityNetwork(pf.Model):
+        
+        def __init__(self, units, head_units):
+            self.core_net = pf.DenseNetwork(units)
+            self.loc_net = pf.DenseNetwork([units[-1]]+head_units)
+            self.std_net = pf.DenseNetwork([units[-1]]+head_units)
+            
+        def __call__(self, x):
+            x = tf.nn.relu(self.core_net(x))
+            loc = self.loc_net(x)
+            std = tf.nn.softplus(self.std_net(x))
+            return pf.StudentT(loc, std)

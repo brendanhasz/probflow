@@ -1,9 +1,10 @@
-Layers API
-==============
+Data API
+========
 
 .. include:: macros.hrst
 
-.. automodule:: probflow.layers
+.. automodule:: probflow.data
    :members:
    :inherited-members:
    :show-inheritance:
+

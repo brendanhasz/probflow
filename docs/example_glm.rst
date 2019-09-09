@@ -14,8 +14,11 @@ TODO: diagram
 
 .. code-block:: python
 
-    from probflow import Exp, Dense, Poisson
+    class PoissonRegression(pf.Model):
 
-    predictions = Exp(Dense())
-    model = Poisson(predictions)
-    model.fit(x, y)
+        def __init__(self, dims):
+            self.w = pf.Parameter([dims, 1])
+            self.b = pf.Parameter([1, 1])
+
+        def __call__(self, x):
+            return pf.Poisson(tf.exp(x @ self.w() + self.b()))

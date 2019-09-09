@@ -1,354 +1,39 @@
-Planned Improvements
-====================
+Backlog
+=======
+
+This page has a list of planned improvements, in order of when I plan to get
+to them.  If you're interested in tackling one of them, I'd be thrilled! 
+`Pull requests <https://github.com/brendanhasz/probflow/pulls>`_
+are totally welcome!
+
+
+Backlog
+-------
+
+* Speed tests on large dataset (looked like there was some kind of autograph warning?)
+* Model evaluation methods (ones to be used in readme)
+* Tests for those
+* README / index
+* User guide
+* Examples
+* Docs for everything implemented so far
+* Fix issues so far (below)
+* Merge back to main repo and release 2.0.0
+* Different plotting methods for different types of dists (both for Parameter priors/posteriors and predictive distribution plots)
+* All model evaluation methods + specialized types of models
+* Make Module.trainable_variables return tf.Variables which are properties of module+sub-modules as well (and not neccesarily in parameters, also allow embedding of tf.Modules?)
+* Real-world examples w/ public BigQuery datasets
+* Bayes estimate / decision methods
+* Convolutional modules
+
+
+Issues
+------
+
+* LogisticRegression doesn't work at all! And seems to take a suspiciously long time...
+* Model.metric (mae) causes too much memory usage (out of mem on colab w/ 100k sample linear regression?). Accidentally making a N^2 matrix maybe?
+* Poisson currently requires y values to be floats? I think that's a TFP/TF 2.0 issue though (in their sc there's the line ``tf.maximum(y, 0.)``, which throws an error when y is of an int type).  Could cast inputs to float in pf.distributions.Poisson.__init__...
+* Gamma distribution isn't passing the fit test (in tests/stats/test_distribution_fits)
+* PyTorch support
+* Add type hinting and enforcing
 
-This page has a list of planned improvements, in order of when I plan to get to them.
-
-
-Backlog (short term):
----------------------
-
-* Docs for distributions (including distribution diagrams)
-* Finish BaseDistribution critisism methods
-* Tests for BaseDistribution critisism methods
-* Docs for BaseDistribution critisism methods
-* Dense layer
-* Test for Dense, add Dense test to stats/test_LinearRegression
-* Test 2-layer dense network (w/ sin(x)/x or something function)
-* `Sequential layer`_
-* Tests for sequential layer
-* Models which only use Dense
-* Tests for those models
-* Bernoulli and Poisson dists
-* Models which use them (Classifiers, GLMs)
-* `Mean alias for discrete dists`_
-* Tests for Bernoulli + Poisson dists + models
-* Write the user guide
-* Write the examples
-* Fix parameter naming problem (right now you get an error if you try to name two parameters the same thing!)
-* `Reset method`_
-* `Sklearn support`_
-
-
-Backlog (long term):
---------------------
-
-* `Optimize bounding`_
-* Refactor layers so they each have their own init...
-* `Flipout and estimator options`_
-* `Parameter sharing`_
-* `Slicing`_
-* `Embedding layer`_
-* Neural Matrix Factorization (model, tests, and example)
-* `Mixture distribution`_
-* Mixture density network example
-* `Separate model from noise uncertainty`_
-* `Bayesian decision support`_
-* `Callbacks`_
-* `Support for random effects and multilevel models`_
-* Multivariate Normal, StudentT, and Cauchy dists
-* `Tensorflow graph view`_
-* `Tensorflow dashboard`_
-* `Saving and loading and initializing parameters`_
-* `Transfer learning`_
-* `Bijector support`_? e.g so you can do ``model=Exp(Normal()); model.fit()``
-* `Input data as tf dataset iterators`_
-* `Loss or cost functions`_
-* `Model comparison`_
-* `Dev guide`_
-* Conv layers
-* Pooling layers
-* Ready-made Conv models
-* LSTM Layer
-* Support for passing x=None to do unsupervised models (e.g. Gaussian mixture models, Bayesian nets, LDA, variational autoencoders)
-* Separate Layers into Transforms (e.g. Exp, Add) and Layer (e.g. Dense, BatchNormalization, which create parameters and return a Transform)
-* `Module class`_
-
-
-Notes
------
-
-
-Sequential layer
-^^^^^^^^^^^^^^^^
-
-Sequential layer can't be a class which inherits from BaseLayer b/c it takes a list.  Also, elements of that list will be instantiated Layers.  Will have to be a func which sets the arg['input'] of each sucessive element as the output of the last layer and then return the last layer?
-
-Also each non-terminal layer in a Sequential layer's list can only have 1 output (and each non-first layer can only have 1 input).
-
-
-Mean alias for discrete dists
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Categorical distributions should have a mean function (for convenience) which actually returns the mode (also have a mode func). That way if you call predict on a model which involves a categorical dist it'll work just fine (by recursively evaluating mean())
-
-
-Reset method
-^^^^^^^^^^^^
-
-Models should have a reset() method which sets is_fit to false and clears the tf graph. Then, in fit, only builds the model if is_fit is false. That way you can do transfer learning or snapshot ensembling easily: fit to one set of data, then fit to another, and for the second fit the parameters start where they were at the end of the first fit. But if you want to explicitly re fit from scratch call model.reset()
-Ideally calling reset on a model would *only* reset the variables contained in that model, and not the entire TF graph...
-
-It should also close the tf session.
-
-
-Sklearn support
-^^^^^^^^^^^^^^^
-
-Model classes should be consistent with a sklearn estimator. 
-Should support predict_proba().
-Or if that won't work, include a sklearn Estimator which takes a model obj.
-https://scikit-learn.org/dev/developers/contributing.html#rolling-your-own-estimator
-
-
-Flipout and estimator options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Add support for what estimator to use.  Now the default is to draw a random sample from the posterior for each *sample* in the batch, but that's really inefficient.  Should be able to also just draw one sample per batch and use that sample for all samples in the batch.
-
-Also add support for flipout, expecially for use w/ Dense + conv layers.  Might have to make Parameters be able to return a sample of size batch_size or a sample of size 1 (which you can then use w/ flipout).  https://arxiv.org/abs/1803.04386
-
-
-Slicing
-^^^^^^^
-
-NOTE that you've implemented this, just need to test/debug it.
-Added layers.Gather and Parameter.__getitem__ which uses Gather.
-
-Ability to 'slice' arrays, e.g.:
-
-.. code-block:: python
-
-   inds = Input()
-   values = Variable(shape[n_unique_inds,1])
-   values[inds]
-
-This will enable the user to do embeddings,
-
-.. code-block:: python
-
-   user_ids = Input('user ids')
-   item_ids = Input('user ids')
-   user_embeddings = Parameter(shape=[n_users, 50])
-   item_embeddings = Parameter(shape=[n_items, 50])
-   predictions = Dot(user_embeddings[user_ids],
-                     item_embeddings[item_ids])
-
-mixed effects,
-
-.. code-block:: python
-
-  subj_id = Input('subject')
-  mixed_eff = Parameter(shape=n_subj)
-  predictions = mixed_eff[subj_id]
-
-and multilevel models:
-
-.. code-block:: python
-
-  pop_mean = Parameter()
-  pop_std = ScaleParameter()
-  subj_params = Parameter(shape=n_subj,
-                          prior=Normal(pop_mean, pop_std))
-  subj_id = Input('subject')
-  params = subj_params[subj_id]
-
-using tf.gather() under the hood.  
-how does np implement that?  Ok looks like via __getitem__
-which should be added to Parameter (can't slice on layers)
-see https://docs.python.org/3/reference/datamodel.html#object.__getitem__
-
-
-Tensorflow graph view
-^^^^^^^^^^^^^^^^^^^^^
-
-Should be able to show the tensorflow graph for a model.
-Maybe via a something like ``model.tensorboard_graph(...same args as fit?...)``.
-See https://www.tensorflow.org/guide/graph_viz
-
-Also should handle scoping better so the tensorboard graph view of models isn't
-so hideous...
-
-Save graph w/ 
-
-.. code-block:: python
-
-   writer = tf.summary.FileWriter("path\to\log", sess.graph)
-
-and remember to do ``writer.close()`` at some point.
-
-
-Tensorflow dashboard
-^^^^^^^^^^^^^^^^^^^^
-
-The ``fit()`` func should have a ``show_dashboard`` kwarg or something.  If true, 
-opens the tensorboard while training.
-
-Set up the TF stuff in python (see previous section).
-
-Then start tensorboard.  May have to use subprocess.Popen (part of std lib):
-
-.. code-block:: python
-
-   import subprocess
-   subprocess.Popen(['tensorboard' '--logdir=path\to\log'])
-
-And finally open a web browser to the tensorboard w/ the webbrowser package (also part of std lib)
-
-.. code-block:: python
-
-   import webbrowser
-   webbrowser.open('localhost:6006', new=2)
-
-
-Embedding layer
-^^^^^^^^^^^^^^^
-
-With priors on the embedding vectors to regularize.
-
-
-Bayesian decision support
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Add methods to base dists which implement finding the optimal bayes action given a loss function, etc
-https://en.wikipedia.org/wiki/Bayes_estimator
-
-
-Callbacks
-^^^^^^^^^
-
-Callbacks would be good to have, especially to adjust learning rate throughout training, and to do early stopping (not for regularization purposes but just to not waste time).
-
-
-Separate model from noise uncertainty
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Right now predictive_distribution estimates the total uncertainty. Would be nice to be able to separately estimate model uncertainty (aka epistemic unc) vs noise uncertainty (aka aleatoric unc).  Could estimate just the model uncertainty by taking the mean if the sample model? Ie _built_model.mean()
-
-
-Saving and loading and initializing parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Should have a way to save and load models, layers, parameters (and their posterior variable values!).  h5?  Or just pickle even?
-
-Also should be able to initialize parameter posterior variables to a specific value (a feature which would probably be used when loading a model/parameter).
-
-
-Transfer learning
-^^^^^^^^^^^^^^^^^
-
-Ideally, you can train a model, then take the parameters or even whole layers (with trees of parameters and layers within them) from that trained model, and plug it into a new model and train that new model.
-
-Also, should be able to set whether parameters are trainable. Or layers (which just sets the trainable value of all parameters contained in that layer or its children).
-E.g. for transfer learning, you might want to train a model, take some layer(s) from it, add a few layers on top, and then train *only those new layers* you added on top, so you'd want to set trainable=False for the layer(s) which were pre-trained.
-
-Could go through the tree and for all parameters set their posterior parameter 
-tf.Varable's .trainable property = False?
-
-
-Parameter sharing
-^^^^^^^^^^^^^^^^^
-
-For conv nets, resnet-like structures, etc.  As-is, if you tried to do:
-
-.. code-block:: python
-
-    beta = Parameter()
-    in1 = Input(0)
-    in2 = Input(1)
-    out = (in1*beta) + (in2*beta)
-
-I think it would *re-build* beta for in2, and then in1 would be pointing at a separate copy of the parameter which ProbFlow wouldn't know about.
-
-Should also allow layer sharing, where output from one layer can be piped into multiple other layers, e.g.:
-
-.. code-block:: python
-
-    layer1 = Dense(units=10)
-    layer2 = Dense(layer1, units=5)
-    layer3 = Cat([layer1, layer2])
-
-Honestly I think all of that may be as easy as putting an "if arg.build_obj is None" before arg.build() in core.BaseLayer.build().
-
-
-
-Bijector support
-^^^^^^^^^^^^^^^^
-
-Adding the jacobian adjustment isn't too bad, just add Abs( d transform / dt ).
-But you also then need to worry about doing the *inverse* transform.
-E.g. w/ ``y ~ Exp(Normal(mu, sigma))``, Exp layer needs to *inverse* transform y
-(i.e. take ``ln(y)``), compute prob of ``ln(y) ~ N(mu, sigma)``, and then 
-return that prob plus the Jacobian adjustment.
-
-But, don't need a special "bijector" or anything, just add that functionality
-to the Exp layer (and other transform layers, like Reciprocal, Log, and Sigmoid)
-
-Also, is there a way to get mean() to work w/ Bijectors? TFP currently just throws an error when you try to call mean on a bijected dist. Currently mean() won't return the mean for transformed dists b/c for example mean(exp(x)) isn't the same as exp(mean(x)).  I don't think getting that to work is as easy as it is for the log prob (were you just transform or inv transform the values), because there's no principled way to get the mean of a transformed dist, and some transforms don't even have analytically tractable means (e.g. the logit normal dist).
-
-
-Input data as tf dataset iterators
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The big advantage of bayes by backprop w/ tensorflow is your data doesn't have
-to fit into memory.  Right now, ``BaseDistribution.fit`` assumes its inputs
-``x`` and ``y`` are numpy arrays (or pandas arrays).... Which need to fit in 
-memory.
-Though I guess you could use memory mapping if it won't fit in memory.
-Distributed arrays would be hard though.  Dask maybe?
-Anyway, it would be nice 
-to let it take dataset iterators so users can define their own data pipelines.
-
-Maybe just define data generators like in keras?  https://keras.io/models/model/#fit_generator
-PyTorch also has a similar thing with torch.utils.data.Dataset
-
-
-Support for random effects and multilevel models
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Should allow for random effects, mixed effects (just the results of a fixed effects net plus the results of a random effects net) and also hierarchical/multilevel models (where random effect variables are nested).
-Ie for random effects there's an over all dist of weights, but each subject/group has their own weight distributions which are drawn from pop dist
-Use the reparam trick?
-And should be able to make multilevel model with that: eg individuals drawn from schools (in fact comparing to the 8 schools example in r would be good way to test that it works)
-Perhaps make a RandomVariable() which takes a slice of the x_values placeholder? (as individual/group id or whatever)
-
-
-
-Loss or cost functions
-^^^^^^^^^^^^^^^^^^^^^^
-
-Add support for loss (cost) functions, computing the expected loss, and Bayes estimator (ie finding the optimal Bayes action).
-
-
-Model comparison
-^^^^^^^^^^^^^^^^
-
-AIC/BIC/DIC/WAIC/LOO?
-I mean.  Or just use held-out log posterior prob...
-or cross-validated summed log posterior prob?
-
-
-Mixture distribution
-^^^^^^^^^^^^^^^^^^^^
-
-A continuous distribution which takes a list of other distrbutions.
-
-
-Optimize bounding
-^^^^^^^^^^^^^^^^^
-
-In Parameter._bound, ``exp`` and ``sigmoid`` are used just to bound the 
-variational posterior args within a certain range.  Should just use tf.keras.constraints to bound the values...
-
-
-Dev guide
-^^^^^^^^^
-
-Testing (eg --plot arg, etc), inheritance structure, etc
-
-
-Module class
-^^^^^^^^^^^^
-
-So more complicated networks can be defined w/ building blocks.  User can define the `__init__` and `__call__` methods.
-
-Then will also want to re-define the "models" (DenseNet, DenseRegression, LinearRegression, etc) as Modules.

@@ -1,4 +1,4 @@
-.. _math:
+.. _ug_math:
 
 Mathematical Details
 ====================

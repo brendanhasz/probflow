@@ -1,9 +1,9 @@
-Models API
-==========
+Applications API
+================
 
 .. include:: macros.hrst
 
-.. automodule:: probflow.models
+.. automodule:: probflow.applications
    :members:
    :inherited-members:
    :show-inheritance:

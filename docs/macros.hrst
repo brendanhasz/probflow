@@ -1,17 +1,27 @@
 .. Macros
 
 .. |Keras| replace:: `Keras <http://keras.io>`__
-.. |TensorFlow| replace:: `TensorFlow <http://www.tensorflow.org/>`__
-.. |TensorFlow Probability| replace:: `TensorFlow Probability <http://www.tensorflow.org/probability/>`__
+.. |TensorFlow| replace:: `TensorFlow <http://www.tensorflow.org/beta>`__
+.. |TensorFlow Probability| replace:: `TensorFlow Probability <http://www.tensorflow.org/probability>`__
+.. |PyTorch| replace:: `PyTorch <http://pytorch.org>`__
+.. |tfp.Distribution| replace:: `tensorflow_probability.distributions.Distribution <http://www.tensorflow.org/probability/api_docs/python/tfp/distributions/Distribution>`__
+.. |torch.Distribution| replace:: `torch.distributions.distribution.Distribution <https://pytorch.org/docs/stable/distributions.html#torch.distributions.distribution.Distribution>`__
 
+.. |Application| replace:: :doc:`Application </api_applications>`
+.. |Applications| replace:: :doc:`Applications </api_applications>`
+.. |Callback| replace:: :doc:`Callback </api_callbacks>`
+.. |Callbacks| replace:: :doc:`Callbacks </api_callbacks>`
+.. |Data| replace:: :doc:`Data </api_data>`
 .. |Distribution| replace:: :doc:`Distribution </api_distributions>`
 .. |Distributions| replace:: :doc:`Distributions </api_distributions>`
+.. |Model| replace:: :doc:`Model </api_models>`
+.. |Models| replace:: :doc:`Models </api_models>`
+.. |Module| replace:: :doc:`Module </api_modules>`
+.. |Modules| replace:: :doc:`Modules </api_modules>`
 .. |Parameter| replace:: :doc:`Parameter </api_parameters>`
 .. |Parameters| replace:: :doc:`Parameters </api_parameters>`
-.. |Layer| replace:: :doc:`Layer </api_layers>`
-.. |Layers| replace:: :doc:`Layers </api_layers>`
-.. |Model| replace:: :class:`Model <.BaseDistribution>`
-.. |Models| replace:: :class:`Models <.BaseDistribution>`
+
+.. |DataGenerator| replace:: :class:`.DataGenerator`
 
 .. |None| replace:: :obj:`None`
 .. |ndarray| replace:: :class:`ndarray <numpy.ndarray>`
@@ -20,14 +30,3 @@
 .. |DataFrames| replace:: :class:`DataFrames <pandas.DataFrame>`
 .. |Series| replace:: :class:`Series <pandas.Series>`
 
-.. TENSORFLOW LINKS
-.. |Tensor| replace:: `Tensor <http://www.tensorflow.org/api_docs/python/tf/Tensor>`__
-.. |Tensors| replace:: `Tensors <http://www.tensorflow.org/api_docs/python/tf/Tensor>`__
-.. |Variable| replace:: `Variable <http://www.tensorflow.org/api_docs/python/tf/Variable>`__
-.. |Variables| replace:: `Variables <http://www.tensorflow.org/api_docs/python/tf/Variable>`__
-.. |DType| replace:: `DType <http://www.tensorflow.org/api_docs/python/tf/dtypes/DType>`__
-.. |Initializer| replace:: `Initializer <http://www.tensorflow.org/api_docs/python/tf/initializers>`__
-.. |Initializers| replace:: `Initializers <http://www.tensorflow.org/api_docs/python/tf/initializers>`__
-.. |tf.placeholder| replace:: `tf.placeholder <http://www.tensorflow.org/api_docs/python/tf/placeholder>`__
-.. |tfp.distribution| replace:: `tfp.distribution <http://www.tensorflow.org/probability/api_docs/python/tfp/distributions>`__
-.. |Optimizer| replace:: `Optimizer <https://www.tensorflow.org/api_docs/python/tf/train/Optimizer>`__

@@ -6,6 +6,8 @@ Neural Matrix Factorization
 .. include:: macros.hrst
 
 
+TODO: update this to v2
+
 TODO: description...
 
 TODO: for a vanilla matrix factorization
@@ -29,6 +31,7 @@ TODO: for a vanilla matrix factorization
     # Fit a model w/ normally-distibuted error
     model = Normal(predictions, error)
     model.fit(df[['user_id', 'item_id']], df['rating'])
+
 
 or for neural matrix factorization https://arxiv.org/abs/1708.05031
 
