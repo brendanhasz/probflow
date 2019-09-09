@@ -88,12 +88,8 @@ def test_posterior_plot(plot):
     if plot:
         plt.show()
 
-    # Should be able to pass kwargs to posterior_plot
-    model.posterior_plot(ci=0.95)
-    if plot:
-        plt.show()
-
     # Should be able to plot just some params
+    # and pass kwargs to Parameter.posterior_plot
     model.posterior_plot(params=['Weight', 'Bias'], ci=0.95)
     if plot:
         plt.show()
