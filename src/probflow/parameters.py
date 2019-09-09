@@ -33,18 +33,35 @@ of a :class:`.Parameter`:
 
 """
 
+
 __all__ = [
     'Parameter',
     'ScaleParameter',
     'CategoricalParameter',
+    'DirichletParameter',
     'BoundedParameter',
     'PositiveParameter',
+    'DeterministicParameter',
 ]
 
 
-import probflow.core.ops as O
-from probflow.core.settings import get_sampling
+
+from typing import Union, List, Dict, Type, Callable
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+from probflow.core.settings import get_samples
 from probflow.core.settings import get_backend
+from probflow.core.settings import Sampling
+from probflow.core.base import BaseParameter
+from probflow.core.base import BaseDistribution
+import probflow.core.ops as O
+from probflow.distributions import Normal
+from probflow.distributions import Gamma
+from probflow.distributions import Categorical
+from probflow.distributions import Dirichlet
+from probflow.distributions import Deterministic
 from probflow.utils.plotting import plot_dist
 from probflow.utils.initializers import xavier
 from probflow.utils.initializers import scale_xavier
@@ -55,9 +72,10 @@ from probflow.utils.initializers import pos_xavier
 class Parameter(BaseParameter):
     r"""Probabilistic parameter(s).
 
-    A probabilistic parameter $\beta$.  The default posterior distribution
-    is the Normal distribution, and the default prior is a Normal 
-    distribution with a mean of 0 and a standard deviation of 1.
+    A probabilistic parameter :math:`\beta`.  The default posterior
+    distribution is the :class:`.Normal` distribution, and the default prior
+    is a :class:`.Normal` distribution with a mean of 0 and a standard
+    deviation of 1.
 
     The prior for a |Parameter| can be set to any |Distribution| object
     (via the ``prior`` argument), and the type of distribution to use for the
@@ -76,7 +94,7 @@ class Parameter(BaseParameter):
 
     Parameters
     ----------
-    shape : int, list of int, or |ndarray|
+    shape : int or List[int]
         Shape of the array containing the parameters.
         Default = ``1``
     posterior : |Distribution| class
@@ -92,12 +110,12 @@ class Parameter(BaseParameter):
         ``posterior``=:class:`.Gamma`` and
         ``transform = lambda x: tf.reciprocal(x)``
         Default is to use no transform.
-    initializer : dict of callables
+    initializer : Dict[str, callable]
         Initializer functions to use for each variable of the variational
         posterior distribution.  Keys correspond to variable names (arguments
         to the distribution), and values contain functions to initialize those
         variables given ``shape`` as the single argument.
-    var_transform : dict of callables
+    var_transform : Dict[str, callable]
         Transform to apply to each variable of the variational posterior.
         For example to transform the standard deviation parameter from 
         untransformed space to transformed, positive, space, use
@@ -106,6 +124,47 @@ class Parameter(BaseParameter):
     name : str
         Name of the parameter(s).
         Default = ``'Parameter'``
+
+
+    Attributes
+    ----------
+    initializer : Dict[str, callable]
+        Initializer functions for each variable
+    name : str
+        Name of this |Parameter|
+    posterior_fn : |Distribution| class
+        Distribution to use for the variational posterior
+    posterior : |Distribution| object
+        This Parameter's variational posterior
+    prior : |Distribution| object
+        This parameter's prior
+    shape : List[int]
+        Shape of this parameter
+    trainable_variables : List[Tensor]
+        List of raw variable objects from the backend used for this Parameter
+    transform : callable
+        Transformation to apply to this parameter's variational distribution
+    untransformed_variables : Dict[str, Tensor]
+        Untransformed variables from the backend
+    var_transform : Dict[str, callable]
+        Transformations to apply to each variable
+    variables : Dict[str, Tensor]
+        Transformed variables from the backend
+    
+
+    Methods
+    -------
+    __init__(...)
+        Instantiate a Parameter array.
+    __call__
+        Return a sample from the 
+    kl_loss
+    posterior_ci
+    posterior_mean
+    posterior_plot
+    posterior_sample
+    prior_plot
+    prior_sample
 
 
     Examples
@@ -120,29 +179,27 @@ class Parameter(BaseParameter):
     """
 
     def __init__(self,
-                 shape=1,
-                 posterior=Normal,
-                 prior=Normal(0, 1),
-                 transform=lambda x: x,
-                 initializer={'loc': xavier, 'scale': scale_xavier},
-                 var_transform={'loc': lambda x: x, 'scale': O.softplus},
-                 name='Parameter'):
-        """Construct an array of Parameter(s)."""
-
-        # Check types
-        # TODO
+                 shape: Union[int, List[int]] = 1,
+                 posterior: Type[BaseDistribution] = Normal,
+                 prior: BaseDistribution = Normal(0, 1),
+                 transform: Callable = lambda x: x,
+                 initializer: Dict[str, Callable] = {'loc': xavier,
+                                                     'scale': scale_xavier},
+                 var_transform : Dict[str, Callable] = {'loc': lambda x: x,
+                                                        'scale': O.softplus},
+                 name: str = 'Parameter'):
 
         # Make shape a list
-        if isinstance(shape, tuple):
-            shape = list(shape)
         if isinstance(shape, int):
             shape = [shape]
-        if isinstance(shape, np.ndarray):
-            shape = shape.tolist()
+
+        # Check values
+        if any(e<1 for e in shape):
+            raise ValueError('all shapes must be >0')
 
         # Assign attributes
         self.shape = shape
-        self.posterior = posterior
+        self.posterior_fn = posterior
         self.prior = prior
         self.transform = transform
         self.initializer = initializer
@@ -150,36 +207,59 @@ class Parameter(BaseParameter):
         self.name = name
 
         # Create variables for the variational distribution
-        self.variables = dict()
+        self.untransformed_variables = dict()
         for var, init in initializer.items():
             if get_backend() == 'pytorch':
-                self.variables[var] = init(shape)
-                self.variables[var].requires_grad = True
+                self.untransformed_variables[var] = init(shape)
+                self.untransformed_variables[var].requires_grad = True
             else:
-                self.variables[var] = tf.Variable(init(shape))
+                import tensorflow as tf
+                self.untransformed_variables[var] = tf.Variable(init(shape))
 
 
-    def _t_vars(self):
+    @property
+    def trainable_variables(self):
+        """Get a list of trainable variables from the backend"""
+        return [e for _, e in self.untransformed_variables.items()]
+
+
+    @property
+    def variables(self):
         """Variables after applying their respective transformations"""
         return {name: self.var_transform[name](val)
-                for name, val in self.variables.items()}
+                for name, val in self.untransformed_variables.items()}
+
+
+    @property
+    def posterior(self):
+        """This Parameter's variational posterior distribution"""
+        return self.posterior_fn(**self.variables)
 
 
     def __call__(self):
         """Return a sample from or the MAP estimate of this parameter.
 
         TODO
+
+        Returns
+        -------
+        sample : Tensor
+            A sample from this Parameter's variational posterior distribution
         """
-        if get_sampling():
-            return self.transform(self.posterior(**self._t_vars()).sample())
+        n_samples = get_samples()
+        if n_samples is None:
+            return self.transform(self.posterior.mean())
+        elif n_samples == 1:
+            return self.transform(self.posterior.sample())
         else:
-            return self.transform(self.posterior(**self._t_vars()).mean())
+            return self.transform(self.posterior.sample(n_samples))
 
 
     def kl_loss(self):
         """Compute the sum of the Kullback–Leibler divergences between this
         parameter's priors and its variational posteriors."""
-        return O.sum(O.kl_divergence(self.posterior, self.prior))
+        return O.sum(O.kl_divergence(self.posterior(), self.prior()),
+                     axis=None)
 
 
     def posterior_mean(self):
@@ -187,10 +267,10 @@ class Parameter(BaseParameter):
 
         TODO
         """
-        return self.transform(self.posterior(**self._t_vars()).mean())
+        return self().numpy()
 
 
-    def posterior_sample(self, n=1):
+    def posterior_sample(self, n: int = 1):
         """Sample from the posterior distribution.
 
         Parameters
@@ -203,26 +283,20 @@ class Parameter(BaseParameter):
         -------
         TODO
         """
-        if n==1:
-            return self.transform(self.posterior(**self._t_vars()).sample())
-        else:
-            return self.transform(self.posterior(**self._t_vars()).sample(n))
+        with Sampling(n=n):
+            return self().numpy()
 
 
-    def prior_sample(self, n=1):
+    def prior_sample(self, n: int = 1):
         """Sample from the prior distribution.
 
-        .. admonition:: Model must be fit first!
-
-            Before calling :meth:`.prior_sample` on a |Parameter|, you must
-            first :meth:`fit <.BaseDistribution.fit>` the model to which it
-            belongs to some data.
 
         Parameters
         ----------
         n : int > 0
             Number of samples to draw from the prior distribution.
             Default = 1
+
 
         Returns
         -------
@@ -232,12 +306,12 @@ class Parameter(BaseParameter):
             ``(self.prior.shape)``.
         """
         if n==1:
-            return self.transform(self.prior.sample())
+            return self.transform(self.prior.sample()).numpy()
         else:
-            return self.transform(self.prior.sample(n))
+            return self.transform(self.prior.sample(n)).numpy()
 
 
-    def posterior_ci(self, ci=0.95, n=10000):
+    def posterior_ci(self, ci: float = 0.95, n: int = 10000):
         """Posterior confidence intervals
 
         Parameters
@@ -245,9 +319,11 @@ class Parameter(BaseParameter):
         ci : float
             Confidence interval for which to compute the upper and lower
             bounds.  Must be between 0 and 1.
+            Default = 0.95
         n : int
             Number of samples to draw from the posterior distributions for
             computing the confidence intervals
+            Default = 10,000
 
         Returns
         -------
@@ -257,13 +333,9 @@ class Parameter(BaseParameter):
             Upper bound of the confidence interval
         """
 
-        # Check inputs
-        if not isinstance(ci, float):
-            raise TypeError('ci must be a float')
+        # Check values
         if ci<0.0 or ci>1.0:
             raise ValueError('ci must be between 0 and 1')
-        if not isinstance(n, int):
-            raise TypeError('n must be an int')
         if n < 1:
             raise ValueError('n must be positive')
 
@@ -334,6 +406,9 @@ class Parameter(BaseParameter):
         plot_dist(samples, xlabel=self.name, style=style, bins=bins, 
                   ci=ci, bw=bw, alpha=alpha, color=color)
 
+        # Label with parameter name
+        plt.xlabel(self.name)
+
 
     def prior_plot(self, n=10000, style='fill', bins=20, ci=0.0,
                    bw=0.075, alpha=0.4, color=None):
@@ -392,6 +467,8 @@ class Parameter(BaseParameter):
         plot_dist(samples, xlabel=self.name, style=style, bins=bins, 
                   ci=ci, bw=bw, alpha=alpha, color=color)
 
+        # Label with parameter name
+        plt.xlabel(self.name+' prior')
 
 
 class ScaleParameter(Parameter):
@@ -404,7 +481,7 @@ class ScaleParameter(Parameter):
 
     .. math::
 
-        \sigma^2 \sim \text{InverseGamma}(\alpha, \beta)
+        \frac{1}{\sigma^2} \sim \text{Gamma}(\alpha, \beta)
 
     Then the variance is transformed into the standard deviation:
 
@@ -414,12 +491,12 @@ class ScaleParameter(Parameter):
 
     By default, an inverse gamma prior is used:
 
-        \sigma^2 \sim \text{InverseGamma}(5, 5)
+        \frac{1}{\sigma^2} \sim \text{Gamma}(5, 5)
 
 
     Parameters
     ----------
-    shape : int, list of int, or |ndarray|
+    shape : int or List[int]
         Shape of the array containing the parameters.
         Default = ``1``
     posterior : |Distribution| class
@@ -432,12 +509,12 @@ class ScaleParameter(Parameter):
     transform : callable
         Transform to apply to the random variable.
         Default is to use a square root transform.
-    initializer : dict of callables
+    initializer : Dict[str, callable]
         Initializer functions to use for each variable of the variational
         posterior distribution.  Keys correspond to variable names (arguments
         to the distribution), and values contain functions to initialize those
         variables given ``shape`` as the single argument.
-    var_transform : dict of callables
+    var_transform : Dict[str, callable]
         Transform to apply to each variable of the variational posterior.
     name : str
         Name of the parameter(s).
@@ -455,13 +532,13 @@ class ScaleParameter(Parameter):
 
     def __init__(self,
                  shape=1,
-                 posterior=InverseGamma,
-                 prior=InverseGamma(5, 5),
-                 transform=lambda x: O.sqrt(x),
+                 posterior=Gamma,
+                 prior=Gamma(5, 5),
+                 transform=lambda x: O.sqrt(1.0/x),
                  initializer={'concentration': pos_xavier, 
-                              'scale': pos_xavier},
-                 var_transform={'concentration': O.softplus,
-                                'scale': O.softplus},
+                              'rate': pos_xavier},
+                 var_transform={'concentration': O.exp,
+                                'rate': O.exp},
                  name='ScaleParameter'):
         super().__init__(shape=shape,
                          posterior=posterior,
@@ -477,6 +554,98 @@ class CategoricalParameter(Parameter):
     r"""Categorical parameter.
 
     This is a convenience class for creating a categorical parameter 
+    :math:`\beta` with a Categorical posterior:
+
+    .. math::
+
+        \beta \sim \text{Categorical}(\mathbf{\theta})
+
+    By default, a uniform prior is used.
+
+    TODO: explain that a sample is an int in [0, k-1]
+
+
+    Parameters
+    ----------
+    k : int > 2
+        Number of categories.
+    shape : int or List[int]
+        Shape of the array containing the parameters.
+        Default = ``1``
+    posterior : |Distribution| class
+        Probability distribution class to use to approximate the posterior.
+        Default = :class:`.Categorical`
+    prior : |Distribution| object
+        Prior probability distribution function which has been instantiated
+        with parameters.
+        Default = :class:`.Categorical` ``(1/k)``
+    transform : callable
+        Transform to apply to the random variable.
+        Default is to use no transform.
+    initializer : Dict[str, callable]
+        Initializer functions to use for each variable of the variational
+        posterior distribution.  Keys correspond to variable names (arguments
+        to the distribution), and values contain functions to initialize those
+        variables given ``shape`` as the single argument.
+    var_transform : Dict[str, callable]
+        Transform to apply to each variable of the variational posterior.
+    name : str
+        Name of the parameter(s).
+        Default = ``'CategoricalParameter'``
+
+
+    Examples
+    --------
+
+    TODO: creating variable
+
+    """
+
+    def __init__(self,
+                 k: int = 2,
+                 shape: Union[int, List[int]] = [],
+                 posterior=Categorical,
+                 prior=None,
+                 transform=lambda x: x,
+                 initializer={'probs': xavier},
+                 var_transform={'probs': O.additive_logistic_transform},
+                 name='CategoricalParameter'):
+
+        # Check type of k
+        if not isinstance(k, int):
+            raise TypeError('k must be an integer')
+        if k<2:
+            raise ValueError('k must be >1')
+
+        # Make shape a list
+        if isinstance(shape, int):
+            shape = [shape]
+
+        # Create shape of underlying variable array
+        shape = shape+[k-1]
+
+        # Use a uniform prior
+        if prior is None:
+            prior = Categorical(O.ones(shape)/float(k))
+
+        # Initialize the parameter
+        super().__init__(shape=shape,
+                         posterior=posterior,
+                         prior=prior,
+                         transform=transform,
+                         initializer=initializer,
+                         var_transform=var_transform,
+                         name=name)
+
+        # shape should correspond to the sample shape
+        self.shape = shape
+
+
+
+class DirichletParameter(Parameter):
+    r"""Dirichlet parameter.
+
+    This is a convenience class for creating a parameter 
     :math:`\theta` with a Dirichlet posterior:
 
     .. math::
@@ -487,12 +656,15 @@ class CategoricalParameter(Parameter):
 
         \theta \sim \text{Dirichlet}(\mathbf{1})
 
+    TODO: explain that a sample is a categorical prob dist (as compared to
+    CategoricalParameter, where a sample is a single value)
+
 
     Parameters
     ----------
     k : int > 2
         Number of categories.
-    shape : int, list of int, or |ndarray|
+    shape : int or List[int]
         Shape of the array containing the parameters.
         Default = ``1``
     posterior : |Distribution| class
@@ -505,16 +677,16 @@ class CategoricalParameter(Parameter):
     transform : callable
         Transform to apply to the random variable.
         Default is to use no transform.
-    initializer : dict of callables
+    initializer : Dict[str, callable]
         Initializer functions to use for each variable of the variational
         posterior distribution.  Keys correspond to variable names (arguments
         to the distribution), and values contain functions to initialize those
         variables given ``shape`` as the single argument.
-    var_transform : dict of callables
+    var_transform : Dict[str, callable]
         Transform to apply to each variable of the variational posterior.
     name : str
         Name of the parameter(s).
-        Default = ``'Parameter'``
+        Default = ``'DirichletParameter'``
 
 
     Examples
@@ -525,16 +697,14 @@ class CategoricalParameter(Parameter):
     """
 
     def __init__(self,
-                 k=2,
-                 shape=1,
+                 k: int = 2,
+                 shape: Union[int, List[int]] = [],
                  posterior=Dirichlet,
                  prior=None,
                  transform=lambda x: x,
-                 initializer={'concentration': pos_xavier, 
-                              'scale': pos_xavier},
-                 var_transform={'concentration': O.softplus,
-                                'scale': O.softplus},
-                 name='CategoricalParameter'):
+                 initializer={'concentration': pos_xavier},
+                 var_transform={'concentration': O.softplus},
+                 name='DirichletParameter'):
 
         # Check type of k
         if not isinstance(k, int):
@@ -543,12 +713,8 @@ class CategoricalParameter(Parameter):
             raise ValueError('k must be >1')
 
         # Make shape a list
-        if isinstance(shape, tuple):
-            shape = list(shape)
         if isinstance(shape, int):
             shape = [shape]
-        if isinstance(shape, np.ndarray):
-            shape = shape.tolist()
 
         # Create shape of underlying variable array
         shape = shape+[k]
@@ -581,7 +747,7 @@ class BoundedParameter(Parameter):
 
     Parameters
     ----------
-    shape : int, list of int, or |ndarray|
+    shape : int or List[int]
         Shape of the array containing the parameters.
         Default = ``1``
     posterior : |Distribution| class
@@ -594,12 +760,12 @@ class BoundedParameter(Parameter):
     transform : callable
         Transform to apply to the random variable.
         Default is to use a sigmoid transform.
-    initializer : dict of callables
+    initializer : Dict[str, callable]
         Initializer functions to use for each variable of the variational
         posterior distribution.  Keys correspond to variable names (arguments
         to the distribution), and values contain functions to initialize those
         variables given ``shape`` as the single argument.
-    var_transform : dict of callables
+    var_transform : Dict[str, callable]
         Transform to apply to each variable of the variational posterior.
     min : float
         Minimum value the parameter can take.
@@ -609,7 +775,7 @@ class BoundedParameter(Parameter):
         Default = 1.
     name : str
         Name of the parameter(s).
-        Default = ``'ScaleParameter'``
+        Default = ``'BoundedParameter'``
 
     Examples
     --------
@@ -625,9 +791,13 @@ class BoundedParameter(Parameter):
                  transform=None,
                  initializer={'loc': xavier, 'scale': scale_xavier},
                  var_transform={'loc': lambda x: x, 'scale': O.softplus},
-                 min=0.0,
-                 max=1.0,
+                 min: float = 0.0,
+                 max: float = 1.0,
                  name='BoundedParameter'):
+
+        # Check bounds
+        if min > max:
+            raise ValueError('min is larger than max')
 
         # Create the transform based on the bounds
         if transform is None:
@@ -658,7 +828,7 @@ class PositiveParameter(Parameter):
 
     Parameters
     ----------
-    shape : int, list of int, or |ndarray|
+    shape : int or List[int]
         Shape of the array containing the parameters.
         Default = ``1``
     posterior : |Distribution| class
@@ -671,12 +841,12 @@ class PositiveParameter(Parameter):
     transform : callable
         Transform to apply to the random variable.
         Default is to use an exponential transform.
-    initializer : dict of callables
+    initializer : Dict[str, callable]
         Initializer functions to use for each variable of the variational
         posterior distribution.  Keys correspond to variable names (arguments
         to the distribution), and values contain functions to initialize those
         variables given ``shape`` as the single argument.
-    var_transform : dict of callables
+    var_transform : Dict[str, callable]
         Transform to apply to each variable of the variational posterior.
     min : float
         Minimum value the parameter can take.
@@ -686,7 +856,7 @@ class PositiveParameter(Parameter):
         Default = 1.
     name : str
         Name of the parameter(s).
-        Default = ``'ScaleParameter'``
+        Default = ``'PositiveParameter'``
 
     Examples
     --------
@@ -703,6 +873,62 @@ class PositiveParameter(Parameter):
                  initializer={'loc': xavier, 'scale': scale_xavier},
                  var_transform={'loc': lambda x: x, 'scale': O.softplus},
                  name='PositiveParameter'):
+        super().__init__(shape=shape,
+                         posterior=posterior,
+                         prior=prior,
+                         transform=transform,
+                         initializer=initializer,
+                         var_transform=var_transform,
+                         name=name)
+
+
+
+class DeterministicParameter(Parameter):
+    r"""A parameter which takes only a single value (i.e., the posterior is a 
+    single point value, not a probability distribution).
+
+
+    Parameters
+    ----------
+    shape : int or List[int]
+        Shape of the array containing the parameters.
+        Default = ``1``
+    posterior : |Distribution| class
+        Probability distribution class to use to approximate the posterior.
+        Default = :class:`.Deterministic`
+    prior : |Distribution| object
+        Prior probability distribution function which has been instantiated
+        with parameters.
+        Default = :class:`.Normal` ``(0, 1)``
+    transform : callable
+        Transform to apply to the random variable.
+        Default is to use no transformation.
+    initializer : Dict[str, callable]
+        Initializer functions to use for each variable of the variational
+        posterior distribution.  Keys correspond to variable names (arguments
+        to the distribution), and values contain functions to initialize those
+        variables given ``shape`` as the single argument.
+    var_transform : Dict[str, callable]
+        Transform to apply to each variable of the variational posterior.
+    name : str
+        Name of the parameter(s).
+        Default = ``'PositiveParameter'``
+
+    Examples
+    --------
+
+    TODO
+
+    """
+
+    def __init__(self,
+                 shape=1,
+                 posterior=Deterministic,
+                 prior=Normal(0, 1),
+                 transform=lambda x: x,
+                 initializer={'loc': xavier},
+                 var_transform={'loc': lambda x: x},
+                 name='DeterministicParameter'):
         super().__init__(shape=shape,
                          posterior=posterior,
                          prior=prior,
