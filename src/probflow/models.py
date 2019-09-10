@@ -130,6 +130,7 @@ class Model(Module):
         @tf.function
         def train_step(x_data, y_data):
             nb = y_data.shape[0] #number of samples in this batch
+            self.reset_kl_loss()
             with Sampling(n=1, flipout=flipout):
                 with tf.GradientTape() as tape:
                     if x_data is None:
