@@ -44,14 +44,11 @@ can be built by creating a ProbFlow Model object:
     class LinearRegression(pf.ContinuousModel):
 
         def __init__(self):
-            """Define the model's parameters"""
             self.weight = pf.Parameter(name='weight')
             self.bias = pf.Parameter(name='bias')
             self.std = pf.ScaleParameter(name='std')
 
-
         def __call__(self, x):
-            """Make predictions"""
             return pf.Normal(x*self.weight()+self.bias(), self.std())
     
     model = LinearRegression()
