@@ -14,6 +14,7 @@ Here are some examples of how to use ProbFlow to build, fit, and diagnose severa
    example_logistic_regression
    example_fully_connected
    example_batch_normalization
+   example_variational_autoencoder
    example_robust_density
    example_glm
    example_gmm
