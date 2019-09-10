@@ -113,8 +113,13 @@ class Module(BaseModule):
         """Compute the sum of the Kullback-Leibler divergences between
         priors and their variational posteriors for all |Parameters| in this
         |Module| and its sub-Modules."""
-        return O.sum([p.kl_loss() for p in self.parameters] + 
-                     [e for m in self.modules for e in m._kl_losses])
+        return O.sum([p.kl_loss() for p in self.parameters])
+
+
+    def kl_loss_batch(self):
+        """Compute the sum of additional Kullback-Leibler divergences due to
+        data in this batch"""
+        return O.sum([e for m in self.modules for e in m._kl_losses])
 
 
     def reset_kl_loss(self):

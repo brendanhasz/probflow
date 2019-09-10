@@ -137,8 +137,8 @@ class Model(Module):
                         log_likelihoods = self().log_prob(y_data)
                     else:
                         log_likelihoods = self(x_data).log_prob(y_data)
-                    kl_loss = self.kl_loss()
-                    elbo_loss = kl_loss/n - tf.reduce_sum(log_likelihoods)/nb
+                    kl_loss = self.kl_loss()/n + self.kl_loss_batch()/nb
+                    elbo_loss = kl_loss - tf.reduce_sum(log_likelihoods)/nb
                 variables = self.trainable_variables
                 gradients = tape.gradient(elbo_loss, variables)
                 self._optimizer.apply_gradients(zip(gradients, variables))
