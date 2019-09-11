@@ -94,6 +94,14 @@ class Module(BaseModule):
 
 
     @property
+    def modules(self):
+        """Get a list of sub-Modules in this |Module|, including itself."""
+        return [m for a in vars(self).values()
+                if isinstance(a, BaseModule)
+                for m in a.modules] + [self]
+
+
+    @property
     def trainable_variables(self):
         """Get a list of trainable backend variables within this |Module|"""
         return [v for p in self.parameters for v in p.trainable_variables]
@@ -106,6 +114,23 @@ class Module(BaseModule):
         priors and their variational posteriors for all |Parameters| in this
         |Module| and its sub-Modules."""
         return O.sum([p.kl_loss() for p in self.parameters])
+
+
+    def kl_loss_batch(self):
+        """Compute the sum of additional Kullback-Leibler divergences due to
+        data in this batch"""
+        return O.sum([e for m in self.modules for e in m._kl_losses])
+
+
+    def reset_kl_loss(self):
+        """Reset additional loss due to KL divergences"""
+        for m in self.modules:
+            m._kl_losses = []
+
+
+    def add_kl_loss(self, loss):
+        """Add additional loss due to KL divergences"""
+        self._kl_losses += [O.sum(loss)]
 
 
 

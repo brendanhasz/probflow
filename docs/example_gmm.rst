@@ -25,5 +25,5 @@ TODO: diagram
             means = self.m()
             stds = self.s()
             dists = [pf.Normal(means[..., i], stds[..., i])
-                     for i in range(self.k)]
+                     for i in range(means.shape[-1])]
             return pf.Mixture(dists, self.w())
