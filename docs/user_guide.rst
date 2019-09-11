@@ -28,7 +28,7 @@ For a quick start, take a look at the :ref:`examples`.
 The user guide contains more detailed information about using ProbFlow, including:
 
 - A brief description of :ref:`Bayesian modeling <ug_inference>`,
-- How to create Bayesian models using :ref:`ug_distributions`, :ref:`ug_parameters`, :ref:`ug_modules`, and :ref:`Models <ug_models>`,
+- Creating Bayesian models using :ref:`ug_distributions`, :ref:`ug_parameters`, :ref:`ug_modules`, and :ref:`Models <ug_models>`,
 - How to :ref:`fit those models <ug_fitting>` to data,
 - How to :ref:`make predictions <ug_predicting>` with those models,
 - How to :ref:`evaluate <ug_evaluating>` the performance of a model,

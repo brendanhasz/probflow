@@ -24,7 +24,7 @@ The ProbFlow API consists of five primary modules:
 * :mod:`.modules`
 * :mod:`.models`
 
-a module which contains pre-built models for standard tasks:
+as well as a module which contains pre-built models for standard tasks:
 
 * :mod:`.applications`
 

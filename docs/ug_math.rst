@@ -36,7 +36,7 @@ The problem is, we don't know what the true posterior looks like - that's what w
 2. the (negative) expected log likelihood
 3. the log model evidence (the probability of the data)
 
-Proof:
+For those of you who like math:
 
 .. math::
 

@@ -42,7 +42,7 @@ can be built by creating a ProbFlow Model object:
             """Define the model's parameters"""
             self.weight = pf.Parameter(name='weight')
             self.bias = pf.Parameter(name='bias')
-            self.std = pf.ScaleParameter(name='std')
+            self.std = pf.ScaleParameter(name='sigma')
 
 
         def __call__(self, x):
@@ -121,7 +121,7 @@ ProbFlow also provides more complex layers, such as those required for building 
                 tf.nn.relu,
                 pf.Dense(128, 64),
                 tf.nn.relu,
-                pf.Dense(128, 1),
+                pf.Dense(64, 1),
             ])
             self.std = pf.ScaleParameter(name='std')
 
@@ -151,21 +151,21 @@ Using parameters and distributions as simple building blocks, ProbFlow allows fo
 Installation
 ------------
 
-Before installing ProbFlow, you'll first need to install either `PyTorch <https://pytorch.org/>`, or `TensorFlow 2.0 <https://www.tensorflow.org/versions/r2.0/api_docs/python/tf>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability/install>`_.  PyTorch, TensorFlow, and TensorFlow Probability are not included in ProbFlow's `requirements.txt` file, so that you can choose which you want to use (and whether to use the GPU or CPU versions).
+Before installing ProbFlow, you'll first need to install either `PyTorch <https://pytorch.org/>`_, or `TensorFlow 2.0 <https://www.tensorflow.org/install/pip>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability/install>`_.  Note that currently you'll need the nightly build of TFP to work with TF 2.0.  PyTorch, TensorFlow, and TensorFlow Probability are not included in ProbFlow's `requirements.txt` file, so that you can choose which you want to use (and whether to use the GPU or CPU versions).
 
-Then, you can use `pip <http://pypi.org/project/pip/>`_ to install ProbFlow itself from the GitHub source:
+Then, you can install ProbFlow itself from the GitHub source:
 
-.. code-block::
+.. code-block:: bash
     
     pip install git+http://github.com/brendanhasz/probflow.git
 
 
-Version 1.0 vs 2.0
-------------------
+Version 1 vs 2
+--------------
 
-The latest version of ProbFlow (version 2) was built to work with eager execution in TensorFlow 2.0 and PyTorch.  Version 1 does not work with eager execution, and only works with TensorFlow 1.0.  The interface is significantly different from 1.0.  To install ProbFlow 1.0:
+The latest version of ProbFlow (version 2) was built to work with eager execution in TensorFlow 2.x and PyTorch.  Version 1 does not work with eager execution, and only works with TensorFlow 1.x (and not PyTorch).  The v2 interface is significantly different from v1, based on a subclassing API instead of the more declarative API of v1.  I won't be supporting v1 moving forward, but if you want to install ProbFlow 1.0:
 
-.. code-block::
+.. code-block:: bash
     
     pip install git+http://github.com/brendanhasz/probflow.git@v1.0
 

@@ -10,6 +10,7 @@ are totally welcome!
 Backlog
 -------
 
+* Fix api docs pages, automodule isn't working on readthedocs
 * Speed tests on large dataset (looked like there was some kind of autograph warning?)
 * Model evaluation methods (ones to be used in readme)
 * Tests for those
