@@ -1,5 +1,5 @@
-Modules API
-===========
+Modules
+=======
 
 .. include:: macros.hrst
 

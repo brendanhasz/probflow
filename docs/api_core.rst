@@ -1,5 +1,5 @@
-Core API
-========
+Core
+====
 
 .. include:: macros.hrst
 

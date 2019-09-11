@@ -1,5 +1,5 @@
-Callbacks API
-=============
+Callbacks
+=========
 
 .. include:: macros.hrst
 

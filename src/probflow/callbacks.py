@@ -1,5 +1,4 @@
-"""Callbacks during training.
-
+"""
 The callbacks module contains classes for monitoring and adjusting the 
 training process.
 

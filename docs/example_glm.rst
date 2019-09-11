@@ -6,7 +6,8 @@ Poisson Regression (GLM)
 .. include:: macros.hrst
 
 
-TODO: description... a generalized linear model w/ a Poisson observation distribution
+TODO: description... 
+a generalized linear model w/ a Poisson observation distribution
 
 TODO: math
 

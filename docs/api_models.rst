@@ -1,5 +1,5 @@
-Models API
-==========
+Models
+======
 
 .. include:: macros.hrst
 

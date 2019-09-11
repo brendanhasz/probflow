@@ -1,5 +1,5 @@
-Distributions API
-=================
+Distributions
+=============
 
 .. include:: macros.hrst
 

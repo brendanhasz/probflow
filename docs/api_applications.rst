@@ -1,5 +1,5 @@
-Applications API
-================
+Applications
+============
 
 .. include:: macros.hrst
 

@@ -1,5 +1,4 @@
-"""Modules.
-
+"""
 Modules are objects which take Tensor(s) as input, perform some computation on
 that Tensor, and output a Tensor.  Modules can create and contain |Parameters|.
 For example, neural network layers are good examples of a |Module|, since 

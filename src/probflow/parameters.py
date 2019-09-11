@@ -1,5 +1,4 @@
-"""Parameters.
-
+"""
 Parameters are values which characterize the behavior of a model.  When
 fitting a model, we want to find the values of the parameters which
 best allow the model to explain the data.  However, with Bayesian modeling
@@ -26,8 +25,10 @@ of a :class:`.Parameter`:
 
 * :class:`.ScaleParameter` - standard deviation parameter
 * :class:`.CategoricalParameter` - categorical parameter
+* :class:`.DirichletParameter` - parameter with a Dirichlet posterior
 * :class:`.BoundedParameter` - parameter which is bounded between 0 and 1
 * :class:`.PositiveParameter` - parameter which is always greater than 0
+* :class:`.DeterministicParameter` - parameter which has a point posterior
 
 ----------
 

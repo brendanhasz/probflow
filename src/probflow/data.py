@@ -1,6 +1,7 @@
-"""Data utilities.
+"""
+TODO: Data utilities, more info...
 
-TODO: more info...
+* :class:`.DataGenerator`
 
 ----------
 

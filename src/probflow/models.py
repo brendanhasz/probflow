@@ -1,14 +1,13 @@
-"""Models.
-
+"""
 Models are objects which take Tensor(s) as input, perform some computation on 
 those Tensor(s), and output probability distributions.
 
 TODO: more...
 
-* :func:`.Model`
-* :func:`.ContinuousModel`
-* :func:`.DiscreteModel`
-* :func:`.CategoricalModel`
+* :class:`.Model`
+* :class:`.ContinuousModel`
+* :class:`.DiscreteModel`
+* :class:`.CategoricalModel`
 * :func:`.save_model`
 * :func:`.load_model`
 

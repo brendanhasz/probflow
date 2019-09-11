@@ -1,5 +1,4 @@
-"""Probability distributions.
-
+"""
 The :mod:`.distributions` module contains classes to instantiate probability
 distributions, which describe the likelihood of either a parameter or a
 datapoint taking any given value.  Distribution objects are used to represent

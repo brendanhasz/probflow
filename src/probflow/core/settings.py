@@ -1,5 +1,4 @@
-"""Global settings
-
+"""
 The core.settings module contains global settings about the backend to use,
 what sampling method to use, the default device, and default datatype.
 

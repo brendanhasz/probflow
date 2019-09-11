@@ -1,5 +1,5 @@
-Data API
-========
+Data
+====
 
 .. include:: macros.hrst
 

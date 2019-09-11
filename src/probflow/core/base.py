@@ -1,5 +1,4 @@
-"""Abstract base classes.
-
+"""
 The core.base module contains abstract base classes (ABCs) for all of
 ProbFlow’s classes.
 

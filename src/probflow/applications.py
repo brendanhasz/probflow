@@ -1,6 +1,14 @@
-"""Ready-made models.
-
+"""
 The applications module contains pre-built |Models| and |Modules|.
+
+* :class:`.LinearRegression` - a linear regression model
+* :class:`.LogisticRegression` - a Bi- or Multinomial logistic regression model
+* :class:`.PoissonRegression` - a Poisson regression model
+* :class:`.DenseNetwork` - a multi-layer dense neural network module
+* :class:`.DenseRegression` - a multi-layer dense neural net regression model
+* :class:`.DenseClassifier` - a multi-layer dense neural net classifier model
+
+----------
 
 """
 
@@ -36,7 +44,7 @@ from probflow.models import CategoricalModel
 class LinearRegression(ContinuousModel):
     r"""A multiple linear regression
 
-    TODO: explain, math, diagram, etc
+    TODO: explain, math, diagram, examples, etc
 
     Parameters
     ----------
@@ -67,7 +75,7 @@ class LinearRegression(ContinuousModel):
 class LogisticRegression(CategoricalModel):
     r"""A logistic regression
 
-    TODO: explain, math, diagram, etc
+    TODO: explain, math, diagram, examples, etc
 
     TODO: set k>2 for a Multinomial logistic regression
 
@@ -99,7 +107,7 @@ class LogisticRegression(CategoricalModel):
 class PoissonRegression(DiscreteModel):
     r"""A Poisson regression (a type of generalized linear model)
 
-    TODO: explain, math, diagram, etc
+    TODO: explain, math, diagram, examples, etc
 
     Parameters
     ----------
@@ -129,7 +137,7 @@ class DenseNetwork(Module):
 
     TODO: warning about how this is a Module not a Model
 
-    TODO: explain, math, diagram, etc
+    TODO: explain, math, diagram, examples, etc
 
     Parameters
     ----------
@@ -174,7 +182,7 @@ class DenseNetwork(Module):
 class DenseRegression(ContinuousModel):
     r"""A regression using a multilayer dense neural network
 
-    TODO: explain, math, diagram, etc
+    TODO: explain, math, diagram, examples, etc
 
     Parameters
     ----------
@@ -207,7 +215,7 @@ class DenseRegression(ContinuousModel):
 class DenseClassifier(CategoricalModel):
     r"""A classifier which uses a multilayer dense neural network
 
-    TODO: explain, math, diagram, etc
+    TODO: explain, math, diagram, examples, etc
 
     Parameters
     ----------

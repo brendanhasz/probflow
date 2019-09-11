@@ -1,5 +1,4 @@
-"""Backend-specific operations
-
+"""
 The core.ops module contains operations which run using the current backend.
 
 * :func:`.kl_divergence`
@@ -18,6 +17,8 @@ The core.ops module contains operations which run using the current backend.
 * :func:`.softplus`
 * :func:`.sigmoid`
 * :func:`.gather`
+
+----------
 
 """
 
