@@ -10,7 +10,6 @@ are totally welcome!
 Backlog
 -------
 
-* Fix api docs pages, automodule isn't working on readthedocs
 * Speed tests on large dataset (looked like there was some kind of autograph warning?)
 * Model evaluation methods (ones to be used in readme)
 * Tests for those
@@ -24,6 +23,7 @@ Backlog
 * All model evaluation methods + specialized types of models
 * Make Module.trainable_variables return tf.Variables which are properties of module+sub-modules as well (and not neccesarily in parameters, also allow embedding of tf.Modules?)
 * Real-world examples w/ public BigQuery datasets
+* More examples: Hidden Markov models, Gaussian processes, and LDA
 * Bayes estimate / decision methods
 * Convolutional modules
 

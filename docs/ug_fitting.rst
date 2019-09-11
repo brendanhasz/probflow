@@ -7,4 +7,6 @@ Fitting a Model
 
 TODO: to fit a model to data, w/ either numpy arrays or pandas DataFrame/Series, etc
 
-TODO: or using a datagenerator
+TODO: section on using a DataGenerator
+
+TODO: section on Callbacks

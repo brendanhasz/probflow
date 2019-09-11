@@ -132,14 +132,14 @@ For convenience, ProbFlow also includes several `pre-built models <http://probfl
 
 .. code-block:: python
 
-    model = pf.LinearRegression()
+    model = pf.LinearRegression(7)
     model.fit(x, y)
 
 And the multi-layer Bayesian neural net could have been made more easily by using ProbFlow's ready-made DenseRegression model:
 
 .. code-block:: python
 
-    model = pf.DenseRegression(units=[128, 64, 1])
+    model = pf.DenseRegression([7, 128, 64, 1])
     model.fit(x, y)
 
 Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like `generalized linear models <http://probflow.readthedocs.io/en/latest/example_glm.html>`_, `neural matrix factorization <http://probflow.readthedocs.io/en/latest/example_nmf.html>`_ models, and `Gaussian mixture models <http://probflow.readthedocs.io/en/latest/example_gmm.html>`_.  Take a look at the `examples <http://probflow.readthedocs.io/en/latest/examples.html>`_ section and the `user guide <http://probflow.readthedocs.io/en/latest/user_guide.html>`_ for more!
