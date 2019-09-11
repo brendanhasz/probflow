@@ -20,7 +20,7 @@ setup(name='probflow',
             ],
         'docs': [
             'tensorflow == 2.0.0b1',
-            'tfp-nightly >= 0.9.0',
+            'tfp-nightly',
             ]
     }
 )
