@@ -13,7 +13,7 @@ setup(name='probflow',
     extras_require={
         'tests': [
             'tensorflow == 2.0.0b1',
-            'tfp-nightly >= 0.9.0',
+            'tfp-nightly',
             'torch >= 1.2.0',
             'pytest >= 5.1.2',
             'pylint >= 2.3.1',
