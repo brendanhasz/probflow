@@ -181,10 +181,10 @@ Post bug reports, feature requests, and tutorial requests in `GitHub issues <htt
 Contributing
 ------------
 
-`Pull requests <https://github.com/brendanhasz/probflow/pulls>`_ are totally welcome!  Any contribution would be appreciated, from things as minor as pointing out typos to things as major as writing new layers and distributions.
+`Pull requests <https://github.com/brendanhasz/probflow/pulls>`_ are totally welcome!  Any contribution would be appreciated, from things as minor as pointing out typos to things as major as writing new applications and distributions.
 
 
 Why the name, ProbFlow?
 -----------------------
 
-Because it's a package for probabilistic modeling, and it was originally built on TensorFlow.  ¯\\_(ツ)_/¯
+Because it's a package for probabilistic modeling, and it was built on TensorFlow.  ¯\\_(ツ)_/¯

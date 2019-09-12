@@ -14,7 +14,7 @@ TODO: math
 
     \mathbf{y} \sim \text{Normal}(\mathbf{X}\beta + \mathbf{Z}\mu, \sigma)
 
-TODO: where :math:`\mathbf{X}` are the fixed variables, :math:`\mathbf{Z}`are the random variables, :math:`\beta` is the vector of fixed-effects coefficients, and :math:`\mu` is the vector of random effects coefficients.
+TODO: where :math:`\mathbf{X}` are the fixed variables, :math:`\mathbf{Z}` are the random variables, :math:`\beta` is the vector of fixed-effects coefficients, and :math:`\mu` is the vector of random effects coefficients.
 
 Manually with One-hot Encoding
 ------------------------------
@@ -36,7 +36,7 @@ TODO: diagram
             mu = self.mu()
             X = x[:, :self.Fd]
             Z = x[:, self.Fd:]
-            return pf.Normal(X@beta + Z@mu, self.sigma())
+            return pf.Normal(X @ beta + Z @ mu, self.sigma())
 
 
 Using the Embedding Module
@@ -56,5 +56,5 @@ TODO: below code assumes you have one random effect (IDs in last col of X)
             self.sigma = pf.ScaleParameter()
 
         def __call__(self, x):
-            preds = x[:, :-1]@self.beta() + self.emb(x[:, -1])
+            preds = x[:, :-1] @ self.beta() + self.emb(x[:, -1])
             return pf.Normal(preds, self.sigma())

@@ -389,9 +389,9 @@ class Embedding(Module):
 
     Parameters
     ----------
-    k : int > 0
+    k : int > 0 or List[int]
         Number of categories to embed.
-    d : int > 0
+    d : int > 0 or List[int]
         Number of embedding dimensions.
     posterior : |Distribution| class
         Probability distribution class to use to approximate the posterior.
@@ -429,28 +429,38 @@ class Embedding(Module):
     """
 
     def __init__(self, 
-                 k: int,
-                 d: int,
+                 k: Union[int, List[int]],
+                 d: Union[int, List[int]],
                  posterior: Type[BaseDistribution] = Deterministic,
                  prior: BaseDistribution = Normal(0, 1),
                  initializer: Dict[str, Callable] = {'loc': xavier},
                  name: str = 'Embeddings'):
 
-        # Check types
-        if k < 1:
+        # Convert to list if not already
+        if isinstance(k, int):
+            k = [k]
+        if isinstance(d, int):
+            d = [d]
+
+        # Check values
+        if len(k) != len(d):
+            raise ValueError('d and k must be the same length')
+        if any(e<1 for e in k):
             raise ValueError('k must be >0')
-        if d < 1:
+        if any(e<1 for e in d):
             raise ValueError('d must be >0')
 
         # Create the parameters
-        self.embeddings = Parameter(shape=[k, d],
-                                    posterior=posterior,
-                                    prior=prior,
-                                    initializer=initializer,
-                                    name=name)
+        self.embeddings = [Parameter(shape=[k[i], d[i]],
+                                     posterior=posterior,
+                                     prior=prior,
+                                     initializer=initializer,
+                                     name=name+'_'+str(i))
+                           for i in range(len(d))]
 
 
     def __call__(self, x):
         """Perform the forward pass"""
-        return O.gather(self.embeddings(), x)
-
+        embs = [O.gather(self.embeddings[i](), x[:, i])
+                for i in range(len(self.embeddings))]
+        return O.cat(embs, -1)

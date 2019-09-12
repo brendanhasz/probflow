@@ -253,6 +253,17 @@ def gather(vals, inds, axis=0):
 
 
 
+def cat(vals, axis=0):
+    """Concatenate tensors"""
+    if get_backend() == 'pytorch':
+        import torch
+        raise NotImplementedError
+    else:
+        import tensorflow as tf
+        return tf.concat(vals, axis=axis)
+
+
+
 def additive_logistic_transform(vals):
     """The additive logistic transformation"""
     # TODO: is this used?
