@@ -10,7 +10,7 @@ are totally welcome!
 Backlog
 -------
 
-* Speed tests on large dataset (looked like there was some kind of autograph warning?)
+* Speed tests on large dataset (tho keep in mind we're not using autograph for now, maybe just compare to w/o using autograph in raw TF code)
 * Model evaluation methods (ones to be used in readme)
 * Tests for those
 * README / index
@@ -31,6 +31,7 @@ Backlog
 Issues
 ------
 
+* Autograph failure warnings? "Entity <blah blah> could not be transformed and will be executed as-is", where blah is "function sum" or "ound method Gamma.call of <probflow.distributions.Gamma..." etc.  Don't get the warnings when you remove the ``@tf.function`` in front of the ``train_step`` func defined in models.Model._train_step_tensorflow.  Happens both w/ CPU and GPU versions of TF 2.0
 * LogisticRegression doesn't work at all! And seems to take a suspiciously long time...
 * Model.metric (mae) causes too much memory usage (out of mem on colab w/ 100k sample linear regression?). Accidentally making a N^2 matrix maybe?
 * Poisson currently requires y values to be floats? I think that's a TFP/TF 2.0 issue though (in their sc there's the line ``tf.maximum(y, 0.)``, which throws an error when y is of an int type).  Could cast inputs to float in pf.distributions.Poisson.__init__...

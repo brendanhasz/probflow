@@ -126,7 +126,7 @@ class Model(Module):
 
         import tensorflow as tf
 
-        @tf.function
+        #@tf.function
         def train_step(x_data, y_data):
             nb = y_data.shape[0] #number of samples in this batch
             self.reset_kl_loss()

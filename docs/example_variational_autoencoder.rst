@@ -21,16 +21,19 @@ TODO: talk about how this model requires adding additional KL divergence term
     class VariationalAutoencoder(pf.ContinuousModel):
 
         def __init__(self, dims)
-            self.mean_encoder = pf.DenseNetwork(dims)
-            self.std_encoder = pf.DenseNetwork(dims)
-            self.mean_decoder = pf.DenseNetwork(dims.reverse())
-            self.std_decoder = pf.DenseNetwork(dims.reverse())
+            self.encoder = pf.DenseNetwork(dims[:-1] + [2*dims[-1]])
+            self.decoder = pf.DenseNetwork(dims[-1:0:-1] + [2*dims[0]])
+
+        def split(self, x)
+            N = x.shape[1]/2
+            return x[:, :N], tf.exp(x[:, N:])
 
         def __call__(self, x):
 
             # Encode
-            z_mu = self.mean_encoder(x)
-            z_std = tf.exp(self.std_encoder(x))
+            z_mu, z_std = self.split(self.encoder(x))
+
+            # Sample from latent posterior via reparameterization trick
             z = z_mu+z_std*tf.random.normal(z_mu.shape)
 
             # Add loss due to latent prior
@@ -40,9 +43,9 @@ TODO: talk about how this model requires adding additional KL divergence term
                     tfd.Normal(0, 1)))
 
             # Decode
-            mu = self.mean_decoder(z)
-            std = tf.exp(self.std_decoder(z))
+            mu, std = self.split(self.decoder(z))
             return pf.Normal(mu, std)
+
 
 Then we can create an instance of the model, defining the dimensionality of
 each layer of the network:
