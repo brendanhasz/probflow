@@ -177,6 +177,8 @@ class Parameter(BaseParameter):
 
     TODO: plotting posterior dist
 
+    TODO: using __getitem__
+
     """
 
     def __init__(self,
@@ -470,6 +472,39 @@ class Parameter(BaseParameter):
 
         # Label with parameter name
         plt.xlabel(self.name+' prior')
+
+
+    def _get_one_dim(self, val, key, axis):
+        """Slice along one axis, keeping the dimensionality of the input"""
+        if isinstance(key, slice):
+            if any(k is not None for k in [key.start, key.stop, key.step]):
+                ix = np.arange(*key.indices(val.shape[axis]))
+                return O.gather(val, ix, axis=axis)
+            else:
+                return val
+        elif isinstance(key, int):
+            return O.gather(val, [key], axis=axis)
+        else:
+            return O.gather(val, key, axis=axis)
+
+
+    def __getitem__(self, key):
+        """Get a slice of a sample from the parameter"""
+        x = self()
+        if isinstance(key, tuple):
+            iA = 0
+            for i in range(len(key)):
+                if key[i] is Ellipsis:
+                    iA = x.ndim - len(key) + i
+                else:
+                    x = self._get_one_dim(x, key[i], iA)
+                iA += 1
+            return x
+        elif key is Ellipsis:
+            return x
+        else:
+            return self._get_one_dim(x, key, 0)
+
 
 
 class ScaleParameter(Parameter):
