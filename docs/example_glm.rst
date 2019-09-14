@@ -13,7 +13,7 @@ TODO: math
 
 TODO: diagram
 
-.. code-block:: python
+.. code-block:: python3
 
     import probflow as pf
 

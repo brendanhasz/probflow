@@ -18,7 +18,7 @@ API
 
 The ProbFlow API consists of five primary modules:
 
-* :mod:`.core`
+* :mod:`core <probflow.core>`
 * :mod:`.distributions`
 * :mod:`.parameters`
 * :mod:`.modules`
@@ -34,9 +34,9 @@ process:
 * :mod:`.callbacks`
 * :mod:`.data`
 
-The :mod:`.core` module contains settings about what backend to use and how to 
-sample, backend-specific operations, and abstract base classes (ABCs) for all 
-of ProbFlow's classes.
+The :mod:`core <probflow.core>` module contains settings about what backend to
+use and how to sample, backend-specific operations, and abstract base classes 
+(ABCs) for all of ProbFlow's classes.
 
 The :mod:`.distributions` module contains classes to instantiate probability
 distributions, which describe the likelihood of either a parameter or a

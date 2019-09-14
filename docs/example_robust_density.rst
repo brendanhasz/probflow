@@ -10,7 +10,7 @@ TODO: dual-module net which estimates predictions and uncertainty separately, an
 
 TODO: math and diagram
 
-.. code-block:: python
+.. code-block:: python3
 
     class RobustDensityNetwork(pf.Model):
         

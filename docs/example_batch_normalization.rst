@@ -13,7 +13,7 @@ Batch normalization can be performed using the :class:`.BatchNormalization`
 Module.  For example, to add batch normalization to the dense neural network
 from the :ref:`previous example <example_fully_connected>`:
 
-.. code-block:: python
+.. code-block:: python3
 
     class DenseRegression(pf.Model):
         

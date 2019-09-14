@@ -27,7 +27,7 @@ TODO: diagram
 TODO: explain in terms of :math:`\phi` and :math:`\theta` parameter matrixes
 
 
-.. code-block:: python
+.. code-block:: python3
 
     import probflow as pf
 
@@ -46,7 +46,7 @@ To fit the model in this way, ``x`` will be document IDs, and ``y`` will be
 a matrix of size ``(Ndocuments, Nwords)``.
 
 
-.. code-block:: python
+.. code-block:: python3
 
     # Nt = number of topics to use
     # Nd = number of documents
@@ -66,7 +66,7 @@ mixtures of topics, and then decoding the word distributions from those topic
 distributions.
 
 
-.. code-block:: python
+.. code-block:: python3
 
     class LdaNet(pf.Model):
 
@@ -83,7 +83,7 @@ TODO: And then when fitting the model we'll use the per-document word frequency
 matrix as both ``x`` and ``y``:
 
 
-.. code-block:: python
+.. code-block:: python3
 
     model = LdaNet([Nw, 256, 256, 256, Nt])
     model.fit(id, W)

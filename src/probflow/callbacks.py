@@ -99,6 +99,20 @@ class LearningRateScheduler(Callback):
 class MonitorMetric(Callback):
     """Monitor some metric on validation data
 
+    TODO: docs
+
+    Example
+    -------
+
+    To record the mean absolute error of a model over the course of training,
+    we can create a :class:`.MonitorMetric` callback:
+
+    .. code-block:: python3
+
+        #x_val and y_val are numpy arrays w/ validation data
+        monitor_mae = MonitorMetric('mse', x_val, y_val)
+
+        model.fit(x_train, y_train, callbacks=[monitor_mae])
     """
 
     def __init__(self, metric, x, y=None, verbose=True):
@@ -165,17 +179,18 @@ class EarlyStopping(Callback):
     Example
     -------
 
-    To monitor the mean absolute error of a model, we can create a 
-    :class:`.MonitorMetric` callback:
+    Stop training when the mean absolute error stops improving, we can create
+    a :class:`.EarlyStopping` callback which monitors the current value of
+    the MAE via a :class:`.MonitorMetric` callback:
 
-    .. code-block:: python
+    .. code-block:: python3
 
-        monitor_mae = MonitorMetric(x_val, y_val, 'mse')
+        #x_val and y_val are numpy arrays w/ validation data
+        monitor_mae = MonitorMetric('mse', x_val, y_val)
         early_stopping = EarlyStopping(lambda: monitor_mae.current_metric)
 
         model.fit(x_train, y_train, callbacks=[monitor_mae, early_stopping])
 
-    TODO
     """
     
     def __init__(self, metric_fn, patience=0):

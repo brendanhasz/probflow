@@ -266,7 +266,6 @@ def cat(vals, axis=0):
 
 def additive_logistic_transform(vals):
     """The additive logistic transformation"""
-    # TODO: is this used?
     if get_backend() == 'pytorch':
         import torch
         raise NotImplementedError

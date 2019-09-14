@@ -21,7 +21,7 @@ Manually with One-hot Encoding
 
 TODO: diagram
 
-.. code-block:: python
+.. code-block:: python3
 
     class LinearMixedEffectsModel(pf.Model):
 
@@ -46,7 +46,7 @@ TODO: explain how you can instead use a 1d embedding module to model random effe
 
 TODO: below code assumes you have one random effect (IDs in last col of X)
 
-.. code-block:: python
+.. code-block:: python3
 
     class LinearMixedEffectsModel(pf.Model):
 

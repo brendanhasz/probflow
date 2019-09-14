@@ -12,7 +12,7 @@ TODO: model, embedding of categorical features (1st column of x) and combining
 with continuous features (rest of x) and predicting with fully-connected neural
 net on top, which does binary classification
 
-.. code-block:: python
+.. code-block:: python3
 
     import probflow as pf
 

@@ -8,7 +8,7 @@ Mixture Density Network
 
 TODO: Need to implement a Mixture Distribution first!
 
-.. code-block:: python
+.. code-block:: python3
 
     class MixtureDensityNetwork(pf.Model):
         

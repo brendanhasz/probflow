@@ -39,7 +39,7 @@ default, we want our parameter to have a :class:`.Normal` prior which has a
 mean of 1 and a scale of 2, we can set this prior by using the ``prior``
 keyword argument:
 
-.. code-block:: python
+.. code-block:: python3
 
     new_param = pf.Parameter(prior=pf.Normal(1, 2))
 
@@ -71,7 +71,7 @@ posterior's ``loc`` (the mean) variable by drawing values from a normal
 distribution, and the ``scale`` (the standard deviation) parameter with all
 ones:
 
-.. code-block:: python
+.. code-block:: python3
 
     import tensorflow as tf
 
@@ -98,7 +98,7 @@ Scale Parameters
 TL;DR: to make a standard deviation parameter, use the 
 :class:`.ScaleParameter` class:
 
-.. code-block:: python
+.. code-block:: python3
 
     std_dev = pf.ScaleParameter()
 
@@ -143,7 +143,7 @@ also have to specify the initializers and variable transformations
 accordingly, and then
 `transform the parameter <#transforming-parameters>`_ with a square root:
 
-.. code-block:: python
+.. code-block:: python3
 
     from probflow.utils.initializers import pos_xavier
 
@@ -159,7 +159,7 @@ Since that's such a pain, ProbFlow provides a :class:`.ScaleParameter` class
 which automatically creates a parameter with the above variational posterior
 and transforms, etc.  This makes it much easier to create a scale parameter:
 
-.. code-block:: python
+.. code-block:: python3
 
     std_dev = pf.ScaleParameter()
 
@@ -178,6 +178,18 @@ TODO
 
 Positive Parameter
 ------------------
+
+TODO
+
+
+Deterministic Parameter
+-----------------------
+
+TODO
+
+
+Dirichlet Parameter
+-------------------
 
 TODO
 

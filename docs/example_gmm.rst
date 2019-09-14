@@ -12,7 +12,7 @@ TODO: math
 
 TODO: diagram
 
-.. code-block:: python
+.. code-block:: python3
 
     class GaussianMixtureModel(pf.Model):
 

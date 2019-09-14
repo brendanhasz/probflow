@@ -37,7 +37,7 @@ For example, a simple Bayesian linear regression
 
 can be built by creating a ProbFlow Model object:
 
-.. code-block:: python
+.. code-block:: python3
 
     import probflow as pf
 
@@ -55,21 +55,21 @@ can be built by creating a ProbFlow Model object:
 
 Then, the model can be fit using variational inference, in *one line*:
 
-.. code-block:: python
+.. code-block:: python3
 
     # x and y are Numpy arrays or pandas DataFrame/Series
     model.fit(x, y)
 
 You can generate predictions for new data:
 
-.. code-block:: python
+.. code-block:: python3
 
     # x_test is a Numpy array or pandas DataFrame
     model.predict(x_test)
 
 Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
-.. code-block:: python
+.. code-block:: python3
 
     model.pred_dist_plot(x_test, ci=0.95)
 
@@ -79,13 +79,13 @@ Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
 Evaluate your model's performance using various metrics:
 
-.. code-block:: python
+.. code-block:: python3
 
     model.metric('mse', x_test, y_test)
 
 Inspect the posterior distributions of your fit model's parameters, with 95% confidence intervals:
 
-.. code-block:: python
+.. code-block:: python3
 
     model.posterior_plot(ci=0.95)
 
@@ -95,13 +95,13 @@ Inspect the posterior distributions of your fit model's parameters, with 95% con
 
 Investigate how well your model is capturing uncertainty by examining how accurate its predictive intervals are:
 
-.. code-block:: python
+.. code-block:: python3
 
     model.pred_dist_coverage(ci=0.95)
 
 and diagnose *where* your model is having problems capturing uncertainty:
 
-.. code-block:: python
+.. code-block:: python3
 
     model.coverage_by(ci=0.95)
 
@@ -111,7 +111,7 @@ and diagnose *where* your model is having problems capturing uncertainty:
 
 ProbFlow also provides more complex layers, such as those required for building Bayesian neural networks.  Also, ProbFlow lets you mix and match ProbFlow objects with TensorFlow objects and operations.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
 
-.. code-block:: python
+.. code-block:: python3
 
     import tensorflow as tf
 
@@ -135,14 +135,14 @@ ProbFlow also provides more complex layers, such as those required for building 
 
 For convenience, ProbFlow also includes several :ref:`pre-built models <ug_applications>` for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made :class:`LinearRegression <probflow.applications.LinearRegression>` model:
 
-.. code-block:: python
+.. code-block:: python3
 
     model = pf.LinearRegression(7)
     model.fit(x, y)
 
 And the multi-layer Bayesian neural net could have been made more easily by using ProbFlow's ready-made :class:`DenseRegression <probflow.applications.DenseRegression>` model:
 
-.. code-block:: python
+.. code-block:: python3
 
     model = pf.DenseRegression([7, 128, 64, 1])
     model.fit(x, y)

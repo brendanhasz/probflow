@@ -14,7 +14,7 @@ TODO: diagram
 
 TODO: test that this works after implementing MultivariateNormal....
 
-.. code-block:: python
+.. code-block:: python3
 
     class BayesianCorrelation(pf.Model):
 

@@ -26,7 +26,7 @@ TODO: generate some data
 
 TODO: create the model via the subclassing api
 
-.. code-block:: python
+.. code-block:: python3
 
     import probflow as pf
 
@@ -41,13 +41,13 @@ TODO: create the model via the subclassing api
 
 By default, the :class:`.Bernoulli` distribution treats its inputs as logits (that is, it passes the inputs through a sigmoid function to get the output class probabilities).  To force it to treat the inputs as raw probability values, use the ``probs`` keyword argument:
 
-.. code-block:: python
+.. code-block:: python3
 
-    pf.Bernoulli(probs=x@self.w()+self.b())
+    pf.Bernoulli(probs=x @ self.w() + self.b())
 
 TODO: initialize and fit
 
-.. code-block:: python
+.. code-block:: python3
 
     model = LogisticRegression()
     model.fit(x, y)
@@ -60,7 +60,7 @@ Using the Dense Layer
 
 TODO: can do the same thing with Dense:
 
-.. code-block:: python
+.. code-block:: python3
 
     class LogisticRegression(pf.Model):
 
@@ -76,7 +76,7 @@ Using the LogisticRegression Model
 
 TODO: and can just use the ready-made model:
 
-.. code-block:: python
+.. code-block:: python3
 
     model = pf.LogisticRegression()
     model.fit(x, y)

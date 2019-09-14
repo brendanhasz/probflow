@@ -71,7 +71,7 @@ During optimization, we can analytically compute the divergence between the prio
 
 When creating a loss function to maximize the ELBO, we need to be careful about batching.  The above minimization equation assumes all samples are being used, but when using stochastic gradient descent, we have only a subset of the samples at any given time.  So, we need to ensure the contribution of the log likelihood and the KL divergence are scaled similarly.  Since we're using a Monte Carlo estimation of the expected log likelihood anyway, with batching we can still just take the mean log likelihood of our samples as the contribution of the log likelihood term.  However, the divergence term should be applied once per *pass through the data*, so we need to normalize it by the *total number of datapoints*, not by the numeber of datapoints in the batch.  With TensorFlow, this looks like:
 
-.. code-block:: python
+.. code-block:: python3
 
     # kl_loss = sum of prior-posterior divergences
     # log_likelihood = mean log likelihood of samples in batch

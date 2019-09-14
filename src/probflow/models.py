@@ -424,7 +424,7 @@ class Model(Module):
             * 'precision': precision
             * 'f1_score': F-measure
             * 'f1': F-measure
-            * callable: a function which takes (y_true, y_pred_dist)
+            * callable: a function which takes (y_true, y_pred)
 
         x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 

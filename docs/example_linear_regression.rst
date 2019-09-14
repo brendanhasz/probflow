@@ -30,7 +30,7 @@ TODO: manually (generate some data)
 
 TODO: talk about subclassing API
 
-.. code-block:: python
+.. code-block:: python3
 
     import probflow as pf
 
@@ -46,7 +46,7 @@ TODO: talk about subclassing API
 
 TODO: initialize and fit
 
-.. code-block:: python
+.. code-block:: python3
 
     model = SimpleLinearRegression()
     model.fit(x, y)
@@ -69,7 +69,7 @@ TODO: generate some data
 
 TODO: again build w/ subclassing API
 
-.. code-block:: python
+.. code-block:: python3
 
     class MultipleLinearRegression(pf.Model):
 
@@ -83,7 +83,7 @@ TODO: again build w/ subclassing API
 
 TODO: initialize and fit
 
-.. code-block:: python
+.. code-block:: python3
 
     model = MultipleLinearRegression()
     model.fit(x, y)
@@ -96,7 +96,7 @@ Using the LinearRegression Model
 
 TODO: with ready-made model:
 
-.. code-block:: python
+.. code-block:: python3
 
     model = pf.LinearRegression()
     model.fit(x, y)

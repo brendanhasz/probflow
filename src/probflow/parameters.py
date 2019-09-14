@@ -305,7 +305,7 @@ class Parameter(BaseParameter):
         -------
         |ndarray|
             Samples from the parameter prior distribution.  If ``n>1`` of size
-            ``(num_samples, self.prior.shape)``.  If ``n==1```, of size
+            ``(num_samples, self.prior.shape)``.  If ``n==1``, of size
             ``(self.prior.shape)``.
         """
         if n==1:
@@ -657,12 +657,12 @@ class CategoricalParameter(Parameter):
         if isinstance(shape, int):
             shape = [shape]
 
-        # Create shape of underlying variable array
-        shape = shape+[k-1]
-
         # Use a uniform prior
         if prior is None:
             prior = Categorical(O.ones(shape)/float(k))
+
+        # Create shape of underlying variable array
+        shape = shape+[k-1]
 
         # Initialize the parameter
         super().__init__(shape=shape,
@@ -690,7 +690,9 @@ class DirichletParameter(Parameter):
 
     By default, a uniform Dirichlet prior is used:
 
-        \theta \sim \text{Dirichlet}(\mathbf{1})
+    .. math::
+
+        \theta \sim \text{Dirichlet}_K(\mathbf{1}/K)
 
     TODO: explain that a sample is a categorical prob dist (as compared to
     CategoricalParameter, where a sample is a single value)
@@ -778,7 +780,8 @@ class BoundedParameter(Parameter):
 
     .. math::
 
-        \text{Logit}(\beta) \sim \text{Normal}(\mu, \sigma)
+        \text{Logit}(\beta) = \log \left( \frac{\beta}{1-\beta} \right) 
+            \sim \text{Normal}(\mu, \sigma)
 
 
     Parameters
@@ -859,7 +862,7 @@ class PositiveParameter(Parameter):
 
     .. math::
 
-        \text{Log}(\beta) \sim \text{Normal}(\mu, \sigma)
+        \log ( \beta ) \sim \text{Normal}(\mu, \sigma)
 
 
     Parameters

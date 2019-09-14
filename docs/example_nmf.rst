@@ -12,7 +12,7 @@ TODO: description...
 
 TODO: for a vanilla matrix factorization
 
-.. code-block:: python
+.. code-block:: python3
 
     import probflow as pf
 
@@ -26,12 +26,12 @@ TODO: for a vanilla matrix factorization
         def __call__(self, x):
             user_vec = self.user_emb(x['user_id'])
             item_vec = self.item_emb(x['item_id'])
-            predictions = tf.matmul(user_vec, tf.transpose(item_vec))
+            predictions = user_vec @ tf.transpose(item_vec)
             return pf.Normal(predictions, self.std())
 
 TODO: Then can instantiate the model
 
-.. code-block:: python
+.. code-block:: python3
 
     #df = DataFrame w/ 3 columns: 'user_id', 'item_id', and 'rating'
     Nu = df['user_id'].nunique() #number of users
@@ -41,14 +41,14 @@ TODO: Then can instantiate the model
 
 TODO: Then fit it;
 
-.. code-block:: python
+.. code-block:: python3
 
     model.fit(df[['user_id', 'item_id']], df['rating'])
 
 
 or for neural matrix factorization https://arxiv.org/abs/1708.05031
 
-.. code-block:: python
+.. code-block:: python3
 
     import probflow as pf
 
@@ -76,7 +76,7 @@ or for neural matrix factorization https://arxiv.org/abs/1708.05031
 
 TODO: Then can instantiate the model
 
-.. code-block:: python
+.. code-block:: python3
 
     #df = DataFrame w/ 3 columns: 'user_id', 'item_id', and 'rating'
     Nu = df['user_id'].nunique() #number of users
@@ -87,7 +87,7 @@ TODO: Then can instantiate the model
 
 TODO: Then fit it;
 
-.. code-block:: python
+.. code-block:: python3
 
     model.fit(df[['user_id', 'item_id']], df['rating'])
 

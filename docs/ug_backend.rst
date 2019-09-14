@@ -9,7 +9,7 @@ Before building models with ProbFlow, you'll want to decide which backend
 to use.  ProbFlow currently supports two backends: |TensorFlow| and |PyTorch|.
 TensorFlow is the default, but you can set which backend to use:
 
-.. code-block:: python
+.. code-block:: python3
 
 	import probflow as pf
 
@@ -17,7 +17,7 @@ TensorFlow is the default, but you can set which backend to use:
 
 You can see which backend is currently being used by:
 
-.. code-block:: python
+.. code-block:: python3
 
 	pf.get_backend()
 

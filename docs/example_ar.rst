@@ -16,7 +16,7 @@ TODO: math
 
 TODO: diagram
 
-.. code-block:: python
+.. code-block:: python3
 
     class AutoregressiveModel(pf.Model):
 
@@ -38,7 +38,7 @@ If we have a timeseries ``x``,
 
 Then we can pull out ``k``-length windows into a feature matrix ``X``, such that each row of ``X`` corresponds to a single time point for which we are trying to predict the next sample's value (in ``y``).
 
-.. code-block:: python
+.. code-block:: python3
 
     k = 50
 
@@ -49,14 +49,14 @@ Then we can pull out ``k``-length windows into a feature matrix ``X``, such that
 
 Then, we can create and fit the model:
 
-.. code-block:: python
+.. code-block:: python3
 
     model = AutoregressiveModel(k)
     model.fit(X, y)
 
 Note that this is exactly equivalent to just doing a linear regression on the lagged feature matrix:
 
-.. code-block:: python
+.. code-block:: python3
 
     model = pf.LinearRegression(k)
     model.fit(X, y)
