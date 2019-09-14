@@ -24,7 +24,7 @@ TODO: math
 
 TODO: diagram
 
-TODO: explain in terms of :math:`\phi` and :math:`\theta` parameter matrixes
+TODO: explain in terms of :math:`\boldsymbol{\varphi}` and :math:`\boldsymbol{\theta}` parameter matrixes
 
 
 .. code-block:: python3
