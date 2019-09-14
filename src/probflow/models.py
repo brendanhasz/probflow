@@ -121,6 +121,15 @@ class Model(Module):
     _learning_rate = None
 
 
+    def log_likelihood(self, x_data, y_data):
+        """Compute the sum log likelihood of the model given a batch of data"""
+        if x_data is None:
+            log_likelihoods = self().log_prob(y_data)
+        else:
+            log_likelihoods = self(x_data).log_prob(y_data)
+        return O.sum(log_likelihoods, axis=None)
+
+
     def _train_step_tensorflow(self, n, flipout):
         """Get the training step function for TensorFlow"""
 
@@ -132,12 +141,9 @@ class Model(Module):
             self.reset_kl_loss()
             with Sampling(n=1, flipout=flipout):
                 with tf.GradientTape() as tape:
-                    if x_data is None:
-                        log_likelihoods = self().log_prob(y_data)
-                    else:
-                        log_likelihoods = self(x_data).log_prob(y_data)
+                    log_loss = self.log_likelihood(x_data, y_data)/nb
                     kl_loss = self.kl_loss()/n + self.kl_loss_batch()/nb
-                    elbo_loss = kl_loss - tf.reduce_sum(log_likelihoods)/nb
+                    elbo_loss = kl_loss - log_loss
                 variables = self.trainable_variables
                 gradients = tape.gradient(elbo_loss, variables)
                 self._optimizer.apply_gradients(zip(gradients, variables))

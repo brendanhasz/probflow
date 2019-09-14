@@ -12,6 +12,7 @@ Backlog
 
 * Speed tests on large dataset (tho keep in mind we're not using autograph for now, maybe just compare to w/o using autograph in raw TF code)
 * Model evaluation methods (ones to be used in readme)
+* Make model evaluation methods (predictive_sample, etc) handle generative models (x or y is None)
 * Tests for those
 * README / index
 * User guide

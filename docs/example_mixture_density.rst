@@ -24,3 +24,5 @@ TODO: Need to implement a Mixture Distribution first!
             dists = [pf.Normal(preds[0][k], preds[1][k]) for k in range(self.k)]
             weights = tf.concat(preds[2], -1)
             return pf.Mixture(dists, weights)
+
+TODO: cite Christopher M. Bishop, Mixture density networks, 1994

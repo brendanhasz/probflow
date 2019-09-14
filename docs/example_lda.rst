@@ -12,13 +12,13 @@ TODO: math
 
 .. math::
 
-    \begin{align}
-    N_t & = & \text{number of topics} \\
-    N_w & = & \text{number of words} \\
-    N_d & = & \text{number of documents} \\
-    \mathbf{\varphi}_{k=1...N_t} & \sim & \text{Dirichlet}_{N_w} (\beta) \\
-    \mathbf{\theta}_{d=1...N_d} & \sim & \text{Dirichlet}_{N_t} (\alpha) \\
-    \mathbf{W} & \sim & \text{OneHotCategorical}(\mathbf{\theta} \mathbf{\varphi})
+    \begin{align*}
+    N_t & = \text{number of topics} \\
+    N_w & = \text{number of words} \\
+    N_d & = \text{number of documents} \\
+    \boldsymbol{\varphi}_{k=1...N_t} & \sim \text{Dirichlet}_{N_w} (\boldsymbol{\beta}) \\
+    \boldsymbol{\theta}_{d=1...N_d} & \sim \text{Dirichlet}_{N_t} (\boldsymbol{\alpha}) \\
+    \mathbf{W} & \sim \text{OneHotCategorical}(\boldsymbol{\theta} \boldsymbol{\varphi})
     \end{align}
 
 
@@ -52,10 +52,10 @@ a matrix of size ``(Ndocuments, Nwords)``.
     # Nd = number of documents
     # Nw = number of words in the vocabulary
     # W = (Nd, Nw)-size matrix of per-document word probabilities
-    id = np.arange(W.shape[0])
+    doc_id = np.arange(W.shape[0])
 
     model = LDA(Nt, Nd, Nw)
-    model.fit(id, W)
+    model.fit(doc_id, W)
 
 
 TODO: Alternatively, when you have a LOT of documents, it's inefficient to

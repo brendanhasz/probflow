@@ -114,7 +114,10 @@ def sum(val, axis=-1):
     """The sum."""
     if get_backend() == 'pytorch':
         import torch
-        return torch.sum(val, dim=axis)
+        if axis is None:
+            return torch.sum(val)
+        else:
+            return torch.sum(val, dim=axis)
     else:
         import tensorflow as tf
         return tf.reduce_sum(val, axis=axis)

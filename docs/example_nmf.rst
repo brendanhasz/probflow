@@ -6,11 +6,13 @@ Neural Matrix Factorization
 .. include:: macros.hrst
 
 
-TODO: update this to v2
-
 TODO: description...
 
-TODO: for a vanilla matrix factorization
+Matrix Factorization
+--------------------
+
+TODO: for a vanilla matrix factorization, description, diagram, math
+(with binary interactions)
 
 .. code-block:: python3
 
@@ -21,13 +23,12 @@ TODO: for a vanilla matrix factorization
         def __init__(self, Nu, Ni, Nd):
             self.user_emb = pf.Embedding(Nu, Nd)
             self.item_emb = pf.Embedding(Ni, Nd)
-            self.std = pf.ScaleParameter()
 
         def __call__(self, x):
             user_vec = self.user_emb(x['user_id'])
             item_vec = self.item_emb(x['item_id'])
-            predictions = user_vec @ tf.transpose(item_vec)
-            return pf.Normal(predictions, self.std())
+            logits = user_vec @ tf.transpose(item_vec)
+            return pf.Bernoulli(logits)
 
 TODO: Then can instantiate the model
 
@@ -46,11 +47,34 @@ TODO: Then fit it;
     model.fit(df[['user_id', 'item_id']], df['rating'])
 
 
-or for neural matrix factorization https://arxiv.org/abs/1708.05031
+Neural Collaborative Filtering
+------------------------------
+
+TODO: description, diagram, math
+TODO: cite https://arxiv.org/abs/1708.05031
 
 .. code-block:: python3
 
-    import probflow as pf
+    class MatrixFactorization(pf.Model):
+
+        def __init__(self, Nu, Ni, Nd, dims):
+            self.user_emb = pf.Embedding(Nu, Nd)
+            self.item_emb = pf.Embedding(Ni, Nd)
+            self.net = pf.DenseNetwork(dims)
+
+        def __call__(self, x):
+            user_vec = self.user_emb(x['user_id'])
+            item_vec = self.item_emb(x['item_id'])
+            logits = self.net(tf.concat([user_vec, item_vec], axis=1))
+            return pf.Bernoulli(logits)
+
+
+Neural Matrix Factorization
+---------------------------
+
+or for neural matrix factorization https://arxiv.org/abs/1708.05031
+
+.. code-block:: python3
 
     class NeuralMatrixFactorization(pf.Model):
 
@@ -60,8 +84,7 @@ or for neural matrix factorization https://arxiv.org/abs/1708.05031
             self.user_ncf = pf.Embedding(Nu, Nd)
             self.item_ncf = pf.Embedding(Ni, Nd)
             self.net = pf.DenseNetwork(dims)
-            self.linear = pf.Dense(dims[-1]+)
-            self.std = pf.ScaleParameter()
+            self.linear = pf.Dense(dims[-1]+Nd)
 
         def __call__(self, x):
             user_mf = self.user_mf(x['user_id'])
@@ -69,9 +92,9 @@ or for neural matrix factorization https://arxiv.org/abs/1708.05031
             user_ncf = self.user_ncf(x['user_id'])
             item_ncf = self.item_ncf(x['item_id'])
             preds_mf = user_mf*item_mf
-            preds_ncf = self.net(tf.concat([user_ncf, item_ncf], -1))
-            preds = self.linear(tf.concat([preds_mf, preds_ncf], -1))
-            return pf.Normal(preds, self.std())
+            preds_ncf = self.net(tf.concat([user_ncf, item_ncf], axis=1))
+            logits = self.linear(tf.concat([preds_mf, preds_ncf], axis=1))
+            return pf.Bernoulli(logits)
 
 
 TODO: Then can instantiate the model
@@ -90,8 +113,3 @@ TODO: Then fit it;
 .. code-block:: python3
 
     model.fit(df[['user_id', 'item_id']], df['rating'])
-
-Or if you have implicit data (0 or 1 for whether the user has interacted with 
-the item), use model = Bernoulli(predictions)
-
-Or if there are discrete scores (e.g. 1-10), then use a BetaBinomial 
