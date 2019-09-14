@@ -1,7 +1,7 @@
 .. _example_nmf:
 
 Neural Matrix Factorization
----------------------------
+===========================
 
 .. include:: macros.hrst
 
