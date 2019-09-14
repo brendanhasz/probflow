@@ -188,13 +188,13 @@ class Model(Module):
             Default = ``100``
         shuffle : bool
             Whether to shuffle the data each epoch.  Note that this is ignored
-            if ``x`` is a |DataGenerator|.
+            if ``x`` is a |DataGenerator|
             Default = ``True``
         optimizer : |None| or a backend-specific optimizer
             What optimizer to use for optimizing the variational posterior
-            distributions' variables.  When the backend is |TensorFlow|,
+            distributions' variables.  When the backend is |TensorFlow|
             the default is to use adam (``tf.keras.optimizers.Adam``).
-            When the backend is |PyTorch|, the default is to use TODO
+            When the backend is |PyTorch| the default is to use TODO
         optimizer_kwargs : dict
             Keyword arguments to pass to the optimizer.
             Default is an empty dict.
@@ -281,7 +281,7 @@ class Model(Module):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor
             Independent variable values of the dataset to evaluate (aka the 
             "features"). 
         n : int
@@ -310,7 +310,7 @@ class Model(Module):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor
             Independent variable values of the dataset to evaluate (aka the 
             "features"). 
         n : int
@@ -339,7 +339,7 @@ class Model(Module):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor
             Independent variable values of the dataset to evaluate (aka the 
             "features"). 
         n : int
@@ -367,7 +367,7 @@ class Model(Module):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor
             Independent variable values of the dataset to evaluate (aka the 
             "features").  
 
@@ -426,10 +426,10 @@ class Model(Module):
             * 'f1': F-measure
             * callable: a function which takes (y_true, y_pred_dist)
 
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| to generate both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target"). 
 
@@ -470,7 +470,7 @@ class Model(Module):
         dict
             Means of the parameter posterior distributions.  A dictionary
             where the keys contain the parameter names and the values contain
-            |ndarray|s with the posterior means.  The |ndarray|s are the same
+            |ndarrays| with the posterior means.  The |ndarrays| are the same
             size as each parameter. Or just the |ndarray| if 
             ``params`` was a str.
 
@@ -506,7 +506,7 @@ class Model(Module):
         dict
             Samples from the parameter posterior distributions.  A dictionary
             where the keys contain the parameter names and the values contain
-            |ndarray|s with the posterior samples.  The |ndarrays| are of size
+            |ndarrays| with the posterior samples.  The |ndarrays| are of size
             (``num_samples``, param.shape). Or just the |ndarray| if 
             ``params`` was a str.
         """
@@ -617,7 +617,7 @@ class Model(Module):
         dict
             Samples from the parameter prior distributions.  A dictionary
             where the keys contain the parameter names and the values contain
-            |ndarray|s with the prior samples.  The |ndarray|s are of size
+            |ndarrays| with the prior samples.  The |ndarrays| are of size
             (``n``,param.shape).
         """
         if isinstance(params, str):
@@ -697,10 +697,10 @@ class Model(Module):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor
             Independent variable values of the dataset to evaluate (aka the 
             "features").  
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target"). 
         individually : bool
@@ -767,10 +767,10 @@ class Model(Module):
         x_by : int or str or list of int or list of str
             Which independent variable(s) to plot the log probability as a
             function of.  That is, which columns in ``x`` to plot by.
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
         bins : int
@@ -805,10 +805,10 @@ class Model(Module):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target"). 
         individually : bool
@@ -854,10 +854,10 @@ class Model(Module):
         x_by : int or str or list of int or list of str
             Which independent variable(s) to plot the log probability as a
             function of.  That is, which columns in ``x`` to plot by.
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
         bins : int
@@ -955,7 +955,7 @@ class ContinuousModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").
         ci : float between 0 and 1
@@ -1007,7 +1007,7 @@ class ContinuousModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").
         n : int
@@ -1069,10 +1069,10 @@ class ContinuousModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
         n : int
@@ -1114,10 +1114,10 @@ class ContinuousModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
         n : int
@@ -1157,10 +1157,10 @@ class ContinuousModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
         n : int
@@ -1201,10 +1201,10 @@ class ContinuousModel(Model):
         x_by : int or str or list of int or list of str
             Which independent variable(s) to plot the log probability as a
             function of.  That is, which columns in ``x`` to plot by.
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
         ci : float between 0 and 1
@@ -1274,10 +1274,10 @@ class ContinuousModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
         split_by : int
@@ -1331,10 +1331,10 @@ class ContinuousModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
         n : int
@@ -1375,10 +1375,10 @@ class ContinuousModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
 
@@ -1398,10 +1398,10 @@ class ContinuousModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
 
@@ -1481,7 +1481,7 @@ class DiscreteModel(ContinuousModel):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").
         n : int
@@ -1550,10 +1550,10 @@ class DiscreteModel(ContinuousModel):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
 
@@ -1624,7 +1624,7 @@ class CategoricalModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").
         n : int
@@ -1679,10 +1679,10 @@ class CategoricalModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or |Tensor| or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or |Tensor|
+        y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
         split_by : int

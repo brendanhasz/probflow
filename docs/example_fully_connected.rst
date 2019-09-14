@@ -23,7 +23,7 @@ TODO: diagram
 
 First we'll make a module which represents a single fully-connected layer:
 
-.. code-block:: python
+.. code-block:: python3
 
     import probflow as pf
 
@@ -42,7 +42,7 @@ Note that we've used ``@``, the
 Having defined a single layer, it's much easier to define another |Module| which 
 stacks several of those layers, with activation functions in between each:
 
-.. code-block:: python
+.. code-block:: python3
 
     class DenseNetwork(pf.Module):
         
@@ -69,7 +69,7 @@ you've selected.  |TensorFlow| is the default backend, but if we had wanted to
 use |PyTorch| (see :ref:`ug_backend`), we could have used PyTorch's relu
 function:
 
-.. code-block:: python
+.. code-block:: python3
 
     import torch
 
@@ -80,7 +80,7 @@ function:
 Finally, we can create a |Model| which uses the network |Module| we've just created.  This model consists of a normal distribution whose mean is predicted
 by the neural network:
 
-.. code-block:: python
+.. code-block:: python3
 
     class DenseRegression(pf.Model):
         
@@ -93,7 +93,7 @@ by the neural network:
 
 TODO: then can fit the net
 
-.. code-block:: python
+.. code-block:: python3
 
     model = DenseRegression([5, 128, 64, 1])
     model.fit(x, y)
@@ -104,7 +104,7 @@ Using the Dense and Sequential Modules
 
 TODO: the Dense module handles creating the variables for you, and the Sequential module takes a list of modules or callables and pipes the output of each into the input of the next
 
-.. code-block:: python
+.. code-block:: python3
 
     class DenseRegression(pf.Model):
         
@@ -123,7 +123,7 @@ TODO: the Dense module handles creating the variables for you, and the Sequentia
 
 TODO: then can fit the net
 
-.. code-block:: python
+.. code-block:: python3
 
     model = DenseRegression([5, 128, 64, 1])
     model.fit(x, y)
@@ -137,7 +137,7 @@ TODO: the DenseNet model automatically creates sequential dense layers, but NOT 
 
 TODO: DenseRegression
 
-.. code-block:: python
+.. code-block:: python3
 
     model = pf.DenseRegression([5, 128, 64, 1])
     model.fit(x, y)
@@ -145,7 +145,7 @@ TODO: DenseRegression
 
 TODO: DenseClassifier
 
-.. code-block:: python
+.. code-block:: python3
 
     # TODO make dataset w/ categorical output
 

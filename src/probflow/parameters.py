@@ -15,7 +15,7 @@ to a specific distribution before fitting the model.  While the *type* of
 distribution used for the posterior is set before fitting the model, the 
 shape of that distribution (the value of the parameters which define the
 distribution) is optimized while fitting the model.
-See the :ref:`math` section for more info.
+See the :ref:`ug_math` section for more info.
 
 The :class:`.Parameter` class can be used to create any probabilistic
 parameter. 

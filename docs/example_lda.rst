@@ -16,9 +16,9 @@ TODO: math
     N_t & = & \text{number of topics} \\
     N_w & = & \text{number of words} \\
     N_d & = & \text{number of documents} \\
-    \phi_{k=1...N_t} & \sim & \text{Dirichlet}_{N_w} (\beta) \\
-    \theta_{d=1...N_d} & \sim & \text{Dirichlet}_{N_t} (\alpha) \\
-    \mathbf{W} & \sim & \text{OneHotCategorical}(\theta \phi)
+    \mathbf{\varphi}_{k=1...N_t} & \sim & \text{Dirichlet}_{N_w} (\beta) \\
+    \mathbf{\theta}_{d=1...N_d} & \sim & \text{Dirichlet}_{N_t} (\alpha) \\
+    \mathbf{W} & \sim & \text{OneHotCategorical}(\mathbf{\theta} \mathbf{\varphi})
     \end{align}
 
 
@@ -33,7 +33,7 @@ TODO: explain in terms of :math:`\phi` and :math:`\theta` parameter matrixes
 
     class LDA(pf.Model):
 
-        def __init__(self, Nt, Nd, Nw)
+        def __init__(self, Nt, Nd, Nw):
             self.phi = pf.DirichletParameter(Nw, Nt)   #per-topic word dists
             self.theta = pf.DirichletParameter(Nt, Nd) #per-document topic dists
 
@@ -70,7 +70,7 @@ distributions.
 
     class LdaNet(pf.Model):
 
-        def __init__(self, dims)
+        def __init__(self, dims):
             self.phi = pf.DirichletParameter(dims[0], dims[-1])
             self.net = pf.DenseNetwork(dims)
 
