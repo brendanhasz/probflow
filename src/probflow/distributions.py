@@ -90,7 +90,7 @@ class Deterministic(BaseDistribution):
 
     Parameters
     ----------
-    loc : int, float, |ndarray|, or |Tensor|
+    loc : int, float, |ndarray|, or Tensor
         Mean of the deterministic distribution (:math:`k_0`).
         Default = 0
     """
@@ -146,10 +146,10 @@ class Normal(BaseDistribution):
 
     Parameters
     ----------
-    loc : int, float, |ndarray|, or |Tensor|
+    loc : int, float, |ndarray|, or Tensor
         Mean of the normal distribution (:math:`\mu`).
         Default = 0
-    scale : int, float, |ndarray|, or |Tensor|
+    scale : int, float, |ndarray|, or Tensor
         Standard deviation of the normal distribution (:math:`\sigma`).
         Default = 1
     """
@@ -214,13 +214,13 @@ class StudentT(BaseDistribution):
 
     Parameters
     ----------
-    df : int, float, |ndarray|, or |Tensor|
+    df : int, float, |ndarray|, or Tensor
         Degrees of freedom of the t-distribution (:math:`\nu`).
         Default = 1
-    loc : int, float, |ndarray|, or |Tensor|
+    loc : int, float, |ndarray|, or Tensor
         Median of the t-distribution (:math:`\mu`).
         Default = 0
-    scale : int, float, |ndarray|, or |Tensor|
+    scale : int, float, |ndarray|, or Tensor
         Spread of the t-distribution (:math:`\sigma`).
         Default = 1
     """
@@ -293,10 +293,10 @@ class Cauchy(BaseDistribution):
 
     Parameters
     ----------
-    loc : int, float, |ndarray|, or |Tensor|
+    loc : int, float, |ndarray|, or Tensor
         Median of the Cauchy distribution (:math:`\mu`).
         Default = 0
-    scale : int, float, |ndarray|, or |Tensor|
+    scale : int, float, |ndarray|, or Tensor
         Spread of the Cauchy distribution (:math:`\gamma`).
         Default = 1
     """
@@ -369,9 +369,9 @@ class Gamma(BaseDistribution):
 
     Parameters
     ----------
-    shape : int, float, |ndarray|, or |Tensor|
+    shape : int, float, |ndarray|, or Tensor
         Shape parameter of the gamma distribution (:math:`\alpha`).
-    rate : int, float, |ndarray|, or |Tensor|
+    rate : int, float, |ndarray|, or Tensor
         Rate parameter of the gamma distribution (:math:`\beta`).
 
     """
@@ -438,9 +438,9 @@ class InverseGamma(BaseDistribution):
 
     Parameters
     ----------
-    concentration : int, float, |ndarray|, or |Tensor|
+    concentration : int, float, |ndarray|, or Tensor
         Shape parameter of the inverse gamma distribution (:math:`\alpha`).
-    scale : int, float, |ndarray|, or |Tensor|
+    scale : int, float, |ndarray|, or Tensor
         Rate parameter of the inverse gamma distribution (:math:`\beta`).
 
     """
@@ -494,10 +494,10 @@ class Bernoulli(BaseDistribution):
 
     Parameters
     ----------
-    logits : int, float, |ndarray|, or |Tensor|
+    logits : int, float, |ndarray|, or Tensor
         Logit-transformed probability parameter of the  Bernoulli 
         distribution (:math:`\p`)
-    probs : int, float, |ndarray|, or |Tensor|
+    probs : int, float, |ndarray|, or Tensor
         Logit-transformed probability parameter of the  Bernoulli 
         distribution (:math:`\p`)
     """
@@ -554,10 +554,10 @@ class Categorical(BaseDistribution):
 
     Parameters
     ----------
-    logits : int, float, |ndarray|, or |Tensor|
+    logits : int, float, |ndarray|, or Tensor
         Logit-transformed category probabilities 
         (:math:`\frac{\mathbf{\theta}}{1-\mathbf{\theta}}`)
-    probs : int, float, |ndarray|, or |Tensor|
+    probs : int, float, |ndarray|, or Tensor
         Raw category probabilities (:math:`\mathbf{\theta}`)
     """
 
@@ -602,7 +602,7 @@ class OneHotCategorical(BaseDistribution):
     ----------
     logits : int, float, |ndarray|, or Tensor
         Logit-transformed category probabilities
-    probs : int, float, |ndarray|, or |Tensor|
+    probs : int, float, |ndarray|, or Tensor
     """
 
     def __init__(self, logits=None, probs=None):
@@ -660,7 +660,7 @@ class Poisson(BaseDistribution):
 
     Parameters
     ----------
-    rate : int, float, |ndarray|, or |Tensor|
+    rate : int, float, |ndarray|, or Tensor
         Rate parameter of the Poisson distribution (:math:`\lambda`).
     """
 
@@ -717,7 +717,7 @@ class Dirichlet(BaseDistribution):
 
     Parameters
     ----------
-    concentration : |ndarray|, or |Tensor|
+    concentration : |ndarray|, or Tensor
         Concentration parameter of the Dirichlet distribution (:math:`\alpha`).
     """
 

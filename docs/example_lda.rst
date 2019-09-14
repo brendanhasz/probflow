@@ -86,4 +86,4 @@ matrix as both ``x`` and ``y``:
 .. code-block:: python3
 
     model = LdaNet([Nw, 256, 256, 256, Nt])
-    model.fit(id, W)
+    model.fit(W, W)
