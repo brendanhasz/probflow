@@ -12,8 +12,7 @@ TODO: math
 
 .. math::
 
-    \require{boldsymbol}
-    \begin{align*}
+    \begin{align}
     N_t & = \text{number of topics} \\
     N_w & = \text{number of words} \\
     N_d & = \text{number of documents} \\
