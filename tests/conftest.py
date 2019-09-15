@@ -1,8 +1,8 @@
-"""Fixtures and options for all tests.
-
-"""
+"""Fixtures and options for all tests."""
 
 import pytest
+import numpy as np
+import tensorflow as tf
 
 
 def pytest_addoption(parser):
@@ -20,3 +20,9 @@ def pytest_generate_tests(metafunc):
         val = getattr(metafunc.config.option, arg)
         if arg in metafunc.fixturenames and val is not None:
             metafunc.parametrize(arg, [val])
+
+
+@pytest.fixture
+def random():
+    np.random.seed(12345)
+    tf.random.set_seed(12345)
