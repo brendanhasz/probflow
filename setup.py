@@ -12,14 +12,16 @@ setup(name='probflow',
     zip_safe=False,
     extras_require={
         'tests': [
-            'tensorflow == 2.0.0b1',
+            'gast==0.2.2', #TODO: workaround for a TF req
+            'tensorflow == 2.0.0-rc1',
             'tfp-nightly',
             'torch >= 1.2.0',
             'pytest >= 5.1.2',
+            'pytest-cov >= 2.7.1',
             'pylint >= 2.3.1',
             ],
         'docs': [
-            'tensorflow == 2.0.0b1',
+            'tensorflow == 2.0.0-rc1',
             'tfp-nightly',
             ]
     }

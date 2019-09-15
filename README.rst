@@ -1,12 +1,23 @@
 ProbFlow
 ========
 
-|Docs Badge|
+|Build Badge|  |Coverage Badge|  |Docs Badge|
 
 .. |Docs Badge| image:: https://readthedocs.org/projects/probflow/badge/
     :alt: Documentation Status
     :scale: 100%
     :target: http://probflow.readthedocs.io
+
+.. |Build Badge| image:: https://travis-ci.com/brendanhasz/probflow.svg?branch=v2
+    :alt: Build Status
+    :scale: 100%
+    :target: https://travis-ci.com/brendanhasz/probflow
+
+.. |Coverage Badge| image:: https://codecov.io/gh/brendanhasz/probflow/branch/v2/graph/badge.svg
+    :alt: Build Status
+    :scale: 100%
+    :target: https://codecov.io/gh/brendanhasz/probflow
+
 
 ProbFlow is a Python package for building probabilistic Bayesian models with `TensorFlow Probability <http://www.tensorflow.org/probability>`_, performing variational inference with those models, and evaluating the models' inferences.  It provides both high-level modules for building Bayesian neural networks, as well as low-level parameters and distributions for constructing custom Bayesian models.
 
