@@ -40,8 +40,8 @@ def scale_xavier(shape):
     vals = xavier(shape)
     if get_backend() == 'pytorch':
         import torch
-        numel = torch.prod(shape)
-        return vals+2-2*torch.log(numel)/torch.log(10.0)
+        numel = torch.prod(torch.Tensor(shape))
+        return vals+2-2*torch.log(numel)/np.log(10.)
     else:
         import tensorflow as tf
         numel = float(tf.reduce_prod(shape))
@@ -54,8 +54,8 @@ def pos_xavier(shape):
     vals = xavier(shape)
     if get_backend() == 'pytorch':
         import torch
-        numel = torch.prod(shape)
-        return vals + torch.log(numel)/torch.log(10.0)
+        numel = torch.prod(torch.Tensor(shape))
+        return vals + torch.log(numel)/np.log(10.)
     else:
         import tensorflow as tf
         numel = float(tf.reduce_prod(shape))

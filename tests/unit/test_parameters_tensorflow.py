@@ -362,9 +362,9 @@ def test_DirichletParameter():
 
     # Should error with incorrect params
     with pytest.raises(TypeError):
-        sparam = CategoricalParameter(k='a')
+        sparam = DirichletParameter(k='a')
     with pytest.raises(ValueError):
-        param = CategoricalParameter(k=1)
+        param = DirichletParameter(k=1)
 
     # Create the parameter
     param = DirichletParameter(k=3)

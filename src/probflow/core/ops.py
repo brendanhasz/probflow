@@ -249,7 +249,7 @@ def gather(vals, inds, axis=0):
     """Gather values by index"""
     if get_backend() == 'pytorch':
         import torch
-        return torch.gather(vals, axis, inds)
+        return torch.index_select(vals, axis, inds)
     else:
         import tensorflow as tf
         return tf.gather(vals, inds, axis=axis)
@@ -260,7 +260,7 @@ def cat(vals, axis=0):
     """Concatenate tensors"""
     if get_backend() == 'pytorch':
         import torch
-        raise NotImplementedError
+        return torch.cat(vals, dim=axis)
     else:
         import tensorflow as tf
         return tf.concat(vals, axis=axis)
@@ -271,7 +271,9 @@ def additive_logistic_transform(vals):
     """The additive logistic transformation"""
     if get_backend() == 'pytorch':
         import torch
-        raise NotImplementedError
+        ones_shape = [s for s in vals.shape[:-1]] + [1]
+        exp_vals = torch.cat([torch.exp(vals), torch.ones(ones_shape)], dim=-1)
+        return exp_vals/torch.sum(exp_vals, dim=-1, keepdim=True)
     else:
         import tensorflow as tf
         ones_shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
@@ -284,8 +286,9 @@ def add_col_of(vals, val):
     """Add a column of a value to a tensor"""
     if get_backend() == 'pytorch':
         import torch
-        raise NotImplementedError
+        shape = [s for s in vals.shape[:-1]] + [1]
+        return torch.cat([vals, val*torch.ones(shape)], dim=-1)
     else:
         import tensorflow as tf
-        ones_shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
-        return tf.concat([vals, val*tf.ones(ones_shape)], axis=-1)
+        shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
+        return tf.concat([vals, val*tf.ones(shape)], axis=-1)
