@@ -72,6 +72,15 @@ class DataGenerator(BaseDataGenerator):
         if not isinstance(test, bool):
             raise TypeError('test must be True or False')
 
+        # No data? (eg when sampling from a generative model)
+        if x is None and y is None:
+            self._empty = True
+            self._n_samples = 1
+            self._batch_size = 1
+            return
+        else:
+            self._empty = False
+
         # Check sizes are consistent
         if x is not None and y is not None:
             if x.shape[0] != y.shape[0]:
@@ -118,6 +127,10 @@ class DataGenerator(BaseDataGenerator):
     def __getitem__(self, index):
         """Generate one batch of data"""
 
+        # Return none if no data
+        if self._empty:
+            return None, None
+
         # Get shuffled indexes
         ix = self.ids[index*self.batch_size:(index+1)*self.batch_size]
 
@@ -147,7 +160,9 @@ class DataGenerator(BaseDataGenerator):
 
     def on_epoch_end(self):
         """Shuffle data each epoch"""
-        if self.shuffle:
+        if self._empty:
+            pass
+        elif self.shuffle:
             self.ids = np.random.permutation(self.n_samples)
         else:
             self.ids = np.arange(self.n_samples, dtype=np.uint64)

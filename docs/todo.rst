@@ -19,9 +19,12 @@ Backlog
 * Examples
 * Docs for everything implemented so far
 * Fix issues so far (below)
+* CI / code coverage / automated testing
 * Merge back to main repo and release 2.0.0
 * Different plotting methods for different types of dists (both for Parameter priors/posteriors and predictive distribution plots)
 * All model evaluation methods + specialized types of models
+* Add model saving/loading (Model.save_model and load_model)
+* Summary method for Modules + Models which show hierarchy of modules/parameters
 * Make Module.trainable_variables return tf.Variables which are properties of module+sub-modules as well (and not neccesarily in parameters, also allow embedding of tf.Modules?)
 * Real-world examples w/ public BigQuery datasets
 * More examples: Hidden Markov models, Gaussian processes, and LDA

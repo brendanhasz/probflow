@@ -130,7 +130,7 @@ class Model(Module):
         return O.sum(log_likelihoods, axis=None)
 
 
-    def _train_step_tensorflow(self, n, flipout):
+    def _train_step_tf(self, n, flipout):
         """Get the training step function for TensorFlow"""
 
         import tensorflow as tf
@@ -152,10 +152,15 @@ class Model(Module):
         return train_step
 
 
-    def _train_step_pytorch(self, n, flipout):
+    def _train_step_pt(self, n, flipout):
         """Get the training step function for PyTorch"""
         raise NotImplementedError
         # TODO
+
+
+    def train_step(self, x_data, y_data):
+        """Perform one training step"""
+        self._train_fn(x_data, y_data)
 
 
     def fit(self,
@@ -215,7 +220,8 @@ class Model(Module):
         """
 
         # Create DataGenerator from input data if not already
-        data = make_generator(x, y, batch_size=batch_size, shuffle=shuffle)
+        self._data = make_generator(x, y, batch_size=batch_size, 
+                                    shuffle=shuffle)
 
         # Use default optimizer if none specified
         self._learning_rate = learning_rate
@@ -231,18 +237,16 @@ class Model(Module):
 
         # Create a function to perform one training step
         if get_backend() == 'pytorch':
-            train_step = self._train_step_pytorch(data.n_samples, flipout)
+            self._train_fn = self._train_step_pt(self._data.n_samples, flipout)
         else:
-            train_step = self._train_step_tensorflow(data.n_samples, flipout)
-
-        # Training has started
-        self._is_training = True
+            self._train_fn = self._train_step_tf(self._data.n_samples, flipout)
 
         # Assign model param to callbacks
         for c in callbacks:
             c.model = self
 
         # Fit the model!
+        self._is_training = True
         for i in range(epochs):
 
             # Stop training early?
@@ -250,20 +254,18 @@ class Model(Module):
                 break
 
             # Update gradients for each batch
-            for x_data, y_data in data:
-                train_step(x_data, y_data)
+            for x_data, y_data in self._data:
+                self.train_step(x_data, y_data)
 
             # Run callbacks at end of epoch
-            data.on_epoch_end()
+            self._data.on_epoch_end()
             for c in callbacks:
                 c.on_epoch_end()
 
         # Run callbacks at end of training
+        self._is_training = False
         for c in callbacks:
             c.on_train_end()
-
-        # No longer training
-        self._is_training = False
 
 
     def stop_training(self):
@@ -279,7 +281,7 @@ class Model(Module):
             self._learning_rate = lr
 
 
-    def predictive_sample(self, x, n=1000):
+    def predictive_sample(self, x=None, n=1000):
         """Draw samples from the predictive distribution given x
 
         TODO: Docs...
@@ -303,11 +305,14 @@ class Model(Module):
         samples = []
         with Sampling(n=n, flipout=False):
             for x_data, y_data in make_generator(x, test=True):
-                samples += [self(O.expand_dims(x_data, 0)).sample()]
+                if x_data is None:
+                    samples += [self().sample()]
+                else:
+                    samples += [self(O.expand_dims(x_data, 0)).sample()]
         return np.concatenate(samples, axis=1)
 
 
-    def aleatoric_sample(self, x, n=1000):
+    def aleatoric_sample(self, x=None, n=1000):
         """Draw samples of the model's estimate given x, including only
         aleatoric uncertainty (uncertainty due to noise)
 
@@ -331,11 +336,14 @@ class Model(Module):
         """
         samples = []
         for x_data, y_data in make_generator(x, test=True):
-            samples += [self(x_data).sample(n=n).numpy()]
+            if x_data is None:
+                samples += [self().sample(n=n).numpy()]
+            else:
+                samples += [self(x_data).sample(n=n).numpy()]
         return np.concatenate(samples, axis=1)
 
 
-    def epistemic_sample(self, x, n=1000):
+    def epistemic_sample(self, x=None, n=1000):
         """Draw samples of the model's estimate given x, including only
         epistemic uncertainty (uncertainty due to uncertainty as to the
         model's parameter values)
@@ -345,7 +353,7 @@ class Model(Module):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or None
             Independent variable values of the dataset to evaluate (aka the 
             "features"). 
         n : int
@@ -361,11 +369,14 @@ class Model(Module):
         samples = []
         with Sampling(n=n, flipout=False):
             for x_data, y_data in make_generator(x, test=True):
-                samples += [self(O.expand_dims(x_data, 0)).mean().numpy()]
+                if x_data is None:
+                    samples += [self().mean().numpy()]
+                else:
+                    samples += [self(O.expand_dims(x_data, 0)).mean().numpy()]
         return np.concatenate(samples, axis=1)
 
 
-    def predict(self, x):
+    def predict(self, x=None):
         """Predict dependent variable using the model
 
         TODO... using maximum a posteriori param estimates etc
@@ -392,7 +403,10 @@ class Model(Module):
         """
         preds = []
         for x_data, y_data in make_generator(x, test=True):
-            preds += [self(x_data).mean().numpy()]
+            if x_data is None:
+                preds += [self().mean().numpy()]
+            else:
+                preds += [self(x_data).mean().numpy()]
         return np.concatenate(preds, axis=0)
 
 
@@ -400,6 +414,8 @@ class Model(Module):
         """Compute a metric of model performance
 
         TODO: docs
+
+        TODO: note that this doesn't work w/ generative models
 
 
         Parameters
@@ -739,7 +755,10 @@ class Model(Module):
                 for i in range(n):
                     t_probs = []
                     for x_data, y_data in make_generator(x, y, test=True):
-                        t_probs += [self(x_data).log_prob(y_data)]
+                        if x_data is None:
+                            t_probs += [self().log_prob(y_data).numpy()]
+                        else:
+                            t_probs += [self(x_data).log_prob(y_data).numpy()]
                     probs += [np.concatenate(t_probs, axis=0)]
             probs = np.stack(probs, axis=probs[0].ndim)
 
@@ -747,7 +766,10 @@ class Model(Module):
         else:
             probs = []
             for x_data, y_data in make_generator(x, y, test=True):
-                probs += [self(x_data).log_prob(y_data)]
+                if x_data is None:
+                    probs += [self().log_prob(y_data).numpy()]
+                else:
+                    probs += [self(x_data).log_prob(y_data).numpy()]
             probs = np.concatenate(probs, axis=0)
 
         # Return log prob of each sample or sum of log probs
@@ -801,9 +823,7 @@ class Model(Module):
     def prob(self, 
              x, 
              y=None,
-             individually=True,
-             distribution=False,
-             n=1000):
+             **kwargs):
         """Compute the probability of ``y`` given the model
 
         TODO: Docs...
@@ -839,9 +859,7 @@ class Model(Module):
             Probabilities. Shape is determined by ``individually``, 
             ``distribution``, and ``n`` kwargs.
         """
-        return np.exp(self.log_prob(x, y, n=n,
-                                    individually=individually,
-                                    distribution=distribution))
+        return np.exp(self.log_prob(x, y, **kwargs))
 
 
     def prob_by(self, 
@@ -883,6 +901,19 @@ class Model(Module):
         pass
         # TODO
         # TODO: handle when x is a DataGenerator, or y=None
+
+
+    def save(self, filename):
+        """Save a model to file.
+
+        TODO
+
+        Parameters
+        ----------
+        filename : str
+            Save the model to a file with this name
+        """
+        save_model(self, filename)
 
 
     def summary(self):
@@ -984,15 +1015,13 @@ class ContinuousModel(Model):
         """
 
         # Sample from the predictive distribution
-        pred_dist = self.predictive_distribution(x, n=n)
-
-        # TODO: assumes y is scalar, add a check for that
+        pred_samples = self.predictive_sample(x, n=n)
 
         # Compute percentiles of the predictive distribution
         lb = 100*(1.0-ci)/2.0
         q = [lb, 100.0-lb]
-        prcs = np.percentile(pred_dist, q, axis=0)
-        return prcs[0, :], prcs[1, :]
+        prcs = np.percentile(pred_samples, q, axis=0)
+        return prcs[0, ...], prcs[1, ...]
 
 
     def pred_dist_plot(self, 
@@ -1049,21 +1078,21 @@ class ContinuousModel(Model):
         """
 
         # Sample from the predictive distribution
-        pred_dist = self.predictive_distribution(x, n=n)
+        pred_samples = self.predictive_sample(x, n=n)
 
         # TODO: assumes y is scalar, add a check for that
 
         # Plot the predictive distributions
-        N = pred_dist.shape[1]
+        N = pred_samples.shape[1]
         if individually:
             rows = np.ceil(N/cols)
             for i in range(N):
                 plt.subplot(rows, cols, i+1)
-                plot_dist(pred_dist[:,i], xlabel='Datapoint '+str(i), 
+                plot_dist(pred_samples[:,i], xlabel='Datapoint '+str(i), 
                           style=style, bins=bins, ci=ci, bw=bw, alpha=alpha, 
                           color=color)
         else:
-            plot_dist(pred_dist, xlabel='Dependent Variable', style=style, 
+            plot_dist(pred_samples, xlabel='Dependent Variable', style=style, 
                       bins=bins, ci=ci, bw=bw, alpha=alpha, color=color)
 
 
@@ -1091,18 +1120,18 @@ class ContinuousModel(Model):
         """
 
         # Sample from the predictive distribution
-        pred_dist = self.predictive_distribution(x, n=n)
+        pred_samples = self.predictive_sample(x, n=n)
 
         # TODO: assumes y is scalar, add a check for that
 
         # Return percentiles of true y data along predictive distribution
-        #inds = np.argmax((np.sort(pred_dist, 0) >
+        #inds = np.argmax((np.sort(pred_samples, 0) >
         #                  y.reshape(1, x.shape[0], -1)),
         #                 axis=0)
         # TODO
         return inds/float(n)
 
-        # TODO: check for when true y value is above max pred_dist val!
+        # TODO: check for when true y value is above max pred_samples val!
         # I think argmax returns 0 when that's the case, which is
         # obviously not what we want
 
@@ -1523,23 +1552,23 @@ class DiscreteModel(ContinuousModel):
         """
 
         # Sample from the predictive distribution
-        pred_dist = self.predictive_distribution(x, n=n)
+        pred_samples = self.predictive_sample(x, n=n)
 
         # TODO: assumes y is scalar, add a check for that
 
         # TODO: plot discretely
 
         # Plot the predictive distributions
-        N = pred_dist.shape[1]
+        N = pred_samples.shape[1]
         if individually:
             rows = np.ceil(N/cols)
             for i in range(N):
                 plt.subplot(rows, cols, i+1)
-                #plot_dist(pred_dist[:,i], xlabel='Datapoint '+str(i), 
+                #plot_dist(pred_samples[:,i], xlabel='Datapoint '+str(i), 
                 #          style=style, bins=bins, ci=ci, bw=bw, alpha=alpha, 
                 #          color=color)
         else:
-            #plot_dist(pred_dist, xlabel='Dependent Variable', style=style, 
+            #plot_dist(pred_samples, xlabel='Dependent Variable', style=style, 
             #          bins=bins, ci=ci, bw=bw, alpha=alpha, color=color)
             pass
 
@@ -1666,7 +1695,7 @@ class CategoricalModel(Model):
         """
 
         # Sample from the predictive distribution
-        pred_dist = self.predictive_distribution(x, n=n)
+        pred_samples = self.predictive_sample(x, n=n)
 
         # TODO
 
@@ -1712,14 +1741,14 @@ class CategoricalModel(Model):
     
 
 
-def save_model(model):
+def save_model(model, filename):
     """Save a model to file"""
     pass 
     # TODO
 
 
 
-def load_model(model):
+def load_model(filename):
     """Load a model from file"""
     pass 
     # TODO
