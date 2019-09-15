@@ -286,6 +286,8 @@ class Parameter(BaseParameter):
         -------
         TODO
         """
+        if n < 1:
+            raise ValueError('n must be positive')
         with Sampling(n=n):
             return self().numpy()
 
@@ -339,8 +341,6 @@ class Parameter(BaseParameter):
         # Check values
         if ci<0.0 or ci>1.0:
             raise ValueError('ci must be between 0 and 1')
-        if n < 1:
-            raise ValueError('n must be positive')
 
         # Sample from the posterior
         samples = self.posterior_sample(n=n)
@@ -352,8 +352,14 @@ class Parameter(BaseParameter):
         return bounds[0, ...], bounds[1, ...]
 
 
-    def posterior_plot(self, n=10000, style='fill', bins=20, ci=0.0,
-                       bw=0.075, alpha=0.4, color=None):
+    def posterior_plot(self,
+                       n: int = 10000,
+                       style: str = 'fill',
+                       bins: Union[int, list, np.ndarray] = 20,
+                       ci: float = 0.0,
+                       bw: float = 0.075,
+                       alpha: float = 0.4,
+                       color=None):
         """Plot distribution of samples from the posterior distribution.
 
         Parameters
@@ -384,24 +390,6 @@ class Parameter(BaseParameter):
             Default = use the default matplotlib color cycle
         """
 
-        # Check inputs
-        if not isinstance(n, int):
-            raise TypeError('n must be an int')
-        if n < 1:
-            raise ValueError('n must be positive')
-        if type(style) is not str or style not in ['fill', 'line', 'hist']:
-            raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
-        if not isinstance(bins, (int, float, np.ndarray)):
-            raise TypeError('bins must be an int or list or numpy vector')
-        if not isinstance(ci, float):
-            raise TypeError('ci must be a float')
-        if ci<0.0 or ci>1.0:
-            raise ValueError('ci must be between 0 and 1')
-        if not isinstance(alpha, float):
-            raise TypeError('alpha must be a float')
-        if alpha<0.0 or alpha>1.0:
-            raise TypeError('alpha must be between 0 and 1')
-
         # Sample from the posterior
         samples = self.posterior_sample(n=n)
         
@@ -413,8 +401,14 @@ class Parameter(BaseParameter):
         plt.xlabel(self.name)
 
 
-    def prior_plot(self, n=10000, style='fill', bins=20, ci=0.0,
-                   bw=0.075, alpha=0.4, color=None):
+    def prior_plot(self,
+                   n: int = 10000,
+                   style: str = 'fill',
+                   bins: Union[int, list, np.ndarray] = 20,
+                   ci: float = 0.0,
+                   bw: float = 0.075,
+                   alpha: float = 0.4,
+                   color=None):
         """Plot distribution of samples from the prior distribution.
 
         Parameters
@@ -444,24 +438,6 @@ class Parameter(BaseParameter):
             See https://matplotlib.org/tutorials/colors/colors.html
             Default = use the default matplotlib color cycle
         """
-
-        # Check inputs
-        if not isinstance(n, int):
-            raise TypeError('n must be an int')
-        if n < 1:
-            raise ValueError('n must be positive')
-        if type(style) is not str or style not in ['fill', 'line', 'hist']:
-            raise TypeError("style must be \'fill\', \'line\', or \'hist\'")
-        if not isinstance(bins, (int, float, np.ndarray)):
-            raise TypeError('bins must be an int or list or numpy vector')
-        if not isinstance(ci, float):
-            raise TypeError('ci must be a float')
-        if ci<0.0 or ci>1.0:
-            raise ValueError('ci must be between 0 and 1')
-        if not isinstance(alpha, float):
-            raise TypeError('alpha must be a float')
-        if alpha<0.0 or alpha>1.0:
-            raise TypeError('alpha must be between 0 and 1')
 
         # Sample from the posterior
         samples = self.prior_sample(n=n)

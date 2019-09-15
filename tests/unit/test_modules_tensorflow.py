@@ -123,6 +123,42 @@ def test_Module():
     assert sample1.shape[0] == 5
     assert sample1.shape[1] == 4
 
+    # Another test module which contains lists/dicts w/ parameters
+    class TestModule3(Module):
+
+        def __init__(self):
+            self.a_list = [Parameter(name='TestParam4'),
+                           Parameter(name='TestParam5')]
+            self.a_dict = {'a': Parameter(name='TestParam6'),
+                           'b': Parameter(name='TestParam7')}
+
+        def __call__(self, x):
+            return (tf.ones([x.shape[0], 1]) + 
+                    self.a_list[0]() + self.a_list[1]() + 
+                    self.a_dict['a']() + self.a_dict['b']())
+
+    the_module = TestModule3()
+
+    # parameters should return a list of all the parameters
+    param_list = the_module.parameters
+    assert isinstance(param_list, list)
+    assert len(param_list) == 4
+    assert all(isinstance(p, Parameter) for p in param_list)
+    param_names = [p.name for p in param_list]
+    assert 'TestParam4' in param_names
+    assert 'TestParam5' in param_names
+    assert 'TestParam6' in param_names
+    assert 'TestParam7' in param_names
+
+    # Should be able to initialize and add kl losses
+    the_module.reset_kl_loss()
+    assert the_module.kl_loss_batch().numpy() == 0
+    the_module.add_kl_loss(3.145)
+    assert is_close(the_module.kl_loss_batch().numpy(), 3.145)
+
+
+
+
 
 
 def test_Dense():
@@ -303,6 +339,10 @@ def test_Embedding():
         emb = Embedding(0, 1)
     with pytest.raises(ValueError):
         emb = Embedding(5, -1)
+
+    # Should error w/ k and d of different lengths
+    with pytest.raises(ValueError):
+        emb = Embedding([2, 3], [2, 3, 4])
 
     # Create the module
     emb = Embedding(10, 5)

@@ -204,6 +204,49 @@ def test_Parameter_2D():
 
 
 
+def test_Parameter_slicing():
+    """Tests a slicing Parameters"""
+
+    # Create 1D parameter
+    param = Parameter(shape=[2, 3, 4, 5])
+
+    # Should be able to slice!
+    sl = param[0].numpy()
+    assert sl.ndim == 4
+    assert sl.shape[0] == 1
+    assert sl.shape[1] == 3
+    assert sl.shape[2] == 4
+    assert sl.shape[3] == 5
+
+    sl = param[:, :, :, :2].numpy()
+    assert sl.ndim == 4
+    assert sl.shape[0] == 2
+    assert sl.shape[1] == 3
+    assert sl.shape[2] == 4
+    assert sl.shape[3] == 2
+
+    sl = param[1, ..., :2].numpy()
+    assert sl.ndim == 4
+    assert sl.shape[0] == 1
+    assert sl.shape[1] == 3
+    assert sl.shape[2] == 4
+    assert sl.shape[3] == 2
+
+    sl = param[...].numpy()
+    assert sl.ndim == 4
+    assert sl.shape[0] == 2
+    assert sl.shape[1] == 3
+    assert sl.shape[2] == 4
+    assert sl.shape[3] == 5
+
+    sl = param[tf.constant([0]), :, ::2, :].numpy()
+    assert sl.ndim == 4
+    assert sl.shape[0] == 1
+    assert sl.shape[1] == 3
+    assert sl.shape[2] == 2
+    assert sl.shape[3] == 5
+
+
 def test_Parameter_posterior_ci():
     """Tests probflow.parameters.Parameter.posterior_ci"""
 
@@ -216,6 +259,14 @@ def test_Parameter_posterior_ci():
     assert ub.ndim == 1
     assert lb.shape[0] == 1
     assert ub.shape[0] == 1
+
+    # Should error w/ invalid ci or n vals
+    with pytest.raises(ValueError):
+        lb, ub = param.posterior_ci(ci=-0.1)
+    with pytest.raises(ValueError):
+        lb, ub = param.posterior_ci(ci=1.1)
+    with pytest.raises(ValueError):
+        lb, ub = param.posterior_ci(n=0)
 
     # With a 1D parameter
     param = Parameter(shape=5)
@@ -272,6 +323,12 @@ def test_ScaleParameter():
 def test_CategoricalParameter():
     """Tests probflow.parameters.CategoricalParameter"""
 
+    # Should error with incorrect params
+    with pytest.raises(TypeError):
+        sparam = CategoricalParameter(k='a')
+    with pytest.raises(ValueError):
+        param = CategoricalParameter(k=1)
+
     # Create the parameter
     param = CategoricalParameter(k=3)
 
@@ -302,6 +359,12 @@ def test_CategoricalParameter():
 
 def test_DirichletParameter():
     """Tests probflow.parameters.DirichletParameter"""
+
+    # Should error with incorrect params
+    with pytest.raises(TypeError):
+        sparam = CategoricalParameter(k='a')
+    with pytest.raises(ValueError):
+        param = CategoricalParameter(k=1)
 
     # Create the parameter
     param = DirichletParameter(k=3)
@@ -336,6 +399,10 @@ def test_DirichletParameter():
 
 def test_BoundedParameter():
     """Tests probflow.parameters.BoundedParameter"""
+
+    # Should error with incorrect params
+    with pytest.raises(ValueError):
+        param = BoundedParameter(min=1.0, max=0.0)
 
     # Create the parameter
     param = BoundedParameter()
@@ -395,20 +462,6 @@ def test_PositiveParameter():
     assert samples.shape[1] == 5
     assert samples.shape[2] == 4
     assert all(s>0 for s in samples.flatten().tolist())
-
-
-
-def test_Parameter_posterior_plot(plot):
-    """Tests probflow.parameters.Parameter.posterior_plot"""
-    pass
-    # TODO
-
-
-
-def test_Parameter_prior_plot(plot):
-    """Tests probflow.parameters.Parameter.prior_plot"""
-    pass
-    # TODO
 
 
 

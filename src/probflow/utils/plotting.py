@@ -94,6 +94,10 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
         Default = use the default matplotlib color cycle
     """
 
+    # Check inputs
+    if ci<0.0 or ci>1.0:
+        raise ValueError('ci must be between 0 and 1')
+
     # If 1d make 2d
     if data.ndim == 1:
         data = np.expand_dims(data, 1)
