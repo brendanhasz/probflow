@@ -7,9 +7,11 @@ Generative Adversarial Network
 
 ProbFlow isn't really built for the kind of flexibility you need to fit a GAN,
 so I wouldn't recommend fitting GANs with ProbFlow.
-That said, you *can* do it.  So... Just for fun...
+That said, you *can* do it.
 
-TODO: description... (Bayesian GAN)
+So... Just for fun...
+
+TODO: description... (Bayesian GAN, cite https://arxiv.org/pdf/1705.09558.pdf)
 
 TODO: math
 

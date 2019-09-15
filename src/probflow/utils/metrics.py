@@ -36,21 +36,33 @@ import pandas as pd
 
 
 def as_numpy(fn):
-    """Cast inputs to numpy arrays before computing metric"""
+    """Cast inputs to numpy arrays and same shape before computing metric"""
 
     def metric_fn(y_true, y_pred):
+
+        # Cast y_true to numpy array
         if isinstance(y_true, (pd.Series, pd.DataFrame)):
-            new_y_true = y_true.values()
+            new_y_true = y_true.values
         elif isinstance(y_true, np.ndarray):
             new_y_true = y_true
         else:
             new_y_true = y_true.numpy()
+
+        # Cast y_pred to numpy array
         if isinstance(y_pred, (pd.Series, pd.DataFrame)):
-            new_y_pred = y_pred.values()
+            new_y_pred = y_pred.values
         elif isinstance(y_pred, np.ndarray):
             new_y_pred = y_pred
         else:
             new_y_pred = y_pred.numpy()
+
+        # Ensure correct sizes
+        if new_y_true.ndim == 1:
+            new_y_true = np.expand_dims(new_y_true, 1)
+        if new_y_pred.ndim == 1:
+            new_y_pred = np.expand_dims(new_y_pred, 1)
+
+        # Return metric function on consistent arrays
         return fn(new_y_true, new_y_pred)
 
     return metric_fn

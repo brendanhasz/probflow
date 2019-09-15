@@ -20,6 +20,7 @@ Discrete Distributions
 
 * :class:`.Bernoulli`
 * :class:`.Categorical`
+* :class:`.OneHotCategorical`
 * :class:`.Poisson`
 * :class:`.Dirichlet`
 
@@ -37,6 +38,7 @@ __all__ = [
     'InverseGamma',
     'Bernoulli',
     'Categorical',
+    'OneHotCategorical',
     'Poisson',
     'Dirichlet',
 ]

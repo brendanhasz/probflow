@@ -5,6 +5,7 @@
 import pytest
 
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 
 from probflow.distributions import *
@@ -14,6 +15,63 @@ from probflow.utils import metrics
 
 def is_close(a, b, tol=1e-5):
     return np.abs(a-b) < tol
+
+
+
+def test_as_numpy():
+    """Tests probflow.utils.metrics.as_numpy"""
+
+    @metrics.as_numpy
+    def func(a, b):
+        assert isinstance(a, np.ndarray)
+        assert isinstance(b, np.ndarray)
+        assert a.ndim == b.ndim
+        assert all(a.shape[d]==b.shape[d] for d in range(a.ndim))
+
+    # Input data types to test
+    N1 = np.random.randn(5)
+    N2 = np.random.randn(5, 1)
+    D = pd.DataFrame(np.random.randn(5, 1))
+    S = pd.Series(np.random.randn(5))
+    T = tf.random.normal([5])
+    T2 = tf.random.normal([5, 1])
+
+    # Test different combinations
+    func(N1, N2)
+    func(N1, D)
+    func(N1, S)
+    func(N1, T)
+    func(N1, T2)
+
+    func(N2, N1)
+    func(N2, D)
+    func(N2, S)
+    func(N2, T)
+    func(N2, T2)
+
+    func(D, N1)
+    func(D, N2)
+    func(D, S)
+    func(D, T)
+    func(D, T2)
+
+    func(S, N1)
+    func(S, N2)
+    func(S, D)
+    func(S, T)
+    func(S, T2)
+
+    func(T, N1)
+    func(T, N2)
+    func(T, D)
+    func(T, S)
+    func(T, T2)
+
+    func(T2, N1)
+    func(T2, N2)
+    func(T2, D)
+    func(T2, S)
+    func(T2, T)
 
 
 
