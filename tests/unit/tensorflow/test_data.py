@@ -65,8 +65,8 @@ def test_DataGenerator():
     dg.shuffle = True
     dg.on_epoch_end()
     x2, y2 = dg[0]
-    assert np.all(x1!=x2)
-    assert np.all(y1!=y2)
+    assert np.sum(x1==x2) < 10
+    assert np.sum(y1==y2) < 10
     
     # should be able to iterate over batches
     i = 0
@@ -124,8 +124,3 @@ def test_DataGenerator():
     x2, y2 = dg[0]
     assert np.all(x1.values==x2.values)
     assert np.all(y1.values==y2.values)
-    dg.shuffle = True
-    dg.on_epoch_end()
-    x2, y2 = dg[0]
-    assert np.all(x1.values!=x2.values)
-    assert np.all(y1.values!=y2.values)
