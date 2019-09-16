@@ -5,6 +5,7 @@
 import pytest
 
 import numpy as np
+import pandas as pd
 
 from probflow.data import *
 
@@ -12,6 +13,22 @@ from probflow.data import *
 
 def test_DataGenerator():
     """Tests probflow.data.DataGenerator"""
+
+    # Should error with invalid args
+    with pytest.raises(TypeError):
+        dg = DataGenerator(x='lala')
+    with pytest.raises(TypeError):
+        dg = DataGenerator(y='lala')
+    with pytest.raises(TypeError):
+        dg = DataGenerator(batch_size=1.1)
+    with pytest.raises(ValueError):
+        dg = DataGenerator(batch_size=-1)
+    with pytest.raises(TypeError):
+        dg = DataGenerator(shuffle=1.1)
+    with pytest.raises(TypeError):
+        dg = DataGenerator(test=1.1)
+    with pytest.raises(ValueError):
+        dg = DataGenerator(x=np.ones(3), y=np.ones(4))
 
     # Create some data
     x = np.random.randn(100, 3)
@@ -79,3 +96,36 @@ def test_DataGenerator():
         assert yy.shape[0] == 5
         assert yy.shape[1] == 3
 
+    # should be able to make an empty generator
+    dg = DataGenerator()
+    for xx, yy in dg:
+        assert xx is None
+        assert yy is None
+
+    # should handle pandas dataframes
+    x = np.random.randn(100, 3)
+    w = np.random.randn(3, 1)
+    b = np.random.randn()
+    y = x @ w + b
+    x = pd.DataFrame(x)
+    y = pd.Series(y[:, 0])
+    
+    dg = DataGenerator(x, y, batch_size=5)
+    assert dg.n_samples == 100
+    assert dg.batch_size == 5
+    assert dg.shuffle == False
+    assert len(dg) == 20
+    x1, y1 = dg[0]
+    assert isinstance(x1, pd.DataFrame)
+    assert isinstance(y1, pd.Series)
+    assert x1.shape[0] == 5
+    assert x1.shape[1] == 3
+    assert y1.shape[0] == 5
+    x2, y2 = dg[0]
+    assert np.all(x1.values==x2.values)
+    assert np.all(y1.values==y2.values)
+    dg.shuffle = True
+    dg.on_epoch_end()
+    x2, y2 = dg[0]
+    assert np.all(x1.values!=x2.values)
+    assert np.all(y1.values!=y2.values)

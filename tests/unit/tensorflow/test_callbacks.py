@@ -64,10 +64,16 @@ def test_Callback():
     assert isinstance(lrs.learning_rate, list)
     assert len(lrs.learning_rate) == 10
 
+    # should error w/ invalid args
+    with pytest.raises(TypeError):
+        lrs = LearningRateScheduler('lala')
+    with pytest.raises(TypeError):
+        lrs = LearningRateScheduler(lambda x: 'lala')
+
     # Test MontiorMetric
     x_val = np.random.randn(100).astype('float32')
     y_val = -x_val + 1
-    mm = MonitorMetric('mae', x_val, y_val, verbose=False)
+    mm = MonitorMetric('mae', x_val, y_val, verbose=True)
     my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[mm])
     assert isinstance(mm.current_epoch, int)
     assert mm.current_epoch == 10
@@ -95,6 +101,14 @@ def test_Callback():
     my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[es])
     assert isinstance(es.count, int)
     assert es.count == 6
+
+    # should error w/ invalid args
+    with pytest.raises(TypeError):
+        es = EarlyStopping(lambda: 3, patience=1.1)
+    with pytest.raises(ValueError):
+        es = EarlyStopping(lambda: 3, patience=-1)
+    with pytest.raises(TypeError):
+        es = EarlyStopping('lala')
 
     # Test multiple callbacks at the same time
     mp = MonitorParameter(x_val, y_val, params='Weight')

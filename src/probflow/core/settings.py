@@ -50,6 +50,8 @@ variational distributions while inside the context manager.
 __all__ = [
     'get_backend',
     'set_backend',
+    'get_datatype',
+    'set_datatype',
     'get_samples',
     'set_samples',
     'get_flipout',
@@ -121,12 +123,14 @@ def get_datatype():
 def set_datatype(datatype):
     """Set the datatype to use for Tensors"""
     if get_backend() == 'pytorch':
-        if isinstance(datatype, torch.dtype):
+        import torch
+        if datatype is None or isinstance(datatype, torch.dtype):
             __SETTINGS__._DATATYPE = datatype
         else:
             raise TypeError('datatype must be a torch.dtype')
     else:
-        if isinstance(datatype, tf.dtypes.DType):
+        import tensorflow as tf
+        if datatype is None or isinstance(datatype, tf.dtypes.DType):
             __SETTINGS__._DATATYPE = datatype
         else:
             raise TypeError('datatype must be a tf.dtypes.DType')

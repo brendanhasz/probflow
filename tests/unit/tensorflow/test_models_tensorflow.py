@@ -56,6 +56,10 @@ def test_Model_0D():
     my_model.set_learning_rate(lr+1.0)
     assert lr != my_model._learning_rate
 
+    # but error w/ wrong type
+    with pytest.raises(TypeError):
+        my_model.set_learning_rate('asdf')
+
     # predictive samples
     samples = my_model.predictive_sample(x[:30], n=50)
     assert isinstance(samples, np.ndarray)

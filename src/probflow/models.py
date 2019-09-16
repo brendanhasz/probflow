@@ -276,7 +276,7 @@ class Model(Module):
     def set_learning_rate(self, lr):
         """Set the learning rate used by this model's optimizer"""
         if not isinstance(lr, float):
-            raise ValueError('lr must be a float')
+            raise TypeError('lr must be a float')
         else:
             self._learning_rate = lr
 
