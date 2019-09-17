@@ -32,6 +32,7 @@ Discrete Distributions
 __all__ = [
     'Deterministic',
     'Normal',
+    'MultivariateNormal',
     'StudentT',
     'Cauchy',
     'Gamma',
@@ -41,6 +42,7 @@ __all__ = [
     'OneHotCategorical',
     'Poisson',
     'Dirichlet',
+    'Mixture',
 ]
 
 
@@ -176,6 +178,78 @@ class Normal(BaseDistribution):
         else:
             from tensorflow_probability import distributions as tfd
             return tfd.Normal(self.loc, self.scale)
+
+
+
+class MultivariateNormal(BaseDistribution):
+    r"""The multivariate Normal distribution.
+
+    The 
+    `multivariate normal distribution <https://en.wikipedia.org/wiki/Multivariate_normal_distribution>`_
+    is a continuous distribution in :math:`d`-dimensional space, and has two
+    parameters: 
+
+    - a location vector (``loc`` or :math:`\boldsymbol{\mu} \in \mathbb{R}^d`)
+      which determines the mean of the distribution, and 
+    - a covariance matrix (``scale`` or 
+      :math:`\boldsymbol{\Sigma} \in \mathbb{R}^{d \times d}_{>0}`) which
+      determines the spread and covariance of the distribution.
+
+    A random variable :math:`\mathbf{x} \in \mathbb{R}^d` drawn from a 
+    multivariate normal distribution
+
+    .. math::
+
+        \mathbf{x} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})
+
+    has probability
+
+    .. math::
+
+        p(\mathbf{x}) = (2\pi)^{-\frac{d}{2}}
+            \det(\boldsymbol{\Sigma})^{-\frac{1}{2}}
+            \exp \left( 
+                -\frac{1}{2}
+                (\mathbf{x}-\boldsymbol{\mu})^\top
+                \boldsymbol{\Sigma}^{-1}
+                (\mathbf{x}-\boldsymbol{\mu})
+            \right)
+
+    TODO: example image of the distribution
+
+
+    Parameters
+    ----------
+    loc : |ndarray|, or Tensor
+        Mean of the multivariate normal distribution 
+        (:math:`\boldsymbol{\mu}`).
+    cov : |ndarray|, or Tensor
+        Covariance matrix of the multivariate normal distribution 
+        (:math:`\boldsymbol{\Sigma}`).
+    """
+
+
+    def __init__(self, loc, cov):
+
+        # Check input
+        _ensure_tensor_like(loc, 'loc')
+        _ensure_tensor_like(cov, 'cov')
+
+        # Store args
+        self.loc = loc
+        self.cov = cov
+
+
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        if get_backend() == 'pytorch':
+            import torch.distributions as tod
+            raise NotImplementedError
+        else:
+            import tensorflow as tf
+            from tensorflow_probability import distributions as tfd
+            tril = tf.linalg.cholesky(self.cov)
+            return tfd.MultivariateNormalTriL(loc=self.loc, scale_tril=tril)
 
 
 
@@ -740,3 +814,50 @@ class Dirichlet(BaseDistribution):
         else:
             from tensorflow_probability import distributions as tfd
             return tfd.Dirichlet(self.concentration) 
+
+
+
+class Mixture(BaseDistribution):
+    r"""A mixture distribution.
+
+    TODO
+
+    TODO: example image of the distribution w/ 2 gaussians
+
+
+    Parameters
+    ----------
+    concentration : |ndarray|, or Tensor
+        Concentration parameter of the Dirichlet distribution (:math:`\alpha`).
+    """
+
+    def __init__(self, weights, distributions, weight_type='logits'):
+
+        # Check input
+        _ensure_tensor_like(weights, 'weights')
+        if not isinstance(weight_type, str):
+            raise TypeError('weight_type must be a str')
+        if weight_type not in ['logits', 'probs']:
+            raise ValueError('weight_type must be ''logits'' or ''probs''')
+
+        # Store args
+        self.weights = weights
+        self.distributions = distributions
+        self.weight_type = weight_type
+
+
+    def __call__(self):
+        """Get the distribution object from the backend"""
+        if get_backend() == 'pytorch':
+            import torch.distributions as tod
+            raise NotImplementedError
+        else:
+            from tensorflow_probability import distributions as tfd
+
+            # Convert to tensorflow distributions if probflow distributions
+            if isinstance(self.distributions, BaseDistribution):
+                self.distributions = self.distributions()
+
+            # Return TFP distribution object
+            return tfd.MixtureSameFamily(tfd.Categorical(self.weights),
+                               self.distributions) 

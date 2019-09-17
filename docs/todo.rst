@@ -10,7 +10,8 @@ are totally welcome!
 Backlog
 -------
 
-* Model evaluation methods (ones to be used in sreadme)
+* Add HiddenMarkovModel and GaussianProcess distributions + examples
+* Model evaluation methods (ones to be used in readme)
 * Make model evaluation methods (predictive_sample, etc) handle generative models (x or y is None)
 * Tests for those
 * README / index

@@ -29,13 +29,12 @@ class BaseDistribution(ABC):
 
     @abstractmethod
     def __init__(self, *args):
-        pass
+        """Initialize the distribution"""
 
 
     @abstractmethod
     def __call__(self):
         """Get the distribution object from the backend"""
-        pass
 
 
     def prob(self, y):
@@ -82,20 +81,18 @@ class BaseParameter(ABC):
 
     @abstractmethod
     def __init__(self, *args):
-        pass
+        """Initialize the parameter"""
 
 
     @abstractmethod
     def __call__(self):
         """Return a sample from or the MAP estimate of this parameter."""
-        pass
 
 
     @abstractmethod
     def kl_loss(self):
         """Compute the sum of the Kullback–Leibler divergences between this
         parameter's priors and its variational posteriors."""
-        pass
 
 
     @abstractmethod
@@ -120,13 +117,11 @@ class BaseModule(ABC):
     @abstractmethod
     def __init__(self, *args):
         """Initialize the module (abstract method)"""
-        pass
 
 
     @abstractmethod
     def __call__(self):
         """Perform forward pass (abstract method)"""
-        pass
 
 
 
@@ -136,21 +131,19 @@ class BaseDataGenerator(ABC):
 
     @abstractmethod
     def __init__(self, *args):
-        pass
+        """Initialize the data generator"""
 
 
     @property
     @abstractmethod
     def n_samples(self):
         """Number of samples in the dataset"""
-        pass
 
 
     @property
     @abstractmethod
     def batch_size(self):
         """Number of samples per batch"""
-        pass
 
 
     def __len__(self):
@@ -161,7 +154,6 @@ class BaseDataGenerator(ABC):
     @abstractmethod
     def __getitem__(self, index):
         """Generate one batch of data"""
-        pass
 
 
     def __iter__(self):
@@ -181,7 +173,6 @@ class BaseDataGenerator(ABC):
 
     def on_epoch_end(self):
         """Will be called at the end of each training epoch"""
-        pass
 
 
 
@@ -195,16 +186,14 @@ class BaseCallback(ABC):
 
     @abstractmethod
     def __init__(self, *args):
-        pass
+        """Initialize the callback"""
 
 
     @abstractmethod
     def on_epoch_end(self):
         """Will be called at the end of each training epoch"""
-        pass
 
 
     @abstractmethod
     def on_train_end(self):
         """Will be called at the end of training"""
-        pass

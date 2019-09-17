@@ -98,6 +98,49 @@ def test_Normal():
 
 
 
+def test_MultivariateNormal():
+    """Tests the MultivariateNormal distribution"""
+
+    # Create the distribution
+    loc = tf.constant([1., 2.])
+    cov = tf.constant([[1., 0.], [0., 1.]])
+    dist = pfd.MultivariateNormal(loc, cov)
+
+
+    # But only with Tensor-like objs
+    with pytest.raises(TypeError):
+        dist = pfd.MultivariateNormal('loc', cov)
+    with pytest.raises(TypeError):
+        dist = pfd.MultivariateNormal(loc, 'cov')
+
+    # Call should return backend obj
+    assert isinstance(dist(), tfd.MultivariateNormalTriL)
+
+    # Test methods
+    prob1 = dist.prob([1., 2.])
+    prob2 = dist.prob([0., 2.])
+    prob3 = dist.prob([0., 3.])
+    assert prob1 > prob2
+    assert prob2 > prob3
+    prob1 = dist.log_prob([1., 2.])
+    prob2 = dist.log_prob([0., 2.])
+    prob3 = dist.log_prob([0., 3.])
+    assert prob1 > prob2
+    assert prob2 > prob3
+
+    # Test sampling
+    samples = dist.sample()
+    assert isinstance(samples, tf.Tensor)
+    assert samples.ndim == 1
+    assert samples.shape[0] == 2
+    samples = dist.sample(10)
+    assert isinstance(samples, tf.Tensor)
+    assert samples.ndim == 2
+    assert samples.shape[0] == 10
+    assert samples.shape[1] == 2
+
+
+
 def test_StudentT():
     """Tests StudentT distribution"""
 
@@ -492,7 +535,6 @@ def test_Dirichlet():
     # Call should return backend obj
     assert isinstance(dist(), tfd.Dirichlet)
 
-
     # Test methods
     assert is_close(dist.prob([0, 0, 1]).numpy(), 0.0)
     assert is_close(dist.prob([0, 1, 0]).numpy(), 0.0)
@@ -546,3 +588,53 @@ def test_Dirichlet():
     assert samples.shape[0] == 10
     assert samples.shape[1] == 4
     assert samples.shape[2] == 3
+
+
+
+def test_Mixture():
+    """Tests Mixture distribution"""
+
+    # Should fail w incorrect args
+    with pytest.raises(TypeError):
+        dist = pfd.Mixture('lala', pfd.Normal([1, 2], [1, 2]))
+    with pytest.raises(TypeError):
+        dist = pfd.Mixture([1, 2], pfd.Normal([1, 2], [1, 2]),
+                           weight_type=3)
+    with pytest.raises(ValueError):
+        dist = pfd.Mixture([1, 2], pfd.Normal([1, 2], [1, 2]),
+                           weight_type='lala')
+
+
+    # Create the distribution
+    weights = tf.broadcast_to(tf.constant([0.1, 0.2, 0.7]), [5, 3])
+    rands = tf.random.normal([5, 3])
+    dists = pfd.Normal(rands, tf.exp(rands))
+    dist = pfd.Mixture(weights, dists)
+
+    # Call should return backend obj
+    assert isinstance(dist(), tfd.MixtureSameFamily)
+
+    # Test sampling
+    samples = dist.sample()
+    assert isinstance(samples, tf.Tensor)
+    assert samples.ndim == 1
+    assert samples.shape[0] == 5
+    samples = dist.sample(10)
+    assert isinstance(samples, tf.Tensor)
+    assert samples.ndim == 2
+    assert samples.shape[0] == 10
+    assert samples.shape[1] == 5
+
+    # Test methods
+
+    dist = pfd.Mixture([0.5, 0.5], pfd.Normal([-1., 1.], [1e-3, 1e-3]))
+    probs = dist.prob([-1., 1.])
+    assert is_close(probs[0]/probs[1], 1.0)
+
+    dist = pfd.Mixture([np.log(0.8), np.log(0.2)], pfd.Normal([-1., 1.], [1e-3, 1e-3]))
+    probs = dist.prob([-1., 1.])
+    assert is_close(probs[0]/probs[1], 4.0)
+
+    dist = pfd.Mixture([np.log(0.1), np.log(0.9)], pfd.Normal([-1., 1.], [1e-3, 1e-3]))
+    probs = dist.prob([-1., 1.])
+    assert is_close(probs[0]/probs[1], 1.0/9.0)

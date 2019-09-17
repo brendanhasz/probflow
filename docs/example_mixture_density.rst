@@ -6,7 +6,7 @@ Mixture Density Network
 .. include:: macros.hrst
 
 
-TODO: Need to implement a Mixture Distribution first!
+TODO: update this to match actual implementation of Mixture dist
 
 .. code-block:: python3
 
@@ -23,6 +23,6 @@ TODO: Need to implement a Mixture Distribution first!
             preds = [[h(x) for h in head] for head in self.heads]
             dists = [pf.Normal(preds[0][k], preds[1][k]) for k in range(self.k)]
             weights = tf.concat(preds[2], -1)
-            return pf.Mixture(dists, weights)
+            return pf.Mixture(weights, dists)
 
 TODO: cite Christopher M. Bishop, Mixture density networks, 1994
