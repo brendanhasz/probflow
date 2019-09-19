@@ -31,13 +31,13 @@ It's very much still a work in progress.
 Getting Started
 ---------------
 
-**ProbFlow** allows you to quickly and painlessly build, fit, and evaluate custom Bayesian models (or `ready-made <http://probflow.readthedocs.io/en/latest/ug_applications.html>`_ ones!) which run on top of `TensorFlow <http://www.tensorflow.org/>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability>`_ or `PyTorch <http://pytorch.org>`_.
+**ProbFlow** allows you to quickly and painlessly build, fit, and evaluate custom Bayesian models (or `ready-made <http://probflow.readthedocs.io/en/latest/ug_applications.html>`_ ones!) which run on top of `TensorFlow 2.0 <http://www.tensorflow.org/beta>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability>`_ or `PyTorch <http://pytorch.org>`_.
 
 With ProbFlow, the core building blocks of a Bayesian model are parameters, probability distributions, and modules (and, of course, the input data).  Parameters define how the independent variables (the features) predict the probability distribution of the dependent variables (the target).
 
 For example, a simple Bayesian linear regression
 
-.. image:: docs/img/readme/regression_equation.svg
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/readme/regression_equation.svg?sanitize=true
    :width: 30 %
    :align: center
 
@@ -79,7 +79,7 @@ Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
     model.pred_dist_plot(x_test, ci=0.95)
 
-.. image:: docs/img/readme/pred_dist.svg
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/readme/pred_dist.svg?sanitize=true
    :width: 90 %
    :align: center
 
@@ -95,7 +95,7 @@ Inspect the posterior distributions of your fit model's parameters, with 95% con
 
     model.posterior_plot(ci=0.95)
 
-.. image:: docs/img/readme/posteriors.svg
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/readme/posteriors.svg?sanitize=true
    :width: 90 %
    :align: center
 
@@ -111,11 +111,11 @@ and diagnose *where* your model is having problems capturing uncertainty:
 
     model.coverage_by(ci=0.95)
 
-.. image:: docs/img/readme/coverage.svg
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/readme/coverage.svg?sanitize=true
    :width: 90 %
    :align: center
 
-ProbFlow also provides more complex layers, such as those required for building Bayesian neural networks.  Also, ProbFlow lets you mix and match ProbFlow objects with TensorFlow objects and operations.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
+ProbFlow also provides more complex layers, such as those required for building Bayesian neural networks.  Also, ProbFlow lets you mix and match ProbFlow objects with TensorFlow (or PyTorch!) objects and operations.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
 
 .. code-block:: python
 
@@ -159,7 +159,7 @@ Using parameters and distributions as simple building blocks, ProbFlow allows fo
 Installation
 ------------
 
-Before installing ProbFlow, you'll first need to install either `PyTorch <https://pytorch.org/>`_, or `TensorFlow 2.0 <https://www.tensorflow.org/install/pip>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability/install>`_.  Note that currently you'll need the nightly build of TFP to work with TF 2.0.  PyTorch, TensorFlow, and TensorFlow Probability are not included in ProbFlow's `requirements.txt` file, so that you can choose which you want to use (and whether to use the GPU or CPU versions).
+Before installing ProbFlow, you'll first need to install either PyTorch, or TensorFlow 2.0 and TensorFlow Probability.  See `more details here <https://probflow.readthedocs.io/en/latest/#installation>`_.
 
 Then, you can install ProbFlow itself from the GitHub source:
 

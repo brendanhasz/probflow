@@ -198,7 +198,28 @@ Using parameters and distributions as simple building blocks, ProbFlow allows fo
 Installation
 ------------
 
-Before installing ProbFlow, you'll first need to install either `PyTorch <https://pytorch.org/>`_, or `TensorFlow 2.0 <https://www.tensorflow.org/install/pip>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability/install>`_.  Note that currently you'll need the nightly build of TFP to work with TF 2.0.  PyTorch, TensorFlow, and TensorFlow Probability are not included in ProbFlow's `requirements.txt` file, so that you can choose which you want to use (and whether to use the GPU or CPU versions).
+Before installing ProbFlow, you'll first need to install either `PyTorch <https://pytorch.org/>`_, or `TensorFlow 2.0 <https://www.tensorflow.org/install/pip>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability/install>`_.
+
+.. tabs::
+
+    .. tab:: PyTorch
+
+        .. code-block:: bash
+            
+            pip install torch
+
+    .. tab:: TensorFlow CPU
+
+        .. code-block:: bash
+            
+            pip install tensorflow==2.0.0-rc1 tensorflow-probability==0.8.0rc0
+
+    .. tab:: TensorFlow GPU
+
+        .. code-block:: bash
+            
+            pip install tensorflow-gpu==2.0.0-rc1 tensorflow-probability==0.8.0rc0
+
 
 Then, you can install ProbFlow itself from the GitHub source:
 
