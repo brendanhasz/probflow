@@ -22,52 +22,63 @@ TODO: logistic regression...
 
 TODO: diagram
 
-.. code-block:: python
+TODO: generate some data
 
-    from probflow import Input, Parameter, Dot, Bernoulli
+TODO: create the model via the subclassing api
 
-    features = Input()
-    weights = Parameter(shape=5)
-    bias = Parameter()
+.. code-block:: python3
 
-    logits = Dot(features, weights) + bias
-    model = Bernoulli(logits)
+    import probflow as pf
+
+    class LogisticRegression(pf.Model):
+
+        def __init__(self, dims):
+            self.w = pf.Parameter([dims, 1])
+            self.b = pf.Parameter()
+
+        def __call__(self, x):
+            return pf.Bernoulli(x @ self.w() + self.b())
+
+By default, the :class:`.Bernoulli` distribution treats its inputs as logits (that is, it passes the inputs through a sigmoid function to get the output class probabilities).  To force it to treat the inputs as raw probability values, use the ``probs`` keyword argument:
+
+.. code-block:: python3
+
+    pf.Bernoulli(probs=x @ self.w() + self.b())
+
+TODO: initialize and fit
+
+.. code-block:: python3
+
+    model = LogisticRegression()
     model.fit(x, y)
 
-By default, the :class:`.Bernoulli` distribution treats its inputs as logits (that is, it passes the inputs through a sigmoid function to get the output class probabilities).  To force it to treat the inputs as raw probability values, use the ``input_type`` keyword argument:
-
-.. code-block:: python
-
-    from probflow import Sigmoid
-
-    probs = Sigmoid(logits)
-    model = Bernoulli(probs, input_type='probs')
-    model.fit(x, y)
+TODO: look at model criticism for a categorical model
 
 
 Using the Dense Layer
 ---------------------
 
-TODO: with Dense (which automatically uses x as input if none is specified, default number of units is 1):
+TODO: can do the same thing with Dense:
 
-.. code-block:: python
+.. code-block:: python3
 
-    from probflow import Dense, Bernoulli
+    class LogisticRegression(pf.Model):
 
-    logits = Dense()
-    model = Bernoulli(logits)
-    model.fit(x, y)
+        def __init__(self, dims):
+            self.layer = pf.Dense(dims, 1)
+
+        def __call__(self, x):
+            return pf.Bernoulli(self.layer(x))
 
 
 Using the LogisticRegression Model
 ----------------------------------
 
-TODO: with ready-made model:
+TODO: and can just use the ready-made model:
 
-.. code-block:: python
+.. code-block:: python3
 
-    from probflow import LogisticRegression
-
-    model = LogisticRegression()
+    model = pf.LogisticRegression()
     model.fit(x, y)
 
+TODO: how to access params from w/i the model

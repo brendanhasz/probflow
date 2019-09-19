@@ -9,51 +9,57 @@ Batch Normalization
 TODO: intro, math, diagram
 
 
-Batch normalization can be performed using the :class:`.BatchNormalization` class.  For example, to add batch normalization to the dense neural network from the :ref:`previous example <example_fully_connected>`:
+Batch normalization can be performed using the :class:`.BatchNormalization` 
+Module.  For example, to add batch normalization to the dense neural network
+from the :ref:`previous example <example_fully_connected>`:
 
-.. code-block:: python
+.. tabs::
 
-    from probflow import Sequential, Dense, BatchNormalization, ScaleParameter, Normal
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
 
-    predictions = Sequential(layers=[
-        Dense(units=128),
-        BatchNormalization(),
-        Relu(),
-        Dense(units=64),
-        BatchNormalization(),
-        Relu(),
-        Dense(units=1)
-    ])
-    noise_std = ScaleParameter()
-    model = Normal(predictions, noise_std)
-    model.fit(x, y)
+            import probflow as pf
+            import tensorflow as tf
 
+            class DenseRegression(pf.Model):
+                
+                def __init__(self):
+                    self.net = pf.Sequential([
+                        pf.Dense(5, 128),
+                        pf.BatchNormalization(128),
+                        tf.nn.relu,
+                        pf.Dense(128, 64),
+                        pf.BatchNormalization(64),
+                        tf.nn.relu,
+                        pf.Dense(64, 1),
+                    ])
+                    self.s = pf.ScaleParameter()
 
-Batch normalization can also be automatically inserted into several ready-made models.  The :func:`.DenseNet`, :func:`.DenseRegression`, and :func:`.DenseClassifier` models take a ``batch_norm`` keyword argument which specifies whether to insert batch normalization layers between each dense layer.  The network with batch normalization in the example above could have been created using :class:`.DenseNet`:
+                def __call__(self, x):
+                    return pf.Normal(self.net(x), self.s())
 
-.. code-block:: python
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
 
-    from probflow import DenseNet, ScaleParameter, Normal
+            import probflow as pf
+            import torch
 
-    predictions = DenseNet(units=[128, 64, 1], batch_norm=True)
-    noise_std = ScaleParameter()
-    model = Normal(predictions, noise_std)
-    model.fit(x, y)
+            class DenseRegression(pf.Model):
+                
+                def __init__(self):
+                    self.net = pf.Sequential([
+                        pf.Dense(5, 128),
+                        pf.BatchNormalization(128),
+                        torch.nn.ReLU(),
+                        pf.Dense(128, 64),
+                        pf.BatchNormalization(64),
+                        torch.nn.ReLU(),
+                        pf.Dense(64, 1),
+                    ])
+                    self.s = pf.ScaleParameter()
 
-:class:`.DenseRegression` works in the same way:
+                def __call__(self, x):
+                    return pf.Normal(self.net(x), self.s())
 
-.. code-block:: python
-
-    from probflow import DenseRegression
-
-    model = DenseRegression(units=[128, 64, 1], batch_norm=True)
-    model.fit(x, y)
-
-As does :class:`.DenseClassifier`:
-
-.. code-block:: python
-
-    from probflow import DenseClassifier
-
-    model = DenseClassifier(units=[128, 64, 1], batch_norm=True)
-    model.fit(x, y)

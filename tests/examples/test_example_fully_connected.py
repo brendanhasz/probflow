@@ -1,76 +1,103 @@
 """Tests examples in example_fully_connected"""
 
 
+
 import numpy as np
 import tensorflow as tf
 
-from probflow import Input, Parameter, ScaleParameter
-from probflow import Reshape, Relu, Matmul, Dot
-from probflow import Normal
-
-
-def test_fully_connected_manual():
-    """Tests example in example_fully_connected/Manually"""
-
-    # Input (D dimensions)
-    D = 3
-    features = Reshape(Input(), shape=[D, 1])
-
-    # First layer
-    weights1 = Parameter(shape=[128, D])
-    bias1 = Parameter(shape=128)
-    layer1 = Relu(Matmul(weights1, features) + bias1)
-
-    # Second layer
-    weights2 = Parameter(shape=[64, 128])
-    bias2 = Parameter(shape=64)
-    layer2 = Relu(Matmul(weights2, layer1) + bias2)
-
-    # Last layer
-    weights3 = Parameter(shape=64)
-    bias3 = Parameter()
-    predictions = Dot(weights3, Reshape(layer2)) + bias3
-
-    # Observation distribution
-    noise_std = ScaleParameter()
-    model = Normal(predictions, noise_std)
-
-    # Dummy data
-    N = 10
-    x = np.random.randn(N, D)
-    y = np.random.randn(N)
-    model.fit(x, y, epochs=3)
+import probflow as pf
 
 
 
-def test_fully_connected_manual_matmul_operator():
-    """Tests example in example_fully_connected/Manually w/ matmul operator"""
+def test_example_fully_connected_manually():
+    """Tests example_fully_connected#manually"""
 
-    # Input (D dimensions)
-    D = 3
-    features = Reshape(Input(), shape=[D, 1])
+    # TODO: generate data
 
-    # First layer
-    weights1 = Parameter(shape=[128, D])
-    bias1 = Parameter(shape=128)
-    layer1 = Relu(weights1@features + bias1)
+    class DenseLayer(pf.Module):
 
-    # Second layer
-    weights2 = Parameter(shape=[64, 128])
-    bias2 = Parameter(shape=64)
-    layer2 = Relu(weights2@layer1 + bias2)
+        def __init__(self, d_in, d_out):
+            self.w = pf.Parameter([d_in, d_out])
+            self.b = pf.Parameter([d_out, 1])
 
-    # Last layer
-    weights3 = Parameter(shape=[1, 64])
-    bias3 = Parameter()
-    predictions = weights3@layer2 + bias3
+        def __call__(self, x):
+            return x @ self.w() + self.b()
 
-    # Observation distribution
-    noise_std = ScaleParameter()
-    model = Normal(predictions, noise_std)
 
-    # Dummy data
-    N = 10
-    x = np.random.randn(N, D)
-    y = np.random.randn(N)
-    model.fit(x, y, epochs=3)
+    class DenseNetwork(pf.Module):
+        
+        def __init__(self, dims):
+            Nl = len(dims)-1
+            self.layers = [DenseLayer(dims[i], dims[i+1]) for i in range(Nl)]
+            self.activations = [tf.nn.relu for i in range(Nl)]
+            self.activations[-1] = lambda x: x
+
+
+        def __call__(self, x):
+            for i in range(len(self.layers)):
+                x = self.layers[i](x)
+                x = self.activations[i](x)
+            return x
+
+
+    class DenseRegression(pf.Model):
+        
+        def __init__(self, dims):
+            self.net = DenseNetwork(dims)
+            self.s = pf.ScaleParameter()
+
+        def __call__(self, x):
+            return pf.Normal(self.net(x), self.s())
+
+
+    # Create and fit the model
+    model = DenseRegression([5, 128, 64, 1])
+    model.fit(x, y)
+
+
+
+def test_example_fully_connected_modules():
+    """Tests example_fully_connected using Modules"""
+
+    # TODO: generate data
+
+    class DenseRegression(pf.Model):
+        
+        def __init__(self):
+            self.net = pf.Sequential([
+                pf.Dense(5, 128),
+                tf.nn.relu,
+                pf.Dense(128, 64),
+                tf.nn.relu,
+                pf.Dense(64, 1),
+            ])
+            self.s = pf.ScaleParameter()
+
+        def __call__(self, x):
+            return pf.Normal(self.net(x), self.s())
+
+    # Create and fit the model
+    model = DenseRegression([5, 128, 64, 1])
+    model.fit(x, y)
+
+
+
+def test_example_fully_connected_DenseRegression():
+    """Tests example_fully_connected using DenseRegression"""
+
+    # TODO: generate data
+
+    # Create and fit the model
+    model = pf.DenseRegression([5, 128, 64, 1])
+    model.fit(x, y)
+
+
+
+def test_example_fully_connected_DenseClassifier():
+    """Tests example_fully_connected using DenseClassifier"""
+
+    # TODO: generate data
+
+    # Create and fit the model
+    model = pf.DenseClassifier([5, 128, 64, 1])
+    model.fit(x, y)

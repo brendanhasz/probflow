@@ -1,68 +1,189 @@
 .. _example_nmf:
 
 Neural Matrix Factorization
----------------------------
+===========================
 
 .. include:: macros.hrst
 
 
 TODO: description...
 
-TODO: for a vanilla matrix factorization
+Matrix Factorization
+--------------------
 
-.. code-block:: python
+TODO: for a vanilla matrix factorization, description, diagram, math
+(with binary interactions)
 
-    from probflow import *
+.. tabs::
+
+    .. group-tab:: TensorFlow
+
+        .. code-block:: python3
+
+            import probflow as pf
+            import tensorflow as tf
+
+            class MatrixFactorization(pf.Model):
+
+                def __init__(self, Nu, Ni, Nd):
+                    self.user_emb = pf.Embedding(Nu, Nd)
+                    self.item_emb = pf.Embedding(Ni, Nd)
+
+                def __call__(self, x):
+                    user_vec = self.user_emb(x['user_id'])
+                    item_vec = self.item_emb(x['item_id'])
+                    logits = user_vec @ tf.transpose(item_vec)
+                    return pf.Bernoulli(logits)
+
+    .. group-tab:: PyTorch
+
+        .. code-block:: python3
+
+            import probflow as pf
+            import torch
+
+            class MatrixFactorization(pf.Model):
+
+                def __init__(self, Nu, Ni, Nd):
+                    self.user_emb = pf.Embedding(Nu, Nd)
+                    self.item_emb = pf.Embedding(Ni, Nd)
+
+                def __call__(self, x):
+                    user_vec = self.user_emb(x['user_id'])
+                    item_vec = self.item_emb(x['item_id'])
+                    logits = user_vec @ torch.t(item_vec)
+                    return pf.Bernoulli(logits)
+
+
+TODO: Then can instantiate the model
+
+.. code-block:: python3
 
     #df = DataFrame w/ 3 columns: 'user_id', 'item_id', and 'rating'
+    Nu = df['user_id'].nunique() #number of users
+    Ni = df['item_id'].nunique() #number of items
+    Nd = 50 #number of embedding dimensions
+    model = MatrixFactorization(Nu, Ni, Nd)
 
-    # User and item IDs
-    users = Input('user_id')
-    items = Input('item_id')
+TODO: Then fit it;
 
-    # Matrix Factorization
-    user_vec = Embedding(users, dims=50)
-    item_vec = Embedding(items, dims=50)
-    predictions = Dot(user_vec, item_vec)
-    error = ScaleParameter()
+.. code-block:: python3
 
-    # Fit a model w/ normally-distibuted error
-    model = Normal(predictions, error)
     model.fit(df[['user_id', 'item_id']], df['rating'])
+
+
+Neural Collaborative Filtering
+------------------------------
+
+TODO: description, diagram, math
+TODO: cite https://arxiv.org/abs/1708.05031
+
+.. tabs::
+
+    .. group-tab:: TensorFlow
+
+        .. code-block:: python3
+
+            class MatrixFactorization(pf.Model):
+
+                def __init__(self, Nu, Ni, Nd, dims):
+                    self.user_emb = pf.Embedding(Nu, Nd)
+                    self.item_emb = pf.Embedding(Ni, Nd)
+                    self.net = pf.DenseNetwork(dims)
+
+                def __call__(self, x):
+                    user_vec = self.user_emb(x['user_id'])
+                    item_vec = self.item_emb(x['item_id'])
+                    logits = self.net(tf.concat([user_vec, item_vec], axis=1))
+                    return pf.Bernoulli(logits)
+
+    .. group-tab:: PyTorch
+
+        .. code-block:: python3
+
+            class MatrixFactorization(pf.Model):
+
+                def __init__(self, Nu, Ni, Nd, dims):
+                    self.user_emb = pf.Embedding(Nu, Nd)
+                    self.item_emb = pf.Embedding(Ni, Nd)
+                    self.net = pf.DenseNetwork(dims)
+
+                def __call__(self, x):
+                    user_vec = self.user_emb(x['user_id'])
+                    item_vec = self.item_emb(x['item_id'])
+                    logits = self.net(torch.cat([user_vec, item_vec], 1))
+                    return pf.Bernoulli(logits)
+
+
+Neural Matrix Factorization
+---------------------------
 
 or for neural matrix factorization https://arxiv.org/abs/1708.05031
 
-.. code-block:: python
+.. tabs::
 
-    from probflow import *
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
+
+            class NeuralMatrixFactorization(pf.Model):
+
+                def __init__(self, Nu, Ni, Nd, dims):
+                    self.user_mf = pf.Embedding(Nu, Nd)
+                    self.item_mf = pf.Embedding(Ni, Nd)
+                    self.user_ncf = pf.Embedding(Nu, Nd)
+                    self.item_ncf = pf.Embedding(Ni, Nd)
+                    self.net = pf.DenseNetwork(dims)
+                    self.linear = pf.Dense(dims[-1]+Nd)
+
+                def __call__(self, x):
+                    user_mf = self.user_mf(x['user_id'])
+                    item_mf = self.item_mf(x['item_id'])
+                    user_ncf = self.user_ncf(x['user_id'])
+                    item_ncf = self.item_ncf(x['item_id'])
+                    preds_mf = user_mf*item_mf
+                    preds_ncf = self.net(tf.concat([user_ncf, item_ncf], axis=1))
+                    logits = self.linear(tf.concat([preds_mf, preds_ncf], axis=1))
+                    return pf.Bernoulli(logits)
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            class NeuralMatrixFactorization(pf.Model):
+
+                def __init__(self, Nu, Ni, Nd, dims):
+                    self.user_mf = pf.Embedding(Nu, Nd)
+                    self.item_mf = pf.Embedding(Ni, Nd)
+                    self.user_ncf = pf.Embedding(Nu, Nd)
+                    self.item_ncf = pf.Embedding(Ni, Nd)
+                    self.net = pf.DenseNetwork(dims)
+                    self.linear = pf.Dense(dims[-1]+Nd)
+
+                def __call__(self, x):
+                    user_mf = self.user_mf(x['user_id'])
+                    item_mf = self.item_mf(x['item_id'])
+                    user_ncf = self.user_ncf(x['user_id'])
+                    item_ncf = self.item_ncf(x['item_id'])
+                    preds_mf = user_mf*item_mf
+                    preds_ncf = self.net(torch.cat([user_ncf, item_ncf], 1))
+                    logits = self.linear(torch.cat([preds_mf, preds_ncf], 1))
+                    return pf.Bernoulli(logits)
+
+
+TODO: Then can instantiate the model
+
+.. code-block:: python3
 
     #df = DataFrame w/ 3 columns: 'user_id', 'item_id', and 'rating'
+    Nu = df['user_id'].nunique() #number of users
+    Ni = df['item_id'].nunique() #number of items
+    Nd = 50 #number of embedding dimensions
+    dims = [Nd*2, 128, 64, 32]
+    model = NeuralMatrixFactorization(Nu, Ni, Nd, dims)
 
-    # User and item IDs
-    users = Input('user_id')
-    items = Input('item_id')
+TODO: Then fit it;
 
-    # Matrix Factorization
-    user_vec_mf = Embedding(users, dims=50)
-    item_vec_mf = Embedding(items, dims=50)
-    predictions_mf = user_vec_mf*item_vec_mf
+.. code-block:: python3
 
-    # Neural Collaborative Filtering
-    user_vec_ncf = Embedding(users, dims=50)
-    item_vec_ncf = Embedding(items, dims=50)
-    ncf_in = Cat([user_vec_ncf, item_vec_ncf])
-    predictions_ncf = DenseNet(ncf_in, units=[128, 64, 32])
-    
-    # Combine the two methods
-    predictions = Dense(Cat([predictions_mf, predictions_ncf]))
-    error = ScaleParameter()
-
-    # Fit a model w/ normally-distibuted error
-    model = Normal(predictions, error)
     model.fit(df[['user_id', 'item_id']], df['rating'])
-
-Or if you have implicit data (0 or 1 for whether the user has interacted with 
-the item), use model = Bernoulli(logits=predictions)
-
-Or if there are discrete scores (e.g. 1-10), then use a BetaBinomial 
-TODO: w/ Dense and Embedding layers, then w/ NeuralMatrixFactorization

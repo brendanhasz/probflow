@@ -26,19 +26,29 @@ TODO: diagram
    :width: 50 %
    :align: center
 
-TODO: manually (generate some data, have link to colab)
+TODO: manually (generate some data)
 
-.. code-block:: python
+TODO: talk about subclassing API
 
-    from probflow import Input, Parameter, ScaleParameter, Normal
+.. code-block:: python3
 
-    feature = Input()
-    weight = Parameter()
-    bias = Parameter()
-    noise_std = ScaleParameter()
+    import probflow as pf
 
-    predictions = weight*feature + bias
-    model = Normal(predictions, noise_std)
+    class SimpleLinearRegression(pf.Model):
+
+        def __init__(self):
+            self.w = pf.Parameter()
+            self.b = pf.Parameter()
+            self.s = pf.ScaleParameter()
+
+        def __call__(self, x):
+            return pf.Normal(x*self.w()+self.b(), self.s())
+
+TODO: initialize and fit
+
+.. code-block:: python3
+
+    model = SimpleLinearRegression()
     model.fit(x, y)
 
 TODO: look at posteriors and model criticism etc
@@ -55,38 +65,30 @@ TODO: intro to multiple linear regression
 
 TODO: diagram
 
-.. code-block:: python
+TODO: generate some data
 
-    from probflow import Input, Parameter, ScaleParameter, Dot, Normal
+TODO: again build w/ subclassing API
 
-    features = Input()
-    weights = Parameter(shape=5)
-    bias = Parameter()
-    noise_std = ScaleParameter()
+.. code-block:: python3
 
-    predictions = Dot(features, weights) + bias
-    model = Normal(predictions, noise_std)
+    class MultipleLinearRegression(pf.Model):
+
+        def __init__(self, dims):
+            self.w = pf.Parameter([dims, 1])
+            self.b = pf.Parameter()
+            self.s = pf.ScaleParameter()
+
+        def __call__(self, x):
+            return pf.Normal(x @ self.w() + self.b(), self.s())
+
+TODO: initialize and fit
+
+.. code-block:: python3
+
+    model = MultipleLinearRegression()
     model.fit(x, y)
 
 TODO: how to access each individual posterior, etc
-
-
-Using the Dense Layer
----------------------
-
-TODO: with Dense (which automatically uses x as input if none is specified, default number of units is 1):
-
-.. code-block:: python
-
-    from probflow import Dense, ScaleParameter, Normal
-
-    predictions = Dense()
-    noise_std = ScaleParameter()
-
-    model = Normal(predictions, noise_std)
-    model.fit(x, y)
-
-TODO: how to access posterior elements from within the Dense layer
 
 
 Using the LinearRegression Model
@@ -94,11 +96,9 @@ Using the LinearRegression Model
 
 TODO: with ready-made model:
 
-.. code-block:: python
+.. code-block:: python3
 
-    from probflow import LinearRegression
-
-    model = LinearRegression()
+    model = pf.LinearRegression()
     model.fit(x, y)
 
 TODO: how to access posterior elements from within the LinearRegression model

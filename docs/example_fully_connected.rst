@@ -5,10 +5,11 @@ Fully-connected Neural Network
 
 .. include:: macros.hrst
 
-
 TODO: intro, link to colab w/ these examples
 
 .. contents:: Outline
+
+TODO: this shows how to do it manually and why it's nice to use Modules as building blocks for large models.  However, it's even easier to do this using ProbFlow's Dense + Sequential modules, or the DenseRegression model, as we'll see in the following sections.
 
 
 Manually
@@ -20,114 +21,184 @@ TODO: math
 
 TODO: diagram
 
-TODO: this is a lot to do manually, below we'll see how to do it much more easily...
+First we'll make a module which represents a single fully-connected layer:
 
-Note that we're using ``@``, the 
-`infix operator for matrix multiplication <https://docs.python.org/3/whatsnew/3.5.html#whatsnew-pep-465>`_.  Though we could have also used the :class:`.Matmul` layer.
+.. code-block:: python3
 
-.. code-block:: python
+    import probflow as pf
 
-    from probflow import Input, Reshape, Relu
-    from probflow import Parameter, ScaleParameter
-    from probflow import Normal
+    class DenseLayer(pf.Module):
 
-    # Input (D dimensions)
-    D = 3
-    features = Reshape(Input(), shape=[D, 1])
+        def __init__(self, d_in, d_out):
+            self.w = pf.Parameter([d_in, d_out])
+            self.b = pf.Parameter([d_out, 1])
 
-    # First layer
-    weights1 = Parameter(shape=[128, D])
-    bias1 = Parameter(shape=128)
-    layer1 = Relu(weights1 @ features + bias1)
+        def __call__(self, x):
+            return x @ self.w() + self.b()
 
-    # Second layer
-    weights2 = Parameter(shape=[64, 128])
-    bias2 = Parameter(shape=64)
-    layer2 = Relu(weights2 @ layer1 + bias2)
+Note that we've used ``@``, the 
+`infix operator for matrix multiplication <https://docs.python.org/3/whatsnew/3.5.html#whatsnew-pep-465>`_.
 
-    # Last layer
-    weights3 = Parameter(shape=[1, 64])
-    bias3 = Parameter()
-    predictions = weights3 @ layer2 + bias3
+Having defined a single layer, it's much easier to define another |Module| which 
+stacks several of those layers, with activation functions in between each:
 
-    # Observation distribution
-    noise_std = ScaleParameter()
-    model = Normal(predictions, noise_std)
+.. tabs::
 
-    # Fit the model
-    # x is an ndarray of shape (N,D)
-    # y is an ndarray of shape (N,)
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
+
+            import tensorflow as tf
+
+            class DenseNetwork(pf.Module):
+                
+                def __init__(self, dims):
+                    Nl = len(dims)-1
+                    self.layers = [DenseLayer(dims[i], dims[i+1]) for i in range(Nl)]
+                    self.activations = [tf.nn.relu for i in range(Nl)]
+                    self.activations[-1] = lambda x: x
+
+
+                def __call__(self, x):
+                    for i in range(len(self.layers)):
+                        x = self.layers[i](x)
+                        x = self.activations[i](x)
+                    return x
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            import torch
+
+            class DenseNetwork(pf.Module):
+                
+                def __init__(self, dims):
+                    Nl = len(dims)-1
+                    self.layers = [DenseLayer(dims[i], dims[i+1]) for i in range(Nl)]
+                    self.activations = [torch.nn.ReLU() for i in range(Nl)]
+                    self.activations[-1] = lambda x: x
+
+
+                def __call__(self, x):
+                    for i in range(len(self.layers)):
+                        x = self.layers[i](x)
+                        x = self.activations[i](x)
+                    return x
+
+
+The first thing to notice here is that |Modules| can contain other |Modules|!
+This allows you to construct models using hierarchical building blocks, making
+testing and debugging of your models much easier.
+
+Also note that we've used TensorFlow code within the model!  ProbFlow lets you
+mix and match ProbFlow operations and objects with operations from the backend 
+you've selected.  |TensorFlow| is the default backend, but if we had wanted to
+use |PyTorch| (see :ref:`ug_backend`), we could have used PyTorch's relu
+function:
+
+.. code-block:: python3
+
+    import torch
+
+    ...
+    self.activations = [torch.nn.ReLU() for i in range(Nl)]
+    ...
+
+Finally, we can create a |Model| which uses the network |Module| we've just created.  This model consists of a normal distribution whose mean is predicted
+by the neural network:
+
+.. code-block:: python3
+
+    class DenseRegression(pf.Model):
+        
+        def __init__(self, dims):
+            self.net = DenseNetwork(dims)
+            self.s = pf.ScaleParameter()
+
+        def __call__(self, x):
+            return pf.Normal(self.net(x), self.s())
+
+TODO: then can fit the net
+
+.. code-block:: python3
+
+    model = DenseRegression([5, 128, 64, 1])
     model.fit(x, y)
 
 
-Using the Dense Layer
----------------------
+Using the Dense and Sequential Modules
+--------------------------------------
 
-TODO: the Dense layer automatically handles creating the parameters, performing the matrix multiplications and a additions, and applying the activation functions for you:
+TODO: the Dense module handles creating the variables for you, and the Sequential module takes a list of modules or callables and pipes the output of each into the input of the next
 
-.. code-block:: python
+.. tabs::
 
-    from probflow import Dense, ScaleParameter, Normal
+    .. group-tab:: TensorFlow
+    
+        .. code-block:: python3
 
-    layer1 = Dense(units=128, activation='relu')
-    layer2 = Dense(layer1, units=64, activation='relu')
-    predictions = Dense(layer2, units=1)
-    noise_std = ScaleParameter()
-    model = Normal(predictions, noise_std)
+            class DenseRegression(pf.Model):
+                
+                def __init__(self):
+                    self.net = pf.Sequential([
+                        pf.Dense(5, 128),
+                        tf.nn.relu,
+                        pf.Dense(128, 64),
+                        tf.nn.relu,
+                        pf.Dense(64, 1),
+                    ])
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    return pf.Normal(self.net(x), self.s())
+
+    .. group-tab:: PyTorch
+    
+        .. code-block:: python3
+
+            class DenseRegression(pf.Model):
+                
+                def __init__(self):
+                    self.net = pf.Sequential([
+                        pf.Dense(5, 128),
+                        torch.nn.ReLU(),
+                        pf.Dense(128, 64),
+                        torch.nn.ReLU(),
+                        pf.Dense(64, 1),
+                    ])
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    return pf.Normal(self.net(x), self.s())
+
+TODO: then can fit the net
+
+.. code-block:: python3
+
+    model = DenseRegression([5, 128, 64, 1])
     model.fit(x, y)
 
 
-Using the Sequential Layer
---------------------------
-
-TODO: the Sequential layer takes a list of layers and pipes the output of each into the input of the next
-
-.. code-block:: python
-
-    from probflow import Sequential, Dense, ScaleParameter, Normal
-
-    predictions = Sequential(layers=[
-        Dense(units=128, activation='relu'),
-        Dense(units=64, activation='relu'),
-        Dense(units=1)
-    ])
-    noise_std = ScaleParameter()
-    model = Normal(predictions, noise_std)
-    model.fit(x, y)
-
-
-Using the DenseNet Model
-------------------------
+Using the DenseRegression or DenseClassifier applications
+---------------------------------------------------------
 
 TODO: the DenseNet model automatically creates sequential dense layers, but NOT an observation distribution, default is relu activation but no activation for last layer
 
-.. code-block:: python
 
-    from probflow import DenseNet, ScaleParameter, Normal
+TODO: DenseRegression
 
-    predictions = DenseNet(units=[128, 64, 1])
-    noise_std = ScaleParameter()
-    model = Normal(predictions, noise_std)
+.. code-block:: python3
+
+    model = pf.DenseRegression([5, 128, 64, 1])
     model.fit(x, y)
 
 
-Using the DenseRegression and DenseClassifier Models
-----------------------------------------------------
+TODO: DenseClassifier
 
-TODO: easiest of all, the DenseRegression model adds a Normal observation dist to a DenseNet
+.. code-block:: python3
 
-.. code-block:: python
+    # TODO make dataset w/ categorical output
 
-    from probflow import DenseRegression
-
-    model = DenseRegression(units=[128, 64, 1])
-    model.fit(x, y)
-
-TODO: DenseClassifier (adds a Bernoulli observation dist):
-
-.. code-block:: python
-
-    from probflow import DenseClassifier
-
-    model = DenseClassifier(units=[128, 64, 1])
+    model = pf.DenseClassifier([5, 128, 64, 1])
     model.fit(x, y)

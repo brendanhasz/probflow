@@ -94,6 +94,10 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
         Default = use the default matplotlib color cycle
     """
 
+    # Check inputs
+    if ci<0.0 or ci>1.0:
+        raise ValueError('ci must be between 0 and 1')
+
     # If 1d make 2d
     if data.ndim == 1:
         data = np.expand_dims(data, 1)
@@ -217,8 +221,10 @@ def fill_between(xdata, lb, ub, xlabel='', ylabel='', alpha=0.3, color=None):
     ----------
     xdata : |ndarray|
         X values of points to plot.  Should be vector of length ``Nsamples``.
-    ydata : |ndarray|
-        Y vaules of points to plot.  Should be of size ``(Nsamples,...)``.
+    lb : |ndarray|
+        Lower bound of fill.  Should be of size ``(Nsamples,...)``.
+    ub : |ndarray|
+        Upper bound of fill.  Should be same size as lb.
     xlabel : str
         Label for the x axis. Default is no x axis label.
     ylabel : str
@@ -234,7 +240,7 @@ def fill_between(xdata, lb, ub, xlabel='', ylabel='', alpha=0.3, color=None):
     # Check shapes
     if not np.all(lb.shape == ub.shape):
         raise ValueError('lb and ub must have same shape')
-    if len(xdata) != lb.shape[1]:
+    if len(xdata) != lb.shape[0]:
         raise ValueError('xdata does not match shape of lb and ub')
 
     # If 1d make 2d
@@ -243,22 +249,21 @@ def fill_between(xdata, lb, ub, xlabel='', ylabel='', alpha=0.3, color=None):
         ub = np.expand_dims(ub, 1)
 
     # Number of fills and datasets
-    dims = lb.shape[2:]
+    dims = lb.shape[1:]
     Nd = int(np.prod(dims))
     Np = lb.shape[0]
 
     # Flatten if >1D
-    lb = np.reshape(lb, (lb.shape[0], lb.shape[1], Nd), order='F')
-    ub = np.reshape(ub, (ub.shape[0], ub.shape[1], Nd), order='F')
+    lb = np.reshape(lb, (lb.shape[0], Nd), order='F')
+    ub = np.reshape(ub, (ub.shape[0], Nd), order='F')
 
     # Plot the data
     for iD in range(Nd): #for each dataset,
         next_color = get_next_color(color, iD)
         lab = get_ix_label(iD, dims)
-        for iP in range(Np): #for each polygon,
-            plt.fill_between(xdata, lb[iP,:,iD], ub[iP,:,iD],
-                             alpha=alpha, facecolor=next_color, 
-                             label=lab if iP==0 else None)
+        plt.fill_between(xdata, lb[:,iD], ub[:,iD],
+                         alpha=alpha, facecolor=next_color,
+                         label=lab)
 
     # Only show the legend if there are >1 datasets
     if Nd > 1:
@@ -281,16 +286,20 @@ def centered_text(text):
 
 def plot_discrete_dist(x):
     """Plot histogram of discrete variable"""
-
-    xc = pd.Series(x.ravel()).value_counts()
+    xc = pd.Series(x.ravel()).value_counts().sort_index()
     xc = xc/xc.sum() #normalize
     plt.bar(xc.index, xc.data)
-    plt.xticks(xc.index, [str(e) for e in xc.index])
+    if len(xc.index) < 15:
+        plt.xticks(xc.index, [str(e) for e in xc.index])
+    else:
+        step = int(len(xc.index) / 7)
+        plt.xticks(xc.index[::step],
+                   [str(e) for e in xc.index[::step]])
 
 
 
 def plot_by(x, data, bins=30, func='mean', plot=True, 
-            bootstrap=100, ci=95.0, **kwargs):
+            bootstrap=100, ci=0.95, **kwargs):
     """Compute and plot some function func of data as a function of x.
 
     Parameters
@@ -318,7 +327,7 @@ def plot_by(x, data, bins=30, func='mean', plot=True,
     bootstrap : None or int > 0
         Number of bootstrap samples to use for estimating the uncertainty of 
         the true coverage.
-    ci : list of float between 0 and 100
+    ci : list of float between 0 and 1
         Bootstrapped confidence interval percentiles of coverage to show.
     **kwargs
         Additional arguments are passed to plt.plot or fill_between
@@ -342,6 +351,8 @@ def plot_by(x, data, bins=30, func='mean', plot=True,
         raise TypeError('bootstrap must be None or an int')
     if isinstance(bootstrap, int) and bootstrap < 1:
         raise ValueError('bootstrap must be > 0')
+    if ci<0.0 or ci>1.0:
+        raise ValueError('ci must be between 0 and 1')
 
     # Determine what function to use
     if callable(func):
@@ -390,11 +401,11 @@ def plot_by(x, data, bins=30, func='mean', plot=True,
 
             # Plot coverage confidence intervals
             ci = np.array(ci)
-            ci_lb = 50.0-ci/2.0
-            ci_ub = 50.0+ci/2.0
+            ci_lb = 100*(0.5-ci/2.0)
+            ci_ub = 100*(0.5+ci/2.0)
             boots = boots.values
-            prc_lb = np.percentile(boots, ci_lb, axis=1)
-            prc_ub = np.percentile(boots, ci_ub, axis=1)
+            prc_lb = np.nanpercentile(boots, ci_lb, axis=1)
+            prc_ub = np.nanpercentile(boots, ci_ub, axis=1)
             plt.fill_between(x_o, prc_lb, prc_ub,
                              alpha=0.3, facecolor=color)
 

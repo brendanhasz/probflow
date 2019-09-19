@@ -1,5 +1,5 @@
-Parameters API
-==============
+Parameters
+==========
 
 .. include:: macros.hrst
 
