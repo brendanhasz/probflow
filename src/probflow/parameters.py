@@ -503,6 +503,8 @@ class ScaleParameter(Parameter):
 
     By default, an inverse gamma prior is used:
 
+    .. math::
+
         \frac{1}{\sigma^2} \sim \text{Gamma}(5, 5)
 
 
@@ -536,7 +538,7 @@ class ScaleParameter(Parameter):
     --------
 
     Use :class:`.ScaleParameter` to create a standard deviation parameter
-    for a :class:`.Normal` distribution::
+    for a :class:`.Normal` distribution:
 
     TODO
 

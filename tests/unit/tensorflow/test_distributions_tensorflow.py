@@ -595,21 +595,20 @@ def test_Mixture():
     """Tests Mixture distribution"""
 
     # Should fail w incorrect args
-    with pytest.raises(TypeError):
-        dist = pfd.Mixture('lala', pfd.Normal([1, 2], [1, 2]))
-    with pytest.raises(TypeError):
-        dist = pfd.Mixture([1, 2], pfd.Normal([1, 2], [1, 2]),
-                           weight_type=3)
     with pytest.raises(ValueError):
-        dist = pfd.Mixture([1, 2], pfd.Normal([1, 2], [1, 2]),
-                           weight_type='lala')
-
+        dist = pfd.Mixture(pfd.Normal([1, 2], [1, 2]))
+    with pytest.raises(TypeError):
+        dist = pfd.Mixture(pfd.Normal([1, 2], [1, 2]), 'lala')
+    with pytest.raises(TypeError):
+        dist = pfd.Mixture(pfd.Normal([1, 2], [1, 2]), logits='lala')
+    with pytest.raises(TypeError):
+        dist = pfd.Mixture(pfd.Normal([1, 2], [1, 2]), probs='lala')
 
     # Create the distribution
-    weights = tf.broadcast_to(tf.constant([0.1, 0.2, 0.7]), [5, 3])
+    weights = tf.random.normal([5, 3])
     rands = tf.random.normal([5, 3])
     dists = pfd.Normal(rands, tf.exp(rands))
-    dist = pfd.Mixture(weights, dists)
+    dist = pfd.Mixture(dists, weights)
 
     # Call should return backend obj
     assert isinstance(dist(), tfd.MixtureSameFamily)
@@ -627,14 +626,33 @@ def test_Mixture():
 
     # Test methods
 
-    dist = pfd.Mixture([0.5, 0.5], pfd.Normal([-1., 1.], [1e-3, 1e-3]))
+    dist = pfd.Mixture(pfd.Normal([-1., 1.], [1e-3, 1e-3]),
+                       [0.5, 0.5])
     probs = dist.prob([-1., 1.])
     assert is_close(probs[0]/probs[1], 1.0)
 
-    dist = pfd.Mixture([np.log(0.8), np.log(0.2)], pfd.Normal([-1., 1.], [1e-3, 1e-3]))
+    dist = pfd.Mixture(pfd.Normal([-1., 1.], [1e-3, 1e-3]),
+                       np.log(np.array([0.8, 0.2]).astype('float32')))
     probs = dist.prob([-1., 1.])
     assert is_close(probs[0]/probs[1], 4.0)
 
-    dist = pfd.Mixture([np.log(0.1), np.log(0.9)], pfd.Normal([-1., 1.], [1e-3, 1e-3]))
+    dist = pfd.Mixture(pfd.Normal([-1., 1.], [1e-3, 1e-3]),
+                       np.log(np.array([0.1, 0.9]).astype('float32')))
     probs = dist.prob([-1., 1.])
     assert is_close(probs[0]/probs[1], 1.0/9.0)
+
+    # try w/ weight_type
+    dist = pfd.Mixture(pfd.Normal([-1., 1.], [1e-3, 1e-3]),  
+                       logits=np.log(np.array([0.1, 0.9]).astype('float32')))
+    probs = dist.prob([-1., 1.])
+    assert is_close(probs[0]/probs[1], 1.0/9.0)
+
+    dist = pfd.Mixture(pfd.Normal([-1., 1.], [1e-3, 1e-3]),  
+                       probs=np.array([0.1, 0.9]).astype('float32'))
+    probs = dist.prob([-1., 1.])
+    assert is_close(probs[0]/probs[1], 1.0/9.0)
+
+
+# TODO: test HMM
+
+# TODO: test GP

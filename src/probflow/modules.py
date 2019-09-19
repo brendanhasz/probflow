@@ -127,9 +127,12 @@ class Module(BaseModule):
             m._kl_losses = []
 
 
-    def add_kl_loss(self, loss):
-        """Add additional loss due to KL divergences"""
-        self._kl_losses += [O.sum(loss, axis=None)]
+    def add_kl_loss(self, loss, d2=None):
+        """Add additional loss due to KL divergences."""
+        if d2 is None:
+            self._kl_losses += [O.sum(loss, axis=None)]
+        else:
+            self._kl_losses += [O.sum(O.kl_divergence(loss, d2), axis=None)]
 
 
 

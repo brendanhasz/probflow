@@ -34,6 +34,26 @@ def test_LinearRegression():
 
 
 
+def test_LinearRegression_heteroscedastic():
+    """Tests probflow.applications.LinearRegression w/ heteroscedastic"""
+
+    # Data
+    x = np.random.randn(100, 5).astype('float32')
+    w = np.random.randn(5, 1).astype('float32')
+    y = x@w + 1
+    y = y+np.exp(y)*np.random.randn(100, 1).astype('float32')
+    
+    # Create the model
+    model = apps.LinearRegression(5, heteroscedastic=True)
+
+    # Fit the model
+    model.fit(x, y, batch_size=10, epochs=11)
+    
+    # Predictive functions
+    model.predict(x)
+
+
+
 def test_LogisticRegression():
     """Tests probflow.applications.LinearRegression"""
 
@@ -132,6 +152,26 @@ def test_DenseRegression():
     
     # Create the model
     model = apps.DenseRegression([5, 20, 15, 1])
+
+    # Fit the model
+    model.fit(x, y, batch_size=10, epochs=11)
+    
+    # Predictive functions
+    model.predict(x)
+
+
+
+def test_DenseRegression():
+    """Tests probflow.applications.DenseRegression w/ heteroscedastic"""
+
+    # Data
+    x = np.random.randn(100, 5).astype('float32')
+    w = np.random.randn(5, 1).astype('float32')
+    y = x@w + 1
+    y = y+np.exp(y)*np.random.randn(100, 1).astype('float32')
+    
+    # Create the model
+    model = apps.DenseRegression([5, 20, 15, 1], heteroscedastic=True)
 
     # Fit the model
     model.fit(x, y, batch_size=10, epochs=11)

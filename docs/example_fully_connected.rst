@@ -42,22 +42,50 @@ Note that we've used ``@``, the
 Having defined a single layer, it's much easier to define another |Module| which 
 stacks several of those layers, with activation functions in between each:
 
-.. code-block:: python3
+.. tabs::
 
-    class DenseNetwork(pf.Module):
-        
-        def __init__(self, dims):
-            Nl = len(dims)-1
-            self.layers = [DenseLayer(dims[i], dims[i+1]) for i in range(Nl)]
-            self.activations = [tf.nn.relu for i in range(Nl)]
-            self.activations[-1] = lambda x: x
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
+
+            import tensorflow as tf
+
+            class DenseNetwork(pf.Module):
+                
+                def __init__(self, dims):
+                    Nl = len(dims)-1
+                    self.layers = [DenseLayer(dims[i], dims[i+1]) for i in range(Nl)]
+                    self.activations = [tf.nn.relu for i in range(Nl)]
+                    self.activations[-1] = lambda x: x
 
 
-        def __call__(self, x):
-            for i in range(len(self.layers)):
-                x = self.layers[i](x)
-                x = self.activations[i](x)
-            return x
+                def __call__(self, x):
+                    for i in range(len(self.layers)):
+                        x = self.layers[i](x)
+                        x = self.activations[i](x)
+                    return x
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            import torch
+
+            class DenseNetwork(pf.Module):
+                
+                def __init__(self, dims):
+                    Nl = len(dims)-1
+                    self.layers = [DenseLayer(dims[i], dims[i+1]) for i in range(Nl)]
+                    self.activations = [torch.nn.ReLU() for i in range(Nl)]
+                    self.activations[-1] = lambda x: x
+
+
+                def __call__(self, x):
+                    for i in range(len(self.layers)):
+                        x = self.layers[i](x)
+                        x = self.activations[i](x)
+                    return x
+
 
 The first thing to notice here is that |Modules| can contain other |Modules|!
 This allows you to construct models using hierarchical building blocks, making
@@ -104,22 +132,45 @@ Using the Dense and Sequential Modules
 
 TODO: the Dense module handles creating the variables for you, and the Sequential module takes a list of modules or callables and pipes the output of each into the input of the next
 
-.. code-block:: python3
+.. tabs::
 
-    class DenseRegression(pf.Model):
-        
-        def __init__(self):
-            self.net = pf.Sequential([
-                pf.Dense(5, 128),
-                tf.nn.relu,
-                pf.Dense(128, 64),
-                tf.nn.relu,
-                pf.Dense(64, 1),
-            ])
-            self.s = pf.ScaleParameter()
+    .. group-tab:: TensorFlow
+    
+        .. code-block:: python3
 
-        def __call__(self, x):
-            return pf.Normal(self.net(x), self.s())
+            class DenseRegression(pf.Model):
+                
+                def __init__(self):
+                    self.net = pf.Sequential([
+                        pf.Dense(5, 128),
+                        tf.nn.relu,
+                        pf.Dense(128, 64),
+                        tf.nn.relu,
+                        pf.Dense(64, 1),
+                    ])
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    return pf.Normal(self.net(x), self.s())
+
+    .. group-tab:: PyTorch
+    
+        .. code-block:: python3
+
+            class DenseRegression(pf.Model):
+                
+                def __init__(self):
+                    self.net = pf.Sequential([
+                        pf.Dense(5, 128),
+                        torch.nn.ReLU(),
+                        pf.Dense(128, 64),
+                        torch.nn.ReLU(),
+                        pf.Dense(64, 1),
+                    ])
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    return pf.Normal(self.net(x), self.s())
 
 TODO: then can fit the net
 

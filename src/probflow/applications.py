@@ -50,6 +50,10 @@ class LinearRegression(ContinuousModel):
     ----------
     d : int
         Dimensionality of the independent variable (number of features)
+    heteroscedastic : bool 
+        Whether to model a change in noise as a function of :math:`\mathbf{x}`
+        (if ``heteroscedastic=True``), or not (if ``heteroscedastic=False``,
+        the default).
 
     Attributes
     ----------
@@ -61,14 +65,25 @@ class LinearRegression(ContinuousModel):
         Standard deviation of the Normal observation distribution
     """
 
-    def __init__(self, d: int):
-        self.weights = Parameter([d, 1], name='weights')
-        self.bias = Parameter(name='bias')
-        self.std = ScaleParameter(name='std')
+    def __init__(self, d: int, heteroscedastic: bool = False):
+        self.heteroscedastic = heteroscedastic
+        if heteroscedastic:
+            self.weights = Parameter([d, 2], name='weights')
+            self.bias = Parameter(name='bias')
+        else:
+            self.weights = Parameter([d, 1], name='weights')
+            self.bias = Parameter(name='bias')
+            self.std = ScaleParameter(name='std')
 
 
     def __call__(self, x):
-        return Normal(x @ self.weights() + self.bias(), self.std())
+        if self.heteroscedastic:
+            p = x @ self.weights()
+            m_preds = p[:, 0:1] + self.bias()
+            s_preds = O.exp(p[:, 1:2])
+            return Normal(m_preds, s_preds)
+        else:
+            return Normal(x @ self.weights() + self.bias(), self.std())
 
 
 
@@ -192,6 +207,10 @@ class DenseRegression(ContinuousModel):
         variable (number of features), and the last element should be the
         dimensionality of the dependent variable (number of dimensions of the
         target).
+    heteroscedastic : bool 
+        Whether to model a change in noise as a function of :math:`\mathbf{x}`
+        (if ``heteroscedastic=True``), or not (if ``heteroscedastic=False``,
+        the default).
 
     Attributes
     ----------
@@ -202,13 +221,25 @@ class DenseRegression(ContinuousModel):
         Standard deviation of the Normal observation distribution
     """
 
-    def __init__(self, d: List[int]):
-        self.network = DenseNetwork(d)
-        self.std = ScaleParameter(name='std')
+    def __init__(self, d: List[int], heteroscedastic: bool = False):
+        self.heteroscedastic = heteroscedastic
+        if heteroscedastic:
+            d[-1] = 2*d[-1]
+            self.network = DenseNetwork(d)
+        else:
+            self.network = DenseNetwork(d)
+            self.std = ScaleParameter(name='std')
 
 
     def __call__(self, x):
-        return Normal(self.network(x), self.std())
+        if self.heteroscedastic:
+            p = self.network(x)
+            Nd = int(p.shape[-1]/2)
+            m_preds = p[:, 0:Nd]
+            s_preds = O.exp(p[:, Nd:2*Nd])
+            return Normal(m_preds, s_preds)
+        else:
+            return Normal(self.network(x), self.std())
 
 
 

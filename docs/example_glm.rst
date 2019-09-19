@@ -13,15 +13,36 @@ TODO: math
 
 TODO: diagram
 
-.. code-block:: python3
+.. tabs::
 
-    import probflow as pf
+    .. group-tab:: TensorFlow
 
-    class PoissonRegression(pf.Model):
-        
-        def __init__(self, dims):
-            self.w = pf.Parameter([dims, 1])
-            self.b = pf.Parameter([1, 1])
-        
-        def __call__(self, x):
-            return pf.Poisson(tf.exp(x @ self.w() + self.b()))
+        .. code-block:: python3
+
+            import probflow as pf
+            import tensorflow as tf
+
+            class PoissonRegression(pf.Model):
+                
+                def __init__(self, dims):
+                    self.w = pf.Parameter([dims, 1])
+                    self.b = pf.Parameter([1, 1])
+                
+                def __call__(self, x):
+                    return pf.Poisson(tf.exp(x @ self.w() + self.b()))
+
+    .. group-tab:: PyTorch
+
+        .. code-block:: python3
+
+            import probflow as pf
+            import torch
+
+            class PoissonRegression(pf.Model):
+                
+                def __init__(self, dims):
+                    self.w = pf.Parameter([dims, 1])
+                    self.b = pf.Parameter([1, 1])
+                
+                def __call__(self, x):
+                    return pf.Poisson(torch.exp(x @ self.w() + self.b()))

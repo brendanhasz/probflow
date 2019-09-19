@@ -24,17 +24,13 @@ def test_gmm():
     class GaussianMixtureModel(pf.Model):
 
         def __init__(self, d, k):
-            self.d = d
-            self.k = k
             self.m = pf.Parameter([d, k])
             self.s = pf.ScaleParameter([d, k])
             self.w = pf.DirichletParameter(k)
 
         def __call__(self):
-            dists = pf.Normal(self.m(), self.s())
-            weights = tf.broadcast_to(self.w(), [self.d, self.k])
-            return pf.Mixture(weights, dists)
-
+            return pf.Mixture(pf.Normal(self.m(), self.s()), probs=self.w())
+            
     model = GaussianMixtureModel(2, 3)
 
     # Create some data

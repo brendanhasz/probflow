@@ -46,6 +46,7 @@ __all__ = [
 
 
 from probflow.core.settings import get_backend
+from probflow.core.base import BaseDistribution
 
 
 
@@ -64,6 +65,14 @@ def kl_divergence(P, Q):
     kld : Tensor
         The Kullback–Leibler divergence between P and Q (KL(P || Q))
     """
+
+    # Get the backend distribution if needed
+    if isinstance(P, BaseDistribution):
+        P = P()
+    if isinstance(Q, BaseDistribution):
+        Q = Q()
+
+    # Compute KL divergence with the backend
     if get_backend() == 'pytorch':
         import torch
         return torch.distributions.kl.kl_divergence(P, Q)

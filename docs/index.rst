@@ -25,7 +25,7 @@ It's very much still a work in progress.
 Getting Started
 ---------------
 
-**ProbFlow** allows you to quickly and painlessly build, fit, and evaluate custom Bayesian models (or :ref:`ready-made <ug_applications>` ones!) which run on top of |TensorFlow| and |TensorFlow Probability|.
+**ProbFlow** allows you to quickly and painlessly build, fit, and evaluate custom Bayesian models (or :ref:`ready-made <ug_applications>` ones!) which run on top of either |TensorFlow| and |TensorFlow Probability| or |PyTorch|.
 
 With ProbFlow, the core building blocks of a Bayesian model are parameters, probability distributions, and modules (and, of course, the input data).  Parameters define how the independent variables (the features) predict the probability distribution of the dependent variables (the target).
 
@@ -109,42 +109,70 @@ and diagnose *where* your model is having problems capturing uncertainty:
    :width: 90 %
    :align: center
 
-ProbFlow also provides more complex layers, such as those required for building Bayesian neural networks.  Also, ProbFlow lets you mix and match ProbFlow objects with TensorFlow objects and operations.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
+ProbFlow also provides more complex layers, such as those required for building Bayesian neural networks.  Also, ProbFlow lets you mix and match ProbFlow objects with TensorFlow (or PyTorch!) objects and operations.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
 
-.. code-block:: python3
+.. tabs::
 
-    import tensorflow as tf
+    .. group-tab:: TensorFlow
+        
+        .. code-block:: python3
 
-    class DenseRegression(pf.ContinuousModel):
+            import tensorflow as tf
 
-        def __init__(self, input_dims):
-            self.net = pf.Sequential([
-                pf.Dense(input_dims, 128),
-                tf.nn.relu,
-                pf.Dense(128, 64),
-                tf.nn.relu,
-                pf.Dense(64, 1),
-            ])
-            self.std = pf.ScaleParameter(name='std')
+            class DenseRegression(pf.ContinuousModel):
 
-        def __call__(self, x):
-            return pf.Normal(self.net(x), self.std())
-    
-    model = DenseRegression()
-    model.fit(x, y)
+                def __init__(self, input_dims):
+                    self.net = pf.Sequential([
+                        pf.Dense(input_dims, 128),
+                        tf.nn.relu,
+                        pf.Dense(128, 64),
+                        tf.nn.relu,
+                        pf.Dense(64, 1),
+                    ])
+                    self.std = pf.ScaleParameter(name='std')
+
+                def __call__(self, x):
+                    return pf.Normal(self.net(x), self.std())
+            
+            model = DenseRegression()
+            model.fit(x, y)
+
+    .. group-tab:: PyTorch
+        
+        .. code-block:: python3
+
+            import torch
+
+            class DenseRegression(pf.ContinuousModel):
+
+                def __init__(self, input_dims):
+                    self.net = pf.Sequential([
+                        pf.Dense(input_dims, 128),
+                        torch.nn.ReLU(),
+                        pf.Dense(128, 64),
+                        torch.nn.ReLU(),
+                        pf.Dense(64, 1),
+                    ])
+                    self.std = pf.ScaleParameter(name='std')
+
+                def __call__(self, x):
+                    return pf.Normal(self.net(x), self.std())
+            
+            model = DenseRegression()
+            model.fit(x, y)
 
 For convenience, ProbFlow also includes several :ref:`pre-built models <ug_applications>` for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made :class:`LinearRegression <probflow.applications.LinearRegression>` model:
 
 .. code-block:: python3
 
-    model = pf.LinearRegression(7)
+    model = pf.LinearRegression(x.shape[1])
     model.fit(x, y)
 
 And the multi-layer Bayesian neural net could have been made more easily by using ProbFlow's ready-made :class:`DenseRegression <probflow.applications.DenseRegression>` model:
 
 .. code-block:: python3
 
-    model = pf.DenseRegression([7, 128, 64, 1])
+    model = pf.DenseRegression([x.shape[1], 128, 64, 1])
     model.fit(x, y)
 
 Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like :ref:`generalized linear models <example_glm>`, :ref:`neural matrix factorization <example_nmf>` models, and :ref:`Gaussian mixture models <example_gmm>`.  Take a look at the :ref:`examples` section and the :ref:`user_guide` for more!
