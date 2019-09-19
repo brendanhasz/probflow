@@ -19,7 +19,7 @@ ProbFlow
     :target: https://codecov.io/gh/brendanhasz/probflow
 
 
-ProbFlow is a Python package for building probabilistic Bayesian models with `TensorFlow Probability <http://www.tensorflow.org/probability>`_, performing variational inference with those models, and evaluating the models' inferences.  It provides both high-level modules for building Bayesian neural networks, as well as low-level parameters and distributions for constructing custom Bayesian models.
+ProbFlow is a Python package for building probabilistic Bayesian models with `TensorFlow 2.0 <http://www.tensorflow.org/beta>`_ or `PyTorch <http://pytorch.org>`_, performing variational inference with those models, and evaluating the models' inferences.  It provides both high-level modules for building Bayesian neural networks, as well as low-level parameters and distributions for constructing custom Bayesian models.
 
 It's very much still a work in progress.
 
@@ -171,7 +171,7 @@ Then, you can install ProbFlow itself from the GitHub source:
 Version 1 vs 2
 --------------
 
-The latest version of ProbFlow (version 2) was built to work with eager execution in TensorFlow 2.x and PyTorch.  Version 1 does not work with eager execution, and only works with TensorFlow 1.x (and not PyTorch).  The v2 interface is significantly different from v1, based on a subclassing API instead of the more declarative API of v1.  I won't be supporting v1 moving forward, but if you want to install ProbFlow 1.0:
+The latest version of ProbFlow (version 2) was built to work with eager execution in TensorFlow 2.x and PyTorch.  `Version 1 <https://github.com/brendanhasz/probflow/releases/tag/v1.0>`_ does not work with eager execution, and only works with TensorFlow 1.x (and not PyTorch).  The v2 interface is significantly different from v1, based on a subclassing API instead of the more declarative API of v1.  I won't be supporting v1 moving forward, but if you want to install ProbFlow 1.0:
 
 .. code-block:: bash
     

@@ -768,22 +768,23 @@ class Dirichlet(BaseDistribution):
     is a continuous distribution defined over the :math:`k`-simplex, and has
     one vector of parameters: 
 
-    - concentration parameters (``concentration`` or :math:`\mathbf{\alpha}`),
-    a vector of positive numbers which determine the relative likelihoods of 
-    different categories represented by the distribution.
+    - concentration parameters (``concentration`` or 
+      :math:`\boldsymbol{\alpha} \in \mathbb{R}^{k}_{>0}`),
+      a vector of positive numbers which determine the relative likelihoods of 
+      different categories represented by the distribution.
 
     A random variable (a vector) :math:`\mathbf{x}` drawn from a Dirichlet
     distribution
 
     .. math::
 
-        \mathbf{x} \sim \text{Dirichlet}(\mathbf{\alpha})
+        \mathbf{x} \sim \text{Dirichlet}(\boldsymbol{\alpha})
 
     has probability
 
     .. math::
 
-        p(\mathbf{x}) = \frac{1}{\mathbf{\text{B}}(\mathbf{\alpha})} 
+        p(\mathbf{x}) = \frac{1}{\mathbf{\text{B}}(\boldsymbol{\alpha})} 
                         \prod_{i=1}^K x_i^{\alpha_i-1}
 
     where :math:`\mathbf{\text{B}}` is the multivariate beta function.

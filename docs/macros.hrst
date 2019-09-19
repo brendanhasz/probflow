@@ -2,6 +2,7 @@
 
 .. |Keras| replace:: `Keras <http://keras.io>`__
 .. |TensorFlow| replace:: `TensorFlow <http://www.tensorflow.org/beta>`__
+.. |TensorFlow 2.0| replace:: `TensorFlow <http://www.tensorflow.org/beta>`__
 .. |TensorFlow Probability| replace:: `TensorFlow Probability <http://www.tensorflow.org/probability>`__
 .. |PyTorch| replace:: `PyTorch <http://pytorch.org>`__
 .. |tfp.Distribution| replace:: `tensorflow_probability.distributions.Distribution <http://www.tensorflow.org/probability/api_docs/python/tfp/distributions/Distribution>`__

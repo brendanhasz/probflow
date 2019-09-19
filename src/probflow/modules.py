@@ -45,21 +45,6 @@ class Module(BaseModule):
 
     TODO
 
-    Attributes
-    ----------
-    parameters : List[Parameter]
-        List of |Parameters| used in this |Module| and its sub-Modules
-    trainable_variables : List[Tensor]
-        List of raw variable objects from the backend used in this |Module|
-        and its sub-Modules
-
-
-    Methods
-    -------
-    __init__ (abstract method)
-    __call__ (abstract method)
-    kl_loss
-
     """
 
     def _params(self, obj):
@@ -88,13 +73,13 @@ class Module(BaseModule):
 
     @property
     def parameters(self):
-        """Get a list of |Parameters| in this |Module| and its sub-Modules."""
+        """A list of |Parameters| in this |Module| and its sub-Modules."""
         return [p for _, a in vars(self).items() for p in self._params(a)]
 
 
     @property
     def modules(self):
-        """Get a list of sub-Modules in this |Module|, including itself."""
+        """A list of sub-Modules in this |Module|, including itself."""
         return [m for a in vars(self).values()
                 if isinstance(a, BaseModule)
                 for m in a.modules] + [self]
@@ -102,7 +87,7 @@ class Module(BaseModule):
 
     @property
     def trainable_variables(self):
-        """Get a list of trainable backend variables within this |Module|"""
+        """A list of trainable backend variables within this |Module|"""
         return [v for p in self.parameters for v in p.trainable_variables]
         # TODO: look for variables NOT in parameters too
         # so users can mix-n-match tf.Variables and pf.Parameters in modules 

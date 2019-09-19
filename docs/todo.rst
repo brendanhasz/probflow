@@ -10,7 +10,7 @@ are totally welcome!
 Backlog
 -------
 
-* Add HiddenMarkovModel and GaussianProcess distributions + examples
+* Implement PyTorch distributions + tests
 * Model evaluation methods (ones to be used in readme)
 * Make model evaluation methods (predictive_sample, etc) handle generative models (x or y is None)
 * Tests for those
@@ -19,14 +19,14 @@ Backlog
 * Examples
 * Docs for everything implemented so far
 * Fix issues so far (below)
-* Merge back to main repo and release 2.0.0
+* Release 2.0.0
 * Different plotting methods for different types of dists (both for Parameter priors/posteriors and predictive distribution plots)
+* Add HiddenMarkovModel and GaussianProcess distributions + examples
 * All model evaluation methods + specialized types of models
 * Add model saving/loading (Model.save_model and load_model)
 * Summary method for Modules + Models which show hierarchy of modules/parameters
 * Make Module.trainable_variables return tf.Variables which are properties of module+sub-modules as well (and not neccesarily in parameters, also allow embedding of tf.Modules?)
 * Real-world examples w/ public BigQuery datasets
-* More examples: Hidden Markov models, Gaussian processes, and LDA
 * Bayes estimate / decision methods
 * Convolutional modules
 
