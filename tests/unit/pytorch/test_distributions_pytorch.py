@@ -22,7 +22,7 @@ def test_TorchDeterministic():
 
     TorchDeterministic = pf.utils.torch_distributions.get_TorchDeterministic()
 
-    dist = TorchDeterministic(loc=torch.tensor([2., 0.]), validate_args=True)
+    dist = TorchDeterministic(loc=torch.tensor([2.]), validate_args=True)
 
     assert is_close(dist.mean.numpy()[0], 2.)
     assert is_close(dist.stddev, 0.)
@@ -30,15 +30,13 @@ def test_TorchDeterministic():
 
     dist.expand([5, 2])
 
-    dist.support
-
     dist.rsample()
 
-    dist.log_prob(torch.tensor([1., 2.]))
+    dist.log_prob(torch.tensor([1.]))
 
-    dist.cdf(torch.tensor([1., 2.]))
+    dist.cdf(torch.tensor([1.]))
 
-    dist.icdf(torch.tensor([1., 2.]))
+    dist.icdf(torch.tensor([1.]))
 
     dist.entropy()
 

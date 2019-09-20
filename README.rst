@@ -161,7 +161,7 @@ Installation
 
 Before installing ProbFlow, you'll first need to install either PyTorch, or TensorFlow 2.0 and TensorFlow Probability.  See `more details here <https://probflow.readthedocs.io/en/latest/#installation>`_.
 
-Then, you can install ProbFlow itself from the GitHub source:
+Then, you can install ProbFlow itself:
 
 .. code-block:: bash
     

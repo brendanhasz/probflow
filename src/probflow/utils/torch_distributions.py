@@ -14,7 +14,8 @@ def get_TorchDeterministic():
         """Deterministic distribution for PyTorch"""
 
 
-        arg_constraints = {'loc': constraints.dependent}
+        arg_constraints = {'loc': constraints.real}
+        support = constraints.real
         has_rsample = True
 
 
@@ -51,11 +52,6 @@ def get_TorchDeterministic():
             super(TorchDeterministic, new).__init__(batch_shape, validate_args=False)
             new._validate_args = self._validate_args
             return new
-
-
-        @constraints.dependent_property
-        def support(self):
-            return constraints.interval(self.loc, self.loc)
 
 
         def rsample(self, sample_shape=torch.Size()):

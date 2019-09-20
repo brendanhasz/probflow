@@ -221,7 +221,7 @@ Before installing ProbFlow, you'll first need to install either `PyTorch <https:
             pip install tensorflow-gpu==2.0.0-rc1 tensorflow-probability==0.8.0rc0
 
 
-Then, you can install ProbFlow itself from the GitHub source:
+Then, you can install ProbFlow itself:
 
 .. code-block:: bash
     
