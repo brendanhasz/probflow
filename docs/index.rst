@@ -19,7 +19,7 @@ ProbFlow
     :target: https://codecov.io/gh/brendanhasz/probflow
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
    :hidden:
 
@@ -225,7 +225,7 @@ Then, you can install ProbFlow itself from the GitHub source:
 
 .. code-block:: bash
     
-    pip install git+http://github.com/brendanhasz/probflow.git
+    pip install probflow
 
 
 Version 1 vs 2

@@ -50,6 +50,7 @@ __all__ = [
 import numpy as np
 
 from probflow.core.settings import get_backend
+from probflow.utils.torch_distributions import get_TorchDeterministic
 from probflow.core.base import BaseDistribution
 
 
@@ -58,7 +59,7 @@ def _ensure_tensor_like(obj, name):
     """Determine whether an object can be cast to a Tensor"""
     if get_backend() == 'pytorch':
         import torch
-        tensor_types = (torch.Tensor)
+        tensor_types = (torch.Tensor,)
     else:
         import tensorflow as tf
         tensor_types = (tf.Tensor, tf.Variable)
@@ -112,7 +113,8 @@ class Deterministic(BaseDistribution):
     def __call__(self):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
-            raise NotImplementedError
+            TorchDeterministic = get_TorchDeterministic()
+            return TorchDeterministic(self.loc)
         else:
             from tensorflow_probability import distributions as tfd
             return tfd.Deterministic(self.loc)
@@ -244,7 +246,8 @@ class MultivariateNormal(BaseDistribution):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
             import torch.distributions as tod
-            raise NotImplementedError
+            return tod.multivariate_normal.MultivariateNormal(
+                self.loc, covariance_matrix=self.cov)
         else:
             import tensorflow as tf
             from tensorflow_probability import distributions as tfd
@@ -536,8 +539,12 @@ class InverseGamma(BaseDistribution):
     def __call__(self):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
+            import torch
             import torch.distributions as tod
-            raise NotImplementedError
+            return tod.transformed_distribution.TransformedDistribution(
+                tod.gamma.Gamma(self.concentration, self.scale),
+                tod.transforms.PowerTransform(torch.tensor([-1.])))
+            # TODO: mean isn't implemented
         else:
             from tensorflow_probability import distributions as tfd
             return tfd.InverseGamma(self.concentration, self.scale) 
@@ -700,8 +707,8 @@ class OneHotCategorical(BaseDistribution):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
             import torch.distributions as tod
-            return tod.categorical.OneHotCategorical(logits=self.logits,
-                                                     probs=self.probs) 
+            return tod.one_hot_categorical.OneHotCategorical(
+                logits=self.logits, probs=self.probs) 
         else:
             from tensorflow_probability import distributions as tfd
             return tfd.OneHotCategorical(logits=self.logits, probs=self.probs) 
@@ -918,7 +925,7 @@ class HiddenMarkovModel(BaseDistribution):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
             import torch.distributions as tod
-            return tod.dirichlet.Dirichlet(self.concentration) 
+            raise NotImplementedError
         else:
             from tensorflow_probability import distributions as tfd
             return tfd.HiddenMarkovModel(

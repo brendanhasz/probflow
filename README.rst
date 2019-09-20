@@ -165,7 +165,7 @@ Then, you can install ProbFlow itself from the GitHub source:
 
 .. code-block:: bash
     
-    pip install git+http://github.com/brendanhasz/probflow.git
+    pip install probflow
 
 
 Version 1 vs 2

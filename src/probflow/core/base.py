@@ -55,19 +55,32 @@ class BaseDistribution(ABC):
 
         Note that this uses the mode of distributions for which the mean
         is undefined (for example, a categorical distribution)"""
-        try:
-            return self().mean()
-        except NotImplementedError:
-            return self().mode()
+        if get_backend() == 'pytorch':
+            return self().mean
+        else:
+            try:
+                return self().mean()
+            except NotImplementedError:
+                return self().mode()
 
 
     def sample(self, n=1):
         """Generate a random sample from this distribution"""
         if get_backend() == 'pytorch':
-            if isinstance(n, int) and n == 1:
-                return self().rsample()
-            else:
-                return self().rsample(n)
+            try:
+                if isinstance(n, int) and n == 1:
+                    return self().rsample()
+                elif isinstance(n, int):
+                    return self().rsample([n])
+                else:
+                    return self().rsample(n)
+            except NotImplementedError:
+                if isinstance(n, int) and n == 1:
+                    return self().sample()
+                elif isinstance(n, int):
+                    return self().sample([n])
+                else:
+                    return self().sample(n)
         else:
             if isinstance(n, int) and n == 1:
                 return self().sample()

@@ -10,7 +10,6 @@ are totally welcome!
 Backlog
 -------
 
-* Implement PyTorch distributions + tests
 * Model evaluation methods (ones to be used in readme)
 * Make model evaluation methods (predictive_sample, etc) handle generative models (x or y is None)
 * Tests for those
@@ -41,4 +40,5 @@ Issues
 * Gamma distribution isn't passing the fit test (in tests/stats/test_distribution_fits)
 * PyTorch support
 * Add type hinting and enforcing
-
+* Implement + test mean() for InverseGamma, Bernoulli, Categorical, and OneHotCategorical for pytorch
+* Implement mixture distribution w/ pytorch backend. They're working on a MixtureSameFamily distribution for PyTorch (https://github.com/pytorch/pytorch/pull/22742) so maybe wait for that.

@@ -17,13 +17,13 @@ TODO: creating, naming, and setting the shape of parameters
 
 
 Specifying the Variational Posterior
-------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 TODO: setting ``posterior`` kwarg to set the variational posterior
 
 
 Setting the Prior
------------------
+^^^^^^^^^^^^^^^^^
 
 The default prior on a |Parameter| is a :class:`.Normal` distribution with a
 mean of 0 and a standard deviation of 1.  However, we can manually set the
@@ -45,13 +45,13 @@ keyword argument:
 
 
 Transforming Parameters
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
 TODO: talk about transform kwarg to constructor.  Parameter w/ lognormal posterior as an example?  Also mention that the transform is only applied to the samples the posterior emits, and NOT to the prior (i.e. the prior and posterior should be in the same non-transformed space)
 
 
 Setting the variable initializers
----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The posterior distributions have one or more variables which determine the 
 shape of the distribution (these are the variables which are optimized over
@@ -86,10 +86,36 @@ ones:
 
 
 Setting the variable transforms
--------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 TODO
 
+
+
+Sampling from a Parameter's variational posterior
+-------------------------------------------------
+
+TODO: use ``__call__``, which returns a backend Tensor
+
+
+Examining a Parameter's variational posterior
+---------------------------------------------
+
+TODO: ``posterior_mean``, ``posterior_sample``, ``posterior_ci`` 
+(which return np arrays), and ``posterior_plot``
+
+
+Examining a Parameter's prior
+-----------------------------
+
+TODO: ``prior_sample`` and ``prior_plot``
+
+
+Slicing a Parameter
+-------------------
+
+TODO: usage of ``__getitem__`` (slice of a sample from variational posterior),
+and supports list of indexes
 
 
 Scale Parameters

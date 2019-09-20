@@ -14,8 +14,6 @@ TODO: diagram
 
 TODO: note that this treats it as a generative model (ie only y no x)
 
-TODO: test that this works after implementing MultivariateNormal....
-
 .. tabs::
 
     .. group-tab:: TensorFlow
@@ -77,7 +75,7 @@ centered around 0:
 .. code-block:: python3
 
     model.fit(X, learning_rate=0.1)
-    model.posterior_plot(style='hist', ci=0.95)
+    model.posterior_plot(ci=0.95, style='hist')
 
 .. image:: img/examples/correlation2.svg
    :width: 90 %
@@ -103,7 +101,7 @@ is considerably closer to 1:
 
     model = BayesianCorrelation()
     model.fit(X, learning_rate=0.1)
-    model.posterior_plot(style='hist', ci=0.95)
+    model.posterior_plot(ci=0.95, style='hist')
 
 .. image:: img/examples/correlation4.svg
    :width: 90 %
@@ -129,7 +127,7 @@ The model recovers the negative correlation coefficient:
 
     model = BayesianCorrelation()
     model.fit(X, learning_rate=0.1)
-    model.posterior_plot(style='hist', ci=0.95)
+    model.posterior_plot(ci=0.95, style='hist')
 
 .. image:: img/examples/correlation6.svg
    :width: 90 %
