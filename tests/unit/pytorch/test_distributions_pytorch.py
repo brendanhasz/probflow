@@ -8,12 +8,39 @@ import numpy as np
 import torch
 tod = torch.distributions
 
+import probflow as pf
 import probflow.distributions as pfd
 
 
 
 def is_close(a, b, tol=1e-3):
     return np.abs(a-b) < tol
+
+
+def test_TorchDeterministic():
+    """Tests the TorchDeterministic distribution"""
+
+    TorchDeterministic = pf.utils.torch_distributions.get_TorchDeterministic()
+
+    dist = TorchDeterministic(loc=torch.tensor([2., 0.]), validate_args=True)
+
+    assert is_close(dist.mean.numpy()[0], 2.)
+    assert is_close(dist.stddev, 0.)
+    assert is_close(dist.variance, 0.)
+
+    dist.expand([5, 2])
+
+    dist.support
+
+    dist.rsample()
+
+    dist.log_prob(torch.tensor([1., 2.]))
+
+    dist.cdf(torch.tensor([1., 2.]))
+
+    dist.icdf(torch.tensor([1., 2.]))
+
+    dist.entropy()
 
 
 
