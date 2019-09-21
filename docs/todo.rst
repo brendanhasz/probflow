@@ -10,6 +10,7 @@ are totally welcome!
 Backlog
 -------
 
+* Get PyTorch fitting working
 * Model evaluation methods (ones to be used in readme)
 * Make model evaluation methods (predictive_sample, etc) handle generative models (x or y is None)
 * Tests for those

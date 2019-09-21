@@ -8,12 +8,12 @@ ProbFlow
     :scale: 100%
     :target: http://probflow.readthedocs.io
 
-.. |Build Badge| image:: https://travis-ci.com/brendanhasz/probflow.svg?branch=v2
+.. |Build Badge| image:: https://travis-ci.com/brendanhasz/probflow.svg
     :alt: Build Status
     :scale: 100%
     :target: https://travis-ci.com/brendanhasz/probflow
 
-.. |Coverage Badge| image:: https://codecov.io/gh/brendanhasz/probflow/branch/v2/graph/badge.svg
+.. |Coverage Badge| image:: https://codecov.io/gh/brendanhasz/probflow/branch/master/graph/badge.svg
     :alt: Build Status
     :scale: 100%
     :target: https://codecov.io/gh/brendanhasz/probflow

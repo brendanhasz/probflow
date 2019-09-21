@@ -28,7 +28,7 @@ __all__ = [
 
 
 import warnings
-from typing import List
+from typing import List, Union, Callable
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -52,64 +52,43 @@ from probflow.utils.metrics import get_metric_fn
 class Model(Module):
     """Abstract base class for probflow models.
 
-
     TODO
 
+    This class inherits several methods and properties from :class:`.Module`:
 
-    Attributes
-    ----------
-    parameters : list
-        List of |Parameters| in the |Model|
+    * :attr:`~parameters`
+    * :attr:`~modules`
+    * :attr:`~trainable_variables`
+    * :meth:`~kl_loss`
+    * :meth:`~kl_loss_batch`
+    * :meth:`~reset_kl_loss`
+    * :meth:`~add_kl_loss`
 
+    and adds model-specific methods:
 
-    Methods
-    -------
-    kl_loss()
-        The sum of the KL divergence between posteriors and priors for all
-        parameters in the model
-    fit(x, ...)
-        Fit the model to data
-    stop_training()
-        Stop the training of the model
-    set_learning_rate(lr)
-        Set the learning rate used by this model's optimizer
-    predictive_sample(x, n=1000)
-        Draw samples from the predictive distribution given x
-    aleatoric_sample(x, n=1000)
-        Draw samples of the model's estimate given x, including only
-        aleatoric uncertainty (uncertainty due to noise)
-    epistemic_sample(x, n=1000)
-        Draw samples of the model's estimate given x, including only
-        epistemic uncertainty (uncertainty due to uncertainty as to the
-        model's parameter values)
-    predict(x)
-        Predict dependent variable using the model
-    metric(x, y, metric='log_prob')
-        Compute a metric of model performance
-    posterior_mean(params=None)
-        Get the mean of the posterior distribution(s)
-    posterior_sample(params=None, n=10000)
-        Draw samples from parameter posteriors
-    posterior_ci(params=None, ci=0.95, n=10000)
-        Posterior confidence intervals
-    posterior_plot(...)
-        Plot posterior distributions of the model's parameters
-    prior_sample(params=None, n=10000)
-        Draw samples from parameter priors
-    prior_plot(...)  
-        Plot prior distributions of the model's parameters
-    log_prob(x, y, individually=True, distribution=False, n=1000)
-        Compute the log probability of ``y`` given the model
-    log_prob_by(x_by, x, y, bins=30, plot=True)
-        Log probability of observations ``y`` given the
-        model, as a function of independent variable(s) ``x_by``
-    prob(x, y, individually=True, distribution=False, n=1000)
-        Compute the probability of ``y`` given the model
-    prob_by(x_by, x, y, bins=30, plot=True)
-        Probability of observations ``y`` given the
-        model, as a function of independent variable(s) ``x_by``
-    summary
-        Show a summary of the model and its parameters.
+    * :meth:`~log_likelihood`
+    * :meth:`~train_step`
+    * :meth:`~fit`
+    * :meth:`~stop_training`
+    * :meth:`~set_learning_rate`
+    * :meth:`~predictive_sample`
+    * :meth:`~aleatoric_sample`
+    * :meth:`~epistemic_sample`
+    * :meth:`~predict`
+    * :meth:`~metric`
+    * :meth:`~posterior_mean`
+    * :meth:`~posterior_sample`
+    * :meth:`~posterior_ci`
+    * :meth:`~prior_sample`
+    * :meth:`~posterior_plot`
+    * :meth:`~prior_plot`
+    * :meth:`~log_prob`
+    * :meth:`~log_prob_by`
+    * :meth:`~prob`
+    * :meth:`~prob_by`
+    * :meth:`~save`
+    * :meth:`~summary`
+
     """
 
 
@@ -281,19 +260,30 @@ class Model(Module):
             self._learning_rate = lr
 
 
+    def _sample(self, x, func, ed=None, axis=1):
+        """Sample from the model"""
+        samples = []
+        for x_data, y_data in make_generator(x, test=True):
+            if x_data is None:
+                samples += [func(self()).numpy()]
+            else:
+                samples += [func(self(O.expand_dims(x_data, ed))).numpy()]
+        return np.concatenate(samples, axis=axis)
+
+
     def predictive_sample(self, x=None, n=1000):
-        """Draw samples from the predictive distribution given x
+        """Draw samples from the posterior predictive distribution given x
 
         TODO: Docs...
 
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features"). 
         n : int
-            Number of samples to draw from the model.
+            Number of samples to draw from the model per datapoint.
 
 
         Returns
@@ -302,14 +292,8 @@ class Model(Module):
             Samples from the predictive distribution.  Size
             (num_samples, x.shape[0], ...)
         """
-        samples = []
         with Sampling(n=n, flipout=False):
-            for x_data, y_data in make_generator(x, test=True):
-                if x_data is None:
-                    samples += [self().sample()]
-                else:
-                    samples += [self(O.expand_dims(x_data, 0)).sample()]
-        return np.concatenate(samples, axis=1)
+            return self._sample(x, lambda x: x.sample(), ed=0)
 
 
     def aleatoric_sample(self, x=None, n=1000):
@@ -321,11 +305,11 @@ class Model(Module):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features"). 
         n : int
-            Number of samples to draw from the model.
+            Number of samples to draw from the model per datapoint.
 
 
         Returns
@@ -334,13 +318,7 @@ class Model(Module):
             Samples from the predicted mean distribution.  Size
             (num_samples,x.shape[0],...)
         """
-        samples = []
-        for x_data, y_data in make_generator(x, test=True):
-            if x_data is None:
-                samples += [self().sample(n=n).numpy()]
-            else:
-                samples += [self(x_data).sample(n=n).numpy()]
-        return np.concatenate(samples, axis=1)
+        return self._sample(x, lambda x: x.sample(n=n))
 
 
     def epistemic_sample(self, x=None, n=1000):
@@ -353,11 +331,11 @@ class Model(Module):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or None
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features"). 
         n : int
-            Number of samples to draw from the model.
+            Number of samples to draw from the model per datapoint.
 
 
         Returns
@@ -366,14 +344,8 @@ class Model(Module):
             Samples from the predicted mean distribution.  Size
             (num_samples, x.shape[0], ...)
         """
-        samples = []
         with Sampling(n=n, flipout=False):
-            for x_data, y_data in make_generator(x, test=True):
-                if x_data is None:
-                    samples += [self().mean().numpy()]
-                else:
-                    samples += [self(O.expand_dims(x_data, 0)).mean().numpy()]
-        return np.concatenate(samples, axis=1)
+            return self._sample(x, lambda x: x.mean(), ed=0)
 
 
     def predict(self, x=None):
@@ -384,9 +356,9 @@ class Model(Module):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
-            "features").  
+            "features"). 
 
 
         Returns
@@ -401,13 +373,7 @@ class Model(Module):
         TODO: Docs...
 
         """
-        preds = []
-        for x_data, y_data in make_generator(x, test=True):
-            if x_data is None:
-                preds += [self().mean().numpy()]
-            else:
-                preds += [self(x_data).mean().numpy()]
-        return np.concatenate(preds, axis=0)
+        return self._sample(x, lambda x: x.mean(), axis=0)
 
 
     def metric(self, metric, x, y=None):
@@ -474,6 +440,19 @@ class Model(Module):
         return metric_fn(y_true, y_pred)
 
 
+    def _param_data(self,
+                    params: Union[str, List[str], None],
+                    func: Callable):
+        """Get data about parameters in the model"""
+        if isinstance(params, str):
+            return [func(p) for p in self.parameters if p.name == params][0]
+        elif isinstance(params, list):
+            return {p.name: func(p) for p in self.parameters
+                    if p.name in params}
+        else:
+            return {p.name: func(p) for p in self.parameters}
+        
+
     def posterior_mean(self, params=None):
         """Get the mean of the posterior distribution(s)
 
@@ -497,14 +476,7 @@ class Model(Module):
             ``params`` was a str.
 
         """
-        if isinstance(params, str):
-            return [p.posterior_mean() for p in self.parameters
-                    if p.name == params][0]
-        elif params is None:
-            return {p.name: p.posterior_mean() for p in self.parameters}
-        else:
-            return {p.name: p.posterior_mean() for p in self.parameters
-                    if p.name in params}
+        return self._param_data(params, lambda x: x.posterior_mean())
 
 
     def posterior_sample(self, params=None, n=10000):
@@ -532,14 +504,7 @@ class Model(Module):
             (``num_samples``, param.shape). Or just the |ndarray| if 
             ``params`` was a str.
         """
-        if isinstance(params, str):
-            return [p.posterior_sample(n=n) for p in self.parameters
-                    if p.name == params][0]
-        elif params is None:
-            return {p.name: p.posterior_sample(n=n) for p in self.parameters}
-        else:
-            return {p.name: p.posterior_sample(n=n) for p in self.parameters
-                    if p.name in params}
+        return self._param_data(params, lambda x: x.posterior_sample(n=n))
 
 
     def posterior_ci(self, params=None, ci=0.95, n=10000):
@@ -574,48 +539,7 @@ class Model(Module):
             the second element is the upper bound.
             Or just a single tuple if params was a str
         """
-        if isinstance(params, str):
-            return [p.posterior_ci(ci=ci, n=n) 
-                    for p in self.parameters if p.name == params][0]
-        elif params is None:
-            return {p.name: p.posterior_ci(ci=ci, n=n) 
-                    for p in self.parameters}
-        else:
-            return {p.name: p.posterior_ci(ci=ci, n=n) 
-                    for p in self.parameters if p.name in params}
-
-
-    def posterior_plot(self,
-                       params=None,
-                       cols=1,
-                       tight_layout=True,
-                       **kwargs):
-        """Plot posterior distributions of the model's parameters
-
-        TODO: Docs... params is a list of strings of params to plot
-
-
-        Parameters
-        ----------
-        params : str or list
-            List of parameters to plot.  Default is to plot the posterior of
-            all parameters in the model.
-        cols : int
-            Divide the subplots into a grid with this many columns.
-        kwargs
-            Additional keyword arguments are passed to 
-            :meth:`.Parameter.posterior_plot`
-        """
-        if params is None:
-            param_list = self.parameters
-        else:
-            param_list = [p for p in self.parameters if p.name in params]
-        rows = np.ceil(len(param_list)/cols)
-        for iP in range(len(param_list)):
-            plt.subplot(rows, cols, iP+1)
-            param_list[iP].posterior_plot(**kwargs)
-        if tight_layout:
-            plt.tight_layout()
+        return self._param_data(params, lambda x: x.posterior_ci(ci=ci, n=n))
 
 
     def prior_sample(self, params=None, n=10000):
@@ -642,20 +566,54 @@ class Model(Module):
             |ndarrays| with the prior samples.  The |ndarrays| are of size
             (``n``,param.shape).
         """
-        if isinstance(params, str):
-            return [p.prior_sample(n=n) 
-                    for p in self.parameters if p.name == params][0]
-        elif params is None:
-            return {p.name: p.prior_sample(n=n) for p in self.parameters}
+        return self._param_data(params, lambda x: x.prior_sample(n=n))
+
+
+    def _param_plot(self,
+                    func: Callable,
+                    params: Union[None, List[str]] = None,
+                    cols: int = 1,
+                    tight_layout: bool = True,
+                    **kwargs):
+        """Plot parameter data"""
+        if params is None:
+            param_list = self.parameters
         else:
-            return {p.name: p.prior_sample(n=n) for p in self.parameters
-                    if p.name in params}
+            param_list = [p for p in self.parameters if p.name in params]
+        rows = np.ceil(len(param_list)/cols)
+        for iP in range(len(param_list)):
+            plt.subplot(rows, cols, iP+1)
+            func(param_list[iP])
+        if tight_layout:
+            plt.tight_layout()
+
+
+    def posterior_plot(self,
+                       params=None,
+                       cols=1,
+                       **kwargs):
+        """Plot posterior distributions of the model's parameters
+
+        TODO: Docs... params is a list of strings of params to plot
+
+
+        Parameters
+        ----------
+        params : str or list or None
+            List of names of parameters to plot.  Default is to plot the 
+            posterior of all parameters in the model.
+        cols : int
+            Divide the subplots into a grid with this many columns.
+        kwargs
+            Additional keyword arguments are passed to 
+            :meth:`.Parameter.posterior_plot`
+        """
+        self._param_plot(lambda x: x.posterior_plot(**kwargs), params, cols)
 
 
     def prior_plot(self,
                    params=None,
                    cols=1,
-                   tight_layout=True,
                    **kwargs):
         """Plot prior distributions of the model's parameters
 
@@ -664,46 +622,16 @@ class Model(Module):
 
         Parameters
         ----------
-        params : |None| or str or list of str
-            List of parameters to plot.  Default is to plot the prior of
-            all parameters in the model.
-        n : int
-            Number of samples to take from each prior distribution.
-            Default = 10000
-        style : str
-            Which style of plot to show.  Available types are:
-
-            * ``'fill'`` - filled density plot (the default)
-            * ``'line'`` - line density plot
-            * ``'hist'`` - histogram
-
+        params : str or list or None
+            List of names of parameters to plot.  Default is to plot the 
+            prior of all parameters in the model.
         cols : int
             Divide the subplots into a grid with this many columns.
-        bins : int or list or |ndarray|
-            Number of bins to use for the prior density histogram (if 
-            ``style='hist'``), or a list or vector of bin edges.
-        ci : float between 0 and 1
-            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
-        bw : float
-            Bandwidth of the kernel density estimate (if using ``style='line'``
-            or ``style='fill'``).  Default is 0.075
-        color : matplotlib color code or list of them
-            Color(s) to use to plot the distribution.
-            See https://matplotlib.org/tutorials/colors/colors.html
-            Default = use the default matplotlib color cycle
-        alpha : float between 0 and 1
-            Transparency of fill/histogram of the density
+        kwargs
+            Additional keyword arguments are passed to 
+            :meth:`.Parameter.prior_plot`
         """
-        if params is None:
-            param_list = self.parameters
-        else:
-            param_list = [p for p in self.parameters if p.name in params]
-        rows = np.ceil(len(param_list)/cols)
-        for iP in range(len(param_list)):
-            plt.subplot(rows, cols, iP+1)
-            param_list[iP].prior_plot(**kwargs)
-        if tight_layout:
-            plt.tight_layout()
+        self._param_plot(lambda x: x.prior_plot(**kwargs), params, cols)
 
 
     def log_prob(self, 
@@ -934,49 +862,61 @@ class ContinuousModel(Model):
     """Abstract base class for probflow models where the dependent variable 
     (the target) is continuous and 1-dimensional.
 
+    TODO : why use this over just Model
 
-    TODO
+    This class inherits several methods from :class:`.Module`:
 
+    * :attr:`~parameters`
+    * :attr:`~modules`
+    * :attr:`~trainable_variables`
+    * :meth:`~kl_loss`
+    * :meth:`~kl_loss_batch`
+    * :meth:`~reset_kl_loss`
+    * :meth:`~add_kl_loss`
 
-    Methods
-    -------
+    as well as several methods from :class:`.Model`:
 
-    This class inherits several methods from :class:`.Model`:
-
-    * :func:`~probflow.models.ContinuousModel.__init__`
-    * :func:`~probflow.models.ContinuousModel.__call__`
-    * :func:`~probflow.models.ContinuousModel.parameters`
-    * :func:`~probflow.models.ContinuousModel.kl_loss`
-    * :func:`~probflow.models.ContinuousModel.fit`
-    * :func:`~probflow.models.ContinuousModel.stop_training`
-    * :func:`~probflow.models.ContinuousModel.set_learning_rate`
-    * :func:`~probflow.models.ContinuousModel.predictive_distribution`
-    * :func:`~probflow.models.ContinuousModel.mean_distribution`
-    * :func:`~probflow.models.ContinuousModel.predict`
-    * :func:`~probflow.models.ContinuousModel.metric`
-    * :func:`~probflow.models.ContinuousModel.posterior_mean`
-    * :func:`~probflow.models.ContinuousModel.posterior_sample`
-    * :func:`~probflow.models.ContinuousModel.posterior_plot`
-    * :func:`~probflow.models.ContinuousModel.prior_sample`
-    * :func:`~probflow.models.ContinuousModel.prior_plot`
-    * :func:`~probflow.models.ContinuousModel.log_prob`
-    * :func:`~probflow.models.ContinuousModel.log_prob_by`
-    * :func:`~probflow.models.ContinuousModel.prob`
-    * :func:`~probflow.models.ContinuousModel.prob_by`
-    * :func:`~probflow.models.ContinuousModel.summary`
+    * :meth:`~log_likelihood`
+    * :meth:`~train_step`
+    * :meth:`~fit`
+    * :meth:`~stop_training`
+    * :meth:`~set_learning_rate`
+    * :meth:`~predictive_sample`
+    * :meth:`~aleatoric_sample`
+    * :meth:`~epistemic_sample`
+    * :meth:`~predict`
+    * :meth:`~metric`
+    * :meth:`~posterior_mean`
+    * :meth:`~posterior_sample`
+    * :meth:`~posterior_ci`
+    * :meth:`~prior_sample`
+    * :meth:`~posterior_plot`
+    * :meth:`~prior_plot`
+    * :meth:`~log_prob`
+    * :meth:`~log_prob_by`
+    * :meth:`~prob`
+    * :meth:`~prob_by`
+    * :meth:`~save`
+    * :meth:`~summary`
 
     and adds the following continuous-model-specific methods:
 
-    * :func:`~probflow.models.ContinuousModel.confidence_intervals`
-    * :func:`~probflow.models.ContinuousModel.pred_dist_plot`
-    * :func:`~probflow.models.ContinuousModel.pred_dist_prc`
-    * :func:`~probflow.models.ContinuousModel.pred_dist_covered`
-    * :func:`~probflow.models.ContinuousModel.pred_dist_coverage`
-    * :func:`~probflow.models.ContinuousModel.coverage_by`
-    * :func:`~probflow.models.ContinuousModel.calibration_curve`
-    * :func:`~probflow.models.ContinuousModel.r_squared`
-    * :func:`~probflow.models.ContinuousModel.residuals`
-    * :func:`~probflow.models.ContinuousModel.residuals_plot`
+    * :meth:`~confidence_intervals`
+    * :meth:`~pred_dist_plot`
+    * :meth:`~predictive_prc`
+    * :meth:`~pred_dist_covered`
+    * :meth:`~pred_dist_coverage`
+    * :meth:`~coverage_by`
+    * :meth:`~calibration_curve`
+    * :meth:`~r_squared`
+    * :meth:`~r_squared_plot`
+    * :meth:`~residuals`
+    * :meth:`~residuals_plot`
+
+    Example
+    -------
+
+    TODO
 
     """
 
@@ -1356,11 +1296,11 @@ class ContinuousModel(Model):
     def r_squared(self,
                   x,
                   y=None,
-                  n=1000,
-                  plot=True):
-        """Compute the Bayesian R-squared value.
+                  n=1000):
+        """Compute the Bayesian R-squared distribution.
 
-        Compute the Bayesian R-squared distribution :ref:`[1] <ref_r_squared>`.
+        Compute the Bayesian R-squared distribution [Gelman, 2018]_
+
         TODO: more info and docs...
 
 
@@ -1393,11 +1333,26 @@ class ContinuousModel(Model):
 
         References
         ----------
-        .. _ref_r_squared:
-        .. [1] Andrew Gelman, Ben Goodrich, Jonah Gabry, & Aki Vehtari.
+
+        .. [Gelman, 2018] Andrew Gelman, Ben Goodrich, Jonah Gabry, 
+            & Aki Vehtari.
             R-squared for Bayesian regression models.
             *The American Statistician*, 2018.
             https://doi.org/10.1080/00031305.2018.1549100
+
+        """
+        pass
+        #TODO
+
+
+    def r_squared_plot(self,
+                       x,
+                       y=None,
+                       n=1000):
+        """Plot the Bayesian R-squared distribution.
+
+        TODO
+
         """
         pass
         #TODO
@@ -1450,51 +1405,65 @@ class DiscreteModel(ContinuousModel):
     """Abstract base class for probflow models where the dependent variable 
     (the target) is discrete (e.g. drawn from a Poisson distribution).
 
+    TODO : why use this over just Model
 
-    TODO
+    This class inherits several methods from :class:`.Module`:
 
+    * :attr:`~parameters`
+    * :attr:`~modules`
+    * :attr:`~trainable_variables`
+    * :meth:`~kl_loss`
+    * :meth:`~kl_loss_batch`
+    * :meth:`~reset_kl_loss`
+    * :meth:`~add_kl_loss`
 
-    Methods
-    -------
+    as well as several methods from :class:`.Model`:
 
-    This class inherits several methods from :class:`.Model`:
+    * :meth:`~log_likelihood`
+    * :meth:`~train_step`
+    * :meth:`~fit`
+    * :meth:`~stop_training`
+    * :meth:`~set_learning_rate`
+    * :meth:`~predictive_sample`
+    * :meth:`~aleatoric_sample`
+    * :meth:`~epistemic_sample`
+    * :meth:`~predict`
+    * :meth:`~metric`
+    * :meth:`~posterior_mean`
+    * :meth:`~posterior_sample`
+    * :meth:`~posterior_ci`
+    * :meth:`~prior_sample`
+    * :meth:`~posterior_plot`
+    * :meth:`~prior_plot`
+    * :meth:`~log_prob`
+    * :meth:`~log_prob_by`
+    * :meth:`~prob`
+    * :meth:`~prob_by`
+    * :meth:`~save`
+    * :meth:`~summary`
 
-    * :func:`~probflow.models.DiscreteModel.__init__`
-    * :func:`~probflow.models.DiscreteModel.__call__`
-    * :func:`~probflow.models.DiscreteModel.parameters`
-    * :func:`~probflow.models.DiscreteModel.kl_loss`
-    * :func:`~probflow.models.DiscreteModel.fit`
-    * :func:`~probflow.models.DiscreteModel.stop_training`
-    * :func:`~probflow.models.DiscreteModel.set_learning_rate`
-    * :func:`~probflow.models.DiscreteModel.predictive_distribution`
-    * :func:`~probflow.models.DiscreteModel.mean_distribution`
-    * :func:`~probflow.models.DiscreteModel.predict`
-    * :func:`~probflow.models.DiscreteModel.metric`
-    * :func:`~probflow.models.DiscreteModel.posterior_mean`
-    * :func:`~probflow.models.DiscreteModel.posterior_sample`
-    * :func:`~probflow.models.DiscreteModel.posterior_plot`
-    * :func:`~probflow.models.DiscreteModel.prior_sample`
-    * :func:`~probflow.models.DiscreteModel.prior_plot`
-    * :func:`~probflow.models.DiscreteModel.log_prob`
-    * :func:`~probflow.models.DiscreteModel.log_prob_by`
-    * :func:`~probflow.models.DiscreteModel.prob`
-    * :func:`~probflow.models.DiscreteModel.prob_by`
-    * :func:`~probflow.models.DiscreteModel.summary`
+    as well as several methods from :class:`.ContinuousModel`:
 
-    and also inherits several methods from :class:`.ContinuousModel`:
-
-    * :func:`~probflow.models.DiscreteModel.confidence_intervals`
-    * :func:`~probflow.models.DiscreteModel.pred_dist_prc`
-    * :func:`~probflow.models.DiscreteModel.pred_dist_covered`
-    * :func:`~probflow.models.DiscreteModel.pred_dist_coverage`
-    * :func:`~probflow.models.DiscreteModel.coverage_by`
-    * :func:`~probflow.models.DiscreteModel.calibration_curve`
-    * :func:`~probflow.models.DiscreteModel.residuals`
+    * :meth:`~confidence_intervals`
+    * :meth:`~predictive_prc`
+    * :meth:`~pred_dist_covered`
+    * :meth:`~pred_dist_coverage`
+    * :meth:`~coverage_by`
+    * :meth:`~calibration_curve`
+    * :meth:`~residuals`
 
     but overrides the following discrete-model-specific methods:
 
-    * :func:`~probflow.models.DiscreteModel.pred_dist_plot`
-    * :func:`~probflow.models.DiscreteModel.residuals_plot`
+    * :meth:`~pred_dist_plot`
+    * :meth:`~residuals_plot`
+
+    Note that :class:`.DiscreteModel` does *not* implement :meth:`~r_squared`
+    or :meth:`~r_squared_plot`.
+
+    Example
+    -------
+
+    TODO
 
     """
 
@@ -1578,6 +1547,11 @@ class DiscreteModel(ContinuousModel):
         raise RuntimeError('Cannot compute R squared for a discrete model')
 
 
+    def r_squared_plot(self, *args, **kwargs):
+        """Cannot compute R squared for a discrete model"""
+        raise RuntimeError('Cannot compute R squared for a discrete model')
+
+
     def residuals_plot(self, x, y=None):
         """Plot the distribution of residuals of the model's predictions.
 
@@ -1602,41 +1576,52 @@ class CategoricalModel(Model):
     """Abstract base class for probflow models where the dependent variable 
     (the target) is categorical (e.g. drawn from a Bernoulli distribution).
 
+    TODO : why use this over just Model
+    
+    This class inherits several methods from :class:`.Module`:
 
-    TODO
+    * :attr:`~parameters`
+    * :attr:`~modules`
+    * :attr:`~trainable_variables`
+    * :meth:`~kl_loss`
+    * :meth:`~kl_loss_batch`
+    * :meth:`~reset_kl_loss`
+    * :meth:`~add_kl_loss`
 
+    as well as several methods from :class:`.Model`:
 
-    Methods
-    -------
-
-    This class inherits several methods from :class:`.Model`:
-
-    * :func:`~probflow.models.CategoricalModel.__init__`
-    * :func:`~probflow.models.CategoricalModel.__call__`
-    * :func:`~probflow.models.CategoricalModel.parameters`
-    * :func:`~probflow.models.CategoricalModel.kl_loss`
-    * :func:`~probflow.models.CategoricalModel.fit`
-    * :func:`~probflow.models.CategoricalModel.stop_training`
-    * :func:`~probflow.models.CategoricalModel.set_learning_rate`
-    * :func:`~probflow.models.CategoricalModel.predictive_distribution`
-    * :func:`~probflow.models.CategoricalModel.mean_distribution`
-    * :func:`~probflow.models.CategoricalModel.predict`
-    * :func:`~probflow.models.CategoricalModel.metric`
-    * :func:`~probflow.models.CategoricalModel.posterior_mean`
-    * :func:`~probflow.models.CategoricalModel.posterior_sample`
-    * :func:`~probflow.models.CategoricalModel.posterior_plot`
-    * :func:`~probflow.models.CategoricalModel.prior_sample`
-    * :func:`~probflow.models.CategoricalModel.prior_plot`
-    * :func:`~probflow.models.CategoricalModel.log_prob`
-    * :func:`~probflow.models.CategoricalModel.log_prob_by`
-    * :func:`~probflow.models.CategoricalModel.prob`
-    * :func:`~probflow.models.CategoricalModel.prob_by`
-    * :func:`~probflow.models.CategoricalModel.summary`
+    * :meth:`~log_likelihood`
+    * :meth:`~train_step`
+    * :meth:`~fit`
+    * :meth:`~stop_training`
+    * :meth:`~set_learning_rate`
+    * :meth:`~predictive_sample`
+    * :meth:`~aleatoric_sample`
+    * :meth:`~epistemic_sample`
+    * :meth:`~predict`
+    * :meth:`~metric`
+    * :meth:`~posterior_mean`
+    * :meth:`~posterior_sample`
+    * :meth:`~posterior_ci`
+    * :meth:`~prior_sample`
+    * :meth:`~posterior_plot`
+    * :meth:`~prior_plot`
+    * :meth:`~log_prob`
+    * :meth:`~log_prob_by`
+    * :meth:`~prob`
+    * :meth:`~prob_by`
+    * :meth:`~save`
+    * :meth:`~summary`
 
     and adds the following categorical-model-specific methods:
 
-    * :func:`~probflow.models.CategoricalModel.pred_dist_plot`
-    * :func:`~probflow.models.CategoricalModel.calibration_curve`
+    * :meth:`~pred_dist_plot`
+    * :meth:`~calibration_curve`
+
+    Example
+    -------
+
+    TODO
 
     """
 

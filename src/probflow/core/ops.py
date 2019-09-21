@@ -88,6 +88,8 @@ def kl_divergence(P, Q):
 
 def expand_dims(val, axis):
     """Add a singular dimension to a Tensor"""
+    if axis is None:
+        return val
     if get_backend() == 'pytorch':
         import torch
         return torch.unsqueeze(val, axis)
