@@ -45,4 +45,5 @@ TODO: diagram
                     self.b = pf.Parameter([1, 1])
                 
                 def __call__(self, x):
+                    x = torch.tensor(x)
                     return pf.Poisson(torch.exp(x @ self.w() + self.b()))

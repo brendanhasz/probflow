@@ -1,22 +1,20 @@
 ProbFlow
 ========
 
-|Build Badge|  |Coverage Badge|  |Docs Badge|
+|Version Badge|  |Build Badge|  |Docs Badge|  |Coverage Badge|
 
-.. |Docs Badge| image:: https://readthedocs.org/projects/probflow/badge/
-    :alt: Documentation Status
-    :scale: 100%
-    :target: http://probflow.readthedocs.io
+.. |Version Badge| image:: https://img.shields.io/pypi/v/probflow
+    :target: https://pypi.org/project/probflow/
 
 .. |Build Badge| image:: https://travis-ci.com/brendanhasz/probflow.svg
-    :alt: Build Status
-    :scale: 100%
     :target: https://travis-ci.com/brendanhasz/probflow
 
+.. |Docs Badge| image:: https://readthedocs.org/projects/probflow/badge/
+    :target: http://probflow.readthedocs.io
+
 .. |Coverage Badge| image:: https://codecov.io/gh/brendanhasz/probflow/branch/master/graph/badge.svg
-    :alt: Build Status
-    :scale: 100%
     :target: https://codecov.io/gh/brendanhasz/probflow
+
 
 .. toctree::
    :maxdepth: 1
@@ -54,21 +52,47 @@ For example, a simple Bayesian linear regression
 
 can be built by creating a ProbFlow Model object:
 
-.. code-block:: python3
 
-    import probflow as pf
+.. tabs::
 
-    class LinearRegression(pf.ContinuousModel):
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
 
-        def __init__(self):
-            self.weight = pf.Parameter(name='weight')
-            self.bias = pf.Parameter(name='bias')
-            self.std = pf.ScaleParameter(name='sigma')
+            import probflow as pf
 
-        def __call__(self, x):
-            return pf.Normal(x*self.weight()+self.bias(), self.std())
-    
-    model = LinearRegression()
+            class LinearRegression(pf.ContinuousModel):
+
+                def __init__(self):
+                    self.weight = pf.Parameter(name='weight')
+                    self.bias = pf.Parameter(name='bias')
+                    self.std = pf.ScaleParameter(name='sigma')
+
+                def __call__(self, x):
+                    return pf.Normal(x*self.weight()+self.bias(), self.std())
+            
+            model = LinearRegression()
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            import probflow as pf
+            import torch
+
+            class LinearRegression(pf.ContinuousModel):
+
+                def __init__(self):
+                    self.weight = pf.Parameter(name='weight')
+                    self.bias = pf.Parameter(name='bias')
+                    self.std = pf.ScaleParameter(name='sigma')
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    return pf.Normal(x*self.weight()+self.bias(), self.std())
+            
+            model = LinearRegression()
+
 
 Then, the model can be fit using variational inference, in *one line*:
 
@@ -173,10 +197,12 @@ ProbFlow also provides more complex layers, such as those required for building 
                     self.std = pf.ScaleParameter(name='std')
 
                 def __call__(self, x):
+                    x = torch.tensor(x)
                     return pf.Normal(self.net(x), self.std())
             
             model = DenseRegression()
             model.fit(x, y)
+            
 
 For convenience, ProbFlow also includes several :ref:`pre-built models <ug_applications>` for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made :class:`LinearRegression <probflow.applications.LinearRegression>` model:
 

@@ -41,6 +41,7 @@ from probflow.core.base import BaseModule
 from probflow.core.base import BaseDataGenerator
 from probflow.core.base import BaseCallback
 import probflow.core.ops as O
+from probflow.utils.casting import to_numpy
 from probflow.modules import Module
 from probflow.utils.plotting import plot_dist
 from probflow.data import DataGenerator
@@ -109,32 +110,46 @@ class Model(Module):
         return O.sum(log_likelihoods, axis=None)
 
 
+    def elbo_loss(self, x_data, y_data, n):
+        """Compute the negative ELBO, scaled to a single sample"""
+        nb = y_data.shape[0] #number of samples in this batch
+        log_loss = self.log_likelihood(x_data, y_data)/nb
+        kl_loss = self.kl_loss()/n + self.kl_loss_batch()/nb
+        return kl_loss - log_loss
+
+
     def _train_step_tf(self, n, flipout):
         """Get the training step function for TensorFlow"""
 
         import tensorflow as tf
 
         #@tf.function
-        def train_step(x_data, y_data):
-            nb = y_data.shape[0] #number of samples in this batch
+        def train_fn(x_data, y_data):
             self.reset_kl_loss()
             with Sampling(n=1, flipout=flipout):
                 with tf.GradientTape() as tape:
-                    log_loss = self.log_likelihood(x_data, y_data)/nb
-                    kl_loss = self.kl_loss()/n + self.kl_loss_batch()/nb
-                    elbo_loss = kl_loss - log_loss
+                    elbo_loss = self.elbo_loss(x_data, y_data, n)
                 variables = self.trainable_variables
                 gradients = tape.gradient(elbo_loss, variables)
                 self._optimizer.apply_gradients(zip(gradients, variables))
-            return elbo_loss
 
-        return train_step
+        return train_fn
 
 
     def _train_step_pt(self, n, flipout):
         """Get the training step function for PyTorch"""
-        raise NotImplementedError
-        # TODO
+
+        import torch
+
+        def train_fn(x_data, y_data):
+            self.reset_kl_loss()
+            with Sampling(n=1, flipout=flipout):
+                self._optimizer.zero_grad()
+                elbo_loss = self.elbo_loss(x_data, y_data, n)                
+                elbo_loss.backward()
+                self._optimizer.step()
+
+        return train_fn
 
 
     def train_step(self, x_data, y_data):
@@ -207,8 +222,9 @@ class Model(Module):
         if optimizer is None:
             if get_backend() == 'pytorch':
                 import torch
-                raise NotImplementedError
-                # TODO
+                self._optimizer = torch.optim.Adam(
+                    self.trainable_variables,
+                    lr=self._learning_rate, **optimizer_kwargs)
             else:
                 import tensorflow as tf
                 self._optimizer = tf.keras.optimizers.Adam(
@@ -265,10 +281,10 @@ class Model(Module):
         samples = []
         for x_data, y_data in make_generator(x, test=True):
             if x_data is None:
-                samples += [func(self()).numpy()]
+                samples += [func(self())]
             else:
-                samples += [func(self(O.expand_dims(x_data, ed))).numpy()]
-        return np.concatenate(samples, axis=axis)
+                samples += [func(self(O.expand_dims(x_data, ed)))]
+        return np.concatenate(to_numpy(samples), axis=axis)
 
 
     def predictive_sample(self, x=None, n=1000):
@@ -431,9 +447,9 @@ class Model(Module):
         y_pred = []
         for x_data, y_data in make_generator(x, y, test=True):
             y_true += [y_data]
-            y_pred += [self(x_data).mean().numpy()]
-        y_true = np.concatenate(y_true, axis=0)
-        y_pred = np.concatenate(y_pred, axis=0)
+            y_pred += [self(x_data).mean()]
+        y_true = np.concatenate(to_numpy(y_true), axis=0)
+        y_pred = np.concatenate(to_numpy(y_pred), axis=0)
 
         # Compute metric between true values and predictions
         metric_fn = get_metric_fn(metric)
@@ -682,23 +698,23 @@ class Model(Module):
                 probs = []
                 for i in range(n):
                     t_probs = []
-                    for x_data, y_data in make_generator(x, y, test=True):
+                    for x_data, y_data in make_generator(x, y):
                         if x_data is None:
-                            t_probs += [self().log_prob(y_data).numpy()]
+                            t_probs += [self().log_prob(y_data)]
                         else:
-                            t_probs += [self(x_data).log_prob(y_data).numpy()]
-                    probs += [np.concatenate(t_probs, axis=0)]
-            probs = np.stack(probs, axis=probs[0].ndim)
+                            t_probs += [self(x_data).log_prob(y_data)]
+                    probs += [np.concatenate(to_numpy(t_probs), axis=0)]
+            probs = np.stack(to_numpy(probs), axis=probs[0].ndim)
 
         # Use MAP estimates
         else:
             probs = []
-            for x_data, y_data in make_generator(x, y, test=True):
+            for x_data, y_data in make_generator(x, y):
                 if x_data is None:
-                    probs += [self().log_prob(y_data).numpy()]
+                    probs += [self().log_prob(y_data)]
                 else:
-                    probs += [self(x_data).log_prob(y_data).numpy()]
-            probs = np.concatenate(probs, axis=0)
+                    probs += [self(x_data).log_prob(y_data)]
+            probs = np.concatenate(to_numpy(probs), axis=0)
 
         # Return log prob of each sample or sum of log probs
         if individually:
@@ -1297,9 +1313,7 @@ class ContinuousModel(Model):
                   x,
                   y=None,
                   n=1000):
-        """Compute the Bayesian R-squared distribution.
-
-        Compute the Bayesian R-squared distribution [Gelman, 2018]_
+        """Compute the Bayesian R-squared distribution (Gelman et al., 2018).
 
         TODO: more info and docs...
 
@@ -1315,30 +1329,26 @@ class ContinuousModel(Model):
         n : int
             Number of posterior draws to use for computing the r-squared
             distribution.  Default = `1000`.
-        plot : bool
-            Whether to plot the r-squared distribution
+
 
         Returns
         -------
         |ndarray|
             Samples from the r-squared distribution.  Size: ``(num_samples,)``.
 
-        Notes
-        -----
-        TODO: Docs...
 
         Examples
         --------
         TODO: Docs...
 
+
         References
         ----------
 
-        .. [Gelman, 2018] Andrew Gelman, Ben Goodrich, Jonah Gabry, 
-            & Aki Vehtari.
-            R-squared for Bayesian regression models.
-            *The American Statistician*, 2018.
-            https://doi.org/10.1080/00031305.2018.1549100
+        - Andrew Gelman, Ben Goodrich, Jonah Gabry, & Aki Vehtari.
+          `R-squared for Bayesian regression models. <https://doi.org/10.1080/00031305.2018.1549100>`_
+          *The American Statistician*, 2018.
+            
 
         """
         pass

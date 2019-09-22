@@ -5,9 +5,7 @@
 import pytest
 
 import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
-tfd = tfp.distributions
+import torch
 
 from probflow.core.settings import Sampling
 import probflow.core.ops as O
@@ -35,6 +33,7 @@ def test_Model_0D():
             self.std = ScaleParameter(name='Std')
 
         def __call__(self, x):
+            x = torch.tensor(x)
             return Normal(x*self.weight() + self.bias(), self.std())
 
     # Instantiate the model
@@ -283,6 +282,7 @@ def test_Model_DataGenerators():
             self.std = ScaleParameter(name='Std')
 
         def __call__(self, x):
+            x = torch.tensor(x)
             return Normal(x*self.weight() + self.bias(), self.std())
 
     # Instantiate the model
@@ -343,6 +343,7 @@ def test_Model_1D():
             self.std = ScaleParameter([1, 1], name='Std')
 
         def __call__(self, x):
+            x = torch.tensor(x)
             return Normal(x@self.weight() + self.bias(), self.std())
 
     # Instantiate the model
@@ -567,7 +568,7 @@ def test_generative_Model():
     model = MyModel()
 
     # Data
-    X = np.random.randn(100, 1)
+    X = np.random.randn(100, 1).astype('float32')
 
     # Fit the model
     model.fit(X, batch_size=10, epochs=3)
@@ -580,7 +581,7 @@ def test_generative_Model():
     assert samples.shape[1] == 1
 
     # log_prob
-    y = np.random.randn(10, 1)
+    y = np.random.randn(10, 1).astype('float32')
     probs = model.log_prob(y)
     assert isinstance(probs, np.ndarray)
     assert probs.ndim == 2
@@ -626,6 +627,7 @@ def test_Model_nesting():
             self.std = ScaleParameter([1, 1], name='Std')
 
         def __call__(self, x):
+            x = torch.tensor(x)
             return Normal(self.module(x), self.std())
 
     # Instantiate the model
@@ -651,7 +653,8 @@ def test_Model_nesting():
     assert samples.shape[2] == 1
 
     # kl loss should be greater for outer model
-    assert my_model.kl_loss().numpy() > my_model.module.kl_loss().numpy()
+    assert (my_model.kl_loss().detach().numpy() > 
+            my_model.module.kl_loss().detach().numpy())
 
 
 

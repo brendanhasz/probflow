@@ -58,6 +58,7 @@ from probflow.core.settings import Sampling
 from probflow.core.base import BaseParameter
 from probflow.core.base import BaseDistribution
 import probflow.core.ops as O
+from probflow.utils.casting import to_numpy
 from probflow.distributions import Normal
 from probflow.distributions import Gamma
 from probflow.distributions import Categorical
@@ -270,7 +271,7 @@ class Parameter(BaseParameter):
 
         TODO
         """
-        return self().numpy()
+        return to_numpy(self())
 
 
     def posterior_sample(self, n: int = 1):
@@ -289,7 +290,7 @@ class Parameter(BaseParameter):
         if n < 1:
             raise ValueError('n must be positive')
         with Sampling(n=n):
-            return self().numpy()
+            return to_numpy(self())
 
 
     def prior_sample(self, n: int = 1):
@@ -311,9 +312,9 @@ class Parameter(BaseParameter):
             ``(self.prior.shape)``.
         """
         if n==1:
-            return self.transform(self.prior.sample()).numpy()
+            return to_numpy(self.transform(self.prior.sample()))
         else:
-            return self.transform(self.prior.sample(n)).numpy()
+            return to_numpy(self.transform(self.prior.sample(n)))
 
 
     def posterior_ci(self, ci: float = 0.95, n: int = 10000):

@@ -108,6 +108,13 @@ def test_plot_dist(plot):
     with pytest.raises(ValueError):
         pf.utils.plotting.plot_dist(data, style='lala')
 
+    # Should be able to show multiple distributions
+    data = np.random.randn(1000, 3) + np.array([[-2., 0., 2.]])
+    pf.utils.plotting.plot_dist(data, ci=0.9)
+    if plot:
+        plt.title('should be 3 kde density (filled) w/ ci')
+        plt.show()
+
 
 
 def test_plot_line(plot):

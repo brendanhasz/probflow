@@ -38,6 +38,10 @@ def test_kl_divergence():
     assert (ops.kl_divergence(d1, d2).numpy() <
             ops.kl_divergence(d1, d3).numpy())
 
+    # Should auto-convert probflow distibutions
+    dist = pf.Normal(0, 1)
+    assert ops.kl_divergence(dist, dist).numpy() == 0.0
+
 
 
 def test_expand_dims():
@@ -157,6 +161,13 @@ def test_sum():
     assert val.shape[0] == 5
     assert val.shape[1] == 3
     assert np.all(val.numpy() == 4.0)
+
+    # Should sum along all dimensions w/ axis=None
+    ones = torch.ones([5, 4, 3])
+    val = ops.sum(ones, axis=None)
+    assert isinstance(val, torch.Tensor)
+    assert val.ndim == 0
+    assert val.numpy() == 60
 
     # Actually test values
     val = ops.sum(torch.Tensor([1.1, 2.0, 3.3]))

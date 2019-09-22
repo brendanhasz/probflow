@@ -26,18 +26,39 @@ TODO: generate some data
 
 TODO: create the model via the subclassing api
 
-.. code-block:: python3
+.. tabs::
 
-    import probflow as pf
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
 
-    class LogisticRegression(pf.Model):
+            import probflow as pf
 
-        def __init__(self, dims):
-            self.w = pf.Parameter([dims, 1])
-            self.b = pf.Parameter()
+            class LogisticRegression(pf.Model):
 
-        def __call__(self, x):
-            return pf.Bernoulli(x @ self.w() + self.b())
+                def __init__(self, dims):
+                    self.w = pf.Parameter([dims, 1])
+                    self.b = pf.Parameter()
+
+                def __call__(self, x):
+                    return pf.Bernoulli(x @ self.w() + self.b())
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            import probflow as pf
+            import torch
+
+            class LogisticRegression(pf.Model):
+
+                def __init__(self, dims):
+                    self.w = pf.Parameter([dims, 1])
+                    self.b = pf.Parameter()
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    return pf.Bernoulli(x @ self.w() + self.b())
 
 By default, the :class:`.Bernoulli` distribution treats its inputs as logits (that is, it passes the inputs through a sigmoid function to get the output class probabilities).  To force it to treat the inputs as raw probability values, use the ``probs`` keyword argument:
 
@@ -60,15 +81,32 @@ Using the Dense Layer
 
 TODO: can do the same thing with Dense:
 
-.. code-block:: python3
+.. tabs::
 
-    class LogisticRegression(pf.Model):
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
 
-        def __init__(self, dims):
-            self.layer = pf.Dense(dims, 1)
+            class LogisticRegression(pf.Model):
 
-        def __call__(self, x):
-            return pf.Bernoulli(self.layer(x))
+                def __init__(self, dims):
+                    self.layer = pf.Dense(dims, 1)
+
+                def __call__(self, x):
+                    return pf.Bernoulli(self.layer(x))
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            class LogisticRegression(pf.Model):
+
+                def __init__(self, dims):
+                    self.layer = pf.Dense(dims, 1)
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    return pf.Bernoulli(self.layer(x))
 
 
 Using the LogisticRegression Model

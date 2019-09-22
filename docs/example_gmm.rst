@@ -14,6 +14,8 @@ TODO: diagram
 
 .. code-block:: python3
 
+    import probflow as pf
+    
     class GaussianMixtureModel(pf.Model):
 
         def __init__(self, d, k):

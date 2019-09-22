@@ -30,19 +30,41 @@ TODO: manually (generate some data)
 
 TODO: talk about subclassing API
 
-.. code-block:: python3
+.. tabs::
 
-    import probflow as pf
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
 
-    class SimpleLinearRegression(pf.Model):
+            import probflow as pf
 
-        def __init__(self):
-            self.w = pf.Parameter()
-            self.b = pf.Parameter()
-            self.s = pf.ScaleParameter()
+            class SimpleLinearRegression(pf.Model):
 
-        def __call__(self, x):
-            return pf.Normal(x*self.w()+self.b(), self.s())
+                def __init__(self):
+                    self.w = pf.Parameter()
+                    self.b = pf.Parameter()
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    return pf.Normal(x*self.w()+self.b(), self.s())
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            import probflow as pf
+            import torch
+
+            class SimpleLinearRegression(pf.Model):
+
+                def __init__(self):
+                    self.w = pf.Parameter()
+                    self.b = pf.Parameter()
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    return pf.Normal(x*self.w()+self.b(), self.s())
 
 TODO: initialize and fit
 
@@ -69,17 +91,36 @@ TODO: generate some data
 
 TODO: again build w/ subclassing API
 
-.. code-block:: python3
+.. tabs::
 
-    class MultipleLinearRegression(pf.Model):
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
 
-        def __init__(self, dims):
-            self.w = pf.Parameter([dims, 1])
-            self.b = pf.Parameter()
-            self.s = pf.ScaleParameter()
+            class MultipleLinearRegression(pf.Model):
 
-        def __call__(self, x):
-            return pf.Normal(x @ self.w() + self.b(), self.s())
+                def __init__(self, dims):
+                    self.w = pf.Parameter([dims, 1])
+                    self.b = pf.Parameter()
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    return pf.Normal(x @ self.w() + self.b(), self.s())
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            class MultipleLinearRegression(pf.Model):
+
+                def __init__(self, dims):
+                    self.w = pf.Parameter([dims, 1])
+                    self.b = pf.Parameter()
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    return pf.Normal(x @ self.w() + self.b(), self.s())
 
 TODO: initialize and fit
 

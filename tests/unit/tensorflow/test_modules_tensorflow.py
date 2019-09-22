@@ -152,7 +152,7 @@ def test_Module():
 
     # Should be able to initialize and add kl losses
     the_module.reset_kl_loss()
-    assert the_module.kl_loss_batch().numpy() == 0
+    assert the_module.kl_loss_batch() == 0
     the_module.add_kl_loss(3.145)
     assert is_close(the_module.kl_loss_batch().numpy(), 3.145)
 

@@ -46,6 +46,7 @@ net on top, which does binary classification
                     self.net = pf.DenseNetwork([Dcat+Dcon, 1])
 
                 def __call__(self, x):
+                    x = torch.tensor(x)
                     embeddings = self.emb(x[:, 0])
                     logits = self.net(torch.cat([embeddings, x[:, 1:]], -1))
                     return pf.Bernoulli(logits)

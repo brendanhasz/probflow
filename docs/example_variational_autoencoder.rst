@@ -14,20 +14,43 @@ TODO: diagram
 TODO: talk about how this model requires adding additional KL divergence term
 (for the latent representation posterior vs prior).
 
-.. code-block:: python
+.. tabs::
 
-    import probflow as pf
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python
 
-    class VariationalAutoencoder(pf.ContinuousModel):
+            import probflow as pf
 
-        def __init__(self, dims)
-            self.encoder = pf.DenseRegression(dims, heteroscedastic=True)
-            self.decoder = pf.DenseRegression(dims[::-1], heteroscedastic=True)
+            class VariationalAutoencoder(pf.ContinuousModel):
 
-        def __call__(self, x):
-            z = self.encoder(x)
-            self.add_kl_loss(z, pf.Normal(0, 1))
-            return self.decoder(z.sample())
+                def __init__(self, dims)
+                    self.encoder = pf.DenseRegression(dims, heteroscedastic=True)
+                    self.decoder = pf.DenseRegression(dims[::-1], heteroscedastic=True)
+
+                def __call__(self, x):
+                    z = self.encoder(x)
+                    self.add_kl_loss(z, pf.Normal(0, 1))
+                    return self.decoder(z.sample())
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python
+
+            import probflow as pf
+            import torch
+
+            class VariationalAutoencoder(pf.ContinuousModel):
+
+                def __init__(self, dims)
+                    self.encoder = pf.DenseRegression(dims, heteroscedastic=True)
+                    self.decoder = pf.DenseRegression(dims[::-1], heteroscedastic=True)
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    z = self.encoder(x)
+                    self.add_kl_loss(z, pf.Normal(0, 1))
+                    return self.decoder(z.sample())
 
 
 Then we can create an instance of the model, defining the dimensionality of

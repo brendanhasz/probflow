@@ -45,6 +45,7 @@ TODO: math and diagram
                     self.b = pf.Parameter(2)
                     
                 def __call__(self, x):
+                    x = torch.tensor(x)
                     p = x @ self.w() + self.b()
                     means = p[:, 0]
                     stds = torch.exp(p[:, 1])
@@ -84,6 +85,7 @@ TODO: you could also use a t-dist + estimate the dof
                     self.df = pf.ScaleParameter()
                     
                 def __call__(self, x):
+                    x = torch.tensor(x)
                     p = x @ self.w() + self.b()
                     means = p[:, 0]
                     stds = torch.exp(p[:, 1])

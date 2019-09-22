@@ -27,6 +27,7 @@ __all__ = [
 from typing import List, Callable, Union
 
 import probflow.core.ops as O
+from probflow.utils.casting import to_tensor
 from probflow.parameters import Parameter
 from probflow.parameters import ScaleParameter
 from probflow.distributions import Normal
@@ -77,6 +78,7 @@ class LinearRegression(ContinuousModel):
 
 
     def __call__(self, x):
+        x = to_tensor(x)
         if self.heteroscedastic:
             p = x @ self.weights()
             m_preds = p[:, 0:1] + self.bias()
@@ -115,6 +117,7 @@ class LogisticRegression(CategoricalModel):
 
 
     def __call__(self, x):
+        x = to_tensor(x)
         return Categorical(O.add_col_of(x @ self.weights() + self.bias(), 0))
 
 
@@ -143,6 +146,7 @@ class PoissonRegression(DiscreteModel):
 
 
     def __call__(self, x):
+        x = to_tensor(x)
         return Poisson(O.exp(x @ self.weights() + self.bias()))
 
 
@@ -187,6 +191,7 @@ class DenseNetwork(Module):
 
 
     def __call__(self, x):
+        x = to_tensor(x)
         for i in range(len(self.layers)):
             x = self.layers[i](x)
             x = self.activations[i](x)
@@ -232,6 +237,7 @@ class DenseRegression(ContinuousModel):
 
 
     def __call__(self, x):
+        x = to_tensor(x)
         if self.heteroscedastic:
             p = self.network(x)
             Nd = int(p.shape[-1]/2)
@@ -269,4 +275,5 @@ class DenseClassifier(CategoricalModel):
 
 
     def __call__(self, x):
+        x = to_tensor(x)
         return Categorical(O.add_col_of(self.network(x), 0))

@@ -47,7 +47,7 @@ __all__ = [
 
 from probflow.core.settings import get_backend
 from probflow.core.base import BaseDistribution
-
+from probflow.utils.casting import make_input_tensor
 
 
 def kl_divergence(P, Q):
@@ -85,7 +85,7 @@ def kl_divergence(P, Q):
 # TODO: all other ops used by probflow internals
 
 
-
+@make_input_tensor
 def expand_dims(val, axis):
     """Add a singular dimension to a Tensor"""
     if axis is None:
@@ -128,7 +128,7 @@ def sum(val, axis=-1):
         if axis is None:
             return torch.sum(val)
         else:
-            return torch.sum(val, dim=axis)
+            return torch.sum(val, axis)
     else:
         import tensorflow as tf
         return tf.reduce_sum(val, axis=axis)

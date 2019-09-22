@@ -21,22 +21,47 @@ Manually with One-hot Encoding
 
 TODO: diagram
 
-.. code-block:: python3
+.. tabs::
 
-    class LinearMixedEffectsModel(pf.Model):
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
 
-        def __init__(self, Fd, Rd):
-            self.Fd = Fd
-            self.beta = pf.Parameter([Fd, 1])
-            self.mu = pf.Parameter([Rd, 1])
-            self.sigma = pf.ScaleParameter()
+            import probflow as pf
 
-        def __call__(self, x):
-            beta = self.beta()
-            mu = self.mu()
-            X = x[:, :self.Fd]
-            Z = x[:, self.Fd:]
-            return pf.Normal(X @ beta + Z @ mu, self.sigma())
+            class LinearMixedEffectsModel(pf.Model):
+
+                def __init__(self, Fd, Rd):
+                    self.Fd = Fd
+                    self.beta = pf.Parameter([Fd, 1])
+                    self.mu = pf.Parameter([Rd, 1])
+                    self.sigma = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    X = x[:, :self.Fd]
+                    Z = x[:, self.Fd:]
+                    return pf.Normal(X @ self.beta() + Z @ self.mu(), self.sigma())
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            import probflow as pf
+            import torch
+
+            class LinearMixedEffectsModel(pf.Model):
+
+                def __init__(self, Fd, Rd):
+                    self.Fd = Fd
+                    self.beta = pf.Parameter([Fd, 1])
+                    self.mu = pf.Parameter([Rd, 1])
+                    self.sigma = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    X = x[:, :self.Fd]
+                    Z = x[:, self.Fd:]
+                    return pf.Normal(X @ self.beta() + Z @ self.mu(), self.sigma())
 
 
 Using the Embedding Module
@@ -46,15 +71,35 @@ TODO: explain how you can instead use a 1d embedding module to model random effe
 
 TODO: below code assumes you have one random effect (IDs in last col of X)
 
-.. code-block:: python3
+.. tabs::
 
-    class LinearMixedEffectsModel(pf.Model):
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
 
-        def __init__(self, Fd, Nr):
-            self.beta = pf.Parameter([Fd, 1])
-            self.emb = pf.Embedding(Nr, 1)
-            self.sigma = pf.ScaleParameter()
+            class LinearMixedEffectsModel(pf.Model):
 
-        def __call__(self, x):
-            preds = x[:, :-1] @ self.beta() + self.emb(x[:, -1])
-            return pf.Normal(preds, self.sigma())
+                def __init__(self, Fd, Nr):
+                    self.beta = pf.Parameter([Fd, 1])
+                    self.emb = pf.Embedding(Nr, 1)
+                    self.sigma = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    preds = x[:, :-1] @ self.beta() + self.emb(x[:, -1])
+                    return pf.Normal(preds, self.sigma())
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            class LinearMixedEffectsModel(pf.Model):
+
+                def __init__(self, Fd, Nr):
+                    self.beta = pf.Parameter([Fd, 1])
+                    self.emb = pf.Embedding(Nr, 1)
+                    self.sigma = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    preds = x[:, :-1] @ self.beta() + self.emb(x[:, -1])
+                    return pf.Normal(preds, self.sigma())

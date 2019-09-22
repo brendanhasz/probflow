@@ -69,6 +69,10 @@ def test_Deterministic():
     assert isinstance(samples, torch.Tensor)
     assert samples.ndim == 1
     assert samples.shape[0] == 10
+    samples = dist.sample(torch.tensor([10]))
+    assert isinstance(samples, torch.Tensor)
+    assert samples.ndim == 1
+    assert samples.shape[0] == 10
 
     # Should be able to set params
     dist = pfd.Deterministic(loc=2)

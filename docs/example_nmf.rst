@@ -49,8 +49,8 @@ TODO: for a vanilla matrix factorization, description, diagram, math
                     self.item_emb = pf.Embedding(Ni, Nd)
 
                 def __call__(self, x):
-                    user_vec = self.user_emb(x['user_id'])
-                    item_vec = self.item_emb(x['item_id'])
+                    user_vec = self.user_emb(torch.tensor(x['user_id']))
+                    item_vec = self.item_emb(torch.tensor(x['item_id']))
                     logits = user_vec @ torch.t(item_vec)
                     return pf.Bernoulli(logits)
 
@@ -109,8 +109,8 @@ TODO: cite https://arxiv.org/abs/1708.05031
                     self.net = pf.DenseNetwork(dims)
 
                 def __call__(self, x):
-                    user_vec = self.user_emb(x['user_id'])
-                    item_vec = self.item_emb(x['item_id'])
+                    user_vec = self.user_emb(torch.tensor(x['user_id']))
+                    item_vec = self.item_emb(torch.tensor(x['item_id']))
                     logits = self.net(torch.cat([user_vec, item_vec], 1))
                     return pf.Bernoulli(logits)
 
@@ -161,10 +161,12 @@ or for neural matrix factorization https://arxiv.org/abs/1708.05031
                     self.linear = pf.Dense(dims[-1]+Nd)
 
                 def __call__(self, x):
-                    user_mf = self.user_mf(x['user_id'])
-                    item_mf = self.item_mf(x['item_id'])
-                    user_ncf = self.user_ncf(x['user_id'])
-                    item_ncf = self.item_ncf(x['item_id'])
+                    uid = torch.tensor(x['user_id'])
+                    iid = torch.tensor(x['item_id'])
+                    user_mf = self.user_mf(uid)
+                    item_mf = self.item_mf(iid)
+                    user_ncf = self.user_ncf(uid)
+                    item_ncf = self.item_ncf(iid)
                     preds_mf = user_mf*item_mf
                     preds_ncf = self.net(torch.cat([user_ncf, item_ncf], 1))
                     logits = self.linear(torch.cat([preds_mf, preds_ncf], 1))

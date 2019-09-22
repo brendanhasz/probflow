@@ -23,18 +23,41 @@ TODO: diagram
 
 First we'll make a module which represents a single fully-connected layer:
 
-.. code-block:: python3
+.. tabs::
 
-    import probflow as pf
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
 
-    class DenseLayer(pf.Module):
+            import probflow as pf
+            import tensorflow as tf
 
-        def __init__(self, d_in, d_out):
-            self.w = pf.Parameter([d_in, d_out])
-            self.b = pf.Parameter([d_out, 1])
+            class DenseLayer(pf.Module):
 
-        def __call__(self, x):
-            return x @ self.w() + self.b()
+                def __init__(self, d_in, d_out):
+                    self.w = pf.Parameter([d_in, d_out])
+                    self.b = pf.Parameter([d_out, 1])
+
+                def __call__(self, x):
+                    return x @ self.w() + self.b()
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            import probflow as pf
+            import torch
+
+            class DenseLayer(pf.Module):
+
+                def __init__(self, d_in, d_out):
+                    self.w = pf.Parameter([d_in, d_out])
+                    self.b = pf.Parameter([d_out, 1])
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    return x @ self.w() + self.b()
+
 
 Note that we've used ``@``, the 
 `infix operator for matrix multiplication <https://docs.python.org/3/whatsnew/3.5.html#whatsnew-pep-465>`_.
@@ -47,8 +70,6 @@ stacks several of those layers, with activation functions in between each:
     .. group-tab:: TensorFlow
             
         .. code-block:: python3
-
-            import tensorflow as tf
 
             class DenseNetwork(pf.Module):
                 
@@ -69,8 +90,6 @@ stacks several of those layers, with activation functions in between each:
             
         .. code-block:: python3
 
-            import torch
-
             class DenseNetwork(pf.Module):
                 
                 def __init__(self, dims):
@@ -81,6 +100,7 @@ stacks several of those layers, with activation functions in between each:
 
 
                 def __call__(self, x):
+                    x = torch.tensor(x)
                     for i in range(len(self.layers)):
                         x = self.layers[i](x)
                         x = self.activations[i](x)
@@ -108,16 +128,34 @@ function:
 Finally, we can create a |Model| which uses the network |Module| we've just created.  This model consists of a normal distribution whose mean is predicted
 by the neural network:
 
-.. code-block:: python3
+.. tabs::
 
-    class DenseRegression(pf.Model):
-        
-        def __init__(self, dims):
-            self.net = DenseNetwork(dims)
-            self.s = pf.ScaleParameter()
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
 
-        def __call__(self, x):
-            return pf.Normal(self.net(x), self.s())
+            class DenseRegression(pf.Model):
+                
+                def __init__(self, dims):
+                    self.net = DenseNetwork(dims)
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    return pf.Normal(self.net(x), self.s())
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            class DenseRegression(pf.Model):
+                
+                def __init__(self, dims):
+                    self.net = DenseNetwork(dims)
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    return pf.Normal(self.net(x), self.s())
 
 TODO: then can fit the net
 
@@ -170,6 +208,7 @@ TODO: the Dense module handles creating the variables for you, and the Sequentia
                     self.s = pf.ScaleParameter()
 
                 def __call__(self, x):
+                    x = torch.tensor(x)
                     return pf.Normal(self.net(x), self.s())
 
 TODO: then can fit the net

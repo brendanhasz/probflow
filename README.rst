@@ -1,21 +1,18 @@
 ProbFlow
 ========
 
-|Build Badge|  |Coverage Badge|  |Docs Badge|
+|Version Badge|  |Build Badge|  |Docs Badge|  |Coverage Badge|
 
-.. |Docs Badge| image:: https://readthedocs.org/projects/probflow/badge/
-    :alt: Documentation Status
-    :scale: 100%
-    :target: http://probflow.readthedocs.io
+.. |Version Badge| image:: https://img.shields.io/pypi/v/probflow
+    :target: https://pypi.org/project/probflow/
 
 .. |Build Badge| image:: https://travis-ci.com/brendanhasz/probflow.svg
-    :alt: Build Status
-    :scale: 100%
     :target: https://travis-ci.com/brendanhasz/probflow
 
+.. |Docs Badge| image:: https://readthedocs.org/projects/probflow/badge/
+    :target: http://probflow.readthedocs.io
+
 .. |Coverage Badge| image:: https://codecov.io/gh/brendanhasz/probflow/branch/master/graph/badge.svg
-    :alt: Build Status
-    :scale: 100%
     :target: https://codecov.io/gh/brendanhasz/probflow
 
 

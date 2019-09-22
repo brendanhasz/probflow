@@ -40,17 +40,16 @@ class Callback(BaseCallback):
     """
     
     def __init__(self, *args):
-        pass
+        """Initialize the callback"""
 
 
     def on_epoch_end(self):
-        """Will be called at the end of each training epoch"""
-        pass
+        """Will be called at the end of each training epoch.  By default does
+        nothing."""
 
 
     def on_train_end(self):
-        """Will be called at the end of training"""
-        pass
+        """Will be called at the end of training. By default does nothing."""
 
 
 
@@ -87,7 +86,7 @@ class LearningRateScheduler(Callback):
 
 
     def on_epoch_end(self):
-        """Set the learning rate at the end of each epoch"""
+        """Set the learning rate at the end of each epoch."""
         self.current_epoch += 1
         self.current_lr = self.fn(self.current_epoch)
         self.model.set_learning_rate(self.current_lr)
@@ -132,7 +131,7 @@ class MonitorMetric(Callback):
 
 
     def on_epoch_end(self):
-        """Compute metric on validation data"""
+        """Compute the metric on validation data at the end of each epoch."""
         self.current_metric = self.model.metric(self.metric_fn, self.data)
         self.current_epoch += 1
         self.metrics += [self.current_metric]
@@ -163,7 +162,7 @@ class MonitorParameter(Callback):
 
 
     def on_epoch_end(self):
-        """Store mean values of Parameter(s) each epoch"""
+        """Store mean values of Parameter(s) at the end of each epoch."""
         self.current_params = self.model.posterior_mean(self.params)
         self.current_epoch += 1
         self.parameter_values += [self.current_params]
@@ -212,7 +211,7 @@ class EarlyStopping(Callback):
 
 
     def on_epoch_end(self):
-        """Will be called at the end of each training epoch"""
+        """Stop training if there was no improvement since the last epoch."""
         metric = self.metric_fn()
         if metric < self.best:
             self.best = metric

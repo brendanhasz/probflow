@@ -16,18 +16,44 @@ TODO: math
 
 TODO: diagram
 
-.. code-block:: python3
+.. tabs::
 
-    class AutoregressiveModel(pf.Model):
+    .. group-tab:: TensorFlow
+            
+        .. code-block:: python3
 
-        def __init__(self, k):
-            self.beta = pf.Parameter([k, 1])
-            self.mu = pf.Parameter()
-            self.sigma = pf.ScaleParameter()
+            import probflow as pf
 
-        def __call__(self, x):
-            preds = x @ self.beta() + self.mu()
-            return pf.Normal(preds, self.sigma())
+            class AutoregressiveModel(pf.Model):
+
+                def __init__(self, k):
+                    self.beta = pf.Parameter([k, 1])
+                    self.mu = pf.Parameter()
+                    self.sigma = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    preds = x @ self.beta() + self.mu()
+                    return pf.Normal(preds, self.sigma())
+
+    .. group-tab:: PyTorch
+            
+        .. code-block:: python3
+
+            import probflow as pf
+            import torch
+
+            class AutoregressiveModel(pf.Model):
+
+                def __init__(self, k):
+                    self.beta = pf.Parameter([k, 1])
+                    self.mu = pf.Parameter()
+                    self.sigma = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    preds = x @ self.beta() + self.mu()
+                    return pf.Normal(preds, self.sigma())
+
 
 If we have a timeseries ``x``,
 

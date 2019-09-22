@@ -20,6 +20,7 @@ from abc import ABC, abstractmethod
 from math import ceil
 
 from probflow.core.settings import get_backend
+from probflow.utils.casting import to_tensor
 
 
 
@@ -47,7 +48,7 @@ class BaseDistribution(ABC):
 
     def log_prob(self, y):
         """Compute the log probability of some data given this distribution"""
-        return self().log_prob(y)
+        return self().log_prob(to_tensor(y))
 
 
     def mean(self):

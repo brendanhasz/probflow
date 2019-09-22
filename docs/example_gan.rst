@@ -63,6 +63,7 @@ First let's build a generator:
                     self.D = None
 
                 def __call__(self, x):
+                    x = torch.tensor(x)
                     z = torch.randn([x.shape[0], self.Dz])
                     return self.G(z)
 
@@ -106,6 +107,7 @@ Then a discriminator:
                     self.D = pf.DenseNetwork(dims)
 
                 def __call__(self, x):
+                    x = torch.tensor(x)
                     return pf.Bernoulli(self.D(x))
 
                 def log_likelihood(self, _, x):

@@ -61,5 +61,6 @@ from the :ref:`previous example <example_fully_connected>`:
                     self.s = pf.ScaleParameter()
 
                 def __call__(self, x):
+                    x = torch.tensor(x)
                     return pf.Normal(self.net(x), self.s())
 
