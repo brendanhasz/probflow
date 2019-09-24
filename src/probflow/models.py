@@ -94,12 +94,10 @@ class Model(Module):
     """
 
 
-    # Whether the model is currently training
+    # Parameters
     _is_training = False
-
-
-    # The current learning rate
     _learning_rate = None
+    _kl_weight = 1.0
 
 
     def log_likelihood(self, x_data, y_data):
@@ -116,7 +114,7 @@ class Model(Module):
         nb = y_data.shape[0] #number of samples in this batch
         log_loss = self.log_likelihood(x_data, y_data)/nb
         kl_loss = self.kl_loss()/n + self.kl_loss_batch()/nb
-        return kl_loss - log_loss
+        return self._kl_weight*kl_loss - log_loss
 
 
     def _train_step_tf(self, n, flipout):
@@ -275,6 +273,14 @@ class Model(Module):
             raise TypeError('lr must be a float')
         else:
             self._learning_rate = lr
+
+
+    def set_kl_weight(self, w):
+        """Set the weight of the KL term's contribution to the ELBO loss"""
+        if not isinstance(w, float):
+            raise TypeError('w must be a float')
+        else:
+            self._kl_weight = w
 
 
     def _sample(self, x, func, ed=None, axis=1):
@@ -1143,11 +1149,10 @@ class ContinuousModel(Model):
             ideal_line_kwargs['color'] = 'k'
 
         # Also plot ideal line
-        if plot and isinstance(x_by, int):
-            plt.axhline(100*ci, label='Ideal', **ideal_line_kwargs)
-            plt.legend()
-            plt.ylabel(str(100*ci)+'% predictive interval coverage')
-            plt.xlabel('Independent variable')
+        plt.axhline(100*ci, label='Ideal', **ideal_line_kwargs)
+        plt.legend()
+        plt.ylabel(str(100*ci)+'% predictive interval coverage')
+        plt.xlabel('Independent variable')
 
         return xo, co
 

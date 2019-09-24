@@ -63,6 +63,20 @@ def test_Callback():
     assert len(lrs.epochs) == 10
     assert isinstance(lrs.learning_rate, list)
     assert len(lrs.learning_rate) == 10
+    assert my_model._learning_rate == 1e-3
+
+    # Test KLWeightScheduler
+    kls = KLWeightScheduler(lambda x: x/100.)
+    my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[kls])
+    assert isinstance(kls.current_epoch, int)
+    assert kls.current_epoch == 10
+    assert isinstance(kls.current_w, float)
+    assert kls.current_w == 0.1
+    assert isinstance(kls.epochs, list)
+    assert len(kls.epochs) == 10
+    assert isinstance(kls.kl_weights, list)
+    assert len(kls.kl_weights) == 10
+    assert my_model._kl_weight == 0.1
 
     # should error w/ invalid args
     with pytest.raises(TypeError):
