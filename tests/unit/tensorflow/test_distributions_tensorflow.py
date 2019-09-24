@@ -348,6 +348,8 @@ def test_Bernoulli():
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
 	    dist = pfd.Bernoulli('lalala')
+    with pytest.raises(TypeError):
+	    dist = pfd.Bernoulli()
 
 
 
@@ -394,6 +396,8 @@ def test_Categorical():
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
 	    dist = pfd.Categorical('lalala')
+    with pytest.raises(TypeError):
+	    dist = pfd.Categorical()
 
 	# Should use the last dim if passed a Tensor arg
     dist = pfd.Categorical(probs=[[0.1, 0.7, 0.2], 
@@ -458,6 +462,8 @@ def test_OneHotCategorical():
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
 	    dist = pfd.OneHotCategorical('lalala')
+    with pytest.raises(TypeError):
+	    dist = pfd.OneHotCategorical()
 
     # Multi-dim
     dist = pfd.OneHotCategorical(probs=[[0.1, 0.7, 0.2], 
@@ -657,6 +663,45 @@ def test_Mixture():
     assert is_close(probs[0]/probs[1], 1.0/9.0)
 
 
-# TODO: test HMM
 
-# TODO: test GP
+def test_HiddenMarkovModel():
+    """Tests hidden Markov model distribution"""
+
+    # Create the distribution (3 states)
+    initial = tf.random.normal([3])
+    transition = tf.random.normal([3, 3])
+    observation = pfd.Normal(tf.random.normal([3]), tf.exp(tf.random.normal([3])))
+    steps = 5
+    dist = pfd.HiddenMarkovModel(initial, transition, observation, steps)
+    
+    # Should fail w incorrect args
+    with pytest.raises(TypeError):
+        d2 = pfd.HiddenMarkovModel('lala', transition, observation, steps)
+    with pytest.raises(TypeError):
+        d2 = pfd.HiddenMarkovModel(initial, 'lala', observation, steps)
+    with pytest.raises(TypeError):
+        d2 = pfd.HiddenMarkovModel(initial, transition, observation, 'lala')
+    with pytest.raises(ValueError):
+        d2 = pfd.HiddenMarkovModel(initial, transition, observation, -1)
+
+    # Call should return backend obj
+    assert isinstance(dist(), tfd.HiddenMarkovModel)
+
+    # Test sampling
+    samples = dist.sample()
+    assert isinstance(samples, tf.Tensor)
+    assert samples.ndim == 1
+    assert samples.shape[0] == 5
+    samples = dist.sample(10)
+    assert isinstance(samples, tf.Tensor)
+    assert samples.ndim == 2
+    assert samples.shape[0] == 10
+    assert samples.shape[1] == 5
+
+    # Test methods
+    probs = dist.prob([-1., 1., 0., 0., 0.])
+    assert probs.ndim == 0
+    probs = dist.prob(np.random.randn(7, 5))
+    assert probs.ndim == 1
+    assert probs.shape[0] == 7
+

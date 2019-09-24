@@ -44,6 +44,7 @@ import probflow.core.ops as O
 from probflow.utils.casting import to_numpy
 from probflow.modules import Module
 from probflow.utils.plotting import plot_dist
+from probflow.utils.plotting import plot_by
 from probflow.data import DataGenerator
 from probflow.data import make_generator
 from probflow.utils.metrics import get_metric_fn
@@ -723,47 +724,6 @@ class Model(Module):
             return np.sum(probs, axis=0)
 
 
-    def log_prob_by(self, 
-                    x_by,
-                    x,
-                    y=None,
-                    bins=30,
-                    plot=True):
-        """Log probability of observations ``y`` given the
-        model, as a function of independent variable(s) ``x_by``
-
-        TODO: docs...
-
-        Parameters
-        ----------
-        x_by : int or str or list of int or list of str
-            Which independent variable(s) to plot the log probability as a
-            function of.  That is, which columns in ``x`` to plot by.
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
-            "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the 
-            "target").
-        bins : int
-            Number of bins.
-        plot : bool
-            Whether to plot the data (if True), or just return the values.
-
-        
-        Returns
-        -------
-        log_probs : |ndarray|
-            The average log probability as a function of ``x_by``.
-            If x_by is an int or str, is of shape ``(bins,)``.
-            If ``x_by`` is a list of length 2, ``prob_by`` is of shape
-            ``(bins, bins)``.
-        """
-        pass
-        # TODO
-        # TODO: handle when x is a DataGenerator, or y=None
-
-
     def prob(self, 
              x, 
              y=None,
@@ -806,47 +766,6 @@ class Model(Module):
         return np.exp(self.log_prob(x, y, **kwargs))
 
 
-    def prob_by(self, 
-                x_by,
-                x,
-                y=None,
-                bins=30,
-                plot=True):
-        """Probability of observations ``y`` given the
-        model, as a function of independent variable(s) ``x_by``
-
-        TODO: docs...
-
-        Parameters
-        ----------
-        x_by : int or str or list of int or list of str
-            Which independent variable(s) to plot the log probability as a
-            function of.  That is, which columns in ``x`` to plot by.
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
-            "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the 
-            "target").
-        bins : int
-            Number of bins.
-        plot : bool
-            Whether to plot the data (if True), or just return the values.
-
-        
-        Returns
-        -------
-        log_probs : |ndarray|
-            The average log probability as a function of ``x_by``.
-            If x_by is an int or str, is of shape ``(bins,)``.
-            If ``x_by`` is a list of length 2, ``prob_by`` is of shape
-            ``(bins, bins)``.
-        """
-        pass
-        # TODO
-        # TODO: handle when x is a DataGenerator, or y=None
-
-
     def save(self, filename):
         """Save a model to file.
 
@@ -879,6 +798,9 @@ class ContinuousModel(Model):
     (the target) is continuous and 1-dimensional.
 
     TODO : why use this over just Model
+
+    TODO: note that only supports discriminative models with scalar, 
+    continuous dependent variables
 
     This class inherits several methods from :class:`.Module`:
 
@@ -983,14 +905,9 @@ class ContinuousModel(Model):
     def pred_dist_plot(self, 
                        x,
                        n=10000,
-                       style='fill',
                        cols=1,
-                       bins=20,
-                       ci=0.0,
-                       bw=0.075,
-                       color=None,
-                       alpha=0.4,
-                       individually=False):
+                       individually=False,
+                       **kwargs):
         """Plot posterior predictive distribution from the model given ``x``.
 
         TODO: Docs...
@@ -998,58 +915,49 @@ class ContinuousModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").
         n : int
             Number of samples to draw from the model given ``x``.
             Default = 10000
-        style : str
-            Which style of plot to show.  Available types are:
-
-            * ``'fill'`` - filled density plot (the default)
-            * ``'line'`` - line density plot
-            * ``'hist'`` - histogram
-
         cols : int
             Divide the subplots into a grid with this many columns (if 
             ``individually=True``.
-        bins : int or list or |ndarray|
-            Number of bins to use for the posterior density histogram (if 
-            ``style='hist'``), or a list or vector of bin edges.
-        ci : float between 0 and 1
-            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
-        bw : float
-            Bandwidth of the kernel density estimate (if using ``style='line'``
-            or ``style='fill'``).  Default is 0.075
-        color : matplotlib color code or list of them
-            Color(s) to use to plot the distribution.
-            See https://matplotlib.org/tutorials/colors/colors.html
-            Default = use the default matplotlib color cycle
-        alpha : float between 0 and 1
-            Transparency of fill/histogram of the density
         individually : bool
             If ``True``, plot one subplot per datapoint in ``x``, otherwise
             plot all the predictive distributions on the same plot.
+        **kwargs
+            Additional keyword arguments are passed to :func:`.plot_dist`
+
+        Example
+        -------
+
+        TODO
+
         """
 
         # Sample from the predictive distribution
-        pred_samples = self.predictive_sample(x, n=n)
+        samples = self.predictive_sample(x, n=n)
 
-        # TODO: assumes y is scalar, add a check for that
+        # Independent variable must be scalar
+        Ns = samples.shape[0]
+        N = samples.shape[1]
+        if samples.ndim > 2 and any(e>1 for e in samples.shape[2:]):
+            raise NotImplementedError('only scalar dependent variables are '
+                                      'supported')
+        else:
+            samples = samples.reshape([Ns, N])
 
         # Plot the predictive distributions
-        N = pred_samples.shape[1]
         if individually:
             rows = np.ceil(N/cols)
             for i in range(N):
                 plt.subplot(rows, cols, i+1)
-                plot_dist(pred_samples[:,i], xlabel='Datapoint '+str(i), 
-                          style=style, bins=bins, ci=ci, bw=bw, alpha=alpha, 
-                          color=color)
+                plot_dist(samples[:,i], xlabel='Datapoint '+str(i), **kwargs)
+            plt.tight_layout()
         else:
-            plot_dist(pred_samples, xlabel='Dependent Variable', style=style, 
-                      bins=bins, ci=ci, bw=bw, alpha=alpha, color=color)
+            plot_dist(samples, xlabel='Dependent Variable', **kwargs)
 
 
     def predictive_prc(self, x, y=None, n=1000):
@@ -1075,33 +983,40 @@ class ContinuousModel(Model):
         prcs : |ndarray| of float between 0 and 1
         """
 
+        # Need both x and y data
+        if y is None and not isinstance(x, DataGenerator):
+            raise TypeError('need both x and y to compute predictive prc')
+            # TODO: doesn't actually support DataGenerator yet b/c doesn't get y?
+
         # Sample from the predictive distribution
-        pred_samples = self.predictive_sample(x, n=n)
+        samples = self.predictive_sample(x, n=n)
 
-        # TODO: assumes y is scalar, add a check for that
+        # Independent variable must be scalar
+        if samples.ndim > 2 and any(e>1 for e in samples.shape[2:]):
+            raise NotImplementedError('only scalar dependent variables are '
+                                      'supported')
 
-        # Return percentiles of true y data along predictive distribution
-        #inds = np.argmax((np.sort(pred_samples, 0) >
-        #                  y.reshape(1, x.shape[0], -1)),
-        #                 axis=0)
-        # TODO
-        return inds/float(n)
+        # Reshape
+        Ns = samples.shape[0]
+        N = samples.shape[1]
+        samples = samples.reshape([Ns, N])
+        y = y.reshape([1, N])
 
-        # TODO: check for when true y value is above max pred_samples val!
-        # I think argmax returns 0 when that's the case, which is
-        # obviously not what we want
+        # Percentiles of true y data along predictive distribution
+        prcs = np.argmax(np.sort(samples, axis=0) > y, axis=0) / Ns
+
+        # Argmax returns 0 when all samples are less than true value!
+        prcs[np.reshape(np.max(samples, axis=0) < y, [N])] = 1.0
+
+        # Return percentiles
+        return prcs.reshape([N, 1])
 
 
-    def pred_dist_covered(self, x, y=None, n=1000, ci=0.95):
+    def pred_dist_covered(self, x, y=None, n: int = 1000, ci: float = 0.95):
         """Compute whether each observation was covered by a given confidence
         interval.
 
         TODO: Docs...
-
-        .. admonition:: Model must be fit first!
-
-            Before calling :meth:`.pred_dist_covered` on a |Model|, you must
-            first :meth:`.fit` it to some data.
 
         Parameters
         ----------
@@ -1122,12 +1037,9 @@ class ContinuousModel(Model):
         TODO
         """
 
-        # Check types
-        if not isinstance(ci, float):
-            if isinstance(ci, int):
-                ci = float(ci)
-            else:
-                raise TypeError('ci must be a float')
+        # Check values
+        if n < 1:
+            raise ValueError('n must be greater than 0')
         if ci < 0.0 or ci > 1.0:
             raise ValueError('ci must be between 0 and 1')
 
@@ -1174,18 +1086,17 @@ class ContinuousModel(Model):
                     x_by,
                     x, 
                     y=None,
-                    ci=0.95, 
-                    bins=30, 
-                    plot=True,
-                    true_line_kwargs={},
-                    ideal_line_kwargs={}):
+                    n: int = 1000,
+                    ci: float = 0.95, 
+                    bins: int = 30, 
+                    plot: bool = True,
+                    ideal_line_kwargs: dict = {},
+                    **kwargs):
         """Compute and plot the coverage of a given confidence interval
-        of the posterior predictive distribution as a
-        function of specified independent variables.
+        of the posterior predictive distribution as a function of specified
+        independent variables.
 
         TODO: Docs...
-
-
 
         Parameters
         ----------
@@ -1204,14 +1115,11 @@ class ContinuousModel(Model):
             posterior predictive distribution.
         bins : int
             Number of bins to use for x_by
-        plot : bool
-            Whether to plot the coverage.  Default = True
-        true_line_kwargs : dict
-            Dict to pass to matplotlib.pyplot.plot for true coverage line
         ideal_line_kwargs : dict
             Dict of args to pass to matplotlib.pyplot.plot for ideal coverage
             line.
-
+        **kwargs
+            Additional keyword arguments are passed to plot_by
 
         Returns
         -------
@@ -1222,17 +1130,11 @@ class ContinuousModel(Model):
             distribution in each bin.
         """
 
-
-
         # Compute whether each sample was covered by the predictive interval
         covered = self.pred_dist_covered(x, y=y, n=n, ci=ci)
 
         # Plot coverage proportion as a fn of x_by cols of x
-        # TODO: how to handle if x is data generator?
-        """
-        xo, co = plot_by(x[:, x_by], 100*covered, bins=bins,
-                         plot=plot, label='Actual', **true_line_kwargs)
-        """
+        xo, co = plot_by(x_by, 100*covered, label='Actual', **kwargs)
 
         # Line kwargs
         if 'linestyle' not in ideal_line_kwargs:
@@ -1245,7 +1147,7 @@ class ContinuousModel(Model):
             plt.axhline(100*ci, label='Ideal', **ideal_line_kwargs)
             plt.legend()
             plt.ylabel(str(100*ci)+'% predictive interval coverage')
-            plt.xlabel('Value of '+str(x_by))
+            plt.xlabel('Independent variable')
 
         return xo, co
 
@@ -1529,27 +1431,8 @@ class DiscreteModel(ContinuousModel):
             If ``True``, plot one subplot per datapoint in ``x``, otherwise
             plot all the predictive distributions on the same plot.
         """
-
-        # Sample from the predictive distribution
-        pred_samples = self.predictive_sample(x, n=n)
-
-        # TODO: assumes y is scalar, add a check for that
-
+        pass
         # TODO: plot discretely
-
-        # Plot the predictive distributions
-        N = pred_samples.shape[1]
-        if individually:
-            rows = np.ceil(N/cols)
-            for i in range(N):
-                plt.subplot(rows, cols, i+1)
-                #plot_dist(pred_samples[:,i], xlabel='Datapoint '+str(i), 
-                #          style=style, bins=bins, ci=ci, bw=bw, alpha=alpha, 
-                #          color=color)
-        else:
-            #plot_dist(pred_samples, xlabel='Dependent Variable', style=style, 
-            #          bins=bins, ci=ci, bw=bw, alpha=alpha, color=color)
-            pass
 
 
     def r_squared(self, *args, **kwargs):
@@ -1688,10 +1571,7 @@ class CategoricalModel(Model):
             If ``True``, plot one subplot per datapoint in ``x``, otherwise
             plot all the predictive distributions on the same plot.
         """
-
-        # Sample from the predictive distribution
-        pred_samples = self.predictive_sample(x, n=n)
-
+        pass
         # TODO
 
 
@@ -1731,8 +1611,8 @@ class CategoricalModel(Model):
         TODO: Docs...
 
         """
-        #TODO
         pass
+        #TODO
     
 
 

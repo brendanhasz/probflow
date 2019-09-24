@@ -112,7 +112,7 @@ and diagnose *where* your model is having problems capturing uncertainty:
    :width: 90 %
    :align: center
 
-ProbFlow also provides more complex layers, such as those required for building Bayesian neural networks.  Also, ProbFlow lets you mix and match ProbFlow objects with TensorFlow (or PyTorch!) objects and operations.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
+ProbFlow also provides more complex modules, such as those required for building Bayesian neural networks.  Also, ProbFlow lets you mix and match ProbFlow objects with TensorFlow (or PyTorch!) objects and operations.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
 
 .. code-block:: python
 

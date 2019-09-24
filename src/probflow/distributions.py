@@ -914,10 +914,15 @@ class HiddenMarkovModel(BaseDistribution):
         if steps < 1:
             raise ValueError('steps must be >0')
 
-        # Store args
+        # Store observation distribution
+        if isinstance(observation, BaseDistribution):
+            self.observation = observation() #store backend distribution
+        else:
+            self.observation = observation
+
+        # Store other args
         self.initial = initial
         self.transition = transition
-        self.observation = observation
         self.steps = steps
 
 

@@ -137,7 +137,7 @@ class Dense(Module):
     """
 
 
-    def __init__(self, d_in: int, d_out: int, name: str = 'Dense'):
+    def __init__(self, d_in: int, d_out: int = 1, name: str = 'Dense'):
 
         # Check types
         if d_in < 1:

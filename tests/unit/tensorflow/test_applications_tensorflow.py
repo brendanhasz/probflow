@@ -27,7 +27,7 @@ def test_LinearRegression():
     model = apps.LinearRegression(5)
 
     # Fit the model
-    model.fit(x, y, batch_size=10, epochs=11)
+    model.fit(x, y, batch_size=10, epochs=3)
     
     # Predictive functions
     model.predict(x)
@@ -47,7 +47,7 @@ def test_LinearRegression_heteroscedastic():
     model = apps.LinearRegression(5, heteroscedastic=True)
 
     # Fit the model
-    model.fit(x, y, batch_size=10, epochs=11)
+    model.fit(x, y, batch_size=10, epochs=3)
     
     # Predictive functions
     model.predict(x)
@@ -67,7 +67,7 @@ def test_LogisticRegression():
     model = apps.LogisticRegression(5)
 
     # Fit the model
-    model.fit(x, y, batch_size=10, epochs=11)
+    model.fit(x, y, batch_size=10, epochs=3)
     
     # Predictive functions
     model.predict(x)
@@ -88,7 +88,7 @@ def test_MultinomialLogisticRegression():
     model = apps.LogisticRegression(d=5, k=3)
 
     # Fit the model
-    model.fit(x, y, batch_size=10, epochs=11)
+    model.fit(x, y, batch_size=10, epochs=3)
     
     # Predictive functions
     model.predict(x)
@@ -108,7 +108,7 @@ def test_PoissonRegression():
     model = apps.PoissonRegression(5)
 
     # Fit the model
-    model.fit(x, y, batch_size=10, epochs=11)
+    model.fit(x, y, batch_size=10, epochs=3)
     
     # Predictive functions
     model.predict(x)
@@ -135,7 +135,7 @@ def test_DenseNetwork():
     model = DenseNet([5, 20, 15, 1])
 
     # Fit the model
-    model.fit(x, y, batch_size=10, epochs=11)
+    model.fit(x, y, batch_size=10, epochs=3)
     
     # Predictive functions
     model.predict(x)
@@ -154,14 +154,14 @@ def test_DenseRegression():
     model = apps.DenseRegression([5, 20, 15, 1])
 
     # Fit the model
-    model.fit(x, y, batch_size=10, epochs=11)
+    model.fit(x, y, batch_size=10, epochs=3)
     
     # Predictive functions
     model.predict(x)
 
 
 
-def test_DenseRegression():
+def test_DenseRegression_heteroscedastic():
     """Tests probflow.applications.DenseRegression w/ heteroscedastic"""
 
     # Data
@@ -174,7 +174,7 @@ def test_DenseRegression():
     model = apps.DenseRegression([5, 20, 15, 1], heteroscedastic=True)
 
     # Fit the model
-    model.fit(x, y, batch_size=10, epochs=11)
+    model.fit(x, y, batch_size=10, epochs=3)
     
     # Predictive functions
     model.predict(x)
@@ -194,7 +194,7 @@ def test_DenseClassifier():
     model = apps.DenseClassifier([5, 20, 15, 2])
 
     # Fit the model
-    model.fit(x, y, batch_size=10, epochs=11)
+    model.fit(x, y, batch_size=10, epochs=3)
     
     # Predictive functions
     model.predict(x)
@@ -215,7 +215,7 @@ def test_MultinomialDenseClassifier():
     model = apps.DenseClassifier([5, 20, 15, 3])
 
     # Fit the model
-    model.fit(x, y, batch_size=10, epochs=11)
+    model.fit(x, y, batch_size=10, epochs=3)
     
     # Predictive functions
     model.predict(x)

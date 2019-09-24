@@ -5,6 +5,7 @@
 import pytest
 
 import numpy as np
+import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow_probability as tfp
 tfd = tfp.distributions
@@ -14,7 +15,8 @@ import probflow.core.ops as O
 from probflow.distributions import Normal
 from probflow.parameters import *
 from probflow.modules import *
-from probflow.models import *
+from probflow.models import Model
+from probflow.models import ContinuousModel, DiscreteModel, CategoricalModel
 from probflow.data import DataGenerator
 
 
@@ -655,10 +657,93 @@ def test_Model_nesting():
 
 
 
-def test_ContinuousModel():
+def test_ContinuousModel(plot):
     """Tests probflow.models.ContinuousModel"""
-    pass
-    #TODO
+
+    class MyModel(ContinuousModel):
+
+        def __init__(self):
+            self.weight = Parameter([5, 1], name='Weight')
+            self.bias = Parameter([1, 1], name='Bias')
+            self.std = ScaleParameter([1, 1], name='Std')
+
+        def __call__(self, x):
+            return Normal(x@self.weight() + self.bias(), self.std())
+
+    # Instantiate the model
+    model = MyModel()
+
+    # Data
+    x = np.random.randn(100, 5).astype('float32')
+    w = np.random.randn(5, 1).astype('float32')
+    y = x@w + 1
+    
+    # Fit the model
+    model.fit(x, y, batch_size=5, epochs=3)
+
+    # confidence intervals
+    lb, ub = model.confidence_intervals(x[:22, :])
+    assert isinstance(lb, np.ndarray)
+    assert isinstance(ub, np.ndarray)
+    assert lb.ndim == 2
+    assert lb.shape[0] == 22
+    assert lb.shape[1] == 1
+    assert ub.ndim == 2
+    assert ub.shape[0] == 22
+    assert ub.shape[1] == 1
+
+    # posterior predictive plot with one sample
+    model.pred_dist_plot(x[:1, :])
+    if plot:
+        plt.title('Should be one dist on one subfig')
+        plt.show()
+
+    # posterior predictive plot with one sample, showing ci
+    model.pred_dist_plot(x[:1, :], ci=0.95, style='hist')
+    if plot:
+        plt.title('Should be one dist on one subfig, w/ ci=0.95')
+        plt.show()
+
+    # posterior predictive plot with two samples
+    model.pred_dist_plot(x[:2, :])
+    if plot:
+        plt.title('Should be two dists on one subfig')
+        plt.show()
+
+    # posterior predictive plot with two samples, two subfigs
+    model.pred_dist_plot(x[:2, :], individually=True)
+    if plot:
+        plt.title('Should be two dists on two subfigs')
+        plt.show()
+
+    # posterior predictive plot with six samples, 6 subfigs, 2 cols
+    model.pred_dist_plot(x[:6, :], individually=True, cols=2)
+    if plot:
+        plt.title('Should be 6 dists, 6 subfigs, 2 cols')
+        plt.show()
+
+    # predictive prc
+    prcs = model.predictive_prc(x[:7, :], y[:7, :])
+    assert isinstance(prcs, np.ndarray)
+    assert prcs.ndim == 2
+    assert prcs.shape[0] == 7
+    assert prcs.shape[1] == 1
+
+    # predictive distribution covered for each sample
+    cov = model.pred_dist_covered(x[:11, :], y[:11, :])
+    assert isinstance(cov, np.ndarray)
+    assert cov.ndim == 2
+    assert cov.shape[0] == 11
+    assert cov.shape[1] == 1
+
+    # predictive distribution covered for each sample
+    cov = model.pred_dist_coverage(x[:11, :], y[:11, :])
+    assert isinstance(cov, np.float)
+
+    # plot coverage by
+    xo, co = model.coverage_by(x[:, :1], x, y)
+    assert isinstance(xo, np.ndarray)
+    assert isinstance(co, np.ndarray)
 
 
 
@@ -672,5 +757,3 @@ def test_DiscreteModel():
 def test_CategoricalModel():
     """Tests probflow.models.CategoricalModel"""
     pass
-    #TODO
-

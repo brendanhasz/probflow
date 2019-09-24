@@ -420,13 +420,13 @@ def plot_by(x, data, bins=30, func='mean', plot=True,
         plt.plot(x_o, data_o, **kwargs)
 
         # Return values
-        return x_o, data_o
+        return x_o, data_o.values
 
     # 2 Dimensional
     elif x.shape[1] == 2:
 
-        # TODO
         pass
+        #TODO
 
     else:
         raise ValueError('x.shape[1] cannot be >2')
