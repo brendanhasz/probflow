@@ -679,7 +679,7 @@ def test_ContinuousModel(plot):
     y = x@w + 1
     
     # Fit the model
-    model.fit(x, y, batch_size=5, epochs=3)
+    model.fit(x, y, batch_size=50, epochs=100, learning_rate=0.01)
 
     # confidence intervals
     lb, ub = model.confidence_intervals(x[:22, :])
@@ -744,6 +744,35 @@ def test_ContinuousModel(plot):
     xo, co = model.coverage_by(x[:, :1], x, y)
     assert isinstance(xo, np.ndarray)
     assert isinstance(co, np.ndarray)
+    if plot:
+        plt.title('should be coverage by plot')
+        plt.show()
+
+    # r squared
+    r2 = model.r_squared(x, y)
+    assert isinstance(r2, np.ndarray)
+    assert r2.ndim == 2
+    assert r2.shape[0] == 100
+    assert r2.shape[1] == 1
+
+    # plot the r2 dist
+    model.r_squared_plot(x, y, style='hist')
+    if plot:
+        plt.title('should be r2 dist')
+        plt.show()
+
+    # residuals
+    res = model.residuals(x, y)
+    assert isinstance(res, np.ndarray)
+    assert r2.ndim == 2
+    assert r2.shape[0] == 100
+    assert r2.shape[1] == 1
+
+    # plot the distribution of residuals
+    model.residuals_plot(x, y)
+    if plot:
+        plt.title('should be residuals dist')
+        plt.show()
 
 
 

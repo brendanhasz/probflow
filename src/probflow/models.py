@@ -966,6 +966,15 @@ class ContinuousModel(Model):
             plot_dist(samples, xlabel='Dependent Variable', **kwargs)
 
 
+    def _get_y(self, x, y):
+        """Get y, even when x is a DataGenerator and y is None"""
+        if y is not None:
+            return y
+        else:
+            y_true = [d for _, d in make_generator(x, y, test=True)]
+            return np.concatenate(to_numpy(y_true), axis=0)
+
+
     def predictive_prc(self, x, y=None, n=1000):
         """Compute the percentile of each observation along the posterior
         predictive distribution.
@@ -992,11 +1001,10 @@ class ContinuousModel(Model):
         # Need both x and y data
         if y is None and not isinstance(x, DataGenerator):
             raise TypeError('need both x and y to compute predictive prc')
-            # TODO: doesn't actually support DataGenerator yet b/c doesn't get y?
 
         # Sample from the predictive distribution
         samples = self.predictive_sample(x, n=n)
-
+        
         # Independent variable must be scalar
         if samples.ndim > 2 and any(e>1 for e in samples.shape[2:]):
             raise NotImplementedError('only scalar dependent variables are '
@@ -1006,7 +1014,7 @@ class ContinuousModel(Model):
         Ns = samples.shape[0]
         N = samples.shape[1]
         samples = samples.reshape([Ns, N])
-        y = y.reshape([1, N])
+        y = self._get_y(x, y).reshape([1, N])
 
         # Percentiles of true y data along predictive distribution
         prcs = np.argmax(np.sort(samples, axis=0) > y, axis=0) / Ns
@@ -1157,80 +1165,21 @@ class ContinuousModel(Model):
         return xo, co
 
 
-    def calibration_curve(self,
-                          x,
-                          y=None,
-                          split_by=None,
-                          bins=10,
-                          plot=True):
-        """Plot and/or return calibration curve.
-
-        Plots and returns the calibration curve (the percentile of the posterior
-        predictive distribution on the x-axis, and the percent of samples which
-        actually fall into that range on the y-axis).
-
-
-        Parameters
-        ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
-            "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the 
-            "target").
-        split_by : int
-            Draw the calibration curve independently for datapoints
-            with each unique value in `x[:,split_by]` (a categorical
-            column).
-        bins : int, list of float, or |ndarray|
-            Bins used to compute the curve.  If an integer, will use
-            `bins` evenly-spaced bins from 0 to 1.  If a vector,
-            `bins` is the vector of bin edges.
-        plot : bool
-            Whether to plot the curve
-
-        Returns
-        -------
-        cx : |ndarray|
-            Vector of percentiles (the middle of each percentile
-            bin).  Length is determined by `bins`.
-        cy : |ndarray|
-            Vector of percentages of samples which fell within each
-            percentile bin of the posterior predictive distribution.
-
-        See Also
-        --------
-        predictive_distribution : used to generate the posterior
-            predictive distribution.
-
-        Notes
-        -----
-        TODO: Docs...
-
-        Examples
-        --------
-        TODO: Docs...
-
-        """
-        pass
-        # TODO
-
-
     def r_squared(self,
                   x,
                   y=None,
                   n=1000):
         """Compute the Bayesian R-squared distribution (Gelman et al., 2018).
 
-        TODO: more info and docs...
+        TODO: more info
 
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or Tensor
+        y : |ndarray| or |DataFrame| or |Series|
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
         n : int
@@ -1255,24 +1204,52 @@ class ContinuousModel(Model):
         - Andrew Gelman, Ben Goodrich, Jonah Gabry, & Aki Vehtari.
           `R-squared for Bayesian regression models. <https://doi.org/10.1080/00031305.2018.1549100>`_
           *The American Statistician*, 2018.
-            
 
         """
-        pass
-        #TODO
+
+        # Get true y values
+        y_true = self._get_y(x, y)
+
+        # Predict y with samples from the posterior distribution
+        y_pred = self.epistemic_sample(x, n=n)
+
+        # Compute Bayesian R^2
+        v_fit = np.var(y_pred, axis=0)
+        v_res = np.var(y_pred-np.expand_dims(y_true, 0), axis=0)
+        return v_fit/(v_fit+v_res)
 
 
     def r_squared_plot(self,
                        x,
                        y=None,
-                       n=1000):
+                       n=1000, 
+                       **kwargs):
         """Plot the Bayesian R-squared distribution.
+
+        See :meth:`~r_squared` for more info on the Bayesian R-squared metric.
+
+        Parameters
+        ----------
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
+            Independent variable values of the dataset to evaluate (aka the 
+            "features").  Or a |DataGenerator| for both x and y.
+        y : |ndarray| or |DataFrame| or |Series|
+            Dependent variable values of the dataset to evaluate (aka the 
+            "target").
+        n : int
+            Number of posterior draws to use for computing the r-squared
+            distribution.  Default = `1000`.
+        **kwargs
+            Additional keyword arguments are passed to :func:`.plot_dist`
+
+        Example
+        -------
 
         TODO
 
         """
-        pass
-        #TODO
+        r2 = self.r_squared(x, y, n=n)
+        plot_dist(r2, **kwargs)
 
 
     def residuals(self, x, y=None):
@@ -1282,39 +1259,55 @@ class ContinuousModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or Tensor
+        y : |ndarray| or |DataFrame| or |Series|
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
+        **kwargs
+            Additional keyword arguments are passed to :func:`.plot_dist`
 
         Returns
         -------
+        |ndarray|
+            The residuals.
+
+        Example
+        -------
+
         TODO
 
         """
-        pass
-        # TODO
+        y_true = self._get_y(x, y)
+        y_pred = self.predict(x)
+        return y_true - y_pred
 
 
-    def residuals_plot(self, x, y=None):
+    def residuals_plot(self, x, y=None, **kwargs):
         """Plot the distribution of residuals of the model's predictions.
 
         TODO: docs...
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or Tensor
+        y : |ndarray| or |DataFrame| or |Series|
             Dependent variable values of the dataset to evaluate (aka the 
             "target").
+        **kwargs
+            Additional keyword arguments are passed to :func:`.plot_dist`
+
+        Example
+        -------
+
+        TODO
 
         """
-        pass
-        # TODO
+        res = self.residuals(x, y)
+        plot_dist(res, **kwargs)
 
 
 

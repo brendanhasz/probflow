@@ -10,7 +10,6 @@ are totally welcome!
 Backlog
 -------
 
-* Add KL loss annealing callback
 * Model evaluation methods (ones to be used in readme)
 * Make model evaluation methods (predictive_sample, etc) handle generative models (x or y is None)
 * Tests for those
