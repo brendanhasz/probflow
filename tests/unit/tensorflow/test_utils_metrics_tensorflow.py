@@ -10,11 +10,24 @@ import tensorflow as tf
 
 from probflow.distributions import *
 from probflow.utils import metrics
+from probflow.utils import casting
 
 
 
 def is_close(a, b, tol=1e-5):
     return np.abs(a-b) < tol
+
+
+
+def test_utils_casting():
+    """Just toss this in here..."""
+
+    df = pd.DataFrame(np.random.randn(5, 2))
+    o = casting.to_numpy(df)
+    assert isinstance(o, np.ndarray)
+    assert o.ndim == 2
+    assert o.shape[0] == 5
+    assert o.shape[1] == 2
 
 
 

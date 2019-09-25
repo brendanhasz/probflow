@@ -705,3 +705,17 @@ def test_HiddenMarkovModel():
     assert probs.ndim == 1
     assert probs.shape[0] == 7
 
+    # Should also work w/ a backend distribution
+    observation = tfd.Normal(tf.random.normal([3]), tf.exp(tf.random.normal([3])))
+    dist = pfd.HiddenMarkovModel(initial, transition, observation, steps)
+
+    # Test sampling
+    samples = dist.sample()
+    assert isinstance(samples, tf.Tensor)
+    assert samples.ndim == 1
+    assert samples.shape[0] == 5
+    samples = dist.sample(10)
+    assert isinstance(samples, tf.Tensor)
+    assert samples.ndim == 2
+    assert samples.shape[0] == 10
+    assert samples.shape[1] == 5

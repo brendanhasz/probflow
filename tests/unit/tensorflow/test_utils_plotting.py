@@ -193,7 +193,24 @@ def test_plot_discrete_dist(plot):
         plt.show()
 
     # xlabel shouldn't show ALL values if lots of uniques
-    pf.utils.plotting.plot_discrete_dist(tf.random.poisson([2000], 50).numpy())
+    pf.utils.plotting.plot_discrete_dist(tf.random.poisson([2000], 10).numpy())
+    if plot:
+        plt.title('should be poisson-y')
+        plt.show()
+
+
+
+def test_plot_categorical_dist(plot):
+    """Tests utils.plotting.plot_categorical_dist"""
+
+    # Should work for categorical variables
+    pf.utils.plotting.plot_categorical_dist(np.array([0, 0, 1, 1, 1, 2]))
+    if plot:
+        plt.title('should be 0 1 2')
+        plt.show()
+
+    # xlabel shouldn't show ALL values if lots of uniques
+    pf.utils.plotting.plot_categorical_dist(tf.random.poisson([2000], 50).numpy())
     if plot:
         plt.title('should be poisson-y, not showing all xticklabels')
         plt.show()
@@ -224,9 +241,9 @@ def test_plot_by(plot):
     with pytest.raises(ValueError):
         pf.utils.plotting.plot_by(np.random.randn(2, 3, 4), data)
     with pytest.raises(ValueError):
-        pf.utils.plotting.plot_dist(data, ci=-0.1)
+        pf.utils.plotting.plot_by(x, data, ci=-0.1)
     with pytest.raises(ValueError):
-        pf.utils.plotting.plot_dist(data, ci=1.1)
+        pf.utils.plotting.plot_by(x, data, ci=1.1)
 
     pf.utils.plotting.plot_by(x, data, func=lambda x: np.mean(x))
     pf.utils.plotting.plot_by(x, data, func='mean', color='#eeefff')

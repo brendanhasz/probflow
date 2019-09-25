@@ -4,6 +4,7 @@ training process.
 
 * :class:`.Callback` - abstract base class for all callbacks
 * :class:`.LearningRateScheduler` - set the learning rate by epoch
+* :class:`.KLWeightScheduler` - set the KL weight by epoch
 * :class:`.MonitorMetric` - record a metric over the course of training
 * :class:`.MonitorParameter` - record a parameter over the course of training
 * :class:`.EarlyStopping` - stop training if some metric stops improving

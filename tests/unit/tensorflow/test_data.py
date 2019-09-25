@@ -87,6 +87,7 @@ def test_DataGenerator():
         assert isinstance(yy, np.ndarray)
         assert yy.shape[0] == 5
         assert yy.shape[1] == 3
+    dg.on_epoch_end()
 
     # and if y is None, should treat x as y (for generative models)
     dg = DataGenerator(x, batch_size=5)
@@ -102,7 +103,7 @@ def test_DataGenerator():
         assert xx is None
         assert yy is None
 
-    # should handle pandas dataframes
+    # should handle pandas dataframes and series
     x = np.random.randn(100, 3)
     w = np.random.randn(3, 1)
     b = np.random.randn()
@@ -121,6 +122,21 @@ def test_DataGenerator():
     assert x1.shape[0] == 5
     assert x1.shape[1] == 3
     assert y1.shape[0] == 5
+    x2, y2 = dg[0]
+    assert np.all(x1.values==x2.values)
+    assert np.all(y1.values==y2.values)
+
+    dg = DataGenerator(y, x, batch_size=5)
+    assert dg.n_samples == 100
+    assert dg.batch_size == 5
+    assert dg.shuffle == False
+    assert len(dg) == 20
+    x1, y1 = dg[0]
+    assert isinstance(y1, pd.DataFrame)
+    assert isinstance(x1, pd.Series)
+    assert y1.shape[0] == 5
+    assert y1.shape[1] == 3
+    assert x1.shape[0] == 5
     x2, y2 = dg[0]
     assert np.all(x1.values==x2.values)
     assert np.all(y1.values==y2.values)

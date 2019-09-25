@@ -29,6 +29,7 @@ of a :class:`.Parameter`:
 * :class:`.BoundedParameter` - parameter which is bounded between 0 and 1
 * :class:`.PositiveParameter` - parameter which is always greater than 0
 * :class:`.DeterministicParameter` - parameter which has a point posterior
+* :class:`.MultivariateNormalParameter` - parameter which has a multivariate Normal posterior
 
 ----------
 

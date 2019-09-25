@@ -20,6 +20,7 @@ from probflow.modules import *
 from probflow.models import Model
 from probflow.models import ContinuousModel, DiscreteModel, CategoricalModel
 from probflow.data import DataGenerator
+from probflow.data import make_generator
 
 
 
@@ -771,6 +772,14 @@ def test_ContinuousModel(plot):
 
     # r squared
     r2 = model.r_squared(x, y)
+    assert isinstance(r2, np.ndarray)
+    assert r2.ndim == 2
+    assert r2.shape[0] == 100
+    assert r2.shape[1] == 1
+
+    # r squared with a DataGenerator
+    dg = make_generator(x, y)
+    r2 = model.r_squared(dg)
     assert isinstance(r2, np.ndarray)
     assert r2.ndim == 2
     assert r2.shape[0] == 100

@@ -10,6 +10,7 @@ Continuous Distributions
 
 * :class:`.Deterministic`
 * :class:`.Normal`
+* :class:`.MultivariateNormal`
 * :class:`.StudentT`
 * :class:`.Cauchy`
 * :class:`.Gamma`
@@ -23,6 +24,11 @@ Discrete Distributions
 * :class:`.OneHotCategorical`
 * :class:`.Poisson`
 * :class:`.Dirichlet`
+
+Other
+-----
+
+* :class:`.Mixture`
 
 ----------
 
