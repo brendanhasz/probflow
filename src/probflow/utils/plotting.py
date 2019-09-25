@@ -286,6 +286,18 @@ def centered_text(text):
 
 def plot_discrete_dist(x):
     """Plot histogram of discrete variable"""
+    minx = np.min(x)
+    maxx = np.max(x)
+    be = np.linspace(minx-0.5, maxx+0.5, maxx-minx+2)
+    bc = np.linspace(minx, maxx, maxx-minx+1)
+    xc, _ = np.histogram(x, be)
+    xc = xc/xc.sum() #normalize
+    plt.bar(bc, xc)
+    
+
+
+def plot_categorical_dist(x):
+    """Plot histogram of categorical variable"""
     xc = pd.Series(x.ravel()).value_counts().sort_index()
     xc = xc/xc.sum() #normalize
     plt.bar(xc.index, xc.data)

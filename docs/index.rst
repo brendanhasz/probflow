@@ -50,7 +50,7 @@ For example, a simple Bayesian linear regression
 
     y \sim \text{Normal}(w x + b, \sigma)
 
-can be built by creating a ProbFlow Model object:
+can be built by creating a ProbFlow Model:
 
 
 .. tabs::
@@ -150,7 +150,7 @@ and diagnose *where* your model is having problems capturing uncertainty:
    :width: 90 %
    :align: center
 
-ProbFlow also provides more complex modules, such as those required for building Bayesian neural networks.  Also, ProbFlow lets you mix and match ProbFlow objects with TensorFlow (or PyTorch!) objects and operations.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
+ProbFlow also provides more complex modules, such as those required for building Bayesian neural networks.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
 
 .. tabs::
 
@@ -252,16 +252,6 @@ Then, you can install ProbFlow itself:
 .. code-block:: bash
     
     pip install probflow
-
-
-Version 1 vs 2
---------------
-
-The latest version of ProbFlow (version 2) was built to work with eager execution in TensorFlow 2.x and PyTorch.  `Version 1 <https://github.com/brendanhasz/probflow/releases/tag/v1.0>`_ does not work with eager execution, and only works with TensorFlow 1.x (and not PyTorch).  The v2 interface is significantly different from v1, based on a subclassing API instead of the more declarative API of v1.  I won't be supporting v1 moving forward, but if you want to install ProbFlow 1.0:
-
-.. code-block:: bash
-    
-    pip install git+http://github.com/brendanhasz/probflow.git@v1.0
 
 
 Support

@@ -44,6 +44,8 @@ import probflow.core.ops as O
 from probflow.utils.casting import to_numpy
 from probflow.modules import Module
 from probflow.utils.plotting import plot_dist
+from probflow.utils.plotting import plot_discrete_dist
+from probflow.utils.plotting import plot_categorical_dist
 from probflow.utils.plotting import plot_by
 from probflow.data import DataGenerator
 from probflow.data import make_generator
@@ -837,9 +839,7 @@ class ContinuousModel(Model):
     * :meth:`~posterior_plot`
     * :meth:`~prior_plot`
     * :meth:`~log_prob`
-    * :meth:`~log_prob_by`
     * :meth:`~prob`
-    * :meth:`~prob_by`
     * :meth:`~save`
     * :meth:`~summary`
 
@@ -851,7 +851,6 @@ class ContinuousModel(Model):
     * :meth:`~pred_dist_covered`
     * :meth:`~pred_dist_coverage`
     * :meth:`~coverage_by`
-    * :meth:`~calibration_curve`
     * :meth:`~r_squared`
     * :meth:`~r_squared_plot`
     * :meth:`~residuals`
@@ -1346,9 +1345,7 @@ class DiscreteModel(ContinuousModel):
     * :meth:`~posterior_plot`
     * :meth:`~prior_plot`
     * :meth:`~log_prob`
-    * :meth:`~log_prob_by`
     * :meth:`~prob`
-    * :meth:`~prob_by`
     * :meth:`~save`
     * :meth:`~summary`
 
@@ -1359,7 +1356,6 @@ class DiscreteModel(ContinuousModel):
     * :meth:`~pred_dist_covered`
     * :meth:`~pred_dist_coverage`
     * :meth:`~coverage_by`
-    * :meth:`~calibration_curve`
     * :meth:`~residuals`
 
     but overrides the following discrete-model-specific methods:
@@ -1380,14 +1376,8 @@ class DiscreteModel(ContinuousModel):
     def pred_dist_plot(self, 
                        x,
                        n=10000,
-                       style='fill',
                        cols=1,
-                       bins=20,
-                       ci=0.0,
-                       bw=0.075,
-                       color=None,
-                       alpha=0.4,
-                       individually=False):
+                       **kwargs):
         """Plot posterior predictive distribution from the model given ``x``.
 
         TODO: Docs...
@@ -1395,42 +1385,39 @@ class DiscreteModel(ContinuousModel):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features").
         n : int
             Number of samples to draw from the model given ``x``.
             Default = 10000
-        style : str
-            Which style of plot to show.  Available types are:
-
-            * ``'fill'`` - filled density plot (the default)
-            * ``'line'`` - line density plot
-            * ``'hist'`` - histogram
-
         cols : int
             Divide the subplots into a grid with this many columns (if 
             ``individually=True``.
-        bins : int or list or |ndarray|
-            Number of bins to use for the posterior density histogram (if 
-            ``style='hist'``), or a list or vector of bin edges.
-        ci : float between 0 and 1
-            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
-        bw : float
-            Bandwidth of the kernel density estimate (if using ``style='line'``
-            or ``style='fill'``).  Default is 0.075
-        color : matplotlib color code or list of them
-            Color(s) to use to plot the distribution.
-            See https://matplotlib.org/tutorials/colors/colors.html
-            Default = use the default matplotlib color cycle
-        alpha : float between 0 and 1
-            Transparency of fill/histogram of the density
-        individually : bool
-            If ``True``, plot one subplot per datapoint in ``x``, otherwise
-            plot all the predictive distributions on the same plot.
+        **kwargs
+            Additional keyword arguments are passed to 
+            :func:`.plot_discrete_dist`
         """
-        pass
-        # TODO: plot discretely
+
+        # Sample from the predictive distribution
+        samples = self.predictive_sample(x, n=n)
+
+        # Independent variable must be scalar
+        Ns = samples.shape[0]
+        N = samples.shape[1]
+        if samples.ndim > 2 and any(e>1 for e in samples.shape[2:]):
+            raise NotImplementedError('only discrete dependent variables are '
+                                      'supported')
+        else:
+            samples = samples.reshape([Ns, N])
+
+        # Plot the predictive distributions
+        rows = np.ceil(N/cols)
+        for i in range(N):
+            plt.subplot(rows, cols, i+1)
+            plot_discrete_dist(samples[:,i])
+            plt.xlabel('Datapoint '+str(i))
+        plt.tight_layout()
 
 
     def r_squared(self, *args, **kwargs):
@@ -1441,25 +1428,6 @@ class DiscreteModel(ContinuousModel):
     def r_squared_plot(self, *args, **kwargs):
         """Cannot compute R squared for a discrete model"""
         raise RuntimeError('Cannot compute R squared for a discrete model')
-
-
-    def residuals_plot(self, x, y=None):
-        """Plot the distribution of residuals of the model's predictions.
-
-        TODO: docs...
-
-        Parameters
-        ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
-            "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the 
-            "target").
-
-        """
-        pass
-        # TODO: plot discretely
 
 
 
@@ -1498,9 +1466,7 @@ class CategoricalModel(Model):
     * :meth:`~posterior_plot`
     * :meth:`~prior_plot`
     * :meth:`~log_prob`
-    * :meth:`~log_prob_by`
     * :meth:`~prob`
-    * :meth:`~prob_by`
     * :meth:`~save`
     * :meth:`~summary`
 
@@ -1520,14 +1486,8 @@ class CategoricalModel(Model):
     def pred_dist_plot(self, 
                        x,
                        n=10000,
-                       style='fill',
                        cols=1,
-                       bins=20,
-                       ci=0.0,
-                       bw=0.075,
-                       color=None,
-                       alpha=0.4,
-                       individually=False):
+                       **kwargs):
         """Plot posterior predictive distribution from the model given ``x``.
 
         TODO: Docs...
@@ -1541,36 +1501,33 @@ class CategoricalModel(Model):
         n : int
             Number of samples to draw from the model given ``x``.
             Default = 10000
-        style : str
-            Which style of plot to show.  Available types are:
-
-            * ``'fill'`` - filled density plot (the default)
-            * ``'line'`` - line density plot
-            * ``'hist'`` - histogram
-
         cols : int
             Divide the subplots into a grid with this many columns (if 
             ``individually=True``.
-        bins : int or list or |ndarray|
-            Number of bins to use for the posterior density histogram (if 
-            ``style='hist'``), or a list or vector of bin edges.
-        ci : float between 0 and 1
-            Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
-        bw : float
-            Bandwidth of the kernel density estimate (if using ``style='line'``
-            or ``style='fill'``).  Default is 0.075
-        color : matplotlib color code or list of them
-            Color(s) to use to plot the distribution.
-            See https://matplotlib.org/tutorials/colors/colors.html
-            Default = use the default matplotlib color cycle
-        alpha : float between 0 and 1
-            Transparency of fill/histogram of the density
-        individually : bool
-            If ``True``, plot one subplot per datapoint in ``x``, otherwise
-            plot all the predictive distributions on the same plot.
+        **kwargs
+            Additional keyword arguments are passed to 
+            :func:`.plot_discrete_dist`
         """
-        pass
-        # TODO
+
+        # Sample from the predictive distribution
+        samples = self.predictive_sample(x, n=n)
+
+        # Independent variable must be scalar
+        Ns = samples.shape[0]
+        N = samples.shape[1]
+        if samples.ndim > 2 and any(e>1 for e in samples.shape[2:]):
+            raise NotImplementedError('only categorical dependent variables '
+                                      'are supported')
+        else:
+            samples = samples.reshape([Ns, N])
+
+        # Plot the predictive distributions
+        rows = np.ceil(N/cols)
+        for i in range(N):
+            plt.subplot(rows, cols, i+1)
+            plot_categorical_dist(samples[:,i])
+            plt.xlabel('Datapoint '+str(i))
+        plt.tight_layout()
 
 
     def calibration_curve(self,

@@ -28,7 +28,7 @@ It's very much still a work in progress.
 Getting Started
 ---------------
 
-**ProbFlow** allows you to quickly and painlessly build, fit, and evaluate custom Bayesian models (or `ready-made <http://probflow.readthedocs.io/en/latest/ug_applications.html>`_ ones!) which run on top of `TensorFlow 2.0 <http://www.tensorflow.org/beta>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability>`_ or `PyTorch <http://pytorch.org>`_.
+**ProbFlow** allows you to quickly and painlessly build, fit, and evaluate custom Bayesian models (or `ready-made <http://probflow.readthedocs.io/en/latest/ug_applications.html>`_ ones!) which run on top of either `TensorFlow 2.0 <http://www.tensorflow.org/beta>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability>`_ or `PyTorch <http://pytorch.org>`_.
 
 With ProbFlow, the core building blocks of a Bayesian model are parameters, probability distributions, and modules (and, of course, the input data).  Parameters define how the independent variables (the features) predict the probability distribution of the dependent variables (the target).
 
@@ -38,7 +38,7 @@ For example, a simple Bayesian linear regression
    :width: 30 %
    :align: center
 
-can be built by creating a ProbFlow Model object:
+can be built by creating a ProbFlow Model:
 
 .. code-block:: python
 
@@ -112,7 +112,7 @@ and diagnose *where* your model is having problems capturing uncertainty:
    :width: 90 %
    :align: center
 
-ProbFlow also provides more complex modules, such as those required for building Bayesian neural networks.  Also, ProbFlow lets you mix and match ProbFlow objects with TensorFlow (or PyTorch!) objects and operations.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
+ProbFlow also provides more complex modules, such as those required for building Bayesian neural networks.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
 
 .. code-block:: python
 
@@ -163,16 +163,6 @@ Then, you can install ProbFlow itself:
 .. code-block:: bash
     
     pip install probflow
-
-
-Version 1 vs 2
---------------
-
-The latest version of ProbFlow (version 2) was built to work with eager execution in TensorFlow 2.x and PyTorch.  `Version 1 <https://github.com/brendanhasz/probflow/releases/tag/v1.0>`_ does not work with eager execution, and only works with TensorFlow 1.x (and not PyTorch).  The v2 interface is significantly different from v1, based on a subclassing API instead of the more declarative API of v1.  I won't be supporting v1 moving forward, but if you want to install ProbFlow 1.0:
-
-.. code-block:: bash
-    
-    pip install git+http://github.com/brendanhasz/probflow.git@v1.0
 
 
 Support

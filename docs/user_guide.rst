@@ -35,5 +35,7 @@ The user guide contains more detailed information about using ProbFlow, includin
 - How to :ref:`make predictions <ug_predicting>` with those models,
 - How to :ref:`evaluate <ug_evaluating>` the performance of a model,
 - How to :ref:`inspect <ug_inspecting>` a model's structure and the values of its parameters,
-- How to use ProbFlow's :ref:`ug_applications`, and
+- How to use ProbFlow's :ref:`ug_applications`, 
+- How to perform actions mid-training with :ref:`ug_callbacks`,
+- How to load data on-the-fly with :ref:`ug_datagenerators`, and
 - :ref:`ug_math` about how ProbFlow fits Bayesian models.

@@ -10,18 +10,14 @@ are totally welcome!
 Backlog
 -------
 
-* Model evaluation methods (ones to be used in readme)
-* Make model evaluation methods (predictive_sample, etc) handle generative models (x or y is None)
-* Tests for those
-* README / index
 * User guide
 * Examples
 * Docs for everything implemented so far
 * Fix issues so far (below)
 * Release 2.0.0
-* Different plotting methods for different types of dists (both for Parameter priors/posteriors and predictive distribution plots)
 * Add HiddenMarkovModel and GaussianProcess distributions + examples
-* All model evaluation methods + specialized types of models
+* Add survival/churn modeling example + Exponential distribution
+* Finish pred_dist_plot for Discrete and Categorical Model, as well as calibration_curve for categorical.
 * Add model saving/loading (Model.save_model and load_model)
 * Summary method for Modules + Models which show hierarchy of modules/parameters
 * Make Module.trainable_variables return tf.Variables which are properties of module+sub-modules as well (and not neccesarily in parameters, also allow embedding of tf.Modules?)
@@ -33,11 +29,11 @@ Backlog
 Issues
 ------
 
-* Autograph fails. "Entity <blah blah> could not be transformed and will be executed as-is", where blah is "function sum" or "ound method Gamma.call of <probflow.distributions.Gamma..." etc.  Don't get the warnings when you remove the ``@tf.function`` in front of the ``train_step`` func defined in models.Model._train_step_tensorflow.  Happens both w/ CPU and GPU versions of TF 2.0.  Presumably b/c autograph doesn't handle various python features (lambda funcs, fancy list comprehensions, methods, etc) used.  Runs about 3x slower w/o autograph optimization (just running w/ eager).
+* Autograph fails. "Entity <blah blah> could not be transformed and will be executed as-is", where blah is "function sum" or "bound method Gamma.call of <probflow.distributions.Gamma..." etc.  Don't get the warnings when you remove the ``@tf.function`` in front of the ``train_step`` func defined in models.Model._train_step_tensorflow.  Happens both w/ CPU and GPU versions of TF 2.0.  Presumably b/c autograph doesn't handle various python features (lambda funcs, fancy list comprehensions, methods, etc) used.  Runs about 3x slower w/o autograph optimization (just running w/ eager).
 * LogisticRegression doesn't work at all! And seems to take a suspiciously long time...
 * Model.metric (mae) causes too much memory usage (out of mem on colab w/ 100k sample linear regression?). Accidentally making a N^2 matrix maybe?
 * Poisson currently requires y values to be floats? I think that's a TFP/TF 2.0 issue though (in their sc there's the line ``tf.maximum(y, 0.)``, which throws an error when y is of an int type).  Could cast inputs to float in pf.distributions.Poisson.__init__...
-* Gamma distribution isn't passing the fit test (in tests/stats/test_distribution_fits)
+* Gamma distribution isn't passing the fit test (in tests/stats/test_distribution_fits) Fitting a Poisson GLM doesn't seem to be doing too well either...
 * PyTorch support
 * Add type hinting and enforcing
 * Implement + test mean() for InverseGamma, Bernoulli, Categorical, and OneHotCategorical for pytorch
