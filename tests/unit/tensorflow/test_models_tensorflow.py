@@ -62,6 +62,15 @@ def test_Model_0D():
     with pytest.raises(TypeError):
         my_model.set_learning_rate('asdf')
 
+    # Should be able to set learning rate
+    assert my_model._kl_weight == 1.0
+    my_model.set_kl_weight(2.0)
+    assert my_model._kl_weight == 2.0
+
+    # but error w/ wrong type
+    with pytest.raises(TypeError):
+        my_model.set_kl_weight('asdf')
+
     # predictive samples
     samples = my_model.predictive_sample(x[:30], n=50)
     assert isinstance(samples, np.ndarray)
@@ -729,12 +738,22 @@ def test_ContinuousModel(plot):
     assert prcs.shape[0] == 7
     assert prcs.shape[1] == 1
 
+    with pytest.raises(TypeError):
+        prcs = model.predictive_prc(x[:7, :], None)
+
     # predictive distribution covered for each sample
     cov = model.pred_dist_covered(x[:11, :], y[:11, :])
     assert isinstance(cov, np.ndarray)
     assert cov.ndim == 2
     assert cov.shape[0] == 11
     assert cov.shape[1] == 1
+    
+    with pytest.raises(ValueError):
+        cov = model.pred_dist_covered(x, y, n=-1)
+    with pytest.raises(ValueError):
+        cov = model.pred_dist_covered(x, y, ci=-0.1)
+    with pytest.raises(ValueError):
+        cov = model.pred_dist_covered(x, y, ci=1.1)
 
     # predictive distribution covered for each sample
     cov = model.pred_dist_coverage(x[:11, :], y[:11, :])

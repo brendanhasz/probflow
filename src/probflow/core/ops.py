@@ -121,6 +121,17 @@ def zeros(shape):
 
 
 
+def eye(dims):
+    """Identity matrix."""
+    if get_backend() == 'pytorch':
+        import torch
+        return torch.eye(dims)
+    else:
+        import tensorflow as tf
+        return tf.eye(dims)
+
+
+
 def sum(val, axis=-1):
     """The sum."""
     if get_backend() == 'pytorch':

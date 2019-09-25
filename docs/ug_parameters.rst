@@ -219,3 +219,9 @@ Dirichlet Parameter
 
 TODO
 
+
+Multivariate Normal Parameter
+-----------------------------
+
+TODO e.g. for allowing your slope and intercept to be correlated
+

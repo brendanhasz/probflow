@@ -65,6 +65,12 @@ def test_Callback():
     assert len(lrs.learning_rate) == 10
     assert my_model._learning_rate == 1e-3
 
+    # should error w/ invalid args
+    with pytest.raises(TypeError):
+        lrs = LearningRateScheduler('lala')
+    with pytest.raises(TypeError):
+        lrs = LearningRateScheduler(lambda x: 'lala')
+
     # Test KLWeightScheduler
     kls = KLWeightScheduler(lambda x: x/100.)
     my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[kls])
@@ -80,9 +86,9 @@ def test_Callback():
 
     # should error w/ invalid args
     with pytest.raises(TypeError):
-        lrs = LearningRateScheduler('lala')
+        lrs = KLWeightScheduler('lala')
     with pytest.raises(TypeError):
-        lrs = LearningRateScheduler(lambda x: 'lala')
+        lrs = KLWeightScheduler(lambda x: 'lala')
 
     # Test MontiorMetric
     x_val = np.random.randn(100).astype('float32')

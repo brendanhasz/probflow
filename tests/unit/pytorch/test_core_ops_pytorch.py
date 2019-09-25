@@ -139,6 +139,20 @@ def test_zeros():
 
 
 
+def test_eye():
+    """Tests eye"""
+
+    # Scalar
+    eye = ops.eye(4)
+    assert isinstance(eye, torch.Tensor)
+    assert eye.ndim == 2
+    assert eye.shape[0] == 4
+    assert eye.shape[1] == 4
+    assert eye.numpy()[0, 0] == 1.0
+    assert eye.numpy()[0, 1] == 0.0
+
+
+
 def test_sum():
     """Tests sum"""
 
