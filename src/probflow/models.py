@@ -1213,8 +1213,8 @@ class ContinuousModel(Model):
         y_pred = self.epistemic_sample(x, n=n)
 
         # Compute Bayesian R^2
-        v_fit = np.var(y_pred, axis=0)
-        v_res = np.var(y_pred-np.expand_dims(y_true, 0), axis=0)
+        v_fit = np.var(y_pred, axis=1)
+        v_res = np.var(y_pred-np.expand_dims(y_true, 0), axis=1)
         return v_fit/(v_fit+v_res)
 
 
@@ -1222,6 +1222,7 @@ class ContinuousModel(Model):
                        x,
                        y=None,
                        n=1000, 
+                       style='hist',
                        **kwargs):
         """Plot the Bayesian R-squared distribution.
 
@@ -1248,7 +1249,7 @@ class ContinuousModel(Model):
 
         """
         r2 = self.r_squared(x, y, n=n)
-        plot_dist(r2, **kwargs)
+        plot_dist(r2, style=style, **kwargs)
 
 
     def residuals(self, x, y=None):

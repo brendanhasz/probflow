@@ -771,18 +771,18 @@ def test_ContinuousModel(plot):
         plt.show()
 
     # r squared
-    r2 = model.r_squared(x, y)
+    r2 = model.r_squared(x, y, n=21)
     assert isinstance(r2, np.ndarray)
     assert r2.ndim == 2
-    assert r2.shape[0] == 100
+    assert r2.shape[0] == 21
     assert r2.shape[1] == 1
 
     # r squared with a DataGenerator
     dg = make_generator(x, y)
-    r2 = model.r_squared(dg)
+    r2 = model.r_squared(dg, n=22)
     assert isinstance(r2, np.ndarray)
     assert r2.ndim == 2
-    assert r2.shape[0] == 100
+    assert r2.shape[0] == 22
     assert r2.shape[1] == 1
 
     # plot the r2 dist
@@ -794,9 +794,9 @@ def test_ContinuousModel(plot):
     # residuals
     res = model.residuals(x, y)
     assert isinstance(res, np.ndarray)
-    assert r2.ndim == 2
-    assert r2.shape[0] == 100
-    assert r2.shape[1] == 1
+    assert res.ndim == 2
+    assert res.shape[0] == 100
+    assert res.shape[1] == 1
 
     # plot the distribution of residuals
     model.residuals_plot(x, y)
