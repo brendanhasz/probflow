@@ -28,8 +28,10 @@ of a :class:`.Parameter`:
 * :class:`.DirichletParameter` - parameter with a Dirichlet posterior
 * :class:`.BoundedParameter` - parameter which is bounded between 0 and 1
 * :class:`.PositiveParameter` - parameter which is always greater than 0
-* :class:`.DeterministicParameter` - parameter which has a point posterior
-* :class:`.MultivariateNormalParameter` - parameter which has a multivariate Normal posterior
+* :class:`.DeterministicParameter` - a non-probabilistic parameter
+* :class:`.MultivariateNormalParameter` - parameter with a multivariate Normal posterior
+
+See the :ref:`user guide <ug_parameters>` for more information on Parameters.
 
 ----------
 

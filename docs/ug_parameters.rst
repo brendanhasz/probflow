@@ -197,7 +197,8 @@ function to transform the unconstrained (raw) variable into a value which is
 always positive.  To define what transforms to use for each unconstrained 
 variable, pass a dictionary to the ``var_transform`` keyword argument
 when initializing a parameter, where the keys are strings (the names of the
-variables) and the values are callables (the transforms to apply).
+variables) and the values are callables (the transforms to apply, note that
+these transforms must use only backend operations).
 
 .. code-block:: python3
 
@@ -230,12 +231,14 @@ posterior, as well as examine and plot the posterior and priors.
 Sampling from a Parameter's variational posterior
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Parameters return a sample from their variational posterior when called:
+Parameters return a sample from their variational posterior when called,
+as a backend tensor:
 
-.. code-block:: python3
+.. code-block:: pycon
 
-    param = pf.Parameter()
-    sample = param()
+    >>> param = pf.Parameter()
+    >>> param()
+    <tf.Tensor: shape=(1,), dtype=float32, numpy=array([1.516305])>
 
 This method should be used for sampling from parameters' posteriors inside
 a model, because it returns a backend tensor.  Depending on the context, 
@@ -374,16 +377,16 @@ the :meth:`prior_plot <.Parameter.prior_plot>` method:
    :align: center
 
 
-Specialized types of Parameters
--------------------------------
+Specialized Parameters
+----------------------
 
 ProbFlow includes several specialized types of parameters.  These are all just
 parameters with specialized default posterior types, priors, initializers, and
 transforms, etc, which are suited for that parameter type.
 
 
-Scale Parameters
-^^^^^^^^^^^^^^^^
+Scale Parameter
+^^^^^^^^^^^^^^^
 
 TL;DR: to make a standard deviation parameter, use the 
 :class:`.ScaleParameter` class:
@@ -455,8 +458,8 @@ and transforms, etc.  This makes it much easier to create a scale parameter:
     std_dev = pf.ScaleParameter()
 
 
-Categorical Parameters
-^^^^^^^^^^^^^^^^^^^^^^
+Categorical Parameter
+^^^^^^^^^^^^^^^^^^^^^
 
 Another type of specialized parameter provided by ProbFlow is the
 :class:`.CategoricalParameter`, which uses a 
@@ -529,8 +532,8 @@ Note that samples from this parameter have size
 ``(shape[0], ... shape[n], k)``, not ``(shape[0], ... shape[n])``.
 
 
-Bounded Parameters
-^^^^^^^^^^^^^^^^^^
+Bounded Parameter
+^^^^^^^^^^^^^^^^^
 
 The :class:`.BoundedParameter` can be used to represent a parameter which 
 has both an upper and a lower bound, and uses a normal posterior and prior,
