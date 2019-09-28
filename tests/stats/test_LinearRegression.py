@@ -28,7 +28,7 @@ def test_linear_regression():
 
     # Create and fit model
     model = pf.LinearRegression(D)
-    model.fit(x, y, batch_size=100, epochs=1000, learning_rate=1e-2)
+    model.fit(x, y, batch_size=100, epochs=1000, lr=1e-2)
 
     # Compute and check confidence intervals on the weights
     lb, ub = model.posterior_ci('weights')

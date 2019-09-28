@@ -691,7 +691,7 @@ def test_ContinuousModel(plot):
     y = x@w + 1
     
     # Fit the model
-    model.fit(x, y, batch_size=50, epochs=100, learning_rate=0.01)
+    model.fit(x, y, batch_size=50, epochs=100, lr=0.01)
 
     # confidence intervals
     lb, ub = model.confidence_intervals(x[:22, :])
@@ -827,7 +827,7 @@ def test_DiscreteModel(plot):
     y = np.round(np.exp(x@w + 1))
     
     # Fit the model
-    model.fit(x, y, batch_size=50, epochs=100, learning_rate=0.1)
+    model.fit(x, y, batch_size=50, epochs=100, lr=0.1)
 
     # plot the predictive dist
     model.pred_dist_plot(x[:1, :])
@@ -893,7 +893,7 @@ def test_CategoricalModel(plot):
     y = np.round(y)
     
     # Fit the model
-    model.fit(x, y, batch_size=50, epochs=100, learning_rate=0.1)
+    model.fit(x, y, batch_size=50, epochs=100, lr=0.1)
 
     # plot the predictive dist
     model.pred_dist_plot(x[:1, :])

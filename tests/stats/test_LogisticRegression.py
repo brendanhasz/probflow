@@ -28,7 +28,7 @@ def test_logistic_regression():
 
     # Create and fit model
     model = pf.LogisticRegression(D)
-    model.fit(x, y, batch_size=100, epochs=1000, learning_rate=1e-3)
+    model.fit(x, y, batch_size=100, epochs=1000, lr=1e-3)
 
     # Compute and check confidence intervals on the weights
     lb, ub = model.posterior_ci('weights')

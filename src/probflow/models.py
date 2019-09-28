@@ -166,7 +166,7 @@ class Model(Module):
             shuffle: bool = True,
             optimizer=None,
             optimizer_kwargs: dict = {},
-            learning_rate: float = 1e-3,
+            lr: float = 1e-3,
             flipout: bool = True,
             callbacks: List[BaseCallback] = []):
         """Fit the model to data
@@ -204,7 +204,7 @@ class Model(Module):
         optimizer_kwargs : dict
             Keyword arguments to pass to the optimizer.
             Default is an empty dict.
-        learning_rate : float
+        lr : float
             Learning rate for the optimizer.
             Note that the learning rate can be updated during training using
             the set_learning_rate method.
@@ -219,7 +219,7 @@ class Model(Module):
                                     shuffle=shuffle)
 
         # Use default optimizer if none specified
-        self._learning_rate = learning_rate
+        self._learning_rate = lr
         if optimizer is None:
             if get_backend() == 'pytorch':
                 import torch

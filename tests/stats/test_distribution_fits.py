@@ -39,7 +39,7 @@ def test_fit_normal():
 
     # Create and fit model
     model = NormalModel()
-    model.fit(x, batch_size=100, epochs=1000, learning_rate=1e-2)
+    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci('mu')
@@ -78,7 +78,7 @@ def test_fit_studentt():
 
     # Create and fit model
     model = StudenttModel()
-    model.fit(x, batch_size=100, epochs=1000, learning_rate=1e-2)
+    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci('mu')
@@ -116,7 +116,7 @@ def test_fit_cauchy():
 
     # Create and fit model
     model = CauchyModel()
-    model.fit(x, batch_size=100, epochs=1000, learning_rate=1e-2)
+    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci('mu')
@@ -154,7 +154,7 @@ def test_fit_gamma():
 
     # Create and fit model
     model = GammaModel()
-    model.fit(x, batch_size=100, epochs=1000, learning_rate=1e-2)
+    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
 
     # Check inferences for mean are correct
     '''
@@ -196,7 +196,7 @@ def test_fit_bernoulli():
 
     # Create and fit model
     model = BernoulliModel()
-    model.fit(x, batch_size=100, epochs=1000, learning_rate=1e-2)
+    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci('prob')
@@ -226,7 +226,7 @@ def test_fit_categorical():
 
     # Create and fit model
     model = CategoricalModel()
-    model.fit(x, batch_size=100, epochs=1000, learning_rate=1e-2)
+    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci('probs')
@@ -257,7 +257,7 @@ def test_fit_poisson():
 
     # Create and fit model
     model = PoissonModel()
-    model.fit(x, batch_size=100, epochs=1000, learning_rate=1e-2)
+    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci('rate')

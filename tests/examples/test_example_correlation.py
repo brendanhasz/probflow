@@ -34,7 +34,7 @@ def test_correlation(plot):
     if plot:
         plt.show()
 
-    model.fit(X, learning_rate=0.2)
+    model.fit(X, lr=0.2)
     model.posterior_plot(style='hist', ci=0.95)
 
     if plot:
@@ -47,7 +47,7 @@ def test_correlation(plot):
         plt.show()
 
     model = BayesianCorrelation()
-    model.fit(X, learning_rate=0.2)
+    model.fit(X, lr=0.2)
     model.posterior_plot(style='hist', ci=0.95)
 
     if plot:
@@ -61,7 +61,7 @@ def test_correlation(plot):
         plt.show()
 
     model = BayesianCorrelation()
-    model.fit(X, learning_rate=0.2)
+    model.fit(X, lr=0.2)
     model.posterior_plot(style='hist', ci=0.95)
 
     if plot:
