@@ -518,7 +518,7 @@ class ScaleParameter(Parameter):
     def __init__(self,
                  shape=1,
                  posterior=Gamma,
-                 prior=Gamma(5, 5),
+                 prior=Gamma(1, 1),
                  transform=lambda x: O.sqrt(1.0/x),
                  initializer={'concentration': pos_xavier, 
                               'rate': pos_xavier},
@@ -978,7 +978,7 @@ class MultivariateNormalParameter(Parameter):
             else:
                 import tensorflow as tf
                 import tensorflow_probability as tfp
-                E = tfp.distributions.fill_triangular(x)
+                E = tfp.math.fill_triangular(x)
                 E = tf.linalg.set_diag(E,tf.exp(tf.linalg.tensor_diag_part(E)))
                 return E @ tf.transpose(E)
 
