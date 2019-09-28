@@ -425,6 +425,7 @@ class Parameter(BaseParameter):
             else:
                 return val
         elif isinstance(key, int):
+            key %= val.shape[axis]
             return O.gather(val, [key], axis=axis)
         else:
             return O.gather(val, key, axis=axis)
@@ -446,6 +447,10 @@ class Parameter(BaseParameter):
             return x
         else:
             return self._get_one_dim(x, key, 0)
+
+
+    def __repr__(self):
+        return '<pf.Parameter '+self.name+' shape='+str(self.shape)+'>'
 
 
 
@@ -481,14 +486,14 @@ class ScaleParameter(Parameter):
         Default = ``1``
     posterior : |Distribution| class
         Probability distribution class to use to approximate the posterior.
-        Default = :class:`.InverseGamma`
+        Default = :class:`.Gamma`
     prior : |Distribution| object
         Prior probability distribution function which has been instantiated
         with parameters.
-        Default = :class:`.InverseGamma` ``(5, 5)``
+        Default = :class:`.Gamma` ``(5, 5)``
     transform : callable
         Transform to apply to the random variable.
-        Default is to use a square root transform.
+        Default is to use an inverse square root transform (``sqrt(1/x)``)
     initializer : Dict[str, callable]
         Initializer functions to use for each variable of the variational
         posterior distribution.  Keys correspond to variable names (arguments
@@ -937,6 +942,8 @@ class MultivariateNormalParameter(Parameter):
         Prior probability distribution function which has been instantiated
         with parameters.
         Default = :class:`.MultivariateNormal` ``(0, I)``
+    expand_dims : int or None
+        Dimension to expand along.
     name : str
         Name of the parameter(s).
         Default = ``'ScaleParameter'``
@@ -961,6 +968,7 @@ class MultivariateNormalParameter(Parameter):
     def __init__(self,
                  d: int = 1,
                  prior = None,
+                 expand_dims: int = -1,
                  name='MultivariateNormalParameter'):
 
         # Transformation for scale parameters
@@ -978,6 +986,12 @@ class MultivariateNormalParameter(Parameter):
         if prior is None:
             prior = MultivariateNormal(O.zeros([d]), O.eye(d))
 
+        # Transform
+        if expand_dims is not None:
+            transform = lambda x: O.expand_dims(x, expand_dims)
+        else:
+            transform = None
+
         # Initializer and variable transforms
         initializer = {'loc': lambda x: xavier([d]), 
                        'cov': lambda x: xavier([int(d*(d+1)/2)])}
@@ -985,6 +999,7 @@ class MultivariateNormalParameter(Parameter):
 
         super().__init__(posterior=MultivariateNormal,
                          prior=prior,
+                         transform=transform,
                          initializer=initializer,
                          var_transform=var_transform,
                          name=name)

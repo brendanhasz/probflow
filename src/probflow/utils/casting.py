@@ -54,16 +54,12 @@ def to_tensor(x):
     # Convert to backend tensor
     if get_backend() == 'pytorch':
         import torch
-        if not isinstance(x, torch.Tensor):
+        if isinstance(x, torch.Tensor):
+            return x
+        else:
             return torch.tensor(x)
-        else:
-            return x
     else:
-        import tensorflow as tf
-        if isinstance(x, tf.Tensor):
-            return tf.constant(x)
-        else:
-            return x
+        return x #TensorFlow auto-converts numpy arrays to tensors
 
 
 

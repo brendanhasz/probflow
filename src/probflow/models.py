@@ -959,10 +959,12 @@ class ContinuousModel(Model):
             rows = np.ceil(N/cols)
             for i in range(N):
                 plt.subplot(rows, cols, i+1)
-                plot_dist(samples[:,i], xlabel='Datapoint '+str(i), **kwargs)
+                plot_dist(samples[:,i], **kwargs)
+                plt.xlabel('Predicted dependent variable value for '+str(i))
             plt.tight_layout()
         else:
-            plot_dist(samples, xlabel='Dependent Variable', **kwargs)
+            plot_dist(samples, **kwargs)
+            plt.xlabel('Predicted dependent variable value')
 
 
     def _get_y(self, x, y):
