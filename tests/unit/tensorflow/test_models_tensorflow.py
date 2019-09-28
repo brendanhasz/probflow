@@ -95,27 +95,6 @@ def test_Model_0D():
     assert samples.shape[0] == 50
     assert samples.shape[1] == 30
 
-    # predictive ci
-    lb, ub = my_model.predictive_ci(x[:30], n=50)
-    assert isinstance(lb, np.ndarray)
-    assert isinstance(ub, np.ndarray)
-    assert lb.shape[0] == 30
-    assert ub.shape[0] == 30
-
-    # aleatoric ci
-    lb, ub = my_model.aleatoric_ci(x[:30], n=50)
-    assert isinstance(lb, np.ndarray)
-    assert isinstance(ub, np.ndarray)
-    assert lb.shape[0] == 30
-    assert ub.shape[0] == 30
-
-    # epistemic ci
-    lb, ub = my_model.epistemic_ci(x[:30], n=50)
-    assert isinstance(lb, np.ndarray)
-    assert isinstance(ub, np.ndarray)
-    assert lb.shape[0] == 30
-    assert ub.shape[0] == 30
-
     # predict
     samples = my_model.predict(x[:30])
     assert isinstance(samples, np.ndarray)

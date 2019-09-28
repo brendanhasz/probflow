@@ -373,44 +373,6 @@ class Model(Module):
             return self._sample(x, lambda x: x.mean(), ed=0)
 
 
-    def _compute_ci(self, samples, ci):
-        """Compute confidence intervals given samples"""
-        ci0 = 100 * (0.5 - ci/2.0)
-        ci1 = 100 * (0.5 + ci/2.0)
-        bounds = np.percentile(samples, q=[ci0, ci1], axis=0)
-        return bounds[0, ...], bounds[1, ...]
-
-
-    def predictive_ci(self, x=None, ci=0.95, n=1000):
-        """Compute predictive confidence intervals.
-
-        TODO
-
-        """
-        samples = self.predictive_sample(x=x, n=n)
-        return self._compute_ci(samples, ci)
-
-
-    def aleatoric_ci(self, x=None, ci=0.95, n=1000):
-        """Compute aleatoric confidence intervals.
-
-        TODO
-
-        """
-        samples = self.aleatoric_sample(x=x, n=n)
-        return self._compute_ci(samples, ci)
-
-
-    def epistemic_ci(self, x=None, ci=0.95, n=1000):
-        """Compute epistemic confidence intervals.
-
-        TODO
-
-        """
-        samples = self.epistemic_sample(x=x, n=n)
-        return self._compute_ci(samples, ci)
-
-
     def predict(self, x=None):
         """Predict dependent variable using the model
 
