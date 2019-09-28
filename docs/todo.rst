@@ -10,6 +10,7 @@ are totally welcome!
 Backlog
 -------
 
+* Change `learning_rate` kwarg to fit to just ``lr``
 * User guide
 * Examples
 * Docs for everything implemented so far

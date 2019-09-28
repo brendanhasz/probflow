@@ -1250,6 +1250,7 @@ class ContinuousModel(Model):
         """
         r2 = self.r_squared(x, y, n=n)
         plot_dist(r2, style=style, **kwargs)
+        plt.xlabel('Bayesian R squared')
 
 
     def residuals(self, x, y=None):
@@ -1308,6 +1309,7 @@ class ContinuousModel(Model):
         """
         res = self.residuals(x, y)
         plot_dist(res, **kwargs)
+        plt.xlabel('Residual (True - Predicted)')
 
 
 

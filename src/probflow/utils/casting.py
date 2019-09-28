@@ -44,11 +44,26 @@ def to_numpy(x):
 
 def to_tensor(x):
     """Make x a tensor if not already"""
+
+    # Get numpy data if pandas
+    if isinstance(x, pd.DataFrame):
+        x = x.values
+    elif isinstance(x, pd.Series):
+        x = x.to_frame().values
+
+    # Convert to backend tensor
     if get_backend() == 'pytorch':
         import torch
         if not isinstance(x, torch.Tensor):
             return torch.tensor(x)
-    return x
+        else:
+            return x
+    else:
+        import tensorflow as tf
+        if isinstance(x, tf.Tensor):
+            return tf.constant(x)
+        else:
+            return x
 
 
 

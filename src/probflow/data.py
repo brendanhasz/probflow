@@ -176,6 +176,3 @@ def make_generator(x=None, y=None, batch_size=None, shuffle=False, test=False):
     else:
         return DataGenerator(x, y, batch_size=batch_size,
                              shuffle=shuffle, test=test)
-
-
-

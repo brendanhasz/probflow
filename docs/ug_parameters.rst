@@ -75,8 +75,8 @@ parameter which uses a normal distribution for its variational posterior:
     param = pf.Parameter(posterior=pf.Normal)
 
 The default variational posterior on a parameter is a :class:`.Normal` 
-distribution. However, we can manually set the prior on any parameter to be
-any |Distribution| (with any parameters).  For example, to instead create a 
+distribution, but this can be changed to any |Distribution| class. 
+For example, to instead create a 
 parameter which uses a Cauchy distribution as the variational posterior:
 
 .. code-block:: python3
