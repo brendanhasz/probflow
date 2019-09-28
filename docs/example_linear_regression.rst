@@ -8,8 +8,6 @@ Linear Regression
 
 TODO: intro, link to colab w/ these examples
 
-.. contents:: Outline
-
 
 Simple Linear Regression
 ------------------------
@@ -130,6 +128,12 @@ TODO: initialize and fit
     model.fit(x, y)
 
 TODO: how to access each individual posterior, etc
+
+
+Using the Dense Module
+----------------------
+
+TODO
 
 
 Using the LinearRegression Model

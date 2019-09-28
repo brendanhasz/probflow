@@ -8,8 +8,6 @@ Logistic Regression
 
 TODO: intro, link to colab w/ these examples
 
-.. contents:: Outline
-
 
 Logistic Regression
 -------------------
@@ -64,7 +62,7 @@ By default, the :class:`.Bernoulli` distribution treats its inputs as logits (th
 
 .. code-block:: python3
 
-    pf.Bernoulli(probs=x @ self.w() + self.b())
+    pf.Bernoulli(probs=tf.sigmoid(x @ self.w() + self.b()))
 
 TODO: initialize and fit
 
@@ -74,39 +72,6 @@ TODO: initialize and fit
     model.fit(x, y)
 
 TODO: look at model criticism for a categorical model
-
-
-Using the Dense Layer
----------------------
-
-TODO: can do the same thing with Dense:
-
-.. tabs::
-
-    .. group-tab:: TensorFlow
-            
-        .. code-block:: python3
-
-            class LogisticRegression(pf.Model):
-
-                def __init__(self, dims):
-                    self.layer = pf.Dense(dims, 1)
-
-                def __call__(self, x):
-                    return pf.Bernoulli(self.layer(x))
-
-    .. group-tab:: PyTorch
-            
-        .. code-block:: python3
-
-            class LogisticRegression(pf.Model):
-
-                def __init__(self, dims):
-                    self.layer = pf.Dense(dims, 1)
-
-                def __call__(self, x):
-                    x = torch.tensor(x)
-                    return pf.Bernoulli(self.layer(x))
 
 
 Using the LogisticRegression Model
