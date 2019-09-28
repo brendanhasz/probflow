@@ -131,47 +131,6 @@ class Parameter(BaseParameter):
         Default = ``'Parameter'``
 
 
-    Attributes
-    ----------
-    initializer : Dict[str, callable]
-        Initializer functions for each variable
-    name : str
-        Name of this |Parameter|
-    posterior_fn : |Distribution| class
-        Distribution to use for the variational posterior
-    posterior : |Distribution| object
-        This Parameter's variational posterior
-    prior : |Distribution| object
-        This parameter's prior
-    shape : List[int]
-        Shape of this parameter
-    trainable_variables : List[Tensor]
-        List of raw variable objects from the backend used for this Parameter
-    transform : callable
-        Transformation to apply to this parameter's variational distribution
-    untransformed_variables : Dict[str, Tensor]
-        Untransformed variables from the backend
-    var_transform : Dict[str, callable]
-        Transformations to apply to each variable
-    variables : Dict[str, Tensor]
-        Transformed variables from the backend
-    
-
-    Methods
-    -------
-    __init__(...)
-        Instantiate a Parameter array.
-    __call__
-        Return a sample from the 
-    kl_loss
-    posterior_ci
-    posterior_mean
-    posterior_plot
-    posterior_sample
-    prior_plot
-    prior_sample
-
-
     Examples
     --------
 
@@ -189,10 +148,10 @@ class Parameter(BaseParameter):
                  shape: Union[int, List[int]] = 1,
                  posterior: Type[BaseDistribution] = Normal,
                  prior: BaseDistribution = Normal(0, 1),
-                 transform: Callable = lambda x: x,
+                 transform: Callable = None,
                  initializer: Dict[str, Callable] = {'loc': xavier,
                                                      'scale': scale_xavier},
-                 var_transform : Dict[str, Callable] = {'loc': lambda x: x,
+                 var_transform : Dict[str, Callable] = {'loc': None,
                                                         'scale': O.softplus},
                  name: str = 'Parameter'):
 
@@ -208,10 +167,11 @@ class Parameter(BaseParameter):
         self.shape = shape
         self.posterior_fn = posterior
         self.prior = prior
-        self.transform = transform
+        self.transform = transform if transform else lambda x: x
         self.initializer = initializer
-        self.var_transform = var_transform
         self.name = name
+        self.var_transform = {n: (f if f else lambda x: x)
+                              for (n, f) in var_transform.items()}
 
         # Create variables for the variational distribution
         self.untransformed_variables = dict()
@@ -624,7 +584,7 @@ class CategoricalParameter(Parameter):
                  shape: Union[int, List[int]] = [],
                  posterior=Categorical,
                  prior=None,
-                 transform=lambda x: x,
+                 transform=None,
                  initializer={'probs': xavier},
                  var_transform={'probs': O.additive_logistic_transform},
                  name='CategoricalParameter'):
@@ -721,7 +681,7 @@ class DirichletParameter(Parameter):
                  shape: Union[int, List[int]] = [],
                  posterior=Dirichlet,
                  prior=None,
-                 transform=lambda x: x,
+                 transform=None,
                  initializer={'concentration': pos_xavier},
                  var_transform={'concentration': O.softplus},
                  name='DirichletParameter'):
@@ -811,7 +771,7 @@ class BoundedParameter(Parameter):
                  prior=Normal(0, 1),
                  transform=None,
                  initializer={'loc': xavier, 'scale': scale_xavier},
-                 var_transform={'loc': lambda x: x, 'scale': O.softplus},
+                 var_transform={'loc': None, 'scale': O.softplus},
                  min: float = 0.0,
                  max: float = 1.0,
                  name='BoundedParameter'):
@@ -839,12 +799,12 @@ class PositiveParameter(Parameter):
     r"""A parameter which takes only positive values.
 
     This is a convenience class for creating a parameter :math:`\beta` which 
-    can only take positive values.  It uses a log-normal variational posterior
-    distribution:
+    can only take positive values.  It uses a normal variational posterior
+    distribution and a softplus transform:
 
     .. math::
 
-        \log ( \beta ) \sim \text{Normal}(\mu, \sigma)
+        \log ( 1 + \exp ( \beta )) \sim \text{Normal}(\mu, \sigma)
 
 
     Parameters
@@ -861,7 +821,7 @@ class PositiveParameter(Parameter):
         Default = :class:`.Normal` ``(0, 1)``
     transform : callable
         Transform to apply to the random variable.
-        Default is to use an exponential transform.
+        Default is to use a softplus transform.
     initializer : Dict[str, callable]
         Initializer functions to use for each variable of the variational
         posterior distribution.  Keys correspond to variable names (arguments
@@ -890,9 +850,9 @@ class PositiveParameter(Parameter):
                  shape=1,
                  posterior=Normal,
                  prior=Normal(0, 1),
-                 transform=O.exp,
+                 transform=O.softplus,
                  initializer={'loc': xavier, 'scale': scale_xavier},
-                 var_transform={'loc': lambda x: x, 'scale': O.softplus},
+                 var_transform={'loc': None, 'scale': O.softplus},
                  name='PositiveParameter'):
         super().__init__(shape=shape,
                          posterior=posterior,
@@ -946,9 +906,9 @@ class DeterministicParameter(Parameter):
                  shape=1,
                  posterior=Deterministic,
                  prior=Normal(0, 1),
-                 transform=lambda x: x,
+                 transform=None,
                  initializer={'loc': xavier},
-                 var_transform={'loc': lambda x: x},
+                 var_transform={'loc': None},
                  name='DeterministicParameter'):
         super().__init__(shape=shape,
                          posterior=posterior,
@@ -1019,7 +979,7 @@ class MultivariateNormalParameter(Parameter):
         # Initializer and variable transforms
         initializer = {'loc': lambda x: xavier([d]), 
                        'cov': lambda x: xavier([int(d*(d+1)/2)])}
-        var_transform = {'loc': lambda x: x, 'cov': log_cholesky_transform}
+        var_transform = {'loc': None, 'cov': log_cholesky_transform}
 
         super().__init__(posterior=MultivariateNormal,
                          prior=prior,

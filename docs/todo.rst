@@ -17,7 +17,9 @@ Backlog
 * Release 2.0.0
 * Add HiddenMarkovModel and GaussianProcess distributions + examples
 * Add survival/churn modeling example + Exponential distribution
+* Models should be able to return a backend distribution (not a PF distribution - do you even need PF distributions?).
 * Finish pred_dist_plot for Discrete and Categorical Model, as well as calibration_curve for categorical.
+* Make Parameters have an option for how to plot their posteriors/priors (ie use plot_dist, plot_discrete_dist, or plot_categorical_dist), and set defaults that make sense for parameters (e.g. default for Categorical param should be plot_categorical_dist)
 * Add model saving/loading (Model.save_model and load_model)
 * Summary method for Modules + Models which show hierarchy of modules/parameters
 * Make Module.trainable_variables return tf.Variables which are properties of module+sub-modules as well (and not neccesarily in parameters, also allow embedding of tf.Modules?)

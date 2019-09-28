@@ -56,7 +56,7 @@ can be built by creating a ProbFlow Model:
     
     model = LinearRegression()
 
-Then, the model can be fit using variational inference, in *one line*:
+Then, the model can be fit using stochastic variational inference, in *one line*:
 
 .. code-block:: python
 
