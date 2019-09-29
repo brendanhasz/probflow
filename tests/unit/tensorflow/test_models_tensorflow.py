@@ -693,8 +693,8 @@ def test_ContinuousModel(plot):
     # Fit the model
     model.fit(x, y, batch_size=50, epochs=100, lr=0.01)
 
-    # confidence intervals
-    lb, ub = model.confidence_intervals(x[:22, :])
+    # predictive intervals
+    lb, ub = model.predictive_interval(x[:22, :])
     assert isinstance(lb, np.ndarray)
     assert isinstance(ub, np.ndarray)
     assert lb.ndim == 2
@@ -702,6 +702,28 @@ def test_ContinuousModel(plot):
     assert lb.shape[1] == 1
     assert ub.ndim == 2
     assert ub.shape[0] == 22
+    assert ub.shape[1] == 1
+
+    # aleatoric intervals
+    lb, ub = model.aleatoric_interval(x[:23, :])
+    assert isinstance(lb, np.ndarray)
+    assert isinstance(ub, np.ndarray)
+    assert lb.ndim == 2
+    assert lb.shape[0] == 23
+    assert lb.shape[1] == 1
+    assert ub.ndim == 2
+    assert ub.shape[0] == 23
+    assert ub.shape[1] == 1
+
+    # epistemic intervals
+    lb, ub = model.epistemic_interval(x[:24, :])
+    assert isinstance(lb, np.ndarray)
+    assert isinstance(ub, np.ndarray)
+    assert lb.ndim == 2
+    assert lb.shape[0] == 24
+    assert lb.shape[1] == 1
+    assert ub.ndim == 2
+    assert ub.shape[0] == 24
     assert ub.shape[1] == 1
 
     # posterior predictive plot with one sample

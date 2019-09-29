@@ -29,6 +29,7 @@ Backlog
 Issues
 ------
 
+* Flipout implementation for sure has a bug - fitting a DenseRegression works w/o flipout, but not w/ it.
 * Autograph fails. "Entity <blah blah> could not be transformed and will be executed as-is", where blah is "function sum" or "bound method Gamma.call of <probflow.distributions.Gamma..." etc.  Don't get the warnings when you remove the ``@tf.function`` in front of the ``train_step`` func defined in models.Model._train_step_tensorflow.  Happens both w/ CPU and GPU versions of TF 2.0.  Presumably b/c autograph doesn't handle various python features (lambda funcs, fancy list comprehensions, methods, etc) used.  Runs about 3x slower w/o autograph optimization (just running w/ eager).
 * LogisticRegression doesn't work at all! And seems to take a suspiciously long time...
 * Model.metric (mae) causes too much memory usage (out of mem on colab w/ 100k sample linear regression?). Accidentally making a N^2 matrix maybe?
@@ -41,3 +42,4 @@ Issues
 * Allow learning rate to be updated w/ PyTorch
 * Automatically set learning rate according to # samples and # parameters? (if no lr kwarg was passed to fit)
 * Models should be able to return a backend distribution (not a PF distribution - do you even need PF distributions?).
+* Model predictive sampling functions don't work when x is a Pandas DataFrame (because you can't expand_dims on a df)

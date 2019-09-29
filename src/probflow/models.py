@@ -845,7 +845,7 @@ class ContinuousModel(Model):
 
     and adds the following continuous-model-specific methods:
 
-    * :meth:`~confidence_intervals`
+    * :meth:`~predictive_interval`
     * :meth:`~pred_dist_plot`
     * :meth:`~predictive_prc`
     * :meth:`~pred_dist_covered`
@@ -864,11 +864,20 @@ class ContinuousModel(Model):
     """
 
 
-    def confidence_intervals(self, 
-                             x,
-                             ci=0.95,
-                             n=1000):
-        """Compute confidence intervals on predictions for ``x``.
+    def _intervals(self, fn, x, ci=0.95, n=1000):
+        """Compute intervals on some type of sample"""
+        samples = fn(x, n=n)
+        lb = 100*(1.0-ci)/2.0
+        prcs = np.percentile(samples, [lb, 100.0-lb], axis=0)
+        return prcs[0, ...], prcs[1, ...]
+
+
+    def predictive_interval(self, 
+                            x,
+                            ci=0.95,
+                            n=1000):
+        """Compute confidence intervals on the model's estimate of the target
+        given ``x``, including all sources of uncertainty.
 
         TODO: docs
 
@@ -896,15 +905,81 @@ class ContinuousModel(Model):
             Upper bounds of the ``ci`` confidence intervals on the predictions
             for samples in ``x``.
         """
+        return self._intervals(self.predictive_sample, x, ci=ci, n=n)
 
-        # Sample from the predictive distribution
-        pred_samples = self.predictive_sample(x, n=n)
 
-        # Compute percentiles of the predictive distribution
-        lb = 100*(1.0-ci)/2.0
-        q = [lb, 100.0-lb]
-        prcs = np.percentile(pred_samples, q, axis=0)
-        return prcs[0, ...], prcs[1, ...]
+    def aleatoric_interval(self, 
+                           x,
+                           ci=0.95,
+                           n=1000):
+        """Compute confidence intervals on the model's estimate of the target
+        given ``x``, including only aleatoric uncertainty (uncertainty due to
+        noise).
+
+        TODO: docs
+
+
+        Parameters
+        ----------
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
+            Independent variable values of the dataset to evaluate (aka the 
+            "features").
+        ci : float between 0 and 1
+            Inner proportion of predictive distribution to use a the
+            confidence interval.
+            Default = 0.95
+        n : int
+            Number of samples from the aleatoric predictive distribution to
+            take to compute the confidence intervals.
+            Default = 1000
+
+        Returns
+        -------
+        lb : |ndarray|
+            Lower bounds of the ``ci`` confidence intervals on the predictions
+            for samples in ``x``.
+        ub : |ndarray|
+            Upper bounds of the ``ci`` confidence intervals on the predictions
+            for samples in ``x``.
+        """
+        return self._intervals(self.aleatoric_sample, x, ci=ci, n=n)
+
+
+    def epistemic_interval(self, 
+                            x,
+                            ci=0.95,
+                            n=1000):
+        """Compute confidence intervals on the model's estimate of the target
+        given ``x``, including only epistemic uncertainty (uncertainty due to
+        uncertainty as to the model's parameter values).
+
+        TODO: docs
+
+
+        Parameters
+        ----------
+        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
+            Independent variable values of the dataset to evaluate (aka the 
+            "features").
+        ci : float between 0 and 1
+            Inner proportion of predictive distribution to use a the
+            confidence interval.
+            Default = 0.95
+        n : int
+            Number of samples from the epistemic predictive distribution to
+            take to compute the confidence intervals.
+            Default = 1000
+
+        Returns
+        -------
+        lb : |ndarray|
+            Lower bounds of the ``ci`` confidence intervals on the predictions
+            for samples in ``x``.
+        ub : |ndarray|
+            Upper bounds of the ``ci`` confidence intervals on the predictions
+            for samples in ``x``.
+        """
+        return self._intervals(self.epistemic_sample, x, ci=ci, n=n)
 
 
     def pred_dist_plot(self, 
@@ -1356,7 +1431,7 @@ class DiscreteModel(ContinuousModel):
 
     as well as several methods from :class:`.ContinuousModel`:
 
-    * :meth:`~confidence_intervals`
+    * :meth:`~predictive_interval`
     * :meth:`~predictive_prc`
     * :meth:`~pred_dist_covered`
     * :meth:`~pred_dist_coverage`

@@ -105,20 +105,20 @@ After defining the model class, we just need to create an instance of the model,
 Now that we've fit the model, we can use it to make predictions on some test data:
 
 
-.. code-block:: pycon
+.. code-block:: python3
 
-    >>> x_test = randn(10, 1)
-    >>> model.predict(x_test)
-    array([[-1.6519268 ],
-           [-2.8056984 ],
-           [ 0.31451344],
-           [-2.8005743 ],
-           [-0.65613306],
-           [-3.668983  ],
-           [-1.8928523 ],
-           [-3.9978495 ],
-           [ 0.8707621 ],
-           [-2.887964  ]], dtype=float32)
+    # Make predictions
+    x_test = np.array([-3, 3]).astype('float32')
+    preds = model.predict(x_test)
+
+    # Plot em
+    plt.plot(x_test, preds, 'r')
+    plt.plot(x, y, '.')
+
+
+.. image:: img/examples/linear_regression/output_10_0.svg
+   :width: 70 %
+   :align: center
 
 
 Or view the residuals of the model's predictions (the difference between the
@@ -157,7 +157,7 @@ We can also get the model's confidence intervals on its predictions:
 
     # Compute 95% predictive confidence intervals
     x_eval = np.linspace(-3, 3, 100).astype('float32')
-    lb, ub = model.confidence_intervals(x_eval, ci=0.9)
+    lb, ub = model.predictive_interval(x_eval, ci=0.9)
 
     # Plot em
     plt.fill_between(x_eval, lb, ub, alpha=0.2)
@@ -221,7 +221,7 @@ Multiple Linear Regression
 
 A multiple linear regression is when we have multiple features (independent
 variables), and a single target (dependent variable).  It's just like a simple
-linear regression, except each variable gets its own weight:
+linear regression, except each feature gets its own weight:
 
 .. math::
 
@@ -367,7 +367,7 @@ pre-built :class:`.LinearRegression` model!
 Using the MultivariateNormalParameter
 -------------------------------------
 
-So far, our variables have been completely independent.  We might want to
+So far, our parameters have been completely independent.  We might want to
 model the full joint distribution, to allow for a potential correlation
 between the parameters.  For that, we can use 
 :class:`.MultivariateNormalParameter`, which creates a parameter that has a
@@ -420,6 +420,12 @@ Then we can instantiate the model and fit it:
 
 
 Now the covariance between parameters has also been modeled:
+
+
+.. code-block:: python3
+
+    samples = model.betas.posterior_sample(n=10000)
+    sns.kdeplot(samples[:, 0, 0], samples[:, 1, 0])
 
 
 .. image:: img/examples/linear_regression/output_38_1.svg

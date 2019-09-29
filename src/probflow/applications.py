@@ -70,19 +70,19 @@ class LinearRegression(ContinuousModel):
         self.heteroscedastic = heteroscedastic
         if heteroscedastic:
             self.weights = Parameter([d, 2], name='weights')
-            self.bias = Parameter(name='bias')
+            self.bias = Parameter([1, 1], name='bias')
         else:
             self.weights = Parameter([d, 1], name='weights')
-            self.bias = Parameter(name='bias')
-            self.std = ScaleParameter(name='std')
+            self.bias = Parameter([1, 1], name='bias')
+            self.std = ScaleParameter([1, 1], name='std')
 
 
     def __call__(self, x):
         x = to_tensor(x)
         if self.heteroscedastic:
             p = x @ self.weights()
-            m_preds = p[:, 0:1] + self.bias()
-            s_preds = O.exp(p[:, 1:2])
+            m_preds = p[..., :, 0:1] + self.bias()
+            s_preds = O.exp(p[..., :, 1:2])
             return Normal(m_preds, s_preds)
         else:
             return Normal(x @ self.weights() + self.bias(), self.std())
@@ -233,7 +233,7 @@ class DenseRegression(ContinuousModel):
             self.network = DenseNetwork(d)
         else:
             self.network = DenseNetwork(d)
-            self.std = ScaleParameter(name='std')
+            self.std = ScaleParameter([1, 1], name='std')
 
 
     def __call__(self, x):
@@ -241,8 +241,8 @@ class DenseRegression(ContinuousModel):
         if self.heteroscedastic:
             p = self.network(x)
             Nd = int(p.shape[-1]/2)
-            m_preds = p[:, 0:Nd]
-            s_preds = O.exp(p[:, Nd:2*Nd])
+            m_preds = p[..., :, 0:Nd]
+            s_preds = O.exp(p[..., :, Nd:2*Nd])
             return Normal(m_preds, s_preds)
         else:
             return Normal(self.network(x), self.std())
