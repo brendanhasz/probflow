@@ -63,7 +63,7 @@ Let's generate some uncorrelated data.
     X = np.random.randn(100, 2).astype('float32')
     plt.plot(X[:, 0], X[:, 1], '.')
 
-.. image:: img/examples/correlation1.svg
+.. image:: img/examples/correlation/correlation1.svg
    :width: 90 %
    :align: center
 
@@ -77,7 +77,7 @@ centered around 0:
     model.fit(X, learning_rate=0.1)
     model.posterior_plot(ci=0.95, style='hist')
 
-.. image:: img/examples/correlation2.svg
+.. image:: img/examples/correlation/correlation2.svg
    :width: 90 %
    :align: center
 
@@ -89,7 +89,7 @@ On the other hand, if we fit the model to some data which is highly correlated,
     X[:, 1] = X[:, 0] + 0.2*np.random.randn(100).astype('float32')
     plt.plot(X[:, 0], X[:, 1], '.')
 
-.. image:: img/examples/correlation3.svg
+.. image:: img/examples/correlation/correlation3.svg
    :width: 90 %
    :align: center
 
@@ -103,7 +103,7 @@ is considerably closer to 1:
     model.fit(X, learning_rate=0.1)
     model.posterior_plot(ci=0.95, style='hist')
 
-.. image:: img/examples/correlation4.svg
+.. image:: img/examples/correlation/correlation4.svg
    :width: 90 %
    :align: center
 
@@ -116,7 +116,7 @@ Conversely, if we generate negatively correlated data,
     X[:, 1] = X[:, 0] - 0.2*np.random.randn(100).astype('float32')
     plt.plot(X[:, 0], X[:, 1], '.')
 
-.. image:: img/examples/correlation5.svg
+.. image:: img/examples/correlation/correlation5.svg
    :width: 90 %
    :align: center
 
@@ -129,6 +129,6 @@ The model recovers the negative correlation coefficient:
     model.fit(X, learning_rate=0.1)
     model.posterior_plot(ci=0.95, style='hist')
 
-.. image:: img/examples/correlation6.svg
+.. image:: img/examples/correlation/correlation6.svg
    :width: 90 %
    :align: center
