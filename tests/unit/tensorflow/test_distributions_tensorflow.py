@@ -357,20 +357,23 @@ def test_Categorical():
     """Tests Categorical distribution"""
 
     # Create the distribution
-    dist = pfd.Categorical([0, 1, 2])
+    dist = pfd.Categorical(tf.constant([0., 1., 2.]))
 
     # Check default params
-    assert dist.logits == [0, 1, 2]
+    assert isinstance(dist.logits, tf.Tensor)
     assert dist.probs is None
 
     # Call should return backend obj
     assert isinstance(dist(), tfd.Categorical)
 
     # Test methods
-    assert dist.prob(0).numpy() < dist.prob(1).numpy()
-    assert dist.prob(1).numpy() < dist.prob(2).numpy()
-    assert dist.log_prob(0).numpy() < dist.log_prob(1).numpy()
-    assert dist.log_prob(1).numpy() < dist.log_prob(2).numpy()
+    zero = np.array([0.])
+    one = np.array([1.])
+    two = np.array([2.])
+    assert dist.prob(zero).numpy() < dist.prob(one).numpy()
+    assert dist.prob(one).numpy() < dist.prob(two).numpy()
+    assert dist.log_prob(zero).numpy() < dist.log_prob(one).numpy()
+    assert dist.log_prob(one).numpy() < dist.log_prob(two).numpy()
 
     # Mean should return the mode!
     assert dist.mean().numpy() == 2
@@ -385,12 +388,12 @@ def test_Categorical():
     assert samples.shape[0] == 10
 
     # Should be able to set params
-    dist = pfd.Categorical(probs=[0.1, 0.7, 0.2])
-    assert dist.probs == [0.1, 0.7, 0.2]
+    dist = pfd.Categorical(probs=tf.constant([0.1, 0.7, 0.2]))
+    assert isinstance(dist.probs, tf.Tensor)
     assert dist.logits is None
-    assert is_close(dist.prob(0).numpy(), 0.1)
-    assert is_close(dist.prob(1).numpy(), 0.7)
-    assert is_close(dist.prob(2).numpy(), 0.2)
+    assert is_close(dist.prob(zero).numpy(), 0.1)
+    assert is_close(dist.prob(one).numpy(), 0.7)
+    assert is_close(dist.prob(two).numpy(), 0.2)
     assert dist.mean().numpy() == 1
 
     # But only with Tensor-like objs
@@ -400,18 +403,20 @@ def test_Categorical():
 	    dist = pfd.Categorical()
 
 	# Should use the last dim if passed a Tensor arg
-    dist = pfd.Categorical(probs=[[0.1, 0.7, 0.2], 
+    dist = pfd.Categorical(probs=tf.constant([[0.1, 0.7, 0.2], 
     							  [0.8, 0.1, 0.1], 
     	                          [0.01, 0.01, 0.98],
-    	                          [0.3, 0.3, 0.4]])
-    assert is_close(dist.prob([0, 1, 2, 2]).numpy()[0], 0.1)
-    assert is_close(dist.prob([0, 1, 2, 2]).numpy()[1], 0.1)
-    assert is_close(dist.prob([0, 1, 2, 2]).numpy()[2], 0.98)
-    assert is_close(dist.prob([0, 1, 2, 2]).numpy()[3], 0.4)
-    assert is_close(dist.prob([2, 1, 0, 0]).numpy()[0], 0.2)
-    assert is_close(dist.prob([2, 1, 0, 0]).numpy()[1], 0.1)
-    assert is_close(dist.prob([2, 1, 0, 0]).numpy()[2], 0.01)
-    assert is_close(dist.prob([2, 1, 0, 0]).numpy()[3], 0.3)
+    	                          [0.3, 0.3, 0.4]]))
+    a1 = tf.constant([0., 1., 2., 2.])
+    a2 = tf.constant([2., 1., 0., 0.])
+    assert is_close(dist.prob(a1).numpy()[0], 0.1)
+    assert is_close(dist.prob(a1).numpy()[1], 0.1)
+    assert is_close(dist.prob(a1).numpy()[2], 0.98)
+    assert is_close(dist.prob(a1).numpy()[3], 0.4)
+    assert is_close(dist.prob(a2).numpy()[0], 0.2)
+    assert is_close(dist.prob(a2).numpy()[1], 0.1)
+    assert is_close(dist.prob(a2).numpy()[2], 0.01)
+    assert is_close(dist.prob(a2).numpy()[3], 0.3)
 
     # And ensure sample dims are correct
     samples = dist.sample()

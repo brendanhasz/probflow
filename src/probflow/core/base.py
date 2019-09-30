@@ -51,6 +51,11 @@ class BaseDistribution(ABC):
         return self().log_prob(to_tensor(y))
 
 
+    def cdf(self, y):
+        """Cumulative probability of some data along this distribution"""
+        return self().cdf(to_tensor(y))
+
+
     def mean(self):
         """Compute the mean of this distribution
 

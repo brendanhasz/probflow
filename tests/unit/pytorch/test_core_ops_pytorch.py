@@ -44,6 +44,25 @@ def test_kl_divergence():
 
 
 
+def test_squeeze():
+    """Tests squeeze"""
+
+    x = torch.randn([3, 2, 1])
+    xo = ops.squeeze(x)
+    assert isinstance(xo, torch.Tensor)
+    assert xo.ndim == 2
+    assert xo.shape[0] == 3
+    assert xo.shape[1] == 2
+
+    x = torch.randn([3, 2])
+    xo = ops.squeeze(x)
+    assert isinstance(xo, torch.Tensor)
+    assert xo.ndim == 2
+    assert xo.shape[0] == 3
+    assert xo.shape[1] == 2
+
+
+
 def test_expand_dims():
     """Tests expand_dims"""
 

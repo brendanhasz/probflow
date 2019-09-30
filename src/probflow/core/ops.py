@@ -99,6 +99,18 @@ def expand_dims(val, axis):
 
 
 
+@make_input_tensor
+def squeeze(val):
+    """Remove singleton dimensions"""
+    if get_backend() == 'pytorch':
+        import torch
+        return torch.squeeze(val)
+    else:
+        import tensorflow as tf
+        return tf.squeeze(val)
+
+
+
 def ones(shape):
     """Tensor full of ones."""
     if get_backend() == 'pytorch':

@@ -113,7 +113,7 @@ class LogisticRegression(CategoricalModel):
 
     def __init__(self, d: int, k: int = 2):
         self.weights = Parameter([d, k-1], name='weights')
-        self.bias = Parameter([k-1], name='bias')
+        self.bias = Parameter([1, k-1], name='bias')
 
 
     def __call__(self, x):
@@ -142,7 +142,7 @@ class PoissonRegression(DiscreteModel):
 
     def __init__(self, d: int):
         self.weights = Parameter([d, 1], name='weights')
-        self.bias = Parameter(name='bias')
+        self.bias = Parameter([1, 1], name='bias')
 
 
     def __call__(self, x):

@@ -56,6 +56,7 @@ __all__ = [
 import numpy as np
 
 from probflow.core.settings import get_backend
+import probflow.core.ops as O
 from probflow.utils.torch_distributions import get_TorchDeterministic
 from probflow.core.base import BaseDistribution
 
@@ -663,6 +664,10 @@ class Categorical(BaseDistribution):
         # Store args
         self.logits = logits
         self.probs = probs
+        if logits is None:
+            self.ndim = probs.ndim
+        else:
+            self.ndim = logits.ndim
 
 
     def __call__(self):
@@ -673,7 +678,21 @@ class Categorical(BaseDistribution):
                                                probs=self.probs) 
         else:
             from tensorflow_probability import distributions as tfd
-            return tfd.Categorical(logits=self.logits, probs=self.probs) 
+            return tfd.Categorical(logits=self.logits, probs=self.probs)
+
+
+    def prob(self, y):
+        """Doesn't broadcast correctly when logits/probs and y are same dims"""
+        if self.ndim == y.ndim:
+            y = O.squeeze(y)
+        return super().prob(y)
+
+
+    def log_prob(self, y):
+        """Doesn't broadcast correctly when logits/probs and y are same dims"""
+        if self.ndim == y.ndim:
+            y = O.squeeze(y)
+        return super().log_prob(y)
 
 
 
