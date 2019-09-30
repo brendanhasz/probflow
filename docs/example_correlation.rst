@@ -3,16 +3,62 @@
 Bayesian Correlation
 ====================
 
+|Colab Badge|
+
+.. |Colab Badge| image:: img/colab-badge.svg
+    :target: https://colab.research.google.com/drive/19ZbyyIXh7kRa3lusY3sK5lWkpFvxkgOn
+
 .. include:: macros.hrst
 
+.. code-block:: python3
 
-TODO: description... 
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import tensorflow as tf
+    randn = lambda *x: np.random.randn(*x).astype('float32')
 
-TODO: math
+    import probflow as pf
 
-TODO: diagram
 
-TODO: note that this treats it as a generative model (ie only y no x)
+The `Pearson correlation coefficient <https://en.wikipedia.org/wiki/Pearson_correlation_coefficient>`_, :math:`\rho`, between two variables is the value that you need to multiply the individual variances of those variables to get the covariance between the two:
+
+.. math::
+
+    \rho_{x,y} = \frac{\text{cov} (x, y)}{\text{var}(x) ~ \text{var}(y)}
+
+To model a correlation probabilistically, we can model our datapoints as being drawn from a multivariate normal distribution, with covariance matrix :math:`\Sigma`.  The correlation coefficient is reflected in the off-diagonal elements of the correlation matrix (we'll just assume the data is normalized, and so all the diagonal elements are 1).
+
+.. image:: img/examples/correlation/covariance.svg
+   :width: 99 %
+   :align: center
+
+This is because (according to the definition of the correlation coefficient), the covariance matrix can be expressed using only the per-variable variances and the correlation coefficient:
+
+.. math::
+
+    \Sigma = 
+    \begin{bmatrix}
+       \text{var}(x) & \text{cov}(x, y) \\
+       \text{cov}(x,y) & \text{var}(y)\\
+    \end{bmatrix} =
+    \begin{bmatrix}
+       \text{var}(x) & \rho ~ \text{var}(x) \text{var}(y) \\
+       \rho ~ \text{var}(x) \text{var}(y) & \text{var}(y)\\
+    \end{bmatrix}
+
+Or, if we assume the input has been `standardized <https://en.wikipedia.org/wiki/Standard_score>`_:
+
+.. math::
+
+    \Sigma = 
+    \begin{bmatrix}
+       1 & \rho \\
+       \rho & 1 \\
+    \end{bmatrix}
+
+So, basically what we're doing is optimizing the correlation coefficient such that it gives us a Gaussian distribution which best fits the data points.
+
+This is our first example of a `generative model <https://en.wikipedia.org/wiki/Generative_model>`_, where we're not trying to *predict* :math:`y` given :math:`x`.  Instead, we're interested in the data-generating distribution itself, from which the correlation coefficient can be derived.  With this type of generative model, we'll treat all the data as the dependent variable, and so our ``__call__`` function will have no input.  The only thing predicting the distribution of the data is the model and its parameters.
 
 .. tabs::
 
@@ -74,7 +120,7 @@ centered around 0:
 
 .. code-block:: python3
 
-    model.fit(X, learning_rate=0.1)
+    model.fit(X, lr=0.1)
     model.posterior_plot(ci=0.95, style='hist')
 
 .. image:: img/examples/correlation/correlation2.svg
@@ -100,7 +146,7 @@ is considerably closer to 1:
 .. code-block:: python3
 
     model = BayesianCorrelation()
-    model.fit(X, learning_rate=0.1)
+    model.fit(X, lr=0.1)
     model.posterior_plot(ci=0.95, style='hist')
 
 .. image:: img/examples/correlation/correlation4.svg
@@ -113,7 +159,7 @@ Conversely, if we generate negatively correlated data,
 .. code-block:: python3
 
     X = np.random.randn(100, 2).astype('float32')
-    X[:, 1] = X[:, 0] - 0.2*np.random.randn(100).astype('float32')
+    X[:, 1] = -X[:, 0] + 0.2*np.random.randn(100).astype('float32')
     plt.plot(X[:, 0], X[:, 1], '.')
 
 .. image:: img/examples/correlation/correlation5.svg
@@ -126,7 +172,7 @@ The model recovers the negative correlation coefficient:
 .. code-block:: python3
 
     model = BayesianCorrelation()
-    model.fit(X, learning_rate=0.1)
+    model.fit(X, lr=0.1)
     model.posterior_plot(ci=0.95, style='hist')
 
 .. image:: img/examples/correlation/correlation6.svg

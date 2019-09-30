@@ -346,7 +346,7 @@ The :class:`.Dense` module can also be used to build a linear regression:
 
     # Fit it!
     model = LinearRegression(3)
-    model.fit(x, y, lr=0.1, epochs=300)
+    model.fit(x, y)
 
 
 
@@ -354,13 +354,13 @@ Using the LinearRegression Model
 --------------------------------
 
 But the easiest way to do a linear regression with ProbFlow is to use the
-pre-built :class:`.LinearRegression` model!
+pre-built :class:`.LinearRegression` model:
 
 
 .. code-block:: python3
 
     model = pf.LinearRegression(3)
-    model.fit(x, y, lr=0.1, epochs=300)
+    model.fit(x, y)
 
 
 
