@@ -82,9 +82,6 @@ def kl_divergence(P, Q):
 
 
 
-# TODO: all other ops used by probflow internals
-
-
 @make_input_tensor
 def expand_dims(val, axis):
     """Add a singular dimension to a Tensor"""

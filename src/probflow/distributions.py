@@ -574,7 +574,7 @@ class Bernoulli(BaseDistribution):
 
         x \sim \text{Bernoulli}(p)
 
-    takes the value :math`1` with probability :math:`p`, and takes the value
+    takes the value :math:`1` with probability :math:`p`, and takes the value
     :math:`0` with probability :math:`p-1`.
 
     TODO: example image of the distribution
