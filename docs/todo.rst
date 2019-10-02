@@ -31,11 +31,9 @@ Issues
 
 * Flipout implementation for sure has a bug - fitting a DenseRegression works w/o flipout, but not w/ it.
 * Autograph fails. "Entity <blah blah> could not be transformed and will be executed as-is", where blah is "function sum" or "bound method Gamma.call of <probflow.distributions.Gamma..." etc.  Don't get the warnings when you remove the ``@tf.function`` in front of the ``train_step`` func defined in models.Model._train_step_tensorflow.  Happens both w/ CPU and GPU versions of TF 2.0.  Presumably b/c autograph doesn't handle various python features (lambda funcs, fancy list comprehensions, methods, etc) used.  Runs about 3x slower w/o autograph optimization (just running w/ eager).
-* LogisticRegression doesn't work at all! And seems to take a suspiciously long time...
 * Model.metric (mae) causes too much memory usage (out of mem on colab w/ 100k sample linear regression?). Accidentally making a N^2 matrix maybe?
 * Poisson currently requires y values to be floats? I think that's a TFP/TF 2.0 issue though (in their sc there's the line ``tf.maximum(y, 0.)``, which throws an error when y is of an int type).  Could cast inputs to float in pf.distributions.Poisson.__init__...
 * Gamma distribution isn't passing the fit test (in tests/stats/test_distribution_fits) Fitting a Poisson GLM doesn't seem to be doing too well either...
-* PyTorch support
 * Add type hinting and enforcing
 * Implement + test mean() for InverseGamma, Bernoulli, Categorical, and OneHotCategorical for pytorch
 * Implement mixture distribution w/ pytorch backend. They're working on a MixtureSameFamily distribution for PyTorch (https://github.com/pytorch/pytorch/pull/22742) so maybe wait for that.

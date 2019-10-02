@@ -15,7 +15,6 @@ Logistic Regression
     import numpy as np
     import matplotlib.pyplot as plt
     import seaborn as sns
-    import tensorflow as tf
     randn = lambda *x: np.random.randn(*x).astype('float32')
 
     import probflow as pf
@@ -85,8 +84,6 @@ predictions given the parameters and the input data:
             
         .. code-block:: python3
 
-            import tensorflow as tf
-
             class LogisticRegression(pf.CategoricalModel):
 
                 def __init__(self, dims):
@@ -101,6 +98,8 @@ predictions given the parameters and the input data:
         .. code-block:: python3
 
             import torch
+            
+            pf.set_backend('pytorch')
 
             class LogisticRegression(pf.CategoricalModel):
 

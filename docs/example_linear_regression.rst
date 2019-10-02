@@ -81,6 +81,8 @@ probabilistic predictions.
 
             import torch
 
+            pf.set_backend('pytorch')
+
             class SimpleLinearRegression(pf.ContinuousModel):
 
                 def __init__(self):
