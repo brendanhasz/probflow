@@ -97,6 +97,7 @@ class Model(Module):
 
 
     # Parameters
+    _optimizer = None
     _is_training = False
     _learning_rate = None
     _kl_weight = 1.0
@@ -162,20 +163,16 @@ class Model(Module):
             x,
             y=None,
             batch_size: int = 128,
-            epochs: int = 100,
+            epochs: int = 200,
             shuffle: bool = True,
             optimizer=None,
             optimizer_kwargs: dict = {},
-            lr: float = 1e-3,
+            lr: float = None,
             flipout: bool = True,
             callbacks: List[BaseCallback] = []):
-        """Fit the model to data
+        r"""Fit the model to data
 
         TODO
-
-        Creates the following attributes of the Model
-        * _optimizer
-        * _is_training
 
 
         Parameters
@@ -191,7 +188,7 @@ class Model(Module):
             Default = ``128``
         epochs : int
             Number of epochs to train the model.
-            Default = ``100``
+            Default = ``200``
         shuffle : bool
             Whether to shuffle the data each epoch.  Note that this is ignored
             if ``x`` is a |DataGenerator|
@@ -208,11 +205,17 @@ class Model(Module):
             Learning rate for the optimizer.
             Note that the learning rate can be updated during training using
             the set_learning_rate method.
-            Default = ``1e-3``
+            Default is :math:`\exp (- \log_{10} (N_p N_b))`, where :math:`N_p`
+            is the number of parameters in the model, and :math:`N_b` is the 
+            number of samples per batch (``batch_size``).
         flipout : bool
             Whether to use flipout during training where possible
             Default = True
         """
+
+        # Determine a somewhat reasonable learning rate if none was passed
+        if lr is None:
+            lr = np.exp(-np.log10(self.n_parameters*batch_size))
 
         # Create DataGenerator from input data if not already
         self._data = make_generator(x, y, batch_size=batch_size, 
@@ -243,7 +246,7 @@ class Model(Module):
 
         # Fit the model!
         self._is_training = True
-        for i in range(epochs):
+        for i in range(int(epochs)):
 
             # Stop training early?
             if not self._is_training:

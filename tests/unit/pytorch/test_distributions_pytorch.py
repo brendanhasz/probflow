@@ -396,8 +396,8 @@ def test_Bernoulli():
     dist = pfd.Bernoulli(probs=0.8)
     assert dist.probs == 0.8
     assert dist.logits is None
-    assert is_close(dist.prob(0).numpy(), 0.2)
-    assert is_close(dist.prob(1).numpy(), 0.8)
+    assert is_close(dist.prob(zero).numpy(), 0.2)
+    assert is_close(dist.prob(one).numpy(), 0.8)
 
     '''
     # Mean should return the mode!

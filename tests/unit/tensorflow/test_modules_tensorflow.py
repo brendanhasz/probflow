@@ -44,6 +44,11 @@ def test_Module():
     assert 'TestParam1' in param_names
     assert 'TestParam2' in param_names
 
+    # n_params property
+    nparams = the_module.n_parameters
+    assert isinstance(nparams, int)
+    assert nparams == 21
+
     # trainable_variables should return list of all variables in the model
     var_list = the_module.trainable_variables
     assert isinstance(var_list, list)
@@ -93,6 +98,11 @@ def test_Module():
     assert 'TestParam1' in param_names
     assert 'TestParam2' in param_names
     assert 'TestParam3' in param_names
+
+    # n_params property
+    nparams = the_module.n_parameters
+    assert isinstance(nparams, int)
+    assert nparams == 27
 
     # trainable_variables should return list of all variables in the model
     var_list = the_module.trainable_variables
@@ -149,6 +159,11 @@ def test_Module():
     assert 'TestParam5' in param_names
     assert 'TestParam6' in param_names
     assert 'TestParam7' in param_names
+
+    # n_params property
+    nparams = the_module.n_parameters
+    assert isinstance(nparams, int)
+    assert nparams == 4
 
     # Should be able to initialize and add kl losses
     the_module.reset_kl_loss()

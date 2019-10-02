@@ -93,6 +93,12 @@ class Module(BaseModule):
         # so users can mix-n-match tf.Variables and pf.Parameters in modules 
 
 
+    @property
+    def n_parameters(self):
+        """Get the number of independent parameters of this module"""
+        return sum([p.n_parameters for p in self.parameters])
+
+
     def kl_loss(self):
         """Compute the sum of the Kullback-Leibler divergences between
         priors and their variational posteriors for all |Parameters| in this

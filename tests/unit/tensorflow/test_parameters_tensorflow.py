@@ -100,6 +100,20 @@ def test_Parameter_scalar():
 
 
 
+def test_Parameter_no_prior():
+    """Tests a parameter with no prior"""
+
+    # Create parameter with no prior
+    param = Parameter(prior=None)
+
+    # kl_loss should return 0
+    kl_loss = param.kl_loss()
+    assert isinstance(kl_loss, tf.Tensor)
+    assert kl_loss.ndim == 0
+    assert kl_loss.numpy() == 0.0
+
+
+
 def test_Parameter_1D():
     """Tests a 1D Parameter"""
 
@@ -147,13 +161,22 @@ def test_Parameter_1D():
     assert prior_sample.ndim == 1
     assert prior_sample.shape[0] == 7
 
+    # n_parameters property
+    nparams = param.n_parameters
+    assert isinstance(nparams, int)
+    assert nparams == 5
+
 
 
 def test_Parameter_2D():
     """Tests a 2D Parameter"""
 
     # Create 1D parameter
-    param = Parameter(shape=[5, 4])
+    param = Parameter(shape=[5, 4], name='lala')
+
+    # repr
+    pstr = param.__repr__()
+    assert pstr == '<pf.Parameter lala shape=[5, 4]>'
 
     # kl_loss should still be scalar
     kl_loss = param.kl_loss()
@@ -201,6 +224,11 @@ def test_Parameter_2D():
     prior_sample = param.prior_sample(n=7)
     assert prior_sample.ndim == 1
     assert prior_sample.shape[0] == 7
+
+    # n_parameters property
+    nparams = param.n_parameters
+    assert isinstance(nparams, int)
+    assert nparams == 20
 
 
 

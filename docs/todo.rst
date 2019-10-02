@@ -38,6 +38,4 @@ Issues
 * Implement + test mean() for InverseGamma, Bernoulli, Categorical, and OneHotCategorical for pytorch
 * Implement mixture distribution w/ pytorch backend. They're working on a MixtureSameFamily distribution for PyTorch (https://github.com/pytorch/pytorch/pull/22742) so maybe wait for that.
 * Allow learning rate to be updated w/ PyTorch
-* Automatically set learning rate according to # samples and # parameters? (if no lr kwarg was passed to fit)
-* Models should be able to return a backend distribution (not a PF distribution - do you even need PF distributions?).
 * Model predictive sampling functions don't work when x is a Pandas DataFrame (because you can't expand_dims on a df)

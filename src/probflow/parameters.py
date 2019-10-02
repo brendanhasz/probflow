@@ -187,9 +187,15 @@ class Parameter(BaseParameter):
 
 
     @property
+    def n_parameters(self):
+        """Get the number of independent parameters of this model"""
+        return int(np.prod(self.shape))
+
+
+    @property
     def trainable_variables(self):
         """Get a list of trainable variables from the backend"""
-        return [e for _, e in self.untransformed_variables.items()]
+        return [e for e in self.untransformed_variables.values()]
 
 
     @property
@@ -227,8 +233,11 @@ class Parameter(BaseParameter):
     def kl_loss(self):
         """Compute the sum of the Kullback–Leibler divergences between this
         parameter's priors and its variational posteriors."""
-        return O.sum(O.kl_divergence(self.posterior(), self.prior()),
-                     axis=None)
+        if self.prior is None:
+            return O.sum([], axis=None)
+        else:
+            return O.sum(O.kl_divergence(self.posterior(), self.prior()),
+                         axis=None)
 
 
     def posterior_mean(self):

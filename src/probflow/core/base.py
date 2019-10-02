@@ -41,9 +41,9 @@ class BaseDistribution(ABC):
     def prob(self, y):
         """Compute the probability of some data given this distribution"""
         if get_backend() == 'pytorch':
-            return self().log_prob(y).exp()
+            return self().log_prob(to_tensor(y)).exp()
         else:
-            return self().prob(y)
+            return self().prob(to_tensor(y))
 
 
     def log_prob(self, y):

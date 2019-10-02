@@ -64,7 +64,7 @@ where :math:`f` is usually the
 with :math:`>2` classes, a 
 `softmax <https://en.wikipedia.org/wiki/Softmax_function>`_.
 
-If our target variable has $2$ possible classes, we can model this using a Bernoulli distribution:
+If our target variable has only 2 possible classes, we can model this using a Bernoulli distribution:
 
 .. math::
 
@@ -115,7 +115,7 @@ predictions given the parameters and the input data:
 Note that by default, the :class:`.Bernoulli` distribution treats its inputs
 as logits (that is, it passes the inputs through a sigmoid function to get the
 output class probabilities).  To force it to treat the inputs as raw
-probability values, use the `probs` keyword argument to the :class:`.Bernoulli`
+probability values, use the ``probs`` keyword argument to the :class:`.Bernoulli`
 constructor.
 
 Then we can instantiate our model class,
@@ -170,9 +170,11 @@ pre-built :class:`.LogisticRegression` model:
 Multinomial Logistic Regression
 -------------------------------
 
-The :class:`.LinearRegression` model even handles when $y$ has multiple classes
-(that is, a `Multinomial logistic regression <https://en.wikipedia.org/wiki/Multinomial_logistic_regression>`_).
-Let's generate some data with 4 features, and the target has 3 possible classes:
+The :class:`.LinearRegression` model even handles when :math:`y` has multiple
+classes (that is, a
+`Multinomial logistic regression <https://en.wikipedia.org/wiki/Multinomial_logistic_regression>`_).
+Let's generate some data with 4 features, where the target has 3 possible
+classes:
 
 
 .. code-block:: python3

@@ -36,7 +36,7 @@ First we'll make a module which represents a single fully-connected layer:
 
                 def __init__(self, d_in, d_out):
                     self.w = pf.Parameter([d_in, d_out])
-                    self.b = pf.Parameter([d_out, 1])
+                    self.b = pf.Parameter([1, d_out])
 
                 def __call__(self, x):
                     return x @ self.w() + self.b()
