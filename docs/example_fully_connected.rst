@@ -154,7 +154,7 @@ TODO: then can fit the net
 
 
 Using the Dense, Sequential, and DenseNetwork Modules
---------------------------------------
+-----------------------------------------------------
 
 ProbFlow comes with some ready-made modules for creating fully-connected 
 neural networks.  The :class:`.Dense` module handles creating the weight and

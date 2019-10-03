@@ -387,6 +387,10 @@ class Model(Module):
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the 
             "features"). 
+        method : str
+            Method to use for prediction.  If ``'mean'``, uses the mean of the
+            predicted target distribution as the prediction.  If ``'mode'``,
+            uses the mode of the distribution.
 
 
         Returns

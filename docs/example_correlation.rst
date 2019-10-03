@@ -110,7 +110,7 @@ Let's generate some uncorrelated data.
     plt.plot(X[:, 0], X[:, 1], '.')
 
 .. image:: img/examples/correlation/correlation1.svg
-   :width: 90 %
+   :width: 70 %
    :align: center
 
 
@@ -124,7 +124,7 @@ centered around 0:
     model.posterior_plot(ci=0.95, style='hist')
 
 .. image:: img/examples/correlation/correlation2.svg
-   :width: 90 %
+   :width: 70 %
    :align: center
 
 
@@ -136,7 +136,7 @@ On the other hand, if we fit the model to some data which is highly correlated,
     plt.plot(X[:, 0], X[:, 1], '.')
 
 .. image:: img/examples/correlation/correlation3.svg
-   :width: 90 %
+   :width: 70 %
    :align: center
 
 
@@ -150,7 +150,7 @@ is considerably closer to 1:
     model.posterior_plot(ci=0.95, style='hist')
 
 .. image:: img/examples/correlation/correlation4.svg
-   :width: 90 %
+   :width: 70 %
    :align: center
 
 
@@ -163,7 +163,7 @@ Conversely, if we generate negatively correlated data,
     plt.plot(X[:, 0], X[:, 1], '.')
 
 .. image:: img/examples/correlation/correlation5.svg
-   :width: 90 %
+   :width: 70 %
    :align: center
 
 
@@ -176,5 +176,5 @@ The model recovers the negative correlation coefficient:
     model.posterior_plot(ci=0.95, style='hist')
 
 .. image:: img/examples/correlation/correlation6.svg
-   :width: 90 %
+   :width: 70 %
    :align: center
