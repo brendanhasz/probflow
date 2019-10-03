@@ -39,3 +39,4 @@ Issues
 * Implement mixture distribution w/ pytorch backend. They're working on a MixtureSameFamily distribution for PyTorch (https://github.com/pytorch/pytorch/pull/22742) so maybe wait for that.
 * Allow learning rate to be updated w/ PyTorch
 * Model predictive sampling functions don't work when x is a Pandas DataFrame (because you can't expand_dims on a df)
+* PyTorch mode for distributions?

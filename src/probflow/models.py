@@ -376,7 +376,7 @@ class Model(Module):
             return self._sample(x, lambda x: x.mean(), ed=0)
 
 
-    def predict(self, x=None):
+    def predict(self, x=None, method='mean'):
         """Predict dependent variable using the model
 
         TODO... using maximum a posteriori param estimates etc
@@ -401,7 +401,12 @@ class Model(Module):
         TODO: Docs...
 
         """
-        return self._sample(x, lambda x: x.mean(), axis=0)
+        if method == 'mean':
+            return self._sample(x, lambda x: x.mean(), axis=0)
+        elif method == 'mode':
+            return self._sample(x, lambda x: x.mode(), axis=0)
+        else:
+            raise ValueError('unknown method '+str(method))
 
 
     def metric(self, metric, x, y=None):

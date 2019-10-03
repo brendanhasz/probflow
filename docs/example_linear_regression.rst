@@ -52,11 +52,11 @@ line.  Then, we model the datapoints as being drawn from a normal distribution
 
     y \sim \text{Normal}(wx+b, ~ \sigma)
 
-To create this model with ProbFlow, we'll create an instance of the
-:class:`.ContinuousModel` class (because our target variable is continuous). 
-In the ``__init__`` method, we'll define the parameters of the model.  Then in
-the ``__call__`` method, we'll use samples from those parameters to generate
-probabilistic predictions.
+To create this model with ProbFlow, we'll create a class which inherits from
+the :class:`.ContinuousModel` class (because our target variable is 
+continuous). In the ``__init__`` method, we'll define the parameters of the
+model.  Then in the ``__call__`` method, we'll use samples from those
+parameters to generate probabilistic predictions.
 
 
 .. tabs::

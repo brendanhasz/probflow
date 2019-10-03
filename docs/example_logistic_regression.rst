@@ -19,7 +19,7 @@ Logistic Regression
 
     import probflow as pf
 
-In the last example, both :math:`x` and :math:`y` were continuous variables (their values ranged from :math:`-\infty` to :math:`\infty`).  What if our output variable is categorical?  That is, suppose the output variable can take only one of two values: 0 or 1. 
+In the last example, both :math:`x` and :math:`y` were continuous variables (their values ranged from :math:`-\infty` to :math:`\infty`).  What if our output variable is binary?  That is, suppose the output variable can take only one of two values, 0 or 1, and so we need a classification model.
 
 Let's create a dataset which has 3 continuous features, and a target variable with 2 classes: 
 

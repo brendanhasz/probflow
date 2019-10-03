@@ -101,6 +101,12 @@ def test_Model_0D():
     assert samples.ndim == 1
     assert samples.shape[0] == 30
 
+    # predict using the mode instead of the mean (same for normal dists)
+    samples = my_model.predict(x[:30], method='mode')
+    assert isinstance(samples, np.ndarray)
+    assert samples.ndim == 1
+    assert samples.shape[0] == 30
+
     # metric
     metric = my_model.metric('mae', x[:30], y[:30])
     assert isinstance(metric, np.floating)

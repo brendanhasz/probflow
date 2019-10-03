@@ -70,6 +70,14 @@ class BaseDistribution(ABC):
                 return self().mode()
 
 
+    def mode(self):
+        """Compute the mode of this distribution"""
+        if get_backend() == 'pytorch':
+            raise NotImplementedError
+        else:
+            return self().mode()
+
+
     def sample(self, n=1):
         """Generate a random sample from this distribution"""
         if get_backend() == 'pytorch':

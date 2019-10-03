@@ -36,6 +36,7 @@ def test_Deterministic():
     assert dist.log_prob(0).numpy() == 0.0
     assert dist.log_prob(1).numpy() == -np.inf
     assert dist.mean().numpy() == 0.0
+    assert dist.mode().numpy() == 0.0
     assert dist.cdf(-1).numpy() == 0.0
     assert dist.cdf(1).numpy() == 1.0
 
