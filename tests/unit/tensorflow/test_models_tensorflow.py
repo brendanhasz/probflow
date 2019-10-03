@@ -710,6 +710,25 @@ def test_ContinuousModel(plot):
     assert ub.shape[0] == 22
     assert ub.shape[1] == 1
 
+    # predictive intervals lower ci
+    llb = model.predictive_interval(x[:22, :], side='lower')
+    assert isinstance(llb, np.ndarray)
+    assert llb.ndim == 2
+    assert llb.shape[0] == 22
+    assert llb.shape[1] == 1
+    assert np.all(llb>=lb)
+    assert np.all(llb<=ub)
+
+    # predictive intervals upper ci
+    uub = model.predictive_interval(x[:22, :], side='upper')
+    assert isinstance(uub, np.ndarray)
+    assert uub.ndim == 2
+    assert uub.shape[0] == 22
+    assert uub.shape[1] == 1
+    assert np.all(uub>=lb)
+    assert np.all(uub<=ub)
+    assert np.all(uub>=llb)
+
     # aleatoric intervals
     lb, ub = model.aleatoric_interval(x[:23, :])
     assert isinstance(lb, np.ndarray)

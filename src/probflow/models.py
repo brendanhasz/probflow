@@ -876,22 +876,30 @@ class ContinuousModel(Model):
     """
 
 
-    def _intervals(self, fn, x, ci=0.95, n=1000):
+    def _intervals(self, fn, x, side, ci=0.95, n=1000):
         """Compute intervals on some type of sample"""
         samples = fn(x, n=n)
-        lb = 100*(1.0-ci)/2.0
-        prcs = np.percentile(samples, [lb, 100.0-lb], axis=0)
-        return prcs[0, ...], prcs[1, ...]
+        if side == 'lower':
+            return np.percentile(samples, 100*(1.0-ci), axis=0)
+        elif side == 'upper':
+            return np.percentile(samples, 100*ci, axis=0)
+        else:
+            lb = 100*(1.0-ci)/2.0
+            prcs = np.percentile(samples, [lb, 100.0-lb], axis=0)
+            return prcs[0, ...], prcs[1, ...]
 
 
     def predictive_interval(self, 
                             x,
                             ci=0.95,
+                            side='both',
                             n=1000):
         """Compute confidence intervals on the model's estimate of the target
         given ``x``, including all sources of uncertainty.
 
         TODO: docs
+
+        TODO: using side= both, upper, vs lower
 
 
         Parameters
@@ -903,6 +911,12 @@ class ContinuousModel(Model):
             Inner proportion of predictive distribution to use a the
             confidence interval.
             Default = 0.95
+        side : str {'lower', 'upper', 'both'}
+            Whether to get the one- or two-sided interval, and which side to
+            get.  If ``'both'`` (default), gets the upper and lower bounds of
+            the central ``ci`` interval.  If ``'lower'``, gets the lower bound
+            on the one-sided ``ci`` interval.  If ``'upper'``, gets the upper
+            bound on the one-sided ``ci`` interval.
         n : int
             Number of samples from the posterior predictive distribution to
             take to compute the confidence intervals.
@@ -912,17 +926,18 @@ class ContinuousModel(Model):
         -------
         lb : |ndarray|
             Lower bounds of the ``ci`` confidence intervals on the predictions
-            for samples in ``x``.
+            for samples in ``x``.  Doesn't return this if ``side='upper'``.
         ub : |ndarray|
             Upper bounds of the ``ci`` confidence intervals on the predictions
-            for samples in ``x``.
+            for samples in ``x``.  Doesn't return this if ``side='lower'``.
         """
-        return self._intervals(self.predictive_sample, x, ci=ci, n=n)
+        return self._intervals(self.predictive_sample, x, side, ci=ci, n=n)
 
 
     def aleatoric_interval(self, 
                            x,
                            ci=0.95,
+                           side='both',
                            n=1000):
         """Compute confidence intervals on the model's estimate of the target
         given ``x``, including only aleatoric uncertainty (uncertainty due to
@@ -940,6 +955,12 @@ class ContinuousModel(Model):
             Inner proportion of predictive distribution to use a the
             confidence interval.
             Default = 0.95
+        side : str {'lower', 'upper', 'both'}
+            Whether to get the one- or two-sided interval, and which side to
+            get.  If ``'both'`` (default), gets the upper and lower bounds of
+            the central ``ci`` interval.  If ``'lower'``, gets the lower bound
+            on the one-sided ``ci`` interval.  If ``'upper'``, gets the upper
+            bound on the one-sided ``ci`` interval.
         n : int
             Number of samples from the aleatoric predictive distribution to
             take to compute the confidence intervals.
@@ -949,18 +970,19 @@ class ContinuousModel(Model):
         -------
         lb : |ndarray|
             Lower bounds of the ``ci`` confidence intervals on the predictions
-            for samples in ``x``.
+            for samples in ``x``.  Doesn't return this if ``side='upper'``.
         ub : |ndarray|
             Upper bounds of the ``ci`` confidence intervals on the predictions
-            for samples in ``x``.
+            for samples in ``x``.  Doesn't return this if ``side='lower'``.
         """
-        return self._intervals(self.aleatoric_sample, x, ci=ci, n=n)
+        return self._intervals(self.aleatoric_sample, x, side, ci=ci, n=n)
 
 
     def epistemic_interval(self, 
-                            x,
-                            ci=0.95,
-                            n=1000):
+                           x,
+                           ci=0.95,
+                           side='both',
+                           n=1000):
         """Compute confidence intervals on the model's estimate of the target
         given ``x``, including only epistemic uncertainty (uncertainty due to
         uncertainty as to the model's parameter values).
@@ -977,6 +999,12 @@ class ContinuousModel(Model):
             Inner proportion of predictive distribution to use a the
             confidence interval.
             Default = 0.95
+        side : str {'lower', 'upper', 'both'}
+            Whether to get the one- or two-sided interval, and which side to
+            get.  If ``'both'`` (default), gets the upper and lower bounds of
+            the central ``ci`` interval.  If ``'lower'``, gets the lower bound
+            on the one-sided ``ci`` interval.  If ``'upper'``, gets the upper
+            bound on the one-sided ``ci`` interval.
         n : int
             Number of samples from the epistemic predictive distribution to
             take to compute the confidence intervals.
@@ -986,12 +1014,12 @@ class ContinuousModel(Model):
         -------
         lb : |ndarray|
             Lower bounds of the ``ci`` confidence intervals on the predictions
-            for samples in ``x``.
+            for samples in ``x``.  Doesn't return this if ``side='upper'``.
         ub : |ndarray|
             Upper bounds of the ``ci`` confidence intervals on the predictions
-            for samples in ``x``.
+            for samples in ``x``.  Doesn't return this if ``side='lower'``.
         """
-        return self._intervals(self.epistemic_sample, x, ci=ci, n=n)
+        return self._intervals(self.epistemic_sample, x, side, ci=ci, n=n)
 
 
     def pred_dist_plot(self, 

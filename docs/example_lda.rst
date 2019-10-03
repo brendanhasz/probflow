@@ -81,7 +81,7 @@ a matrix of size ``(Ndocuments, Nwords)``.
 
 TODO: Alternatively, when you have a LOT of documents, it's inefficient to
 try and infer that huge Nd-by-Nt matrix of parameters, so you can use a neural
-net to estimate the topic distribution from the word distributions.  Its...
+net to estimate the topic distribution from the word distributions (amortize).  Its...
 kinda sorta like an autoencoder, where you're encoding documents into weighted
 mixtures of topics, and then decoding the word distributions from those topic
 distributions.
