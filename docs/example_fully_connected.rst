@@ -76,8 +76,7 @@ stacks several of those layers, with activation functions in between each:
                 def __init__(self, dims):
                     Nl = len(dims)-1
                     self.layers = [DenseLayer(dims[i], dims[i+1]) for i in range(Nl)]
-                    self.activations = [tf.nn.relu for i in range(Nl)]
-                    self.activations[-1] = lambda x: x
+                    self.activations = Nl*[tf.nn.relu] + [lambda x: x]
 
 
                 def __call__(self, x):
@@ -95,8 +94,7 @@ stacks several of those layers, with activation functions in between each:
                 def __init__(self, dims):
                     Nl = len(dims)-1
                     self.layers = [DenseLayer(dims[i], dims[i+1]) for i in range(Nl)]
-                    self.activations = [torch.nn.ReLU() for i in range(Nl)]
-                    self.activations[-1] = lambda x: x
+                    self.activations = Nl*[torch.nn.ReLU()] + [lambda x: x]
 
 
                 def __call__(self, x):
@@ -111,19 +109,9 @@ The first thing to notice here is that |Modules| can contain other |Modules|!
 This allows you to construct models using hierarchical building blocks, making
 testing and debugging of your models much easier.
 
-Also note that we've used TensorFlow code within the model!  ProbFlow lets you
-mix and match ProbFlow operations and objects with operations from the backend 
-you've selected.  |TensorFlow| is the default backend, but if we had wanted to
-use |PyTorch| (see :ref:`ug_backend`), we could have used PyTorch's relu
-function:
-
-.. code-block:: python3
-
-    import torch
-
-    ...
-    self.activations = [torch.nn.ReLU() for i in range(Nl)]
-    ...
+Also note that we've used TensorFlow (or PyTorch) code within the model!
+ProbFlow lets you mix and match ProbFlow operations and objects with operations
+from the backend you've selected.
 
 Finally, we can create a |Model| which uses the network |Module| we've just created.  This model consists of a normal distribution whose mean is predicted
 by the neural network:
@@ -165,10 +153,16 @@ TODO: then can fit the net
     model.fit(x, y)
 
 
-Using the Dense and Sequential Modules
+Using the Dense, Sequential, and DenseNetwork Modules
 --------------------------------------
 
-TODO: the Dense module handles creating the variables for you, and the Sequential module takes a list of modules or callables and pipes the output of each into the input of the next
+ProbFlow comes with some ready-made modules for creating fully-connected 
+neural networks.  The :class:`.Dense` module handles creating the weight and
+bias parameters, and the :class:`.Sequential` module takes a list of modules
+or callables and pipes the output of each into the input of the next.
+
+Using these two modules, we can define the same neural network as above much
+more easily:
 
 .. tabs::
 
@@ -178,9 +172,9 @@ TODO: the Dense module handles creating the variables for you, and the Sequentia
 
             class DenseRegression(pf.Model):
                 
-                def __init__(self):
+                def __init__(self, d_in):
                     self.net = pf.Sequential([
-                        pf.Dense(5, 128),
+                        pf.Dense(d_in, 128),
                         tf.nn.relu,
                         pf.Dense(128, 64),
                         tf.nn.relu,
@@ -197,9 +191,9 @@ TODO: the Dense module handles creating the variables for you, and the Sequentia
 
             class DenseRegression(pf.Model):
                 
-                def __init__(self):
+                def __init__(self, d_in):
                     self.net = pf.Sequential([
-                        pf.Dense(5, 128),
+                        pf.Dense(d_in, 128),
                         torch.nn.ReLU(),
                         pf.Dense(128, 64),
                         torch.nn.ReLU(),
@@ -211,12 +205,50 @@ TODO: the Dense module handles creating the variables for you, and the Sequentia
                     x = torch.tensor(x)
                     return pf.Normal(self.net(x), self.s())
 
-TODO: then can fit the net
+Then we can fit the network in the same way as before:
 
 .. code-block:: python3
 
-    model = DenseRegression([5, 128, 64, 1])
+    model = DenseRegression(5)
     model.fit(x, y)
+
+
+Even easier is the :class:`.DenseNetwork` module.  Just pass the number of
+dimensions per dense layer as a list, and :class:`.DenseNetwork` will create a
+fully-connected neural network with the corresponding number of units, 
+rectified linear activation functions in between, and no activation function
+after the final layer.  For example, to create the same model as above with
+:class:`.DenseNetwork`:
+
+
+.. tabs::
+
+    .. group-tab:: TensorFlow
+    
+        .. code-block:: python3
+
+            class DenseRegression(pf.Model):
+                
+                def __init__(self, d_in):
+                    self.net = pf.DenseNetwork([d_in, 128, 64, 1])
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    return pf.Normal(self.net(x), self.s())
+
+    .. group-tab:: PyTorch
+    
+        .. code-block:: python3
+
+            class DenseRegression(pf.Model):
+                
+                def __init__(self, d_in):
+                    self.net = pf.DenseNetwork([d_in, 128, 64, 1])
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    return pf.Normal(self.net(x), self.s())
 
 
 Using the DenseRegression or DenseClassifier applications

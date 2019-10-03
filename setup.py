@@ -24,17 +24,16 @@ setup(
     zip_safe=False,
     extras_require={
         'tests': [
-            'gast==0.2.2', #TODO: workaround for a TF req
-            'tensorflow == 2.0.0-rc1',
-            'tensorflow-probability == 0.8.0rc0',
+            'tensorflow == 2.0.0',
+            'tensorflow-probability == 0.8.0',
             'torch >= 1.2.0',
             'pytest >= 5.1.2',
             'pytest-cov >= 2.7.1',
             'pylint >= 2.3.1',
             ],
         'docs': [
-            'tensorflow == 2.0.0-rc1',
-            'tensorflow-probability == 0.8.0rc0',
+            'tensorflow == 2.0.0',
+            'tensorflow-probability == 0.8.0',
             'sphinx-tabs'
             ]
     }
