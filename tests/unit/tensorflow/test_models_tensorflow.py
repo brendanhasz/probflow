@@ -716,7 +716,6 @@ def test_ContinuousModel(plot):
     assert llb.ndim == 2
     assert llb.shape[0] == 22
     assert llb.shape[1] == 1
-    assert np.all(llb>=lb)
     assert np.all(llb<=ub)
 
     # predictive intervals upper ci
@@ -726,7 +725,6 @@ def test_ContinuousModel(plot):
     assert uub.shape[0] == 22
     assert uub.shape[1] == 1
     assert np.all(uub>=lb)
-    assert np.all(uub<=ub)
     assert np.all(uub>=llb)
 
     # aleatoric intervals
