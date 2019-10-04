@@ -12,6 +12,7 @@ TODO: intro, link to colab w/ these examples
 TODO: this shows how to do it manually and why it's nice to use Modules as building blocks for large models.  However, it's even easier to do this using ProbFlow's Dense + Sequential modules, or the DenseRegression model, as we'll see in the following sections.
 
 
+
 Manually
 --------
 
@@ -153,8 +154,9 @@ TODO: then can fit the net
     model.fit(x, y)
 
 
-Using the Dense, Sequential, and DenseNetwork Modules
------------------------------------------------------
+
+Using the Dense and Sequential Modules
+--------------------------------------
 
 ProbFlow comes with some ready-made modules for creating fully-connected 
 neural networks.  The :class:`.Dense` module handles creating the weight and
@@ -213,7 +215,13 @@ Then we can fit the network in the same way as before:
     model.fit(x, y)
 
 
-Even easier is the :class:`.DenseNetwork` module.  Just pass the number of
+
+Using the DenseNetwork Module
+-----------------------------
+
+The :class:`.DenseNetwork` module can be used to automatically create 
+sequential models of Dense layers with ReLU activations in between.
+Just pass the number of
 dimensions per dense layer as a list, and :class:`.DenseNetwork` will create a
 fully-connected neural network with the corresponding number of units, 
 rectified linear activation functions in between, and no activation function
@@ -251,13 +259,16 @@ after the final layer.  For example, to create the same model as above with
                     return pf.Normal(self.net(x), self.s())
 
 
+
 Using the DenseRegression or DenseClassifier applications
 ---------------------------------------------------------
 
-TODO: the DenseNet model automatically creates sequential dense layers, but NOT an observation distribution, default is relu activation but no activation for last layer
+The :class:`.DenseNetwork` module automatically creates sequential dense
+layers, but it doesn't include an observation distribuiton.  To create the
+same model as before (a multilayer network which predicts the mean of a 
+normally-distributed observation distribution), just use the 
+:class:`.DenseRegression` application:
 
-
-TODO: DenseRegression
 
 .. code-block:: python3
 
@@ -265,11 +276,15 @@ TODO: DenseRegression
     model.fit(x, y)
 
 
-TODO: DenseClassifier
+To instead use a dense network to perform classification (the observation 
+distribution is a categorical distribtuion instead of a normal distribution),
+use the :class:`.DenseClassifier` application:
+
 
 .. code-block:: python3
 
-    # TODO make dataset w/ categorical output
+    # Nf = number of features
+    # Nc = number of categories in target
 
-    model = pf.DenseClassifier([5, 128, 64, 1])
+    model = pf.DenseClassifier([Nf, 128, 64, Nc])
     model.fit(x, y)

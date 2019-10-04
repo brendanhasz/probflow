@@ -14,7 +14,6 @@ Bayesian Correlation
 
     import numpy as np
     import matplotlib.pyplot as plt
-    import tensorflow as tf
     randn = lambda *x: np.random.randn(*x).astype('float32')
 
     import probflow as pf
@@ -66,7 +65,6 @@ This is our first example of a `generative model <https://en.wikipedia.org/wiki/
 
         .. code-block:: python3
 
-            import probflow as pf
             import tensorflow as tf
 
             class BayesianCorrelation(pf.Model):
@@ -82,7 +80,6 @@ This is our first example of a `generative model <https://en.wikipedia.org/wiki/
 
         .. code-block:: python3
 
-            import probflow as pf
             import torch
 
             class BayesianCorrelation(pf.Model):

@@ -3,7 +3,6 @@
 Poisson Regression (GLM)
 ========================
 
-
 |Colab Badge|
 
 .. |Colab Badge| image:: img/colab-badge.svg
@@ -67,8 +66,8 @@ is a type of
 (GLM).  In a GLM, we use weight and bias parameters to compute a scalar
 prediction from the features, pipe that scalar through some function, and use
 the output as the mean of some observation distribution.  With a Poisson
-regression, the function is the exponential function, and the observation
-distribution is the
+regression, the function we use is the exponential function, and the 
+observation distribution is the
 `Poisson distribution <https://en.wikipedia.org/wiki/Poisson_distribution>`_.
 
 .. math::
