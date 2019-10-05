@@ -952,16 +952,13 @@ class MultivariateNormalParameter(Parameter):
         with parameters.
         Default = :class:`.MultivariateNormal` ``(0, I)``
     expand_dims : int or None
-        Dimension to expand along.
+        Dimension to expand output samples along.
     name : str
         Name of the parameter(s).
-        Default = ``'ScaleParameter'``
+        Default = ``'MultivariateNormalParameter'``
 
     Examples
     --------
-
-    Use :class:`.ScaleParameter` to create a standard deviation parameter
-    for a :class:`.Normal` distribution:
 
     TODO
 

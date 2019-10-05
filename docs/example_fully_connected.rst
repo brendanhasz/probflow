@@ -112,7 +112,7 @@ testing and debugging of your models much easier.
 
 Also note that we've used TensorFlow (or PyTorch) code within the model!
 ProbFlow lets you mix and match ProbFlow operations and objects with operations
-from the backend you've selected.
+from the :ref:`backend you've selected <ug_backend>`.
 
 Finally, we can create a |Model| which uses the network |Module| we've just created.  This model consists of a normal distribution whose mean is predicted
 by the neural network:
