@@ -7,7 +7,7 @@ Generative Adversarial Network
 
 ProbFlow isn't really built for the kind of flexibility you need to fit a GAN,
 so I wouldn't recommend fitting GANs with ProbFlow.
-That said, you *can* do it.
+That said, you can *technically* do it.
 
 So... Just for fun...
 
@@ -138,10 +138,12 @@ Then, we can instantiate the networks, the callback, and fit the network:
 .. code-block:: python3
 
     # x is a numpy array or pandas DataFrame of real data
+    Nf = 7 #number of features / input dimensionality (x.shape[1])
+    Nz = 3 #number of latent dimensions
 
     # Create the networks
-    G = Generator([3, 256, 128, 7])
-    D = Discriminator([7, 256, 128, 1])
+    G = Generator([Nz, 256, 128, Nf])
+    D = Discriminator([Nf, 256, 128, 1])
 
     # Let them know about each other <3
     G.D = lambda x: D(x)
@@ -154,9 +156,12 @@ Then, we can instantiate the networks, the callback, and fit the network:
     D.fit(x, callbacks=[train_g])
 
 
-TODO: talk about how you need to use lambda functions
-(in the "G.D = lambda..." block) instead of just assigning the opposite net
-to be an attribute, otherwise one net will update the gradients of the
-*other* network w.r.t. the first net's loss.  This is because pf.Modules 
-recursively search a module's attributes for pf.Modules and update the 
-parameters therein.  But it doesn't look in lambda functions!
+Note that we use lambda functions instead of simply assigning the opposite net
+as an attribute of the each model instance.  This is because ProbFlow 
+recursively searches a model instance's attributes for :class:`.Module`s and 
+:class:`.Parameter`s, and optimizes all found parameters with respect to the
+loss.  However, we don't want the discriminator's parameters updated with the
+the generator's loss, or vice versa!  ProbFlow even looks for parameters in
+attributes which are lists and dictionaries, but it doesn't look in lambda
+functions, so we can "hide" the parameters of one model from the other that
+way, while still allowing each model to `__call__` the other.
