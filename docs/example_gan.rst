@@ -158,10 +158,11 @@ Then, we can instantiate the networks, the callback, and fit the network:
 
 Note that we use lambda functions instead of simply assigning the opposite net
 as an attribute of the each model instance.  This is because ProbFlow 
-recursively searches a model instance's attributes for :class:`.Module`s and 
-:class:`.Parameter`s, and optimizes all found parameters with respect to the
-loss.  However, we don't want the discriminator's parameters updated with the
-the generator's loss, or vice versa!  ProbFlow even looks for parameters in
-attributes which are lists and dictionaries, but it doesn't look in lambda
-functions, so we can "hide" the parameters of one model from the other that
-way, while still allowing each model to `__call__` the other.
+recursively searches a model instance's attributes for :class:`.Module` and 
+:class:`.Parameter` objects, and optimizes all found parameters with respect
+to the loss.  However, we don't want the discriminator's parameters updated
+with the the generator's loss, or vice versa!  ProbFlow even looks for
+parameters in attributes which are lists and dictionaries, but it doesn't look
+in lambda functions, so we can "hide" the parameters of one model from the
+other that way, while still allowing each model to ``__call__`` the other to 
+compute its own loss.

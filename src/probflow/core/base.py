@@ -38,6 +38,15 @@ class BaseDistribution(ABC):
         """Get the distribution object from the backend"""
 
 
+    def __getitem__(self, key):
+        """Get a parameter, or if a probflow.Parameter, get a sample"""
+        param = getattr(self, key)
+        if callable(param):
+            return param()
+        else:
+            return param
+
+
     def prob(self, y):
         """Compute the probability of some data given this distribution"""
         if get_backend() == 'pytorch':

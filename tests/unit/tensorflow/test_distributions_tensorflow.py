@@ -10,6 +10,7 @@ import tensorflow_probability as tfp
 tfd = tfp.distributions
 
 import probflow.distributions as pfd
+import probflow as pf
 
 
 
@@ -61,6 +62,10 @@ def test_Deterministic():
     with pytest.raises(TypeError):
 	    dist = pfd.Deterministic(loc='lalala')
 
+    # Test using a parameter as an argument
+    p = pf.Parameter()
+    dist = pfd.Deterministic(loc=p)
+    dist.sample()
 
 
 def test_Normal():

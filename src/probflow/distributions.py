@@ -59,6 +59,7 @@ from probflow.core.settings import get_backend
 import probflow.core.ops as O
 from probflow.utils.torch_distributions import get_TorchDeterministic
 from probflow.core.base import BaseDistribution
+from probflow.core.base import BaseParameter
 
 
 
@@ -69,7 +70,7 @@ def _ensure_tensor_like(obj, name):
         tensor_types = (torch.Tensor,)
     else:
         import tensorflow as tf
-        tensor_types = (tf.Tensor, tf.Variable)
+        tensor_types = (tf.Tensor, tf.Variable, BaseParameter)
     if not isinstance(obj, (int, float, np.ndarray, list)+tensor_types):
         raise TypeError(name+' must be Tensor-like')
 
@@ -121,10 +122,10 @@ class Deterministic(BaseDistribution):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
             TorchDeterministic = get_TorchDeterministic()
-            return TorchDeterministic(self.loc)
+            return TorchDeterministic(self['loc'])
         else:
             from tensorflow_probability import distributions as tfd
-            return tfd.Deterministic(self.loc)
+            return tfd.Deterministic(self['loc'])
 
 
 
@@ -183,10 +184,10 @@ class Normal(BaseDistribution):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
             import torch.distributions as tod
-            return tod.normal.Normal(self.loc, self.scale)
+            return tod.normal.Normal(self['loc'], self['scale'])
         else:
             from tensorflow_probability import distributions as tfd
-            return tfd.Normal(self.loc, self.scale)
+            return tfd.Normal(self['loc'], self['scale'])
 
 
 
@@ -254,12 +255,12 @@ class MultivariateNormal(BaseDistribution):
         if get_backend() == 'pytorch':
             import torch.distributions as tod
             return tod.multivariate_normal.MultivariateNormal(
-                self.loc, covariance_matrix=self.cov)
+                self['loc'], covariance_matrix=self['cov'])
         else:
             import tensorflow as tf
             from tensorflow_probability import distributions as tfd
-            tril = tf.linalg.cholesky(self.cov)
-            return tfd.MultivariateNormalTriL(loc=self.loc, scale_tril=tril)
+            tril = tf.linalg.cholesky(self['cov'])
+            return tfd.MultivariateNormalTriL(loc=self['loc'], scale_tril=tril)
 
 
 
@@ -329,10 +330,10 @@ class StudentT(BaseDistribution):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
             import torch.distributions as tod
-            return tod.studentT.StudentT(self.df, self.loc, self.scale)
+            return tod.studentT.StudentT(self['df'], self['loc'], self['scale'])
         else:
             from tensorflow_probability import distributions as tfd
-            return tfd.StudentT(self.df, self.loc, self.scale)
+            return tfd.StudentT(self['df'], self['loc'], self['scale'])
 
 
     def mean(self):
@@ -403,10 +404,10 @@ class Cauchy(BaseDistribution):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
             import torch.distributions as tod
-            return tod.cauchy.Cauchy(self.loc, self.scale)
+            return tod.cauchy.Cauchy(self['loc'], self['scale'])
         else:
             from tensorflow_probability import distributions as tfd
-            return tfd.Cauchy(self.loc, self.scale)
+            return tfd.Cauchy(self['loc'], self['scale'])
 
 
     def mean(self):
@@ -477,10 +478,10 @@ class Gamma(BaseDistribution):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
             import torch.distributions as tod
-            return tod.gamma.Gamma(self.concentration, self.rate)
+            return tod.gamma.Gamma(self['concentration'], self['rate'])
         else:
             from tensorflow_probability import distributions as tfd
-            return tfd.Gamma(self.concentration, self.rate) 
+            return tfd.Gamma(self['concentration'], self['rate']) 
 
 
 
@@ -549,12 +550,12 @@ class InverseGamma(BaseDistribution):
             import torch
             import torch.distributions as tod
             return tod.transformed_distribution.TransformedDistribution(
-                tod.gamma.Gamma(self.concentration, self.scale),
+                tod.gamma.Gamma(self['concentration'], self['scale']),
                 tod.transforms.PowerTransform(torch.tensor([-1.])))
             # TODO: mean isn't implemented
         else:
             from tensorflow_probability import distributions as tfd
-            return tfd.InverseGamma(self.concentration, self.scale) 
+            return tfd.InverseGamma(self['concentration'], self['scale']) 
 
 
 
@@ -611,10 +612,11 @@ class Bernoulli(BaseDistribution):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
             import torch.distributions as tod
-            return tod.bernoulli.Bernoulli(logits=self.logits, probs=self.probs) 
+            return tod.bernoulli.Bernoulli(logits=self['logits'],
+                                           probs=self['probs']) 
         else:
             from tensorflow_probability import distributions as tfd
-            return tfd.Bernoulli(logits=self.logits, probs=self.probs) 
+            return tfd.Bernoulli(logits=self['logits'], probs=self['probs']) 
 
 
 
@@ -674,11 +676,11 @@ class Categorical(BaseDistribution):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
             import torch.distributions as tod
-            return tod.categorical.Categorical(logits=self.logits,
-                                               probs=self.probs) 
+            return tod.categorical.Categorical(logits=self['logits'],
+                                               probs=self['probs']) 
         else:
             from tensorflow_probability import distributions as tfd
-            return tfd.Categorical(logits=self.logits, probs=self.probs)
+            return tfd.Categorical(logits=self['logits'], probs=self['probs'])
 
 
     def prob(self, y):
@@ -733,10 +735,11 @@ class OneHotCategorical(BaseDistribution):
         if get_backend() == 'pytorch':
             import torch.distributions as tod
             return tod.one_hot_categorical.OneHotCategorical(
-                logits=self.logits, probs=self.probs) 
+                logits=self['logits'], probs=self['probs']) 
         else:
             from tensorflow_probability import distributions as tfd
-            return tfd.OneHotCategorical(logits=self.logits, probs=self.probs) 
+            return tfd.OneHotCategorical(logits=self['logits'],
+                                         probs=self['probs']) 
 
 
 
@@ -785,10 +788,10 @@ class Poisson(BaseDistribution):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
             import torch.distributions as tod
-            return tod.poisson.Poisson(self.rate) 
+            return tod.poisson.Poisson(self['rate']) 
         else:
             from tensorflow_probability import distributions as tfd
-            return tfd.Poisson(self.rate) 
+            return tfd.Poisson(self['rate']) 
 
 
 
@@ -843,10 +846,10 @@ class Dirichlet(BaseDistribution):
         """Get the distribution object from the backend"""
         if get_backend() == 'pytorch':
             import torch.distributions as tod
-            return tod.dirichlet.Dirichlet(self.concentration) 
+            return tod.dirichlet.Dirichlet(self['concentration']) 
         else:
             from tensorflow_probability import distributions as tfd
-            return tfd.Dirichlet(self.concentration) 
+            return tfd.Dirichlet(self['concentration']) 
 
 
 
@@ -898,9 +901,9 @@ class Mixture(BaseDistribution):
             shape = self.distributions.batch_shape
             args = {'logits': None, 'probs': None}
             if self.logits is not None:
-                args['logits'] = tf.broadcast_to(self.logits, shape)
+                args['logits'] = tf.broadcast_to(self['logits'], shape)
             else:
-                args['probs'] = tf.broadcast_to(self.probs, shape)
+                args['probs'] = tf.broadcast_to(self['probs'], shape)
 
             # Return TFP distribution object
             return tfd.MixtureSameFamily(
@@ -959,7 +962,7 @@ class HiddenMarkovModel(BaseDistribution):
         else:
             from tensorflow_probability import distributions as tfd
             return tfd.HiddenMarkovModel(
-                initial_distribution=tfd.Categorical(self.initial),
-                transition_distribution=tfd.Categorical(self.transition),
-                observation_distribution=self.observation,
-                num_steps=self.steps)
+                initial_distribution=tfd.Categorical(self['initial']),
+                transition_distribution=tfd.Categorical(self['transition']),
+                observation_distribution=self['observation'],
+                num_steps=self['steps'])
