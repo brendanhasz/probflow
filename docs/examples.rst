@@ -27,3 +27,4 @@ Here are some examples of how to use ProbFlow to build, fit, and diagnose severa
    example_mixture_density
    example_variational_autoencoder
    example_gan
+   example_normalizing_flows
