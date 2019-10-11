@@ -6,7 +6,7 @@ Mathematical Details
 .. include:: macros.hrst
 
 
-ProbFlow fits Bayesian models to data using stochastic variational inference [1]_ [2]_, specifically via "Bayes by Backprop" [3]_.
+ProbFlow fits Bayesian models to data using stochastic variational inference (Graves, 2011; Hoffman et al., 2013), specifically via "Bayes by Backprop" (Blundell et al., 2015).
 
 Notation:
 
@@ -59,7 +59,7 @@ For those of you who like math:
         - \mathbb{E}_{q(\beta|\theta)} [~\log p(\mathcal{D}|\beta)~] 
         + \log p(\mathcal{D})
 
-The model evidence (:math:`\log p(\mathcal{D})`) is a constant, so in order to minimize the divergence between the variational and true posteriors, we can just minimize the right-hand side of the equation, ignoring the model evidence:
+The model evidence (:math:`\log p(\mathcal{D})`) is a constant, so in order to find the variational distribution parameters (:math:`\hat{\theta}`) which minimize the divergence between the variational and true posteriors, we can just minimize the right-hand side of the equation, ignoring the model evidence:
 
 .. math::
 
@@ -67,9 +67,9 @@ The model evidence (:math:`\log p(\mathcal{D})`) is a constant, so in order to m
 
 These two terms are known as the "variational free energy", or the (negative) "evidence lower bound" (ELBO).
 
-During optimization, we can analytically compute the divergence between the priors and the variational posteriors (:math:`\text{KL} (~q(\beta|\theta)~||~p(\beta)~)`), assuming this is possible given the types of distributions we used for the prior and posterior (e.g. Normal distributions).  We can estimate the expected log likelihood (:math:`\mathbb{E}_{q(\beta|\theta)} [~\log p(\mathcal{D}|\beta)~]`) by sampling parameter values from the variational distribution for each batch, and then computing the average log likelihood for those samples.  That is, we estimate it via Monte Carlo.
+During optimization, we can analytically compute the divergence between the priors and the variational posteriors (:math:`\text{KL} (~q(\beta|\theta)~||~p(\beta)~)`), assuming this is possible given the types of distributions we used for the prior and posterior (e.g. Normal distributions).  We can estimate the expected log likelihood (:math:`\mathbb{E}_{q(\beta|\theta)} [~\log p(\mathcal{D}|\beta)~]`) by sampling parameter values from the variational distribution each minibatch, and then computing the average log likelihood for those samples.  That is, we estimate it via Monte Carlo.
 
-When creating a loss function to maximize the ELBO, we need to be careful about batching.  The above minimization equation assumes all samples are being used, but when using stochastic gradient descent, we have only a subset of the samples at any given time.  So, we need to ensure the contribution of the log likelihood and the KL divergence are scaled similarly.  Since we're using a Monte Carlo estimation of the expected log likelihood anyway, with batching we can still just take the mean log likelihood of our samples as the contribution of the log likelihood term.  However, the divergence term should be applied once per *pass through the data*, so we need to normalize it by the *total number of datapoints*, not by the numeber of datapoints in the batch.  With TensorFlow, this looks like:
+When creating a loss function to maximize the ELBO, we need to be careful about batching.  The above minimization equation assumes all samples are being used, but when using stochastic gradient descent, we have only a subset of the samples at any given time (i.e. the minibatch).  So, we need to ensure the contribution of the log likelihood and the KL divergence are scaled similarly.  Since we're using a Monte Carlo estimation of the expected log likelihood anyway, with batching we can still just take the mean log likelihood of our samples as the contribution of the log likelihood term.  However, the divergence term should be applied once per *pass through the data*, so we need to normalize it by the *total number of datapoints*, not by the numeber of datapoints in the batch.  With TensorFlow, this looks like:
 
 .. code-block:: python3
 
@@ -82,14 +82,9 @@ When creating a loss function to maximize the ELBO, we need to be careful about 
 
 References
 ----------
-.. [1] Alex Graves.
-    Practical Variational Inference for Neural Networks.
-    In *Advances in Neural Information Processing Systems (NIPS)*, pages 2348–2356, 2011
-    http://papers.nips.cc/paper/4329-practical-variational-inference-for-neural-networks
-.. [2] Matthew D. Hoffman, David M. Blei, Chong Wang, and John Paisley.
-    Stochastic Variational Inference.
-    *Journal of Machine Learning Research* 14:1303−1347, 2013.
-    http://jmlr.org/papers/v14/hoffman13a.html
-.. [3] Charles Blundell, Julien Cornebise, Koray Kavukcuoglu, and Daan Wierstra. 
-    Weight uncertainty in neural networks. 
-    *arXiv preprint*, 2015. http://arxiv.org/abs/1505.05424
+
+Alex Graves. `Practical Variational Inference for Neural Networks <http://papers.nips.cc/paper/4329-practical-variational-inference-for-neural-networks>`_.  In *Advances in Neural Information Processing Systems*, pages 2348–2356, 2011.
+    
+Matthew D. Hoffman, David M. Blei, Chong Wang, and John Paisley.  `Stochastic Variational Inference <http://jmlr.org/papers/v14/hoffman13a.html>`_. *Journal of Machine Learning Research* 14:1303−1347, 2013.
+    
+Charles Blundell, Julien Cornebise, Koray Kavukcuoglu, and Daan Wierstra. `Weight uncertainty in neural networks <http://arxiv.org/abs/1505.05424>`_. *arXiv preprint*, 2015. 
