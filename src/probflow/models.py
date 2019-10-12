@@ -214,16 +214,18 @@ class Model(Module):
         """
 
         # Determine a somewhat reasonable learning rate if none was passed
-        if lr is None:
-            lr = np.exp(-np.log10(self.n_parameters*batch_size))
+        if lr is not None:
+            self._learning_rate = lr
+        elif self._learning_rate is None:
+            default_lr = np.exp(-np.log10(self.n_parameters*batch_size))
+            self._learning_rate = default_lr
 
         # Create DataGenerator from input data if not already
         self._data = make_generator(x, y, batch_size=batch_size, 
                                     shuffle=shuffle)
 
         # Use default optimizer if none specified
-        self._learning_rate = lr
-        if optimizer is None:
+        if optimizer is None and self._optimizer is None:
             if get_backend() == 'pytorch':
                 import torch
                 self._optimizer = torch.optim.Adam(

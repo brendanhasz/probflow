@@ -15,7 +15,6 @@ ProbFlow
 .. |Coverage Badge| image:: https://codecov.io/gh/brendanhasz/probflow/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/brendanhasz/probflow
 
-
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
@@ -40,7 +39,7 @@ It's very much still a work in progress.
 Getting Started
 ---------------
 
-**ProbFlow** allows you to quickly and painlessly build, fit, and evaluate custom Bayesian models (or :ref:`ready-made <ug_applications>` ones!) which run on top of either |TensorFlow| and |TensorFlow Probability| or |PyTorch|.
+**ProbFlow** allows you to quickly and :raw-html:`<del>painlessly</del>` less painfully build, fit, and evaluate custom Bayesian models (or :ref:`ready-made <ug_applications>` ones!) which run on top of either |TensorFlow| and |TensorFlow Probability| or |PyTorch|.
 
 With ProbFlow, the core building blocks of a Bayesian model are parameters, probability distributions, and modules (and, of course, the input data).  Parameters define how the independent variables (the features) predict the probability distribution of the dependent variables (the target).
 

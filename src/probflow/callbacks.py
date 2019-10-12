@@ -288,7 +288,7 @@ class TimeOut(Callback):
 
     .. code-block:: python3
 
-        early_stopping = pf.callbacks.TimeOut(5*60*60)
+        time_out = pf.callbacks.TimeOut(5*60*60)
         model.fit(x, y, callbacks=[time_out])
 
     """

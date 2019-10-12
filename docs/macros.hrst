@@ -31,3 +31,5 @@
 .. |DataFrames| replace:: :class:`DataFrames <pandas.DataFrame>`
 .. |Series| replace:: :class:`Series <pandas.Series>`
 
+.. role:: raw-html(raw)
+   :format: html

@@ -83,7 +83,7 @@ reflect the prior distribution.
    :align: center
 
 There are a few different methods for fitting Bayesian models.  Simple models
-can by solved analytically, but for more complicated models we have to 
+can be solved analytically, but for more complicated models we have to 
 settle for approximations of the posterior distributions.
 `Markov chain monte carlo <https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo>`_
 (MCMC) is one method which uses sampling to estimate the posterior 
@@ -137,6 +137,7 @@ information you can't get from a normal model:
   to add domain knowledge to Bayesian models by biasing parameter posteriors
   towards values which experts believe are more valid or likely.
 - **Provides a framework for making decisions** using your model's probabilistic predictions via `Bayesian decision theory <http://en.wikipedia.org/wiki/Bayesian_decision_theory>`_.
+
 .. and model comparison? (though ProbFlow doesn't support that yet)
 
 However, there are a few important disadvantages to using Bayesian models:
@@ -148,6 +149,10 @@ However, there are a few important disadvantages to using Bayesian models:
   and it's usually best to use somewhat informative priors.  Unfortunately,
   the prior can bias the result!  So the result of a Bayesian analysis is 
   never really "unbiased."
+- **Harder to debug**.  Bayesian models often take more time and effort to 
+  get working correctly than, say, gradient boosted decision trees or a simple
+  t-test.  You have to decide whether that time is worth it for the advantages
+  using a Bayesian model can have for your application.
 
 This has been a quick and *very* non-formal intro to Bayesian modeling, but 
 for an actual introduction, some things I'd suggest taking a look at:
