@@ -15,6 +15,8 @@ Backlog
 * Docs for everything implemented so far
 * Fix some issues (below)
 * Release 2.0.0
+* Get autograph and pytorch working!
+* Make DataGenerators run on a thread pool in parallel w/ training
 * Add HiddenMarkovModel and GaussianProcess distributions + examples
 * Add survival/churn modeling example + Exponential distribution
 * Finish pred_dist_plot for Discrete and Categorical Model, as well as calibration_curve for categorical.

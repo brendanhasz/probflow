@@ -73,6 +73,7 @@ from probflow.utils.plotting import plot_dist
 from probflow.utils.initializers import xavier
 from probflow.utils.initializers import scale_xavier
 from probflow.utils.initializers import pos_xavier
+from probflow.utils.initializers import full_of
 
 
 
@@ -529,8 +530,8 @@ class ScaleParameter(Parameter):
                  posterior=Gamma,
                  prior=Gamma(1, 1),
                  transform=lambda x: O.sqrt(1.0/x),
-                 initializer={'concentration': pos_xavier, 
-                              'rate': pos_xavier},
+                 initializer={'concentration': full_of(4.), 
+                              'rate': full_of(1.)},
                  var_transform={'concentration': O.exp,
                                 'rate': O.exp},
                  name='ScaleParameter'):

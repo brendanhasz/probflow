@@ -60,3 +60,15 @@ def pos_xavier(shape):
         import tensorflow as tf
         numel = float(tf.reduce_prod(shape))
         return vals + tf.math.log(numel)/tf.math.log(10.0)
+
+
+
+def full_of(val):
+    """Get initializer which returns tensor full of single value"""
+
+    import probflow.core.ops as O
+
+    def init(shape):
+        return val*O.ones(shape)
+
+    return init
