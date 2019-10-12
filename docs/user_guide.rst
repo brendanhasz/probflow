@@ -15,12 +15,12 @@ User Guide
    ug_modules
    ug_models
    ug_fitting
+   ug_callbacks
+   ug_datagenerators
    ug_predicting
    ug_evaluating
    ug_inspecting
    ug_applications
-   ug_callbacks
-   ug_datagenerators
    ug_math
 
 .. include:: macros.hrst

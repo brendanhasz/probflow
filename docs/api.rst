@@ -18,7 +18,7 @@ API
 
 The ProbFlow API consists of five primary modules:
 
-* :mod:`core <probflow.core>`
+* :mod:`.core`
 * :mod:`.distributions`
 * :mod:`.parameters`
 * :mod:`.modules`

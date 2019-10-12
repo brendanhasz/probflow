@@ -3,8 +3,12 @@ Core
 
 .. include:: macros.hrst
 
-TODO: explain core sub-modules
+The ``core`` module contains modules which ProbFlow uses internally.  There
+are three sub-modules in core:
 
+* :mod:`.settings` - backend, datatype, and sampling settings
+* :mod:`.base` - abstract base classes for ProbFlow objects
+* :mod:`.ops` - backend-independent mathematical operations
 
 Settings
 --------

@@ -41,3 +41,4 @@ Issues
 * Allow learning rate to be updated w/ PyTorch
 * Model predictive sampling functions don't work when x is a Pandas DataFrame (because you can't expand_dims on a df)
 * PyTorch pf.Distribution.mode()?
+* Default datatype for torch (in core.settings)

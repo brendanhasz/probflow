@@ -6,7 +6,9 @@ Selecting a Backend
 .. include:: macros.hrst
 
 Before building models with ProbFlow, you'll want to decide which backend
-to use.  ProbFlow currently supports two backends: |TensorFlow| and |PyTorch|.
+to use.  What I mean by "backend" is the system which performs the automatic
+differentiation required to fit models with stochastic variational inference.
+ProbFlow currently supports two backends: |TensorFlow| and |PyTorch|.
 TensorFlow is the default, but you can set which backend to use:
 
 .. code-block:: python3
