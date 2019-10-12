@@ -3,6 +3,7 @@
 
 
 import pytest
+import time
 
 import numpy as np
 
@@ -122,6 +123,12 @@ def test_Callback():
     assert isinstance(es.count, int)
     assert es.count == 6
 
+    # Test TimeOut
+    to = TimeOut(2)
+    ts = time.time()
+    my_model.fit(x, y, batch_size=5, epochs=10000, callbacks=[to])
+    assert time.time()-ts < 4
+
     # should error w/ invalid args
     with pytest.raises(TypeError):
         es = EarlyStopping(lambda: 3, patience=1.1)
@@ -143,5 +150,3 @@ def test_Callback():
     assert isinstance(mp.epochs, list)
     assert len(mp.epochs) == 7
     assert isinstance(mp.parameter_values, list)
-    assert len(mp.parameter_values) == 7
-

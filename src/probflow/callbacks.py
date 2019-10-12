@@ -8,6 +8,7 @@ training process.
 * :class:`.MonitorMetric` - record a metric over the course of training
 * :class:`.MonitorParameter` - record a parameter over the course of training
 * :class:`.EarlyStopping` - stop training if some metric stops improving
+* :class:`.TimeOut` - stop training after a certain amount of time
 
 ----------
 
@@ -21,9 +22,12 @@ __all__ = [
     'MonitorMetric',
     'MonitorParameter',
     'EarlyStopping',
+    'TimeOut',
 ]
 
 
+
+import time
 
 import numpy as np
 
@@ -264,3 +268,42 @@ class EarlyStopping(Callback):
             self.count += 1
             if self.count > self.patience:
                 self.model.stop_training()
+
+
+
+class TimeOut(Callback):
+    """Stop training after a certain amount of time
+
+    TODO
+
+    Parameters
+    ----------
+    time_limit : float or int
+        Number of seconds after which to stop training
+
+    Example
+    -------
+
+    Stop training after five hours:
+
+    .. code-block:: python3
+
+        early_stopping = pf.callbacks.TimeOut(5*60*60)
+        model.fit(x, y, callbacks=[time_out])
+
+    """
+    
+    def __init__(self, time_limit):
+
+        # Store values
+        self.time_limit = time_limit
+        self.start_time = None
+
+
+    def on_epoch_end(self):
+        """Stop training if time limit has been passed"""
+        if self.start_time is None:
+            self.start_time = time.time()
+        if self.time_limit < time.time()-self.start_time:
+            self.model.stop_training()
+
