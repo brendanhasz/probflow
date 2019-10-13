@@ -49,6 +49,11 @@ class Callback(BaseCallback):
         """Initialize the callback"""
 
 
+    def on_epoch_start(self):
+        """Will be called at the start of each training epoch.  By default does
+        nothing."""
+
+
     def on_epoch_end(self):
         """Will be called at the end of each training epoch.  By default does
         nothing."""

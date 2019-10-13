@@ -7,28 +7,29 @@ import pytest
 import numpy as np
 import pandas as pd
 
+import probflow as pf
 from probflow.data import *
 
 
 
-def test_DataGenerator():
-    """Tests probflow.data.DataGenerator"""
+def test_ArrayDataGenerator():
+    """Tests probflow.data.ArrayDataGenerator"""
 
     # Should error with invalid args
     with pytest.raises(TypeError):
-        dg = DataGenerator(x='lala')
+        dg = ArrayDataGenerator(x='lala')
     with pytest.raises(TypeError):
-        dg = DataGenerator(y='lala')
+        dg = ArrayDataGenerator(y='lala')
     with pytest.raises(TypeError):
-        dg = DataGenerator(batch_size=1.1)
+        dg = ArrayDataGenerator(batch_size=1.1)
     with pytest.raises(ValueError):
-        dg = DataGenerator(batch_size=-1)
+        dg = ArrayDataGenerator(batch_size=-1)
     with pytest.raises(TypeError):
-        dg = DataGenerator(shuffle=1.1)
+        dg = ArrayDataGenerator(shuffle=1.1)
     with pytest.raises(TypeError):
-        dg = DataGenerator(test=1.1)
+        dg = ArrayDataGenerator(test=1.1)
     with pytest.raises(ValueError):
-        dg = DataGenerator(x=np.ones(3), y=np.ones(4))
+        dg = ArrayDataGenerator(x=np.ones(3), y=np.ones(4))
 
     # Create some data
     x = np.random.randn(100, 3)
@@ -37,7 +38,7 @@ def test_DataGenerator():
     y = x @ w + b
     
     # Create the generator
-    dg = DataGenerator(x, y, batch_size=5)
+    dg = ArrayDataGenerator(x, y, batch_size=5)
 
     # Check properties
     assert dg.n_samples == 100
@@ -81,7 +82,7 @@ def test_DataGenerator():
     assert i == 20
 
     # should handle if y is None
-    dg = DataGenerator(y=x, batch_size=5)
+    dg = ArrayDataGenerator(y=x, batch_size=5)
     for xx, yy in dg:
         assert xx is None
         assert isinstance(yy, np.ndarray)
@@ -90,7 +91,7 @@ def test_DataGenerator():
     dg.on_epoch_end()
 
     # and if y is None, should treat x as y (for generative models)
-    dg = DataGenerator(x, batch_size=5)
+    dg = ArrayDataGenerator(x, batch_size=5)
     for xx, yy in dg:
         assert xx is None
         assert isinstance(yy, np.ndarray)
@@ -98,7 +99,7 @@ def test_DataGenerator():
         assert yy.shape[1] == 3
 
     # should be able to make an empty generator
-    dg = DataGenerator()
+    dg = ArrayDataGenerator()
     for xx, yy in dg:
         assert xx is None
         assert yy is None
@@ -111,7 +112,7 @@ def test_DataGenerator():
     x = pd.DataFrame(x)
     y = pd.Series(y[:, 0])
     
-    dg = DataGenerator(x, y, batch_size=5)
+    dg = ArrayDataGenerator(x, y, batch_size=5)
     assert dg.n_samples == 100
     assert dg.batch_size == 5
     assert dg.shuffle == False
@@ -126,7 +127,7 @@ def test_DataGenerator():
     assert np.all(x1.values==x2.values)
     assert np.all(y1.values==y2.values)
 
-    dg = DataGenerator(y, x, batch_size=5)
+    dg = ArrayDataGenerator(y, x, batch_size=5)
     assert dg.n_samples == 100
     assert dg.batch_size == 5
     assert dg.shuffle == False
@@ -140,3 +141,22 @@ def test_DataGenerator():
     x2, y2 = dg[0]
     assert np.all(x1.values==x2.values)
     assert np.all(y1.values==y2.values)
+
+
+
+def test_DataGenerator_workers():
+    """Tests probflow.data.DataGenerator w/ multiple worker processes"""
+
+    # Data
+    x = np.random.randn(100, 3).astype('float32')
+    w = np.random.randn(3, 1).astype('float32')
+    y = x@w
+
+    # Fit a model with 1 worker
+    model = pf.LinearRegression(3)
+    model.fit(x, y, batch_size=10, epochs=10, num_workers=1)
+
+    # Fit a model with 4 workers
+    model = pf.LinearRegression(3)
+    model.fit(x, y, batch_size=10, epochs=10, num_workers=4)
+

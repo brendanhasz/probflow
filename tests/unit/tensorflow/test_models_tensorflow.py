@@ -19,7 +19,7 @@ from probflow.parameters import *
 from probflow.modules import *
 from probflow.models import Model
 from probflow.models import ContinuousModel, DiscreteModel, CategoricalModel
-from probflow.data import DataGenerator
+from probflow.data import ArrayDataGenerator
 from probflow.data import make_generator
 
 
@@ -291,9 +291,9 @@ def test_Model_0D():
 
 
 
-def test_Model_DataGenerators():
+def test_Model_ArrayDataGenerators():
     """Tests the probflow.models.Model sampling/predictive methods when
-    passed DataGenerators"""
+    passed ArrayDataGenerators"""
 
     class MyModel(Model):
 
@@ -308,10 +308,10 @@ def test_Model_DataGenerators():
     # Instantiate the model
     my_model = MyModel()
 
-    # Make a DataGenerator
+    # Make a ArrayDataGenerator
     x = np.random.randn(100).astype('float32')
     y = -x + 1
-    data = DataGenerator(x, y, batch_size=5)
+    data = ArrayDataGenerator(x, y, batch_size=5)
 
     # Fit the model
     my_model.fit(data, epochs=3)
@@ -822,7 +822,7 @@ def test_ContinuousModel(plot):
     assert r2.shape[0] == 21
     assert r2.shape[1] == 1
 
-    # r squared with a DataGenerator
+    # r squared with an ArrayDataGenerator
     dg = make_generator(x, y)
     r2 = model.r_squared(dg, n=22)
     assert isinstance(r2, np.ndarray)

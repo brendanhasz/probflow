@@ -170,6 +170,14 @@ class BaseDataGenerator(ABC):
         """Initialize the data generator"""
 
 
+    def on_epoch_start(self):
+        """Will be called at the start of each training epoch"""
+
+
+    def on_epoch_end(self):
+        """Will be called at the end of each training epoch"""
+
+
     @property
     @abstractmethod
     def n_samples(self):
@@ -179,7 +187,7 @@ class BaseDataGenerator(ABC):
     @property
     @abstractmethod
     def batch_size(self):
-        """Number of samples per batch"""
+        """Number of samples to generate each minibatch"""
 
 
     def __len__(self):
@@ -192,23 +200,14 @@ class BaseDataGenerator(ABC):
         """Generate one batch of data"""
 
 
+    @abstractmethod
     def __iter__(self):
         """Get an iterator over batches"""
-        self._batch = -1
-        return self
 
-    
+
+    @abstractmethod
     def __next__(self):
         """Get the next batch"""
-        self._batch += 1
-        if self._batch < len(self):
-            return self[self._batch]
-        else:
-            raise StopIteration()
-
-
-    def on_epoch_end(self):
-        """Will be called at the end of each training epoch"""
 
 
 
@@ -223,6 +222,11 @@ class BaseCallback(ABC):
     @abstractmethod
     def __init__(self, *args):
         """Initialize the callback"""
+
+
+    @abstractmethod
+    def on_epoch_start(self):
+        """Will be called at the start of each training epoch"""
 
 
     @abstractmethod

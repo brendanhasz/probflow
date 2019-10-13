@@ -169,6 +169,7 @@ class Model(Module):
             optimizer_kwargs: dict = {},
             lr: float = None,
             flipout: bool = True,
+            num_workers: int = None,
             callbacks: List[BaseCallback] = []):
         r"""Fit the model to data
 
@@ -211,6 +212,13 @@ class Model(Module):
         flipout : bool
             Whether to use flipout during training where possible
             Default = True
+        num_workers : None or int > 0
+            Number of parallel processes to run for loading the data.  If 
+            ``None``, will not use parallel processes.  If an integer, will 
+            use a process pool with that many processes.
+            Default = None
+        callbacks : List[BaseCallback]
+            List of callbacks to run while training the model
         """
 
         # Determine a somewhat reasonable learning rate if none was passed
@@ -222,7 +230,7 @@ class Model(Module):
 
         # Create DataGenerator from input data if not already
         self._data = make_generator(x, y, batch_size=batch_size, 
-                                    shuffle=shuffle)
+                                    shuffle=shuffle, num_workers=num_workers)
 
         # Use default optimizer if none specified
         if optimizer is None and self._optimizer is None:
@@ -254,8 +262,14 @@ class Model(Module):
             if not self._is_training:
                 break
 
+            # Run callbacks at start of epoch
+            self._data.on_epoch_start()
+            for c in callbacks:
+                c.on_epoch_start()
+
             # Update gradients for each batch
             for x_data, y_data in self._data:
+                print('new batch epoch '+str(i)); import sys; sys.stdout.flush()
                 self.train_step(x_data, y_data)
 
             # Run callbacks at end of epoch
