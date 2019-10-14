@@ -269,7 +269,6 @@ class Model(Module):
 
             # Update gradients for each batch
             for x_data, y_data in self._data:
-                print('new batch epoch '+str(i)); import sys; sys.stdout.flush()
                 self.train_step(x_data, y_data)
 
             # Run callbacks at end of epoch
