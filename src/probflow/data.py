@@ -216,9 +216,6 @@ class ArrayDataGenerator(DataGenerator):
     def get_batch(self, index):
         """Generate one batch of data"""
 
-        print('get batch '+str(index))
-        import sys; sys.stdout.flush()
-
         # Return none if no data
         if self._empty:
             return None, None
