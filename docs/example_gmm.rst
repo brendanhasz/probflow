@@ -108,7 +108,7 @@ Then, we can instantiate the model and fit it to the data!
 .. code-block:: python3
 
     model = GaussianMixtureModel(3, 2)
-    model.fit(X, epochs=500, batch_size=1024)
+    model.fit(X, lr=0.03, epochs=500, batch_size=1024)
 
 
 To look at the fit mixture density over possible values of :math:`X`, we can
