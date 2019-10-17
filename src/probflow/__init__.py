@@ -7,4 +7,4 @@ from probflow.applications import *
 from probflow.callbacks import *
 from probflow.data import *
 
-__version__ = '2.0.0a0'
+__version__ = '2.0.0a1'
