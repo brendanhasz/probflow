@@ -78,7 +78,7 @@ And then the likelihood of that datapoint's observed values are determined by th
 Let's make that model using ProbFlow.  We'll use :class:`.DirichletParameter`
 for the weights, which uses a 
 `Dirichlet distribution <https://en.wikipedia.org/wiki/Dirichlet_distribution>`_
-as the variational prior, because the weights must sum to 1.  As with the
+as the variational posterior, because the weights must sum to 1.  As with the
 :ref:`correlation model <example_correlation>`, this is a generative model -
 we're not predicting :math:`y` given :math:`x`, but rather are just fitting the
 data-generating distribution - and so the ``__call__`` method has no inputs.

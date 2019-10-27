@@ -64,7 +64,8 @@ where :math:`f` is usually the
 with :math:`>2` classes, a 
 `softmax <https://en.wikipedia.org/wiki/Softmax_function>`_.
 
-If our target variable has only 2 possible classes, we can model this using a Bernoulli distribution:
+If our target variable has only 2 possible classes, we can model this using a
+`Bernoulli distribution <https://en.wikipedia.org/wiki/Bernoulli_distribution>`_:
 
 .. math::
 
@@ -170,7 +171,7 @@ pre-built :class:`.LogisticRegression` model:
 Multinomial Logistic Regression
 -------------------------------
 
-The :class:`.LinearRegression` model even handles when :math:`y` has multiple
+The :class:`.LogisticRegression` model even handles when :math:`y` has multiple
 classes (that is, a
 `Multinomial logistic regression <https://en.wikipedia.org/wiki/Multinomial_logistic_regression>`_).
 Let's generate some data with 4 features, where the target has 3 possible

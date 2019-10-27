@@ -108,14 +108,17 @@ stacks several of those layers, with activation functions in between each:
 
 The first thing to notice here is that |Modules| can contain other |Modules|!
 This allows you to construct models using hierarchical building blocks, making
-testing and debugging of your models much easier.
+testing and debugging of your models much easier, and encourages code reuse.
 
 Also note that we've used TensorFlow (or PyTorch) code within the model!
 ProbFlow lets you mix and match ProbFlow operations and objects with operations
 from the :ref:`backend you've selected <ug_backend>`.
 
-Finally, we can create a |Model| which uses the network |Module| we've just created.  This model consists of a normal distribution whose mean is predicted
-by the neural network:
+Finally, we can create a |Model| which uses the network |Module| we've just 
+created.  This model consists of a normal distribution whose mean is predicted
+by the neural network.  Note that while the ``__call__`` methods of the 
+|Modules| above returned tensors, the ``__call__`` method of the |Model| below
+returns a *probability distribution*:
 
 .. tabs::
 
