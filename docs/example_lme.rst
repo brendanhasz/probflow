@@ -1,25 +1,33 @@
 .. _example_lme:
 
-Mixed Effects Models
-====================
+Mixed Effects / Multilevel Models
+=================================
 
 .. include:: macros.hrst
 
 
 TODO: description... 
 
-TODO: math
 
-.. math::
 
-    \mathbf{y} \sim \text{Normal}(\mathbf{X}\beta + \mathbf{Z}\mu, \sigma)
-
-TODO: where :math:`\mathbf{X}` are the fixed variables, :math:`\mathbf{Z}` are the random variables, :math:`\beta` is the vector of fixed-effects coefficients, and :math:`\mu` is the vector of random effects coefficients.
 
 Manually with One-hot Encoding
 ------------------------------
 
-TODO: diagram
+TODO: one way to do it is to manually encode the variables into design 
+matrices...
+
+.. math::
+
+    \mathbf{y} \sim \text{Normal}(\mathbf{X}\mathbf{w} + \mathbf{Z}\mathbf{u}, ~ \sigma)
+
+where 
+
+- :math:`\mathbf{X}` is the fixed variables' design matrix,
+- :math:`\mathbf{Z}` is the random variables' design matrix,
+- :math:`\mathbf{w}` is the vector of fixed-effects coefficients,
+- :math:`\mathbf{u}` is the vector of random effects coefficients, and
+- :math:`\sigma` is the noise standard deviation.
 
 .. tabs::
 
@@ -63,43 +71,3 @@ TODO: diagram
                     Z = x[:, self.Fd:]
                     return pf.Normal(X @ self.beta() + Z @ self.mu(), self.sigma())
 
-
-Using the Embedding Module
---------------------------
-
-TODO: explain how you can instead use a 1d embedding module to model random effects (and then you don't have to one-hot encode the input data).  
-
-TODO: below code assumes you have one random effect (IDs in last col of X)
-
-.. tabs::
-
-    .. group-tab:: TensorFlow
-            
-        .. code-block:: python3
-
-            class LinearMixedEffectsModel(pf.Model):
-
-                def __init__(self, Fd, Nr):
-                    self.beta = pf.Parameter([Fd, 1])
-                    self.emb = pf.Embedding(Nr, 1)
-                    self.sigma = pf.ScaleParameter()
-
-                def __call__(self, x):
-                    preds = x[:, :-1] @ self.beta() + self.emb(x[:, -1])
-                    return pf.Normal(preds, self.sigma())
-
-    .. group-tab:: PyTorch
-            
-        .. code-block:: python3
-
-            class LinearMixedEffectsModel(pf.Model):
-
-                def __init__(self, Fd, Nr):
-                    self.beta = pf.Parameter([Fd, 1])
-                    self.emb = pf.Embedding(Nr, 1)
-                    self.sigma = pf.ScaleParameter()
-
-                def __call__(self, x):
-                    x = torch.tensor(x)
-                    preds = x[:, :-1] @ self.beta() + self.emb(x[:, -1])
-                    return pf.Normal(preds, self.sigma())

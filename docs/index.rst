@@ -27,7 +27,7 @@ ProbFlow
 
 .. include:: macros.hrst
 
-ProbFlow is a Python package for building probabilistic Bayesian models with |TensorFlow 2.0| or |PyTorch|, performing variational inference with those models, and evaluating the models' inferences.  It provides both high-level |Modules| for building Bayesian neural networks, as well as low-level |Parameters| and |Distributions| for constructing custom Bayesian models.
+ProbFlow is a Python package for building probabilistic Bayesian models with |TensorFlow 2.0| or |PyTorch|, performing stochastic variational inference with those models, and evaluating the models' inferences.  It provides both high-level |Modules| for building Bayesian neural networks, as well as low-level |Parameters| and |Distributions| for constructing custom Bayesian models.
 
 It's very much still a work in progress.
 

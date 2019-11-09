@@ -235,9 +235,9 @@ class Parameter(BaseParameter):
         """Compute the sum of the Kullback–Leibler divergences between this
         parameter's priors and its variational posteriors."""
         if self.prior is None:
-            return O.sum([], axis=None)
+            return O.zeros([])
         else:
-            return O.sum(O.kl_divergence(self.posterior(), self.prior()),
+            return O.sum(O.kl_divergence(self.posterior, self.prior),
                          axis=None)
 
 
@@ -286,7 +286,9 @@ class Parameter(BaseParameter):
             ``(num_samples, self.prior.shape)``.  If ``n==1``, of size
             ``(self.prior.shape)``.
         """
-        if n==1:
+        if self.prior is None:
+            return np.full(n, np.nan)
+        elif n==1:
             return to_numpy(self.transform(self.prior.sample()))
         else:
             return to_numpy(self.transform(self.prior.sample(n)))
@@ -460,7 +462,8 @@ class Parameter(BaseParameter):
 
 
     def __repr__(self):
-        return '<pf.Parameter '+self.name+' shape='+str(self.shape)+'>'
+        return ('<pf.' + self.__class__.__name__ + ' ' + self.name + 
+                ' shape=' + str(self.shape) + '>')
 
 
 
@@ -497,10 +500,10 @@ class ScaleParameter(Parameter):
     posterior : |Distribution| class
         Probability distribution class to use to approximate the posterior.
         Default = :class:`.Gamma`
-    prior : |Distribution| object
+    prior : |Distribution| object or |None|
         Prior probability distribution function which has been instantiated
-        with parameters.
-        Default = :class:`.Gamma` ``(5, 5)``
+        with parameters, or |None| for a uniform prior.
+        Default = ``None``
     transform : callable
         Transform to apply to the random variable.
         Default is to use an inverse square root transform (``sqrt(1/x)``)
@@ -528,7 +531,7 @@ class ScaleParameter(Parameter):
     def __init__(self,
                  shape=1,
                  posterior=Gamma,
-                 prior=Gamma(1, 1),
+                 prior=None,
                  transform=lambda x: O.sqrt(1.0/x),
                  initializer={'concentration': full_of(4.), 
                               'rate': full_of(1.)},

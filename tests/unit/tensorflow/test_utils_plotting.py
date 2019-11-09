@@ -312,7 +312,8 @@ def test_prior_plot(plot):
         def __init__(self):
             self.weight = pf.Parameter(name='Weight')
             self.bias = pf.Parameter(name='Bias')
-            self.std = pf.ScaleParameter(name='Noise Std Dev')
+            self.std = pf.ScaleParameter(name='Noise Std Dev',
+                prior=pf.Gamma(1., 1.))
 
         def __call__(self, x):
             return pf.Normal(x*self.weight() + self.bias(), self.std())

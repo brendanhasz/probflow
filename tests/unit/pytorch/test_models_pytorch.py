@@ -624,7 +624,8 @@ def test_Model_nesting():
 
         def __init__(self):
             self.module = MyModule()
-            self.std = ScaleParameter([1, 1], name='Std')
+            self.std = ScaleParameter([1, 1], name='Std',
+                prior=torch.distributions.gamma.Gamma(1., 1.))
 
         def __call__(self, x):
             x = torch.tensor(x)

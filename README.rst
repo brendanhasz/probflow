@@ -16,7 +16,7 @@ ProbFlow
     :target: https://codecov.io/gh/brendanhasz/probflow
 
 
-ProbFlow is a Python package for building probabilistic Bayesian models with `TensorFlow 2.0 <http://www.tensorflow.org/beta>`_ or `PyTorch <http://pytorch.org>`_, performing variational inference with those models, and evaluating the models' inferences.  It provides both high-level modules for building Bayesian neural networks, as well as low-level parameters and distributions for constructing custom Bayesian models.
+ProbFlow is a Python package for building probabilistic Bayesian models with `TensorFlow 2.0 <http://www.tensorflow.org/beta>`_ or `PyTorch <http://pytorch.org>`_, performing stochastic variational inference with those models, and evaluating the models' inferences.  It provides both high-level modules for building Bayesian neural networks, as well as low-level parameters and distributions for constructing custom Bayesian models.
 
 It's very much still a work in progress.
 
