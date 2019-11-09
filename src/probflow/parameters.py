@@ -337,7 +337,8 @@ class Parameter(BaseParameter):
                        ci: float = 0.0,
                        bw: float = 0.075,
                        alpha: float = 0.4,
-                       color=None):
+                       color=None,
+                       **kwargs):
         """Plot distribution of samples from the posterior distribution.
 
         Parameters
@@ -366,6 +367,9 @@ class Parameter(BaseParameter):
             Color(s) to use to plot the distribution.
             See https://matplotlib.org/tutorials/colors/colors.html
             Default = use the default matplotlib color cycle
+        kwargs
+            Additional keyword arguments are passed to 
+            :meth:`.utils.plotting.plot_dist`
         """
 
         # Sample from the posterior
@@ -373,7 +377,7 @@ class Parameter(BaseParameter):
         
         # Plot the posterior densities
         plot_dist(samples, xlabel=self.name, style=style, bins=bins, 
-                  ci=ci, bw=bw, alpha=alpha, color=color)
+                  ci=ci, bw=bw, alpha=alpha, color=color, **kwargs)
 
         # Label with parameter name
         plt.xlabel(self.name)

@@ -62,7 +62,7 @@ def get_ix_label(ix, shape):
 
 
 def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075, 
-              alpha=0.4, color=None):
+              alpha=0.4, color=None, legend=True):
     """Plot the distribution of samples.
 
     Parameters
@@ -92,6 +92,9 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
         Color(s) to use to plot the distribution.
         See https://matplotlib.org/tutorials/colors/colors.html
         Default = use the default matplotlib color cycle
+    legend : bool
+        Whether to show legends for plots with >1 distribution
+        Default = True
     """
 
     # Check inputs
@@ -150,7 +153,7 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
             raise ValueError("style must be \'fill\', \'line\', or \'hist\'")
 
     # Only show the legend if there are >1 sample set
-    if Nd > 1:
+    if Nd > 1 and legend:
         plt.legend()
 
     # Set x axis label, and no y axis or bounding box needed
