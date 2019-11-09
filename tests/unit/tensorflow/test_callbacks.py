@@ -6,6 +6,7 @@ import pytest
 import time
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 from probflow.distributions import Normal
 from probflow.parameters import *
@@ -15,7 +16,7 @@ from probflow.callbacks import *
 
 
 
-def test_Callback():
+def test_Callback(plot):
     """Tests the probflow.callbacks.Callback"""
 
     class MyModel(Model):
@@ -104,6 +105,25 @@ def test_Callback():
     assert len(mm.epochs) == 10
     assert isinstance(mm.metrics, list)
     assert len(mm.metrics) == 10
+    mm.plot()
+    if plot:
+        plt.show()
+
+    # Test MontiorELBO
+    x_val = np.random.randn(100).astype('float32')
+    y_val = -x_val + 1
+    me = MonitorELBO()
+    my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[me])
+    assert isinstance(me.current_epoch, int)
+    assert me.current_epoch == 10
+    assert isinstance(me.current_elbo, np.floating)
+    assert isinstance(me.epochs, list)
+    assert len(me.epochs) == 10
+    assert isinstance(me.elbos, list)
+    assert len(me.elbos) == 10
+    me.plot()
+    if plot:
+        plt.show()
 
     # Test MonitorParameter
     mp = MonitorParameter(x_val, y_val, params='Weight')

@@ -20,6 +20,7 @@ __all__ = [
     'LearningRateScheduler',
     'KLWeightScheduler',
     'MonitorMetric',
+    'MonitorELBO',
     'MonitorParameter',
     'EarlyStopping',
     'TimeOut',
@@ -30,6 +31,7 @@ __all__ = [
 import time
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 from probflow.core.base import BaseCallback
 from probflow.data import DataGenerator
@@ -171,6 +173,10 @@ class MonitorMetric(Callback):
 
         # Store metric
         self.metric_fn = get_metric_fn(metric)
+        if isinstance(metric, str):
+            self.metric_name = metric
+        else:
+            self.metric_name = self.metric_fn.__name__
 
         # Store validation data
         self.data = make_generator(x, y)
@@ -192,8 +198,60 @@ class MonitorMetric(Callback):
         if self.verbose:
             print('Epoch {} \t{}: {}'.format(
                   self.current_epoch,
-                  self.metric_fn.__name__,
+                  self.metric_name,
                   self.current_metric))
+
+
+    def plot(self):
+        plt.plot(self.epochs, self.metrics)
+        plt.xlabel('Epoch')
+        plt.ylabel(self.metric_name)
+
+
+
+class MonitorELBO(Callback):
+    """Monitor the ELBO on the training data
+
+    TODO: docs
+
+    Example
+    -------
+
+    To record the evidence lower bound (ELBO) for each batch of training data
+    over the course of training, we can create a :class:`.MonitorELBO`
+    callback:
+
+    .. code-block:: python3
+
+        monitor_elbo = MonitorELBO()
+
+        model.fit(x_train, y_train, callbacks=[monitor_elbo])
+    """
+
+    def __init__(self, verbose=True):
+        self.current_elbo = np.nan
+        self.current_epoch = 0
+        self.elbos = []
+        self.epochs = []
+        self.verbose = verbose
+
+
+    def on_epoch_end(self):
+        """Store the ELBO at the end of each epoch."""
+        self.current_elbo = self.model.get_elbo()
+        self.current_epoch += 1
+        self.elbos += [self.current_elbo]
+        self.epochs += [self.current_epoch]
+        if self.verbose:
+            print('Epoch {} \tELBO: {}'.format(
+                  self.current_epoch,
+                  self.current_elbo))
+
+
+    def plot(self):
+        plt.plot(self.epochs, self.elbos)
+        plt.xlabel('Epoch')
+        plt.ylabel('ELBO')
 
 
 

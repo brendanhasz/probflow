@@ -60,9 +60,10 @@ Building a Neural Network Manually
 First we'll see how to manually create a Bayesian neural network with ProbFlow
 from "scratch", to illustrate how to use the :class:`.Module` class, and to
 see why it's so handy to be able to define components from which you can build
-a larger model.
+a larger model.  Then later we'll use ProbFlow's pre-built modules which make
+creating neural networks even easier.
 
-First we’ll make a module which represents just a single fully-connected layer
+Let's create a module which represents just a single fully-connected layer
 (aka a "dense" layer).  This layer takes a vector :math:`\mathbf{x}` (of 
 length :math:`N_i`), and outputs a vector of length :math:`N_o`.  It 
 multiplies the input by its weights (:math:`\mathbf{W}`, a 

@@ -101,6 +101,7 @@ class Model(Module):
     _is_training = False
     _learning_rate = None
     _kl_weight = 1.0
+    _current_elbo = None
 
 
     def log_likelihood(self, x_data, y_data):
@@ -120,6 +121,11 @@ class Model(Module):
         return self._kl_weight*kl_loss - log_loss
 
 
+    def get_elbo(self):
+        """Get the current ELBO on training data"""
+        return self._current_elbo
+
+
     def _train_step_tf(self, n, flipout):
         """Get the training step function for TensorFlow"""
 
@@ -131,6 +137,7 @@ class Model(Module):
             with Sampling(n=1, flipout=flipout):
                 with tf.GradientTape() as tape:
                     elbo_loss = self.elbo_loss(x_data, y_data, n)
+                self._current_elbo += elbo_loss.numpy()
                 variables = self.trainable_variables
                 gradients = tape.gradient(elbo_loss, variables)
                 self._optimizer.apply_gradients(zip(gradients, variables))
@@ -147,7 +154,8 @@ class Model(Module):
             self.reset_kl_loss()
             with Sampling(n=1, flipout=flipout):
                 self._optimizer.zero_grad()
-                elbo_loss = self.elbo_loss(x_data, y_data, n)                
+                elbo_loss = self.elbo_loss(x_data, y_data, n)
+                self._current_elbo += elbo_loss.detach().numpy()
                 elbo_loss.backward()
                 self._optimizer.step()
 
@@ -263,6 +271,7 @@ class Model(Module):
                 break
 
             # Run callbacks at start of epoch
+            self._current_elbo = 0.0
             self._data.on_epoch_start()
             for c in callbacks:
                 c.on_epoch_start()
