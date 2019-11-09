@@ -216,6 +216,8 @@ class DenseRegression(ContinuousModel):
         Whether to model a change in noise as a function of :math:`\mathbf{x}`
         (if ``heteroscedastic=True``), or not (if ``heteroscedastic=False``,
         the default).
+    kwargs
+        Additional keyword arguments are passed to :class:`.DenseNetwork`
 
     Attributes
     ----------
@@ -226,13 +228,13 @@ class DenseRegression(ContinuousModel):
         Standard deviation of the Normal observation distribution
     """
 
-    def __init__(self, d: List[int], heteroscedastic: bool = False):
+    def __init__(self, d: List[int], heteroscedastic: bool = False, **kwargs):
         self.heteroscedastic = heteroscedastic
         if heteroscedastic:
             d[-1] = 2*d[-1]
-            self.network = DenseNetwork(d)
+            self.network = DenseNetwork(d, **kwargs)
         else:
-            self.network = DenseNetwork(d)
+            self.network = DenseNetwork(d, **kwargs)
             self.std = ScaleParameter([1, 1], name='std')
 
 
@@ -261,6 +263,8 @@ class DenseClassifier(CategoricalModel):
         The first element should be the dimensionality of the independent
         variable (number of features), and the last element should be the
         number of classes of the target.
+    kwargs
+        Additional keyword arguments are passed to :class:`.DenseNetwork`
 
     Attributes
     ----------
@@ -269,9 +273,9 @@ class DenseClassifier(CategoricalModel):
         class probabilities
     """
 
-    def __init__(self, d: List[int]):
+    def __init__(self, d: List[int], **kwargs):
         d[-1] -= 1
-        self.network = DenseNetwork(d)
+        self.network = DenseNetwork(d, **kwargs)
 
 
     def __call__(self, x):
