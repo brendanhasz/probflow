@@ -107,6 +107,12 @@ class LearningRateScheduler(Callback):
         self.learning_rate += [self.current_lr]
 
 
+    def plot(self):
+        plt.plot(self.epochs, self.learning_rate)
+        plt.xlabel('Epoch')
+        plt.ylabel('Learning Rate')
+
+
 
 class KLWeightScheduler(Callback):
     """Set the weight of the KL term's contribution to the ELBO loss each epoch
@@ -147,6 +153,12 @@ class KLWeightScheduler(Callback):
         self.model.set_kl_weight(self.current_w)
         self.epochs += [self.current_epoch]
         self.kl_weights += [self.current_w]
+
+
+    def plot(self):
+        plt.plot(self.epochs, self.kl_weights)
+        plt.xlabel('Epoch')
+        plt.ylabel('KL Loss Weight')
 
 
 
@@ -303,7 +315,8 @@ class EarlyStopping(Callback):
 
     """
     
-    def __init__(self, metric_fn, patience=0):
+    def __init__(self, metric_fn, patience=0, verbose=True, 
+                 name='EarlyStopping'):
 
         # Check types
         if not isinstance(patience, int):
@@ -318,11 +331,15 @@ class EarlyStopping(Callback):
         self.patience = patience
         self.best = np.Inf
         self.count = 0
+        self.epoch = 0
+        self.verbose = verbose
+        self.name = name
         # TODO: restore_best_weights? using save_model and load_model?
 
 
     def on_epoch_end(self):
         """Stop training if there was no improvement since the last epoch."""
+        self.epoch += 1
         metric = self.metric_fn()
         if metric < self.best:
             self.best = metric
@@ -331,6 +348,8 @@ class EarlyStopping(Callback):
             self.count += 1
             if self.count > self.patience:
                 self.model.stop_training()
+                if self.verbose:
+                    print(self.name+' after '+str(self.epoch)+' epochs')
 
 
 
@@ -356,17 +375,21 @@ class TimeOut(Callback):
 
     """
     
-    def __init__(self, time_limit):
+    def __init__(self, time_limit, verbose=True):
 
         # Store values
         self.time_limit = time_limit
         self.start_time = None
+        self.verbose = None
 
 
     def on_epoch_end(self):
         """Stop training if time limit has been passed"""
         if self.start_time is None:
             self.start_time = time.time()
-        if self.time_limit < time.time()-self.start_time:
+        dt = time.time()-self.start_time
+        if self.time_limit < dt:
             self.model.stop_training()
+            if self.verbose:
+                print('TimeOut after '+str(dt)+'s')
 

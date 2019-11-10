@@ -66,6 +66,9 @@ def test_Callback(plot):
     assert isinstance(lrs.learning_rate, list)
     assert len(lrs.learning_rate) == 10
     assert my_model._learning_rate == 1e-3
+    lrs.plot()
+    if plot:
+        plt.show()
 
     # should error w/ invalid args
     with pytest.raises(TypeError):
@@ -85,6 +88,9 @@ def test_Callback(plot):
     assert isinstance(kls.kl_weights, list)
     assert len(kls.kl_weights) == 10
     assert my_model._kl_weight == 0.1
+    kls.plot()
+    if plot:
+        plt.show()
 
     # should error w/ invalid args
     with pytest.raises(TypeError):
