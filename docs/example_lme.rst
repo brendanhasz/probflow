@@ -11,8 +11,8 @@ TODO: description...
 
 
 
-Manually with One-hot Encoding
-------------------------------
+Linear Mixed Effects Model via Design Matrices
+----------------------------------------------
 
 TODO: one way to do it is to manually encode the variables into design 
 matrices...
@@ -39,16 +39,16 @@ where
 
             class LinearMixedEffectsModel(pf.Model):
 
-                def __init__(self, Fd, Rd):
-                    self.Fd = Fd
-                    self.beta = pf.Parameter([Fd, 1])
-                    self.mu = pf.Parameter([Rd, 1])
-                    self.sigma = pf.ScaleParameter()
+                def __init__(self, Nf, Nr):
+                    self.Nf = Nf
+                    self.w = pf.Parameter([Nf, 1])
+                    self.u = pf.Parameter([Nr, 1])
+                    self.sigma = pf.ScaleParameter([1, 1])
 
                 def __call__(self, x):
-                    X = x[:, :self.Fd]
-                    Z = x[:, self.Fd:]
-                    return pf.Normal(X @ self.beta() + Z @ self.mu(), self.sigma())
+                    X = x[:, :self.Nf]
+                    Z = x[:, self.Nf:]
+                    return pf.Normal(X @ self.w() + Z @ self.u(), self.sigma())
 
     .. group-tab:: PyTorch
             
@@ -59,15 +59,14 @@ where
 
             class LinearMixedEffectsModel(pf.Model):
 
-                def __init__(self, Fd, Rd):
-                    self.Fd = Fd
-                    self.beta = pf.Parameter([Fd, 1])
-                    self.mu = pf.Parameter([Rd, 1])
-                    self.sigma = pf.ScaleParameter()
+                def __init__(self, Nf, Nr):
+                    self.Nf = Nf
+                    self.w = pf.Parameter([Nf, 1])
+                    self.u = pf.Parameter([Nr, 1])
+                    self.sigma = pf.ScaleParameter([1, 1])
 
                 def __call__(self, x):
                     x = torch.tensor(x)
-                    X = x[:, :self.Fd]
-                    Z = x[:, self.Fd:]
-                    return pf.Normal(X @ self.beta() + Z @ self.mu(), self.sigma())
-
+                    X = x[:, :self.Nf]
+                    Z = x[:, self.Nf:]
+                    return pf.Normal(X @ self.w() + Z @ self.u(), self.sigma())

@@ -41,7 +41,7 @@ Getting Started
 
 **ProbFlow** allows you to quickly and :raw-html:`<del>painlessly</del>` less painfully build, fit, and evaluate custom Bayesian models (or :ref:`ready-made <ug_applications>` ones!) which run on top of either |TensorFlow| and |TensorFlow Probability| or |PyTorch|.
 
-With ProbFlow, the core building blocks of a Bayesian model are parameters, probability distributions, and modules (and, of course, the input data).  Parameters define how the independent variables (the features) predict the probability distribution of the dependent variables (the target).
+With ProbFlow, the core building blocks of a Bayesian model are parameters and probability distributions (and, of course, the input data).  Parameters define how the independent variables (the features) predict the probability distribution of the dependent variables (the target).
 
 For example, a simple Bayesian linear regression
 
@@ -49,7 +49,7 @@ For example, a simple Bayesian linear regression
 
     y \sim \text{Normal}(w x + b, \sigma)
 
-can be built by creating a ProbFlow Model:
+can be built by creating a ProbFlow |Model|:
 
 
 .. tabs::
@@ -102,10 +102,11 @@ Then, the model can be fit using stochastic variational inference, in *one line*
 
 You can generate predictions for new data:
 
-.. code-block:: python3
+.. code-block:: pycon
 
     # x_test is a Numpy array or pandas DataFrame
-    model.predict(x_test)
+    >>> model.predict(x_test)
+    [0.983]
 
 Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
@@ -119,9 +120,10 @@ Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
 Evaluate your model's performance using various metrics:
 
-.. code-block:: python3
+.. code-block:: pycon
 
-    model.metric('mse', x_test, y_test)
+    >>> model.metric('mse', x_test, y_test)
+    0.217
 
 Inspect the posterior distributions of your fit model's parameters, with 95% confidence intervals:
 
@@ -135,9 +137,10 @@ Inspect the posterior distributions of your fit model's parameters, with 95% con
 
 Investigate how well your model is capturing uncertainty by examining how accurate its predictive intervals are:
 
-.. code-block:: python3
+.. code-block:: pycon
 
-    model.pred_dist_coverage(ci=0.95)
+    >>> model.pred_dist_coverage(ci=0.95)
+    0.903
 
 and diagnose *where* your model is having problems capturing uncertainty:
 
@@ -149,7 +152,7 @@ and diagnose *where* your model is having problems capturing uncertainty:
    :width: 90 %
    :align: center
 
-ProbFlow also provides more complex modules, such as those required for building Bayesian neural networks.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
+ProbFlow also provides more complex modules, such as those required for building :ref:`Bayesian neural networks <example_fully_connected>` .  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
 
 .. tabs::
 
@@ -169,12 +172,12 @@ ProbFlow also provides more complex modules, such as those required for building
                         tf.nn.relu,
                         pf.Dense(64, 1),
                     ])
-                    self.std = pf.ScaleParameter(name='std')
+                    self.std = pf.ScaleParameter()
 
                 def __call__(self, x):
                     return pf.Normal(self.net(x), self.std())
             
-            model = DenseRegression()
+            model = DenseRegression(5)
             model.fit(x, y)
 
     .. group-tab:: PyTorch
@@ -193,24 +196,24 @@ ProbFlow also provides more complex modules, such as those required for building
                         torch.nn.ReLU(),
                         pf.Dense(64, 1),
                     ])
-                    self.std = pf.ScaleParameter(name='std')
+                    self.std = pf.ScaleParameter()
 
                 def __call__(self, x):
                     x = torch.tensor(x)
                     return pf.Normal(self.net(x), self.std())
             
-            model = DenseRegression()
+            model = DenseRegression(5)
             model.fit(x, y)
             
 
-For convenience, ProbFlow also includes several :ref:`pre-built models <ug_applications>` for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made :class:`LinearRegression <probflow.applications.LinearRegression>` model:
+For convenience, ProbFlow also includes several :doc:`pre-built models </api_applications>` for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made :class:`LinearRegression <probflow.applications.LinearRegression>` model:
 
 .. code-block:: python3
 
     model = pf.LinearRegression(x.shape[1])
     model.fit(x, y)
 
-And the multi-layer Bayesian neural net could have been made more easily by using ProbFlow's ready-made :class:`DenseRegression <probflow.applications.DenseRegression>` model:
+And the multi-layer Bayesian neural net could have been made even more easily by using ProbFlow's ready-made :class:`DenseRegression <probflow.applications.DenseRegression>` model:
 
 .. code-block:: python3
 

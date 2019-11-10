@@ -20,10 +20,11 @@ Normalizing Flows
 TODO: description, math, diagram
 
 
-Note that this example only works with the TensorFlow backend (using 
-`bijectors <https://www.tensorflow.org/probability/api_docs/python/tfp/bijectors>`_), 
-but one could implement a similar model using
-`PyTorch transforms <https://pytorch.org/docs/stable/distributions.html#module-torch.distributions.transforms>`_.
+.. note::
+    This example only works with the TensorFlow backend (using 
+    `bijectors <https://www.tensorflow.org/probability/api_docs/python/tfp/bijectors>`_), 
+    but one could implement a similar model using
+    `PyTorch transforms <https://pytorch.org/docs/stable/distributions.html#module-torch.distributions.transforms>`_.
 
 Let's create some data which has a wonky shape, and which would be difficult
 to model with a standard probability distribution.

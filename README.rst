@@ -30,7 +30,7 @@ Getting Started
 
 **ProbFlow** allows you to quickly and less painfully build, fit, and evaluate custom Bayesian models (or `ready-made <http://probflow.readthedocs.io/en/latest/ug_applications.html>`_ ones!) which run on top of either `TensorFlow 2.0 <http://www.tensorflow.org/beta>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability>`_ or `PyTorch <http://pytorch.org>`_.
 
-With ProbFlow, the core building blocks of a Bayesian model are parameters, probability distributions, and modules (and, of course, the input data).  Parameters define how the independent variables (the features) predict the probability distribution of the dependent variables (the target).
+With ProbFlow, the core building blocks of a Bayesian model are parameters and probability distributions (and, of course, the input data).  Parameters define how the independent variables (the features) predict the probability distribution of the dependent variables (the target).
 
 For example, a simple Bayesian linear regression
 
@@ -65,10 +65,11 @@ Then, the model can be fit using stochastic variational inference, in *one line*
 
 You can generate predictions for new data:
 
-.. code-block:: python
+.. code-block:: pycon
 
     # x_test is a Numpy array or pandas DataFrame
-    model.predict(x_test)
+    >>> model.predict(x_test)
+    [0.983]
 
 Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
@@ -82,9 +83,10 @@ Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
 Evaluate your model's performance using metrics:
 
-.. code-block:: python
+.. code-block:: pycon
 
-    model.metric('mse', x_test, y_test)
+    >>> model.metric('mse', x_test, y_test)
+    0.217
 
 Inspect the posterior distributions of your fit model's parameters, with 95% confidence intervals:
 
@@ -98,9 +100,10 @@ Inspect the posterior distributions of your fit model's parameters, with 95% con
 
 Investigate how well your model is capturing uncertainty by examining how accurate its predictive intervals are:
 
-.. code-block:: python
+.. code-block:: pycon
 
-    model.pred_dist_coverage(ci=0.95)
+    >>> model.pred_dist_coverage(ci=0.95)
+    0.903
 
 and diagnose *where* your model is having problems capturing uncertainty:
 
@@ -128,26 +131,26 @@ ProbFlow also provides more complex modules, such as those required for building
                 tf.nn.relu,
                 pf.Dense(64, 1),
             ])
-            self.std = pf.ScaleParameter(name='std')
+            self.std = pf.ScaleParameter()
 
         def __call__(self, x):
             return pf.Normal(self.net(x), self.std())
     
-    model = DenseRegression()
+    model = DenseRegression(5)
     model.fit(x, y)
 
 For convenience, ProbFlow also includes several `pre-built models <http://probflow.readthedocs.io/en/latest/ug_applications.html>`_ for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made LinearRegression model:
 
 .. code-block:: python
 
-    model = pf.LinearRegression(7)
+    model = pf.LinearRegression(x.shape[1])
     model.fit(x, y)
 
-And the multi-layer Bayesian neural net could have been made more easily by using ProbFlow's ready-made DenseRegression model:
+And the multi-layer Bayesian neural net could have been made even more easily by using ProbFlow's ready-made DenseRegression model:
 
 .. code-block:: python
 
-    model = pf.DenseRegression([7, 128, 64, 1])
+    model = pf.DenseRegression([x.shape[1], 128, 64, 1])
     model.fit(x, y)
 
 Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like `generalized linear models <http://probflow.readthedocs.io/en/latest/example_glm.html>`_, `neural matrix factorization <http://probflow.readthedocs.io/en/latest/example_nmf.html>`_ models, and `Gaussian mixture models <http://probflow.readthedocs.io/en/latest/example_gmm.html>`_.  Take a look at the `examples <http://probflow.readthedocs.io/en/latest/examples.html>`_ section and the `user guide <http://probflow.readthedocs.io/en/latest/user_guide.html>`_ for more!
