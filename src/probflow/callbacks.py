@@ -169,7 +169,7 @@ class MonitorMetric(Callback):
         model.fit(x_train, y_train, callbacks=[monitor_mae])
     """
 
-    def __init__(self, metric, x, y=None, verbose=True):
+    def __init__(self, metric, x, y=None, verbose=False):
 
         # Store metric
         self.metric_fn = get_metric_fn(metric)
@@ -228,7 +228,7 @@ class MonitorELBO(Callback):
         model.fit(x_train, y_train, callbacks=[monitor_elbo])
     """
 
-    def __init__(self, verbose=True):
+    def __init__(self, verbose=False):
         self.current_elbo = np.nan
         self.current_epoch = 0
         self.elbos = []
