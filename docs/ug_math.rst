@@ -22,13 +22,15 @@ With variational inference we approximate the posterior for each parameter with 
 
     q(\beta|\theta) = q(\beta|\mu,\sigma) = \mathcal{N}(\beta | \mu, \sigma)
 
+
 To "fit" a Bayesian model with this method, we want to find the values of :math:`\theta` such that the difference between :math:`q(\beta|\theta)` (the variational distribution) and :math:`p(\beta|\mathcal{D})` (the true posterior distribution) is as small as possible.
 
 If we use `Kullback-Leibler divergence <http://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence>`_ as our measure of "difference", then we want to find the best values for our variational distribution variables (:math:`\hat{\theta}`) which give the lowest KL divergence between the variational distribution and the true posterior:
 
 .. math::
 
-    \hat{\theta} = \arg \min_\theta ~ \text{KL}(~q(\beta|\theta)~||~p(\beta|\mathcal{D})~) 
+    \hat{\theta} = \operatorname*{arg\,min}_\theta \text{KL}(~q(\beta|\theta)~||~p(\beta|\mathcal{D})~) 
+
 
 The problem is, we don't know what the true posterior looks like - that's what we're trying to solve!  Luckily, this divergence between the variational and true posteriors can be broken down into the sum of three terms:
 
@@ -59,11 +61,13 @@ For those of you who like math:
         - \mathbb{E}_{q(\beta|\theta)} [~\log p(\mathcal{D}|\beta)~] 
         + \log p(\mathcal{D})
 
+
 The model evidence (:math:`\log p(\mathcal{D})`) is a constant, so in order to find the variational distribution parameters (:math:`\hat{\theta}`) which minimize the divergence between the variational and true posteriors, we can just minimize the right-hand side of the equation, ignoring the model evidence:
 
 .. math::
 
-    \hat{\theta} = \arg \min_\theta ~ \text{KL} (~q(\beta|\theta)~||~p(\beta)~) - \mathbb{E}_{q(\beta|\theta)} [~\log p(\mathcal{D}|\beta)~]
+    \hat{\theta} = \operatorname*{arg\,min}_\theta \text{KL} (~q(\beta|\theta)~||~p(\beta)~) - \mathbb{E}_{q(\beta|\theta)} [~\log p(\mathcal{D}|\beta)~]
+
 
 These two terms are known as the "variational free energy", or the (negative) "evidence lower bound" (ELBO).
 

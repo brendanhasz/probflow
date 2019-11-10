@@ -179,7 +179,7 @@ below returns a *probability distribution*!
 
 .. code-block:: python3
 
-    class DenseRegression(pf.Model):
+    class DenseRegression(pf.ContinuousModel):
         
         def __init__(self, dims):
             self.net = DenseNetwork(dims)

@@ -28,7 +28,7 @@ It's very much still a work in progress.
 Getting Started
 ---------------
 
-**ProbFlow** allows you to quickly and less painfully build, fit, and evaluate custom Bayesian models (or `ready-made <http://probflow.readthedocs.io/en/latest/ug_applications.html>`_ ones!) which run on top of either `TensorFlow 2.0 <http://www.tensorflow.org/beta>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability>`_ or `PyTorch <http://pytorch.org>`_.
+**ProbFlow** allows you to quickly and less painfully build, fit, and evaluate custom Bayesian models (or `ready-made <http://probflow.readthedocs.io/en/latest/api_applications.html>`_ ones!) which run on top of either `TensorFlow 2.0 <http://www.tensorflow.org/beta>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability>`_ or `PyTorch <http://pytorch.org>`_.
 
 With ProbFlow, the core building blocks of a Bayesian model are parameters and probability distributions (and, of course, the input data).  Parameters define how the independent variables (the features) predict the probability distribution of the dependent variables (the target).
 
@@ -139,7 +139,7 @@ ProbFlow also provides more complex modules, such as those required for building
     model = DenseRegression(5)
     model.fit(x, y)
 
-For convenience, ProbFlow also includes several `pre-built models <http://probflow.readthedocs.io/en/latest/ug_applications.html>`_ for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made LinearRegression model:
+For convenience, ProbFlow also includes several `pre-built models <http://probflow.readthedocs.io/en/latest/api_applications.html>`_ for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made LinearRegression model:
 
 .. code-block:: python
 
@@ -159,7 +159,7 @@ Using parameters and distributions as simple building blocks, ProbFlow allows fo
 Installation
 ------------
 
-Before installing ProbFlow, you'll first need to install either PyTorch, or TensorFlow 2.0 and TensorFlow Probability.  See `more details here <https://probflow.readthedocs.io/en/latest/#installation>`_.
+Before installing ProbFlow, you'll first need to install either PyTorch, or TensorFlow 2.0 and TensorFlow Probability.  See `more details here <http://probflow.readthedocs.io/en/latest/#installation>`_.
 
 Then, you can install ProbFlow itself:
 
@@ -177,7 +177,7 @@ Post bug reports, feature requests, and tutorial requests in `GitHub issues <htt
 Contributing
 ------------
 
-`Pull requests <https://github.com/brendanhasz/probflow/pulls>`_ are totally welcome!  Any contribution would be appreciated, from things as minor as pointing out typos to things as major as writing new applications and distributions.
+`Pull requests <http://github.com/brendanhasz/probflow/pulls>`_ are totally welcome!  Any contribution would be appreciated, from things as minor as pointing out typos to things as major as writing new applications and distributions.
 
 
 Why the name, ProbFlow?
