@@ -118,7 +118,7 @@ def test_Callback(plot):
     # Test MontiorELBO
     x_val = np.random.randn(100).astype('float32')
     y_val = -x_val + 1
-    me = MonitorELBO()
+    me = MonitorELBO(verbose=True)
     my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[me])
     assert isinstance(me.current_epoch, int)
     assert me.current_epoch == 10

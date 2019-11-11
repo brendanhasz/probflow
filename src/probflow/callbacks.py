@@ -98,8 +98,8 @@ class LearningRateScheduler(Callback):
         self.learning_rate = []
 
 
-    def on_epoch_end(self):
-        """Set the learning rate at the end of each epoch."""
+    def on_epoch_start(self):
+        """Set the learning rate at the start of each epoch."""
         self.current_epoch += 1
         self.current_lr = self.fn(self.current_epoch)
         self.model.set_learning_rate(self.current_lr)
@@ -146,8 +146,8 @@ class KLWeightScheduler(Callback):
         self.kl_weights = []
 
 
-    def on_epoch_end(self):
-        """Set the KL weight at the end of each epoch."""
+    def on_epoch_start(self):
+        """Set the KL weight at the start of each epoch."""
         self.current_epoch += 1
         self.current_w = self.fn(self.current_epoch)
         self.model.set_kl_weight(self.current_w)
