@@ -1,6 +1,9 @@
 ProbFlow
 ========
 
+.. meta::
+    :og:image: img/examples/heteroscedastic/output_20_0.svg
+
 |Version Badge|  |Build Badge|  |Docs Badge|  |Coverage Badge|
 
 .. |Version Badge| image:: https://img.shields.io/pypi/v/probflow
