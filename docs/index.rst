@@ -2,7 +2,7 @@ ProbFlow
 ========
 
 .. meta::
-    :og:image: img/examples/heteroscedastic/output_20_0.svg
+    :property=og\:image: img/examples/heteroscedastic/output_20_0.svg
 
 |Version Badge|  |Build Badge|  |Docs Badge|  |Coverage Badge|
 
