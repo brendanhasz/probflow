@@ -2,7 +2,7 @@ ProbFlow
 ========
 
 .. meta::
-    :property=og\:image: img/probflow_og_image.png
+    :property=og\:image: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/probflow_og_image.png
     :property=og\:image\:width: 1200
     :property=og\:image\:height: 1200
 
