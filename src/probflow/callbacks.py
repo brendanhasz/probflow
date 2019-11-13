@@ -380,7 +380,7 @@ class TimeOut(Callback):
         # Store values
         self.time_limit = time_limit
         self.start_time = None
-        self.verbose = None
+        self.verbose = verbose
 
 
     def on_epoch_end(self):

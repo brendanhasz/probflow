@@ -15,6 +15,7 @@ Here are some examples of how to use ProbFlow to build, fit, and diagnose severa
    example_fully_connected
    example_glm
    example_robust_heteroscedastic
+   example_time_to_event
    example_lme
    example_ar
    example_correlation

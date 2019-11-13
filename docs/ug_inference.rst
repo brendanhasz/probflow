@@ -160,3 +160,4 @@ for an actual introduction, some things I'd suggest taking a look at:
 - `Doing Bayesian Data Analysis <https://sites.google.com/site/doingbayesiandataanalysis/what-s-new-in-2nd-ed>`_ by John Krusche
 - `Bayesian Data Analysis <http://www.stat.columbia.edu/~gelman/book/>`_ by Andrew Gelman & co
 - The `Stan user guide <https://mc-stan.org/docs/2_20/stan-users-guide/index.html>`_
+- `Probabilistic Programming and Bayesian Methods for Hackers <https://camdavidsonpilon.github.io/Probabilistic-Programming-and-Bayesian-Methods-for-Hackers/>`_ by Cameron Davidson-Pilon
