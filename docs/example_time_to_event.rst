@@ -87,9 +87,9 @@ We can take a look at the relationship between each of our simulated features an
    :width: 90 %
    :align: center
 
-Some features (like $x_1$) make it more likely that the next purchase will take longer to occur (they make the customer more likely to "churn"), while other features (like $x_0$) make it more likely that the next purchase will happen sooner.
+Some features (like :math:`x_1`) make it more likely that the next purchase will take longer to occur (they make the customer more likely to "churn"), while other features (like :math:`x_0`) make it more likely that the next purchase will happen sooner.
 
-However, the points in red haven't actually occurred by the time we collect the data to train our model!  The $y$ values correspond to what the actual time-to-events *would* be, but when fitting the models below, that data is censored - that is, we won't have access to the true $y$ values, we'll just know that the purchase has still not yet occurred after some amount of time.
+However, the points in red haven't actually occurred by the time we collect the data to train our model!  The :math:`y` values correspond to what the actual time-to-events *would* be, but when fitting the models below, that data is censored - that is, we won't have access to the true :math:`y` values, we'll just know that the purchase has still not yet occurred after some amount of time.
 
 
 Regular Time-to-Event Model
@@ -506,3 +506,9 @@ Then we can instantiate the neural-network-based time-to-event model:
     model = DeepSurvivalModel([D, 1])
 
 TODO: fit it to some `data <https://console.cloud.google.com/marketplace/details/obfuscated-ga360-data/obfuscated-ga360-data>`_
+
+**See also**
+
+* `WTTE-RNN - Less hacky churn prediction <https://ragulpr.github.io/2016/12/22/WTTE-RNN-Hackless-churn-modeling>`_ by Egil Martinsson
+* `Modeling Censored Time-to-Event Data Using Pyro <https://eng.uber.com/modeling-censored-time-to-event-data-using-pyro>`_
+* `Survival analysis <https://en.wikipedia.org/wiki/Survival_analysis>`_
