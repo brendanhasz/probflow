@@ -189,8 +189,15 @@ class Parameter(BaseParameter):
 
     @property
     def n_parameters(self):
-        """Get the number of independent parameters of this model"""
+        """Get the number of independent parameters"""
         return int(np.prod(self.shape))
+
+
+    @property
+    def n_variables(self):
+        """Get the number of underlying variables"""
+        return int(sum([np.prod(e.shape.as_list()) for e in 
+                        self.untransformed_variables.values()]))
 
 
     @property

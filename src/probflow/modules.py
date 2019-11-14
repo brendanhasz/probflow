@@ -99,6 +99,12 @@ class Module(BaseModule):
         return sum([p.n_parameters for p in self.parameters])
 
 
+    @property
+    def n_variables(self):
+        """Get the number of underlying variables in this module"""
+        return sum([p.n_variables for p in self.parameters])
+
+
     def kl_loss(self):
         """Compute the sum of the Kullback-Leibler divergences between
         priors and their variational posteriors for all |Parameters| in this

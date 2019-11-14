@@ -44,10 +44,15 @@ def test_Module():
     assert 'TestParam1' in param_names
     assert 'TestParam2' in param_names
 
-    # n_params property
+    # n_parameters property
     nparams = the_module.n_parameters
     assert isinstance(nparams, int)
     assert nparams == 21
+
+    # n_variables property
+    nvars = the_module.n_variables
+    assert isinstance(nvars, int)
+    assert nparams == 42
 
     # trainable_variables should return list of all variables in the model
     var_list = the_module.trainable_variables
