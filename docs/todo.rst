@@ -5,7 +5,7 @@ This page has a list of planned improvements, in order of when I plan to get
 to them (the backlog).  If you're interested in tackling one of them, I'd be 
 thrilled!  `Pull requests <https://github.com/brendanhasz/probflow/pulls>`_
 are totally welcome!  There's also a list of things which I think are out of
-scope for the package.
+scope for the package, and for actual bugs/issues see the `issues page <https://github.com/brendanhasz/probflow/issues>`_
 
 
 Backlog
@@ -16,18 +16,18 @@ Backlog
 * Docs for everything implemented so far
 * Fix some issues (below)
 * Release 2.0.0
-* Get autograph and pytorch working!
+* Get tf autograph/tf.function and pytorch torchscript/trace working!!!
 * Add ability to use >1 MC samples from variational distribution per batch
 * Add HiddenMarkovModel and GaussianProcess distributions + examples
-* Add survival/churn modeling example w/ Exponential or Gumbel distribution
+* Bayesian decision making example
 * Finish pred_dist_plot for Discrete and Categorical Model, as well as calibration_curve for categorical.
 * Make Parameters have an option for how to plot their posteriors/priors (ie use plot_dist, plot_discrete_dist, or plot_categorical_dist), and set defaults that make sense for parameters (e.g. default for Categorical param should be plot_categorical_dist)
 * Add model saving/loading (Model.save_model and load_model)
 * Summary method for Modules + Models which show hierarchy of modules/parameters
 * Make Module.trainable_variables return tf.Variables which are properties of module+sub-modules as well (and not neccesarily in parameters, also allow embedding of tf.Modules?)
-* Bayes estimate / decision methods
 * Add kwarg to Parameter (mc_kl_estimate=False or somesuch) which if true will use MC samples to estimate KL divergence between parameter's prior and variational posterior (to allow for arbitrary posterior/prior choices)
 * Convolutional modules
+* Add more consistent type hinting and enforcing (perhaps via `enforce.runtime_validation <https://github.com/RussBaz/enforce>`_ or `pytypes.typechecked <https://github.com/Stewori/pytypes>`_ or `typeguard.typechecked <https://github.com/agronholm/typeguard>`_ ).  Or maybe just remove all type hinting and just have it in the docstrings...
 
 
 Out of scope
@@ -41,19 +41,6 @@ package:
 * Gaussian processes (again, maybe someday, but nonparametric models also don't quite fit in to the ProbFlow framework.  Though again one could hack together a GP w/ ProbFlow, for example using `tfd.GaussianProcess <https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/GaussianProcess>`_).  See `this issue <https://github.com/brendanhasz/probflow/issues/7>`_ for more info.
 * Bayesian model comparison (also maybe someday)
 * Backends other than TensorFlow/TFP and PyTorch
-* Automatic variational posterior generation (`a la Pyro <http://docs.pyro.ai/en/stable/infer.autoguide.html>`_)
+* Automatic variational posterior generation (`a la Pyro <http://docs.pyro.ai/en/stable/infer.autoguide.html>`_).
 * Automatic reparameterizations
 * Streaming inference
-
-
-Issues
-------
-
-* Autograph fails. "Entity <blah blah> could not be transformed and will be executed as-is", where blah is "function sum" or "bound method Gamma.call of <probflow.distributions.Gamma..." etc.  Don't get the warnings when you remove the ``@tf.function`` in front of the ``train_step`` func defined in models.Model._train_step_tensorflow.  Happens both w/ CPU and GPU versions of TF 2.0.  Presumably b/c autograph doesn't handle various python features (lambda funcs, fancy list comprehensions, etc) used.  Runs about 3x slower w/o autograph optimization (just running w/ eager) on medium-sized neural net, probably will be much slower for smaller models.
-* Gamma distribution isn't passing the fit test (in tests/stats/test_distribution_fits)
-* Add type hinting and enforcing
-* PyTorch: Implement + test mean() for InverseGamma, Bernoulli, Categorical, and OneHotCategorical
-* PyTorch: Implement mixture distribution w/ pytorch backend. They're working on a MixtureSameFamily distribution (https://github.com/pytorch/pytorch/pull/22742) so maybe wait for that.
-* PyTorch: Allow learning rate to be updated.  Keras optimizers take a callable but pytorch's don't.
-* Pandas: Model predictive sampling functions don't work when x is a Pandas DataFrame (because you can't expand_dims on a df)
-* PyTorch pf.Distribution.mode()?

@@ -335,7 +335,7 @@ def test_InverseGamma():
     assert is_close(dist.prob(two).numpy(), 0.09022352)
     assert is_close(dist.log_prob(one).numpy(), np.log(0.78146726))
     assert is_close(dist.log_prob(two).numpy(), np.log(0.09022352))
-    #assert dist.mean().numpy() == 1.0
+    #assert dist.mean().numpy() == 1.0 #NOTE: pytorch doesn't implement mean()
 
     # Test sampling
     samples = dist.sample()
@@ -435,6 +435,7 @@ def test_Categorical():
     '''
     # Mean should return the mode!
     assert dist.mean().numpy() == 2
+    #NOTE: pytorch doesn't implement mean()
     '''
 
     # Test sampling
