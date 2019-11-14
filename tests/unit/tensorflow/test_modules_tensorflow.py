@@ -52,7 +52,7 @@ def test_Module():
     # n_variables property
     nvars = the_module.n_variables
     assert isinstance(nvars, int)
-    assert nparams == 42
+    assert nvars == 42
 
     # trainable_variables should return list of all variables in the model
     var_list = the_module.trainable_variables
