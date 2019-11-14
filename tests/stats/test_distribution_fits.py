@@ -157,7 +157,6 @@ def test_fit_gamma():
     model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
 
     # Check inferences for mean are correct
-    '''
     lb, ub = model.posterior_ci('alpha')
     assert lb < alpha
     assert ub > alpha
@@ -168,11 +167,6 @@ def test_fit_gamma():
     assert lb < beta
     assert ub > beta
     assert is_close(beta, model.posterior_mean('beta'), th=0.2)
-
-    # TODO: uh doesn't seem to be working. Priors on PositiveParameter?
-    import pdb; pdb.set_trace()
-    print('asdf')
-    '''
 
 
 
