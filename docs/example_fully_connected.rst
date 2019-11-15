@@ -378,4 +378,239 @@ containing 32 units each) to perform classification between ``Nc`` categories:
 Fitting a large network to a large dataset
 ------------------------------------------
 
-TODO: cool but does it scale.  Use a `dual-headed net to predict taxi trip times from the NYC taxi dataset <https://brendanhasz.github.io/2019/07/23/bayesian-density-net.html>`_
+|Colab Badge 2|
+
+.. |Colab Badge 2| image:: img/colab-badge.svg
+    :target: https://colab.research.google.com/drive/1NhQvWhuIUpkLfleQBX9eP3fMvPIVyF3g
+
+This is cool and all, but do Bayesian neural networks scale? Bayesian models have a reputation for taking a really long time to train - can we fit a Bayesian neural network to a large dataset in any reasonable amount of time?
+
+Let's use ProbFlow to fit a Bayesian neural network to over 1 million samples from New York City's `taxi trip records dataset <https://console.cloud.google.com/marketplace/details/city-of-new-york/nyc-tlc-trips>`_, which is a publicly available BigQuery dataset.
+
+First let's set some settings, including how many samples to use per batch, the number of epochs to train for, and how much of the data to use for validation.
+
+
+.. code-block:: python3
+
+    # Batch size
+    BATCH_SIZE = 1024
+
+    # Number of training epochs
+    EPOCHS = 100
+
+    # Proportion of samples to hold out
+    VAL_SPLIT = 0.2
+
+I'll skip the data loading and cleaning code here, though `check out the colab <https://colab.research.google.com/drive/1NhQvWhuIUpkLfleQBX9eP3fMvPIVyF3g>`_ if you want to see it! Once we've loaded the data, we have ``x_taxi``, the normalized predictors, which includes the pickup and dropoff locations, and the time and date of the pickup:
+
+
+.. code-block:: python3
+
+    x_taxi.head()
+
+
+================  ===============  =================  ================  ==========  ===========  ===========
+pickup_longitude  pickup_latitude  dropoff_longitude  dropoff_latitude  min_of_day  day_of_week  day_of_year
+================  ===============  =================  ================  ==========  ===========  ===========
+-0.219310         0.745995         2.165016           4.864790          -0.768917   1.507371     0.321964
+-0.079724         -0.021950        3.029199           0.673444          -0.241391   -0.023185    1.348868
+-0.617643         -0.531016        0.149039           0.158556          -0.100370   -0.023185    0.399466
+3.054433          0.806405         -0.242285          0.066294          0.087659    0.487000     -0.937446
+3.275032          0.662305         -0.550953          0.044937          0.226069    -1.553742    -1.557464
+...               ...              ...                ...               ...         ...          ...
+================  ===============  =================  ================  ==========  ===========  ===========
+
+
+
+And ``y_taxi``, the (normalized) trip durations which our model will be trying to predict:
+
+
+.. code-block:: pycon
+
+    >>> y_taxi.head()
+    0    0.890518
+    1    1.430678
+    2    2.711816
+    3    1.541603
+    4    1.976256
+    Name: trip_duration, dtype: float32
+
+
+
+Let's split this data into training data and data to be used for validation.
+
+
+.. code-block:: python3
+
+    # Train / validation split
+    train_N = int(x_taxi.shape[0]*(1.-VAL_SPLIT))
+    x_train = x_taxi.values[:train_N, :]
+    y_train = y_taxi.values[:train_N].reshape(-1, 1)
+    x_val = x_taxi.values[train_N:, :]
+    y_val = y_taxi.values[train_N:].reshape(-1, 1)
+
+
+Now our training set has over 1.2M rows!
+
+
+.. code-block:: pycon
+
+    >>> print(x_train.shape, y_train.shape)
+    (1253485, 7) (1253485, 1)
+
+
+To model this data, we'll use a 5-layer fully-connected Bayesian neural network. The first layer will have 256 units, then the second will have 128, and so on. The final layer will have a single unit whose activation corresponds to the network's prediction of the mean of the predicted distribution of the (normalized) trip duration.
+
+.. image:: img/examples/fully_connected/net_diagram.svg
+   :width: 90 %
+   :align: center
+
+We can create a Bayesian neural network with this structure pretty easily using ProbFlow's :class:`.DenseRegression` model:
+
+
+.. code-block:: python3
+
+    model = pf.DenseRegression([7, 256, 128, 64, 32, 1])
+
+
+To see how many parameters the model contains, use the ``n_parameters`` property of the model. This includes all the weights, the biases, and the standard deviation parameter:
+
+
+.. code-block:: pycon
+
+    >>> model.n_parameters
+    45314
+
+
+
+You can also see the total number of underlying variables used for optimization. That is, all the variables used to parameterize the variational posteriors. Since all the parameters in our current model have 2 variables per parameter, this is exactly twice the number of parameters (the weights and biases have normally-distributed variational posteriors which have 2 variables: the mean and the standard deviation, and the noise standard deviation parameter has a Gamma-derived variational posterior and so also has two underlying variables, the concentration and the rate). However, this might not always be the case: certain variational posteriors could have only one variable per parameter (e.g. those with Deterministic or Exponential variational posteriors), or more (e.g. a Student's t-distribution, which has 3).
+
+
+.. code-block:: pycon
+
+    >>> model.n_variables
+    90628
+
+
+
+The training of any ProbFlow model can be controlled using :doc:`callbacks <api_callbacks>`, which are similar to `Keras callbacks <https://keras.io/callbacks>`_. These can be used to do things such as anneal the learning rate, record the performance of the model over the course of training, record the values of parameters over the course of training, stop training early when some desired performance level is reached, and more!
+
+We'll use three different callbacks during training. First, we'll make a callback to record the evidence lower bound (ELBO), the loss used for training the model, over the course of training. Also, we'll use a callback to record the predictive performance of our model on validation data, using the mean absolute error. Finally, we'll create a callback which anneals the learning rate: it starts at a high learning rate and decreases to ~0 over the course of training.
+
+
+.. code-block:: python3
+
+    # Record the ELBO
+    monitor_elbo = pf.MonitorELBO()
+
+    # Record the mean absolute error on validation data
+    monitor_mae = pf.MonitorMetric('mae', x_val, y_val)
+
+    # Anneal the learning rate from ~2e-4 to ~0
+    lr_scheduler = pf.LearningRateScheduler(lambda e: 2e-4-2e-6*e)
+
+    # List of callbacks
+    callbacks = [monitor_elbo, monitor_mae, lr_scheduler]
+
+
+Also, keep in mind that you can :doc:`build your own callback <ug_callbacks>` pretty easily if you need to perform custom actions during training!
+
+Then we can fit the model, using those callbacks!
+
+
+.. code-block:: python3
+
+    model.fit(x_train, y_train,
+              epochs=EPOCHS,
+              batch_size=BATCH_SIZE,
+              callbacks=callbacks)
+
+
+Currently, this takes around 2.5 hrs, but that's using non-optimized eager execution.  I'm working on adding support for autograph in TF and tracing in PyTorch, which makes things 3-10 times faster!
+
+
+After the model has been fit, using it to predict new data is just as easy as before:
+
+
+.. code-block:: python3
+
+    preds = model.predict(x_val)
+
+
+We can also easily compute various :meth:`metrics <probflow.models.Model.metric>` of our model's performance on validation data. For example, to compute the mean absolute error:
+
+
+.. code-block:: pycon
+
+    >>> model.metric('mae', x_val, y_val)
+    0.32324722
+
+
+
+Also, since we used a callback to record the ELBO over the course of training, we can plot that and see that it has decreased over training and has mostly converged.
+
+
+.. code-block:: python3
+
+    monitor_elbo.plot()
+
+
+.. image:: img/examples/fully_connected/output_31_0.svg
+   :width: 80 %
+   :align: center
+
+We also used a callback to record the mean absolute error of our model on validation data, and our error decreases over the course of training to reach pretty good performance!
+
+
+.. code-block:: python3
+
+    monitor_mae.plot()
+
+
+.. image:: img/examples/fully_connected/output_33_0.svg
+   :width: 80 %
+   :align: center
+
+And we also used a callback to anneal the learning rate over the course of training, and we can plot that as well to validate that it actually decreased the learning rate:
+
+
+.. code-block:: python3
+
+    lr_scheduler.plot()
+
+
+.. image:: img/examples/fully_connected/output_35_0.svg
+   :width: 80 %
+   :align: center
+
+Perhaps most importantly, since this is a Bayesian network, we have access to the uncertainty associated with the model's predictions:
+
+
+.. code-block:: python3
+
+    # Plot predicted distributions
+    model.pred_dist_plot(x_val[:6, :], ci=0.95,
+                         individually=True, cols=2)
+
+    # Show true values
+    for i in range(6):
+        plt.subplot(3, 2, i+1)
+        plt.axvline(y_val[i])
+        plt.xlim([-4, 4])
+        plt.xlabel('')
+
+
+.. image:: img/examples/fully_connected/output_37_1.svg
+   :width: 80 %
+   :align: center
+
+
+
+ProbFlow also has :class:`.DataGenerator` objects which make training models on large datasets easier (similar to `Keras Sequences <https://keras.io/utils#sequence>`_). Using DataGenerators, you can train models on datasets which are too large to fit into memory by loading data from disk (or from wherever!) batch-by-batch. You can also use them to do on-the-fly data augmentation like random rotation/scaling, random swap, or `mixup <https://arxiv.org/abs/1710.09412>`_!
+
+For more complicated examples of using ProbFlow to build neural-network-based models, check out these other examples:
+
+* :doc:`example_time_to_event`
+* :doc:`example_mixture_density`
+* :doc:`example_nmf`
+* :doc:`example_variational_autoencoder`
