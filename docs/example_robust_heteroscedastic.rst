@@ -1,23 +1,29 @@
 .. _example_robust_heteroscedastic:
 
-Robust Heteroscedastic Regression
-=================================
-
-|Colab Badge|
+Robust Heteroscedastic Regression |Colab Badge|
+===============================================
 
 .. |Colab Badge| image:: img/colab-badge.svg
     :target: https://colab.research.google.com/drive/1Mh9Uaby9tsPftoF0-w2NlqHeOhlQB_Nu
 
 .. include:: macros.hrst
 
-.. code-block:: python3
+.. admonition:: TLDR
 
-    import numpy as np
-    import matplotlib.pyplot as plt
-    rand = lambda *x: np.random.rand(*x).astype('float32')
-    randn = lambda *x: np.random.randn(*x).astype('float32')
+    .. code-block:: python3
 
-    import probflow as pf
+        class RobustHeteroscedasticRegression(pf.ContinuousModel):
+
+            def __init__(self, dims):
+                self.m = pf.Dense(dims)
+                self.s = pf.Dense(dims)
+
+            def __call__(self, x):
+                return pf.Cauchy(self.m(x), tf.exp(self.s(x)))
+
+        model = RobustHeteroscedasticRegression(x.shape[1])
+        model.fit(x, y)
+
 
 
 With a :ref:`linear regression <example_linear_regression>`, the amount of
@@ -31,6 +37,13 @@ Let's generate some data which is heteroscedastic and also contains outliers.
 
 
 .. code-block:: python3
+
+    # Imports
+    import probflow as pf
+    import numpy as np
+    import matplotlib.pyplot as plt
+    rand = lambda *x: np.random.rand(*x).astype('float32')
+    randn = lambda *x: np.random.randn(*x).astype('float32')
 
     # Settings
     N = 512 #number of datapoints

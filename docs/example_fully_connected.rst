@@ -1,24 +1,40 @@
 .. _example_fully_connected:
 
-Fully-connected Neural Network
-==============================
-
-|Colab Badge|
+Fully-connected Neural Network |Colab Badge|
+============================================
 
 .. |Colab Badge| image:: img/colab-badge.svg
     :target: https://colab.research.google.com/drive/1AgvMHWBAEUpIcrTFY-VhvMGD_RrEKAqG
 
 .. include:: macros.hrst
 
-.. code-block:: python3
+.. admonition:: TLDR
 
-    import numpy as np
-    import matplotlib.pyplot as plt
-    rand = lambda *x: np.random.rand(*x).astype('float32')
-    randn = lambda *x: np.random.randn(*x).astype('float32')
-    zscore = lambda x: (x-np.mean(x, axis=0))/np.std(x, axis=0)
+    .. code-block:: python3
 
-    import probflow as pf
+        class DenseRegression(pf.ContinuousModel):
+            
+            def __init__(self, dims):
+                self.net = pf.DenseNetwork(dims)
+                self.s = pf.ScaleParameter()
+
+            def __call__(self, x):
+                return pf.Normal(self.net(x), self.s())
+
+        units = [x.shape[1], 256, 128, 64, 32, 1] #units per layer
+        model = DenseRegression(units)
+
+    or simply
+
+    .. code-block:: python3
+
+        model = pf.DenseRegression(units)
+
+    and then 
+
+    .. code-block:: python3
+
+        model.fit(x, y)
 
 
 Purely linear regressions aren't able handle complex nonlinear relationships
@@ -34,6 +50,14 @@ Let's create some nonlinear data to test our neural networks on.  Later we'll fi
 
 
 .. code-block:: python3
+
+    # Imports
+    import probflow as pf
+    import numpy as np
+    import matplotlib.pyplot as plt
+    rand = lambda *x: np.random.rand(*x).astype('float32')
+    randn = lambda *x: np.random.randn(*x).astype('float32')
+    zscore = lambda x: (x-np.mean(x, axis=0))/np.std(x, axis=0)
 
     # Create the data
     N = 1024

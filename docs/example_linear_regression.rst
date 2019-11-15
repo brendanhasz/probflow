@@ -1,25 +1,41 @@
 .. _example_linear_regression:
 
-Linear Regression
-=================
-
-|Colab Badge|
+Linear Regression |Colab Badge|
+===============================
 
 .. |Colab Badge| image:: img/colab-badge.svg
     :target: https://colab.research.google.com/drive/1evt7LXWEd8V6YUV1SoqG18skZxSlEDsY
 
 .. include:: macros.hrst
 
-.. code-block:: python3
+.. admonition:: TLDR
 
-    import numpy as np
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    import tensorflow as tf
-    randn = lambda *x: np.random.randn(*x).astype('float32')
+    .. code-block:: python3
 
-    import probflow as pf
+        class LinearRegression(pf.ContinuousModel):
+
+            def __init__(self, d):
+                self.w = pf.Parameter([d, 1]) #weights
+                self.b = pf.Parameter()       #bias
+                self.s = pf.ScaleParameter()  #std dev
+
+            def __call__(self, x):
+                return pf.Normal(x @ self.w() + self.b(), self.s())
+
+        model = LinearRegression(x.shape[1])
+
+    or simply
+
+    .. code-block:: python3
+
+        model = pf.LinearRegression(x.shape[1])
+
+    and then 
+
+    .. code-block:: python3
+
+        model.fit(x, y)
+
 
 
 Simple Linear Regression
@@ -29,6 +45,15 @@ A simple linear regression is one of the simplest (`discriminative <https://en.w
 
 
 .. code-block:: python3
+
+    # Imports
+    import probflow as pf
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import tensorflow as tf
+    randn = lambda *x: np.random.randn(*x).astype('float32')
 
     # Generate some data
     x = randn(100)

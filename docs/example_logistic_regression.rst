@@ -1,23 +1,40 @@
 .. _example_logistic_regression:
 
-Logistic Regression
-===================
-
-|Colab Badge|
+Logistic Regression |Colab Badge|
+=================================
 
 .. |Colab Badge| image:: img/colab-badge.svg
     :target: https://colab.research.google.com/drive/10b4zBofgCfU1SgpGZoQXmcn1g2jGO-AG
 
 .. include:: macros.hrst
 
-.. code-block:: python3
+.. admonition:: TLDR
 
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    randn = lambda *x: np.random.randn(*x).astype('float32')
+    .. code-block:: python3
 
-    import probflow as pf
+        class LogisticRegression(pf.CategoricalModel):
+
+            def __init__(self, d):
+                self.w = pf.Parameter([d, 1]) #weights
+                self.b = pf.Parameter([1, 1]) #bias
+
+            def __call__(self, x):
+                return pf.Bernoulli(x @ self.w() + self.b())
+
+        model = LogisticRegression(x.shape[1])
+
+    or simply
+
+    .. code-block:: python3
+
+        model = pf.LogisticRegression(x.shape[1])
+
+    and then 
+
+    .. code-block:: python3
+
+        model.fit(x, y)
+
 
 In the last example, both :math:`x` and :math:`y` were continuous variables (their values ranged from :math:`-\infty` to :math:`\infty`).  What if our output variable is binary?  That is, suppose the output variable can take only one of two values, 0 or 1, and so we need a classification model.
 
@@ -25,6 +42,13 @@ Let's create a dataset which has 3 continuous features, and a target variable wi
 
 
 .. code-block:: python3
+
+    # Imports
+    import probflow as pf
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    randn = lambda *x: np.random.randn(*x).astype('float32')
 
     # Settings
     N = 1000 #number of datapoints

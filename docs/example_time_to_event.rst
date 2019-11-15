@@ -1,25 +1,35 @@
 .. _example_time_to_event:
 
-Censored Time-to-Event Model
-============================
-
-|Colab Badge|
+Censored Time-to-Event Model |Colab Badge|
+==========================================
 
 .. |Colab Badge| image:: img/colab-badge.svg
     :target: https://colab.research.google.com/drive/12xf2Tzub3coM6YSZthEboQaFbaPiqTOm
 
 .. include:: macros.hrst
 
-.. code-block:: python3
+.. admonition:: TLDR
 
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import tensorflow as tf
-    import tensorflow_probability as tfp
-    tfd = tfp.distributions
-    randn = lambda *x: np.random.randn(*x).astype('float32')
+    .. code-block:: python3
 
-    import probflow as pf
+        class CensoredSurvivalModel(pf.ContinuousModel):
+
+            def __init__(self, d):
+                self.layer = pf.Dense(d)
+
+            def __call__(self, x):
+                return tfd.Exponential(tf.exp(self.layer(x)))
+
+            def log_likelihood(self, x, y):
+                """If y>=0, that's the time to the observed event.
+                If y<0, it has not yet been observed after -y time!"""
+                dist = self(x) #predicted distribution
+                obs_ll = dist.log_prob(y)[y>=0] #observed likelihoods
+                non_ll = dist.log_survival_function(-y)[y<0] #nonobserved
+                return tf.reduce_sum(obs_ll) + tf.reduce_sum(non_ll)
+
+        model = CensoredSurvivalModel(x.shape[0])
+        model.fit(x, y)
 
 
 The problem of predicting how long it will be until some event happens again is a pretty common one.  For example, time-to-event prediction problems include:
@@ -39,6 +49,15 @@ We'll be using these models to predict (simulated!) customer purchasing behavior
 First let's simulate some customer purchase data:
 
 .. code-block:: python3
+
+    # Imports
+    import probflow as pf
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import tensorflow as tf
+    import tensorflow_probability as tfp
+    tfd = tfp.distributions
+    randn = lambda *x: np.random.randn(*x).astype('float32')
 
     # Generate time-to-event data
     N = 100 #number of customers

@@ -1,23 +1,29 @@
 .. _example_glm:
 
-Poisson Regression (GLM)
-========================
-
-|Colab Badge|
+Poisson Regression (GLM) |Colab Badge|
+======================================
 
 .. |Colab Badge| image:: img/colab-badge.svg
     :target: https://colab.research.google.com/drive/1ARkpzwzlv5GWWEKiZpZ-FHuL_Dn905KW
 
 .. include:: macros.hrst
 
-.. code-block:: python3
+.. admonition:: TLDR
 
-    import numpy as np
-    import matplotlib.pyplot as plt
-    rand = lambda *x: np.random.rand(*x).astype('float32')
-    randn = lambda *x: np.random.randn(*x).astype('float32')
+    .. code-block:: python3
 
-    import probflow as pf
+        class PoissonRegression(pf.DiscreteModel):
+
+            def __init__(self, d):
+                self.w = pf.Parameter([d, 1]) #weights
+                self.b = pf.Parameter([1, 1]) #bias
+
+            def __call__(self, x):
+                return pf.Poisson(tf.exp(x @ self.w() + self.b()))
+
+        model = PoissonRegression(x.shape[1])
+        model.fit(x, y)
+
 
 
 In the :ref:`linear <example_linear_regression>` and
@@ -36,6 +42,13 @@ Poisson-distributed target variable.
 
 
 .. code-block:: python3
+
+    # Imports
+    import probflow as pf
+    import numpy as np
+    import matplotlib.pyplot as plt
+    rand = lambda *x: np.random.rand(*x).astype('float32')
+    randn = lambda *x: np.random.randn(*x).astype('float32')
 
     # Settings
     N = 512 #number of datapoints
