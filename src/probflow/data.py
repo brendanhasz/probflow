@@ -50,7 +50,8 @@ class DataGenerator(BaseDataGenerator):
     """
 
 
-    num_workers = None #number of processes in pool
+    def __init__(self, num_workers=None):
+        self.num_workers = num_workers
 
 
     @abstractmethod
@@ -143,7 +144,11 @@ class ArrayDataGenerator(DataGenerator):
                  y=None,
                  batch_size=None,
                  shuffle=False,
-                 test=False):
+                 test=False,
+                 num_workers=num_workers):
+
+        # Set number of worker threads
+        super().__init__(num_workers=num_workers)
 
         # Check types
         data_types = (np.ndarray, pd.DataFrame, pd.Series)
@@ -268,7 +273,6 @@ def make_generator(x=None,
     if isinstance(x, DataGenerator):
         return x
     else:
-        dg = ArrayDataGenerator(x, y, batch_size=batch_size,
-                                shuffle=shuffle, test=test)
-        dg.num_workers = num_workers
+        dg = ArrayDataGenerator(x, y, batch_size=batch_size, test=test,
+                                shuffle=shuffle, num_workers=num_workers)
         return dg

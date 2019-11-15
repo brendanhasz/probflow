@@ -14,7 +14,6 @@ Backlog
 * User guide
 * Examples
 * Docs for everything implemented so far
-* Fix some issues (below)
 * Release 2.0.0
 * Get tf autograph/tf.function and pytorch torchscript/trace working!!!
 * Add ability to use >1 MC samples from variational distribution per batch
