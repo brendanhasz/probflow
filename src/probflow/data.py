@@ -145,7 +145,7 @@ class ArrayDataGenerator(DataGenerator):
                  batch_size=None,
                  shuffle=False,
                  test=False,
-                 num_workers=num_workers):
+                 num_workers=None):
 
         # Set number of worker threads
         super().__init__(num_workers=num_workers)
@@ -226,7 +226,9 @@ class ArrayDataGenerator(DataGenerator):
             return None, None
 
         # Get shuffled indexes
-        ix = self.ids[index*self.batch_size:(index+1)*self.batch_size]
+        ix = slice(index*self.batch_size, (index+1)*self.batch_size)
+        if self.shuffle:
+            ix = self.ids[ix]
 
         # Get x data
         if self.x is None:
@@ -254,12 +256,8 @@ class ArrayDataGenerator(DataGenerator):
 
     def on_epoch_end(self):
         """Shuffle data each epoch"""
-        if self._empty:
-            pass
-        elif self.shuffle:
+        if self.shuffle:
             self.ids = np.random.permutation(self.n_samples)
-        else:
-            self.ids = np.arange(self.n_samples, dtype=np.uint64)
 
 
 

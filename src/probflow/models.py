@@ -172,7 +172,7 @@ class Model(Module):
             y=None,
             batch_size: int = 128,
             epochs: int = 200,
-            shuffle: bool = True,
+            shuffle: bool = False,
             optimizer=None,
             optimizer_kwargs: dict = {},
             lr: float = None,
