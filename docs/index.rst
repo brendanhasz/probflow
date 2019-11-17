@@ -64,6 +64,7 @@ can be built by creating a ProbFlow |Model|:
         .. code-block:: python3
 
             import probflow as pf
+            import tensorflow as tf
 
             class LinearRegression(pf.ContinuousModel):
 
@@ -157,7 +158,13 @@ and diagnose *where* your model is having problems capturing uncertainty:
    :width: 90 %
    :align: center
 
-ProbFlow also provides more complex modules, such as those required for building :ref:`Bayesian neural networks <example_fully_connected>` .  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
+ProbFlow also provides more complex modules, such as those required for building :doc:`Bayesian neural networks <example_fully_connected>`.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, even a somewhat complex multi-layer Bayesian neural network like this:
+
+.. image:: img/readme/dual_headed_net.svg
+   :width: 99 %
+   :align: center
+
+Can be built and fit with ProbFlow in only a few lines:  
 
 .. tabs::
 
@@ -165,49 +172,42 @@ ProbFlow also provides more complex modules, such as those required for building
         
         .. code-block:: python3
 
-            import tensorflow as tf
+            class DensityNetwork(pf.ContinuousModel):
 
-            class DenseRegression(pf.ContinuousModel):
-
-                def __init__(self, input_dims):
-                    self.net = pf.Sequential([
-                        pf.Dense(input_dims, 128),
-                        tf.nn.relu,
-                        pf.Dense(128, 64),
-                        tf.nn.relu,
-                        pf.Dense(64, 1),
-                    ])
-                    self.std = pf.ScaleParameter()
+                def __init__(self, units, head_units):
+                    self.core = pf.DenseNetwork(units)
+                    self.mean = pf.DenseNetwork(head_units)
+                    self.std  = pf.DenseNetwork(head_units)
 
                 def __call__(self, x):
-                    return pf.Normal(self.net(x), self.std())
-            
-            model = DenseRegression(5)
+                    x = self.core(x)
+                    return pf.Normal(self.mean(x), tf.exp(self.std(x)))
+
+            # Create the model
+            model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
+
+            # Fit it!
             model.fit(x, y)
 
     .. group-tab:: PyTorch
         
         .. code-block:: python3
 
-            import torch
+            class DensityNetwork(pf.ContinuousModel):
 
-            class DenseRegression(pf.ContinuousModel):
-
-                def __init__(self, input_dims):
-                    self.net = pf.Sequential([
-                        pf.Dense(input_dims, 128),
-                        torch.nn.ReLU(),
-                        pf.Dense(128, 64),
-                        torch.nn.ReLU(),
-                        pf.Dense(64, 1),
-                    ])
-                    self.std = pf.ScaleParameter()
+                def __init__(self, units, head_units):
+                    self.core = pf.DenseNetwork(units)
+                    self.mean = pf.DenseNetwork(head_units)
+                    self.std  = pf.DenseNetwork(head_units)
 
                 def __call__(self, x):
-                    x = torch.tensor(x)
-                    return pf.Normal(self.net(x), self.std())
-            
-            model = DenseRegression(5)
+                    x = self.core(x)
+                    return pf.Normal(self.mean(x), torch.exp(self.std(x)))
+
+            # Create the model
+            model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
+
+            # Fit it!
             model.fit(x, y)
             
 
@@ -218,14 +218,14 @@ For convenience, ProbFlow also includes several :doc:`pre-built models </api_app
     model = pf.LinearRegression(x.shape[1])
     model.fit(x, y)
 
-And the multi-layer Bayesian neural net could have been made even more easily by using ProbFlow's ready-made :class:`DenseRegression <probflow.applications.DenseRegression>` model:
+And a multi-layer Bayesian neural net can be made easily using ProbFlow's ready-made :class:`DenseRegression <probflow.applications.DenseRegression>` model:
 
 .. code-block:: python3
 
     model = pf.DenseRegression([x.shape[1], 128, 64, 1])
     model.fit(x, y)
 
-Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like :ref:`generalized linear models <example_glm>`, :ref:`neural matrix factorization <example_nmf>` models, and :ref:`Gaussian mixture models <example_gmm>`.  Take a look at the :ref:`examples` section and the :ref:`user_guide` for more!
+Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like :doc:`generalized linear models <example_glm>`, :doc:`deep time-to-event models <example_time_to_event>`, :doc:`neural matrix factorization <example_nmf>` models, and :doc:`Gaussian mixture models <example_gmm>`.  Take a look at the :doc:`examples` and the :doc:`user_guide` for more!
 
 
 Installation
@@ -234,12 +234,6 @@ Installation
 Before installing ProbFlow, you'll first need to install either `PyTorch <https://pytorch.org/>`_, or `TensorFlow 2.0 <https://www.tensorflow.org/install/pip>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability/install>`_.
 
 .. tabs::
-
-    .. tab:: PyTorch
-
-        .. code-block:: bash
-            
-            pip install torch
 
     .. tab:: TensorFlow CPU
 
@@ -252,6 +246,12 @@ Before installing ProbFlow, you'll first need to install either `PyTorch <https:
         .. code-block:: bash
             
             pip install tensorflow-gpu==2.0.0 tensorflow-probability==0.8.0
+
+    .. tab:: PyTorch
+
+        .. code-block:: bash
+            
+            pip install torch
 
 
 Then, you can install ProbFlow itself:

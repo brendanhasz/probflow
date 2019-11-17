@@ -43,6 +43,7 @@ can be built by creating a ProbFlow Model:
 .. code-block:: python
 
     import probflow as pf
+    import tensorflow as tf
 
     class LinearRegression(pf.ContinuousModel):
 
@@ -115,29 +116,33 @@ and diagnose *where* your model is having problems capturing uncertainty:
    :width: 90 %
    :align: center
 
-ProbFlow also provides more complex modules, such as those required for building Bayesian neural networks.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, a multi-layer Bayesian neural network can be built and fit using ProbFlow in only a few lines:
+ProbFlow also provides more complex modules, such as those required for building Bayesian neural networks.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, even a somewhat complex multi-layer Bayesian neural network like this:
+
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/readme/dual_headed_net.svg
+   :width: 99 %
+   :align: center
+
+Can be built and fit with ProbFlow in only a few lines:  
 
 .. code-block:: python
 
-    import tensorflow as tf
+    class DensityNetwork(pf.ContinuousModel):
 
-    class DenseRegression(pf.ContinuousModel):
-
-        def __init__(self, input_dims):
-            self.net = pf.Sequential([
-                pf.Dense(input_dims, 128),
-                tf.nn.relu,
-                pf.Dense(128, 64),
-                tf.nn.relu,
-                pf.Dense(64, 1),
-            ])
-            self.std = pf.ScaleParameter()
+        def __init__(self, units, head_units):
+            self.core = pf.DenseNetwork(units)
+            self.mean = pf.DenseNetwork(head_units)
+            self.std  = pf.DenseNetwork(head_units)
 
         def __call__(self, x):
-            return pf.Normal(self.net(x), self.std())
-    
-    model = DenseRegression(5)
+            x = self.core(x)
+            return pf.Normal(self.mean(x), tf.exp(self.std(x)))
+
+    # Create the model
+    model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
+
+    # Fit it!
     model.fit(x, y)
+
 
 For convenience, ProbFlow also includes several `pre-built models <http://probflow.readthedocs.io/en/latest/api_applications.html>`_ for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made LinearRegression model:
 
@@ -146,14 +151,18 @@ For convenience, ProbFlow also includes several `pre-built models <http://probfl
     model = pf.LinearRegression(x.shape[1])
     model.fit(x, y)
 
-And the multi-layer Bayesian neural net could have been made even more easily by using ProbFlow's ready-made DenseRegression model:
+And a multi-layer Bayesian neural net can be made easily using ProbFlow's ready-made DenseRegression model:
 
 .. code-block:: python
 
     model = pf.DenseRegression([x.shape[1], 128, 64, 1])
     model.fit(x, y)
 
-Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like `generalized linear models <http://probflow.readthedocs.io/en/latest/example_glm.html>`_, `neural matrix factorization <http://probflow.readthedocs.io/en/latest/example_nmf.html>`_ models, and `Gaussian mixture models <http://probflow.readthedocs.io/en/latest/example_gmm.html>`_.  Take a look at the `examples <http://probflow.readthedocs.io/en/latest/examples.html>`_ section and the `user guide <http://probflow.readthedocs.io/en/latest/user_guide.html>`_ for more!
+Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like 
+`generalized linear models <http://probflow.readthedocs.io/en/latest/example_glm.html>`_,
+`deep time-to-event models <http://probflow.readthedocs.io/en/latest/example_time_to_event.html>`_, 
+`neural matrix factorization <http://probflow.readthedocs.io/en/latest/example_nmf.html>`_ models, and 
+`Gaussian mixture models <http://probflow.readthedocs.io/en/latest/example_gmm.html>`_.  Take a look at the `examples <http://probflow.readthedocs.io/en/latest/examples.html>`_ and the `user guide <http://probflow.readthedocs.io/en/latest/user_guide.html>`_ for more!
 
 
 Installation
