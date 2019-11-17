@@ -118,7 +118,7 @@ and diagnose *where* your model is having problems capturing uncertainty:
 
 ProbFlow also provides more complex modules, such as those required for building Bayesian neural networks.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, even a somewhat complex multi-layer Bayesian neural network like this:
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/readme/dual_headed_net.svg
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/readme/dual_headed_net.svg?sanitize=true
    :width: 99 %
    :align: center
 
