@@ -16,10 +16,10 @@ Stochastic Volatility Model
 
 
 `Stochastic volatility models <https://en.wikipedia.org/wiki/Stochastic_volatility>`_
-are usually used to model the variability of stock prices over time. 
+are often used to model the variability of stock prices over time. 
 The `volatility <https://en.wikipedia.org/wiki/Volatility_(finance)>`_ is 
 the standard deviation of the logarithmic returns over time.  Instead of 
-assuming that the volatility is constant over time, stochastic volatility 
+assuming that the volatility is constant, stochastic volatility 
 models have latent parameters which model the volatility at each moment in 
 time.
 

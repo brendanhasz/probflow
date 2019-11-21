@@ -41,6 +41,9 @@ __all__ = [
     'softplus',
     'sigmoid',
     'gather',
+    'cat',
+    'additive_logistic_transform',
+    'add_col_of',
 ]
 
 
@@ -323,3 +326,17 @@ def add_col_of(vals, val):
         import tensorflow as tf
         shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
         return tf.concat([vals, val*tf.ones(shape)], axis=-1)
+
+
+
+def insert_col_of(vals, val):
+    """Add a column of a value to the left side of a tensor"""
+    if get_backend() == 'pytorch':
+        import torch
+        shape = [s for s in vals.shape[:-1]] + [1]
+        return torch.cat([val*torch.ones(shape), vals], dim=-1)
+    else:
+        import tensorflow as tf
+        shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
+        return tf.concat([val*tf.ones(shape), vals], axis=-1)
+
