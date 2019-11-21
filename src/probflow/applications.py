@@ -118,7 +118,7 @@ class LogisticRegression(CategoricalModel):
 
     def __call__(self, x):
         x = to_tensor(x)
-        return Categorical(O.insert_col_of(x @ self.weights() + self.bias(), 0))
+        return Categorical(O.insert_col_of(x@self.weights() + self.bias(), 0))
 
 
 
@@ -280,4 +280,4 @@ class DenseClassifier(CategoricalModel):
 
     def __call__(self, x):
         x = to_tensor(x)
-        return Categorical(O.add_col_of(self.network(x), 0))
+        return Categorical(O.insert_col_of(self.network(x), 0))
