@@ -207,7 +207,7 @@ below returns a *probability distribution*!
         
         def __init__(self, dims):
             self.net = DenseNetwork(dims)
-            self.s = pf.ScaleParameter()
+            self.s = pf.ScaleParameter([1, 1])
 
         def __call__(self, x):
             return pf.Normal(self.net(x), self.s())
