@@ -137,7 +137,7 @@ class Parameter(BaseParameter):
     Examples
     --------
 
-    TODO: creating variable
+    TODO: creating variables
 
     TODO: creating variable w/ beta posterior
 
