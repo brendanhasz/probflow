@@ -291,8 +291,8 @@ def plot_discrete_dist(x):
     """Plot histogram of discrete variable"""
     minx = np.min(x)
     maxx = np.max(x)
-    be = np.linspace(minx-0.5, maxx+0.5, maxx-minx+2)
-    bc = np.linspace(minx, maxx, maxx-minx+1)
+    be = np.linspace(minx-0.5, maxx+0.5, int(maxx-minx+2))
+    bc = np.linspace(minx, maxx, int(maxx-minx+1))
     xc, _ = np.histogram(x, be)
     xc = xc/xc.sum() #normalize
     plt.bar(bc, xc)
@@ -303,7 +303,7 @@ def plot_categorical_dist(x):
     """Plot histogram of categorical variable"""
     xc = pd.Series(x.ravel()).value_counts().sort_index()
     xc = xc/xc.sum() #normalize
-    plt.bar(xc.index, xc.data)
+    plt.bar(xc.index, xc.values)
     if len(xc.index) < 15:
         plt.xticks(xc.index, [str(e) for e in xc.index])
     else:
@@ -398,7 +398,7 @@ def plot_by(x, data, bins=30, func='mean', plot=True,
     if x.shape[1] == 1:
 
         # Create bins over x
-        edges = np.linspace(min(x), max(x), bins).flatten()
+        edges = np.linspace(min(x), max(x), int(bins)).flatten()
         edges[-1] += 1e-9
         bin_id = np.digitize(x, edges)
         x_o = (edges[:-1]+edges[1:])/2.0 #bin centers
