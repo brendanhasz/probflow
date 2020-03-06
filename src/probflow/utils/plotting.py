@@ -28,7 +28,7 @@ def approx_kde(data, bins=500, bw=0.075):
                            be[-1]+pbe))
     z_pad = np.zeros(pbe.shape[0])
     raw = np.concatenate((z_pad, counts, z_pad))
-    k_x = np.linspace(-stds, stds, bins*bw*stds)
+    k_x = np.linspace(-stds, stds, int(bins*bw*stds))
     kernel = 1.0/np.sqrt(2.0*np.pi)*np.exp(-np.square(k_x)/2.0)
     y_out = np.convolve(raw, kernel, mode='same')
     return x_out, y_out
