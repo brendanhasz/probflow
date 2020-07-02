@@ -30,13 +30,13 @@ Backlog
 * Bayesian decision making example
 * Finish pred_dist_plot for Discrete and Categorical Model, as well as calibration_curve for categorical.
 * Make Parameters have an option for how to plot their posteriors/priors (ie use plot_dist, plot_discrete_dist, or plot_categorical_dist), and set defaults that make sense for parameters (e.g. default for Categorical param should be plot_categorical_dist)
-* Add model saving/loading (Model.save_model and load_model)
+* Add docs for ``pf.dumps``, ``pf.loads``, ``pf.dump``, and ``pf.load``, as well as module/model's methods ``save`` and ``load``
 * Summary method for Modules + Models which show hierarchy of modules/parameters
 * Make Module.trainable_variables return tf.Variables which are properties of module+sub-modules as well (and not neccesarily in parameters, also allow embedding of tf.Modules?)
 * Add kwarg to Parameter (mc_kl_estimate=False or somesuch) which if true will use MC samples to estimate KL divergence between parameter's prior and variational posterior (to allow for arbitrary posterior/prior choices)
 * Convolutional modules
 * Add more consistent type hinting and enforcing (perhaps via `enforce.runtime_validation <https://github.com/RussBaz/enforce>`_ or `pytypes.typechecked <https://github.com/Stewori/pytypes>`_ or `typeguard.typechecked <https://github.com/agronholm/typeguard>`_ ).  Or maybe just remove all type hinting and just have it in the docstrings...
-* Add a `set_priors_to_posteriors` (or perhaps something more elegant... `bayesian_update`? Just `update`?) function to `pf.models.Model` which sets the prior distributions to the current value of the posterior distributions, to allow Bayesian updating / streaming inference / incremental updates.  Should be relatively straightforward I think :thinking: Like, literally just `for p in self.parameters: p.prior = p.posterior`
+* Add a `set_priors_to_posteriors` (or perhaps something more elegant... `bayesian_update`? Just `update`?) function to `pf.models.Model` which sets the prior distributions to the current value of the posterior distributions, to allow Bayesian updating / streaming inference / incremental updates.  Should be relatively straightforward I think :thinking: Like, literally just ``for p in self.parameters: p.prior = p.posterior`` ... Well no, that would set it by reference, will need to make a copy of each parameter's posterior Distribution object and fix the underlying variables, then set the prior to that.  Maybe add a ``bayesian_udpate()`` method to Parameter which does that, then Module's ``bayesian_update()`` can just be ``for p in self.parameters: p.bayesian_update()``
 
 Out of scope
 ------------

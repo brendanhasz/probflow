@@ -37,6 +37,8 @@ from probflow.distributions import Normal
 from probflow.parameters import Parameter
 from probflow.utils.initializers import xavier
 from probflow.utils.initializers import scale_xavier
+from probflow.utils.io import dumps
+from probflow.utils.io import dump
 
 
 
@@ -130,6 +132,47 @@ class Module(BaseModule):
             self._kl_losses += [O.sum(loss, axis=None)]
         else:
             self._kl_losses += [O.sum(O.kl_divergence(loss, d2), axis=None)]
+
+    
+    def dumps(self):
+        """Serialize module object to bytes"""
+        dumps(self)
+        
+
+    def save(self, filename: str):
+        """Save module object to file
+
+        Parameters
+        ----------
+        filename : str
+            Filename for file to which to save this object
+
+        Example
+        -------
+        
+        .. code-block:: python3
+
+            import numpy as np
+            import probflow as pf
+
+            N = 1024
+            D = 7
+            x = np.random.randn(N, D).astype('float32')
+            w = np.random.randn(D, 1).astype('float32')
+            y = x@w + np.random.randn(N, 1).astype('float32')
+
+            model = pf.LinearRegression(7)
+            model.fit(x, y)
+
+            # Save the model to file
+            model.save("my_model.pfm")
+
+            # Load it back in
+            model2 = pf.load("my_model.pfm")
+
+        """
+        dump(self, filename)
+        
 
 
 

@@ -6,5 +6,6 @@ from probflow.models import *
 from probflow.applications import *
 from probflow.callbacks import *
 from probflow.data import *
+from probflow.utils.io import *
 
 __version__ = '2.0.0a2'

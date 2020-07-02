@@ -8,8 +8,6 @@ TODO: more...
 * :class:`.ContinuousModel`
 * :class:`.DiscreteModel`
 * :class:`.CategoricalModel`
-* :func:`.save_model`
-* :func:`.load_model`
 
 ----------
 
@@ -21,8 +19,6 @@ __all__ = [
     'ContinuousModel',
     'DiscreteModel',
     'CategoricalModel',
-    'save_model',
-    'load_model',
 ]
 
 
@@ -67,6 +63,8 @@ class Model(Module):
     * :meth:`~kl_loss_batch`
     * :meth:`~reset_kl_loss`
     * :meth:`~add_kl_loss`
+    * :meth:`~dumps`
+    * :meth:`~save`
 
     and adds model-specific methods:
 
@@ -808,19 +806,6 @@ class Model(Module):
             ``distribution``, and ``n`` kwargs.
         """
         return np.exp(self.log_prob(x, y, **kwargs))
-
-
-    def save(self, filename):
-        """Save a model to file.
-
-        TODO
-
-        Parameters
-        ----------
-        filename : str
-            Save the model to a file with this name
-        """
-        save_model(self, filename)
 
 
     def summary(self):
