@@ -21,6 +21,7 @@ User Guide
    ug_evaluating
    ug_inspecting
    ug_applications
+   ug_saving_and_loading
    ug_math
 
 .. include:: macros.hrst
