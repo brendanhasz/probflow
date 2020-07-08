@@ -11,7 +11,17 @@ __all__ = [
 
 
 def dumps(obj):
-    """Serialize a probflow object to bytes"""
+    """Serialize a probflow object to bytes.
+
+    Note
+    ----
+    This removes the compiled ``_train_fn`` attribute of a |Model| which is 
+    either a |TensorFlow| or |PyTorch| compiled function to perform a single
+    training step.  Cloudpickle can't serialize it, and after de-serializing
+    will just JIT re-compile if needed.
+    """
+    if hasattr(obj, "_train_fn"):
+        delattr(obj, "_train_fn")
     return cloudpickle.dumps(obj)
 
 
@@ -21,7 +31,17 @@ def loads(s):
 
 
 def dump(obj, filename):
-    """Serialize a probflow object to file"""
+    """Serialize a probflow object to file
+
+    Note
+    ----
+    This removes the compiled ``_train_fn`` attribute of a |Model| which is 
+    either a |TensorFlow| or |PyTorch| compiled function to perform a single
+    training step.  Cloudpickle can't serialize it, and after de-serializing
+    will just JIT re-compile if needed.
+    """
+    if hasattr(obj, "_train_fn"):
+        delattr(obj, "_train_fn")
     with open(filename, "wb") as f:
         cloudpickle.dump(obj, f)
 

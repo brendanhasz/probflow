@@ -667,9 +667,9 @@ class Categorical(BaseDistribution):
         self.logits = logits
         self.probs = probs
         if logits is None:
-            self.ndim = probs.ndim
+            self.ndim = len(probs.shape)
         else:
-            self.ndim = logits.ndim
+            self.ndim = len(logits.shape)
 
 
     def __call__(self):
@@ -685,14 +685,14 @@ class Categorical(BaseDistribution):
 
     def prob(self, y):
         """Doesn't broadcast correctly when logits/probs and y are same dims"""
-        if self.ndim == y.ndim:
+        if self.ndim == len(y.shape):
             y = O.squeeze(y)
         return super().prob(y)
 
 
     def log_prob(self, y):
         """Doesn't broadcast correctly when logits/probs and y are same dims"""
-        if self.ndim == y.ndim:
+        if self.ndim == len(y.shape):
             y = O.squeeze(y)
         return super().log_prob(y)
 

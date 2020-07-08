@@ -286,9 +286,6 @@ def test_Model_0D():
     assert probs.shape[0] == 10
     assert np.all(probs >= 0)
 
-    # Save the model
-    my_model.save('test_model.dat')
-
 
 
 def test_Model_ArrayDataGenerators():
@@ -587,7 +584,7 @@ def test_generative_Model():
     model = MyModel()
 
     # Data
-    X = np.random.randn(100, 1)
+    X = np.random.randn(100, 1).astype('float32')
 
     # Fit the model
     model.fit(X, batch_size=10, epochs=3)

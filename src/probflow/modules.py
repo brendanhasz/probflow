@@ -136,7 +136,7 @@ class Module(BaseModule):
     
     def dumps(self):
         """Serialize module object to bytes"""
-        dumps(self)
+        return dumps(self)
         
 
     def save(self, filename: str):

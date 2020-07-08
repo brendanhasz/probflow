@@ -129,16 +129,16 @@ class Model(Module):
 
         import tensorflow as tf
 
-        #@tf.function
+        @tf.function
         def train_fn(x_data, y_data):
             self.reset_kl_loss()
             with Sampling(n=1, flipout=flipout):
                 with tf.GradientTape() as tape:
                     elbo_loss = self.elbo_loss(x_data, y_data, n)
-                self._current_elbo += elbo_loss.numpy()
                 variables = self.trainable_variables
                 gradients = tape.gradient(elbo_loss, variables)
                 self._optimizer.apply_gradients(zip(gradients, variables))
+            return elbo_loss
 
         return train_fn
 
@@ -153,16 +153,20 @@ class Model(Module):
             with Sampling(n=1, flipout=flipout):
                 self._optimizer.zero_grad()
                 elbo_loss = self.elbo_loss(x_data, y_data, n)
-                self._current_elbo += elbo_loss.detach().numpy()
                 elbo_loss.backward()
                 self._optimizer.step()
+            return elbo_loss
 
         return train_fn
 
 
     def train_step(self, x_data, y_data):
         """Perform one training step"""
-        self._train_fn(x_data, y_data)
+        elbo = self._train_fn(x_data, y_data)
+        if get_backend() == 'pytorch':
+            self._current_elbo += elbo.detach().numpy()
+        else:
+            self._current_elbo += elbo.numpy()
 
 
     def fit(self,
