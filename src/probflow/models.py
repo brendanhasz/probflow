@@ -124,12 +124,12 @@ class Model(Module):
         return self._current_elbo
 
 
-    def _train_step_tf(self, n, flipout):
+    def _train_step_tensorflow(self, n, flipout=False, eager=False):
         """Get the training step function for TensorFlow"""
 
         import tensorflow as tf
 
-        @tf.function
+        #@tf.function
         def train_fn(x_data, y_data):
             self.reset_kl_loss()
             with Sampling(n=1, flipout=flipout):
@@ -140,10 +140,13 @@ class Model(Module):
                 self._optimizer.apply_gradients(zip(gradients, variables))
             return elbo_loss
 
-        return train_fn
+        if eager:
+            return train_fn
+        else:
+            return tf.function(train_fn)
 
 
-    def _train_step_pt(self, n, flipout):
+    def _train_step_pytorch(self, n, flipout=False, eager=False):
         """Get the training step function for PyTorch"""
 
         import torch
@@ -157,7 +160,11 @@ class Model(Module):
                 self._optimizer.step()
             return elbo_loss
 
-        return train_fn
+        if eager:
+            return train_fn
+        else:
+            # TODO: if eager=false, return traced function
+            return train_fn
 
 
     def train_step(self, x_data, y_data):
@@ -169,18 +176,21 @@ class Model(Module):
             self._current_elbo += elbo.numpy()
 
 
-    def fit(self,
-            x,
-            y=None,
-            batch_size: int = 128,
-            epochs: int = 200,
-            shuffle: bool = False,
-            optimizer=None,
-            optimizer_kwargs: dict = {},
-            lr: float = None,
-            flipout: bool = True,
-            num_workers: int = None,
-            callbacks: List[BaseCallback] = []):
+    def fit(
+        self,
+        x,
+        y=None,
+        batch_size: int = 128,
+        epochs: int = 200,
+        shuffle: bool = False,
+        optimizer=None,
+        optimizer_kwargs: dict = {},
+        lr: float = None,
+        flipout: bool = True,
+        num_workers: int = None,
+        callbacks: List[BaseCallback] = [],
+        eager: bool = False,
+    ):
         r"""Fit the model to data
 
         TODO
@@ -229,6 +239,11 @@ class Model(Module):
             Default = None
         callbacks : List[BaseCallback]
             List of callbacks to run while training the model
+        eager : bool
+            Whether to use eager execution.  If False, will use ``tf.function``
+            (for TensorFlow) or tracing (for PyTorch) to optimize the model
+            fitting.  Note that even if eager=True, you can still use eager
+            execution when using the model after it is fit.  Default = False
         """
 
         # Determine a somewhat reasonable learning rate if none was passed
@@ -256,9 +271,13 @@ class Model(Module):
 
         # Create a function to perform one training step
         if get_backend() == 'pytorch':
-            self._train_fn = self._train_step_pt(self._data.n_samples, flipout)
+            self._train_fn = self._train_step_pytorch(
+                self._data.n_samples, flipout, eager=eager
+            )
         else:
-            self._train_fn = self._train_step_tf(self._data.n_samples, flipout)
+            self._train_fn = self._train_step_tensorflow(
+                self._data.n_samples, flipout, eager=eager
+            )
 
         # Assign model param to callbacks
         for c in callbacks:
@@ -1701,18 +1720,3 @@ class CategoricalModel(Model):
         """
         pass
         #TODO
-    
-
-
-def save_model(model, filename):
-    """Save a model to file"""
-    pass 
-    # TODO
-
-
-
-def load_model(filename):
-    """Load a model from file"""
-    pass 
-    # TODO
-

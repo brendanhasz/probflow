@@ -85,6 +85,8 @@ def test_Model_0D():
     assert isinstance(samples, np.ndarray)
     assert samples.ndim == 1
     assert samples.shape[0] == 30
+    with pytest.raises(ValueError):
+        samples = my_model.predict(x[:30], method='asdf')
 
     # metric
     metric = my_model.metric('mae', x[:30], y[:30])
@@ -265,8 +267,32 @@ def test_Model_0D():
     assert probs.shape[0] == 10
     assert np.all(probs >= 0)
 
-    # Save the model
-    my_model.save('test_model.dat')
+    # summary method should run
+    my_model.summary()
+
+
+
+def test_Model_force_eager():
+    """Tests fitting probflow.model.Model forcing eager=True"""
+
+    class MyModel(Model):
+
+        def __init__(self):
+            self.weight = Parameter(name='Weight')
+            self.bias = Parameter(name='Bias')
+            self.std = ScaleParameter(name='Std')
+
+        def __call__(self, x):
+            x = torch.tensor(x)
+            return Normal(x*self.weight() + self.bias(), self.std())
+
+    # Instantiate the model
+    my_model = MyModel()
+
+    # Fit it with tracing off
+    x = np.random.randn(100).astype('float32')
+    y = -x + 1
+    my_model.fit(x, y, batch_size=50, epochs=2, eager=True)
 
 
 
