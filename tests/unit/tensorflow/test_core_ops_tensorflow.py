@@ -1,7 +1,6 @@
 """Tests the probflow.core.ops module when backend = tensorflow"""
 
 
-
 import pytest
 
 import numpy as np
@@ -12,10 +11,8 @@ import probflow as pf
 from probflow.core import ops
 
 
-
 def is_close(a, b, tol=1e-3):
-    return np.abs(a-b) < tol
-
+    return np.abs(a - b) < tol
 
 
 def test_kl_divergence():
@@ -34,13 +31,13 @@ def test_kl_divergence():
     d1 = tfp.distributions.Normal(0, 1)
     d2 = tfp.distributions.Normal(1, 1)
     d3 = tfp.distributions.Normal(2, 1)
-    assert (ops.kl_divergence(d1, d2).numpy() <
-            ops.kl_divergence(d1, d3).numpy())
+    assert (
+        ops.kl_divergence(d1, d2).numpy() < ops.kl_divergence(d1, d3).numpy()
+    )
 
     # Should auto-convert probflow distibutions
     dist = pf.Normal(0, 1)
     assert ops.kl_divergence(dist, dist).numpy() == 0.0
-
 
 
 def test_squeeze():
@@ -59,7 +56,6 @@ def test_squeeze():
     assert xo.ndim == 2
     assert xo.shape[0] == 3
     assert xo.shape[1] == 2
-
 
 
 def test_ones():
@@ -97,7 +93,6 @@ def test_ones():
     assert np.all(ones.numpy() == 1.0)
 
 
-
 def test_zeros():
     """Tests zeros"""
 
@@ -133,7 +128,6 @@ def test_zeros():
     assert np.all(zeros.numpy() == 0.0)
 
 
-
 def test_eye():
     """Tests eye"""
 
@@ -145,7 +139,6 @@ def test_eye():
     assert eye.shape[1] == 4
     assert eye.numpy()[0, 0] == 1.0
     assert eye.numpy()[0, 1] == 0.0
-
 
 
 def test_sum():
@@ -181,7 +174,6 @@ def test_sum():
     assert is_close(val.numpy(), 6.4)
 
 
-
 def test_prod():
     """Tests prod"""
 
@@ -208,7 +200,6 @@ def test_prod():
     assert is_close(val.numpy(), 7.26)
 
 
-
 def test_mean():
     """Tests mean"""
 
@@ -233,7 +224,6 @@ def test_mean():
     # Actually test values
     val = ops.mean(tf.constant([0.9, 1.9, 2.1, 3.1]))
     assert is_close(val.numpy(), 2.0)
-
 
 
 def test_std():
@@ -264,7 +254,6 @@ def test_std():
     assert is_close(val.numpy(), 0.816496581)
 
 
-
 def _test_elementwise(fn, inputs, outputs):
     """Test elementwise function"""
 
@@ -282,71 +271,62 @@ def _test_elementwise(fn, inputs, outputs):
         assert is_close(val.numpy()[i], outputs[i])
 
 
-
 def test_round():
     """Tests round"""
-    _test_elementwise(ops.round, 
-                      [-0.9, 0.00001, 1.0, 3.14],
-                      [-1.0, 0.0, 1.0, 3.0])
-
+    _test_elementwise(
+        ops.round, [-0.9, 0.00001, 1.0, 3.14], [-1.0, 0.0, 1.0, 3.0]
+    )
 
 
 def test_abs():
     """Tests abs"""
-    _test_elementwise(ops.abs, 
-                      [-1.0, 0.0, 1.0], 
-                      [1.0, 0.0, 1.0])
-
+    _test_elementwise(ops.abs, [-1.0, 0.0, 1.0], [1.0, 0.0, 1.0])
 
 
 def test_square():
     """Tests square"""
-    _test_elementwise(ops.square, 
-                      [-2.0, -1.0, 0.0, 1.0, 3.0], 
-                      [4.0, 1.0, 0.0, 1.0, 9.0])
-
+    _test_elementwise(
+        ops.square, [-2.0, -1.0, 0.0, 1.0, 3.0], [4.0, 1.0, 0.0, 1.0, 9.0]
+    )
 
 
 def test_sqrt():
     """Tests sqrt"""
-    _test_elementwise(ops.sqrt, 
-                      [0.0, 1.0, 4.0, 100.0], 
-                      [0.0, 1.0, 2.0, 10.0])
-
+    _test_elementwise(ops.sqrt, [0.0, 1.0, 4.0, 100.0], [0.0, 1.0, 2.0, 10.0])
 
 
 def test_exp():
     """Tests exp"""
-    _test_elementwise(ops.exp, 
-                      [-1.0, 0.0, 1.0, 4.0], 
-                      [np.exp(-1.0), 1.0, np.e, np.exp(4.0)])
-
+    _test_elementwise(
+        ops.exp, [-1.0, 0.0, 1.0, 4.0], [np.exp(-1.0), 1.0, np.e, np.exp(4.0)]
+    )
 
 
 def test_relu():
     """Tests relu"""
-    _test_elementwise(ops.relu, 
-                      [-1.0, -0.1, 0.0, 0.1, 1.0], 
-                      [0.0, 0.0, 0.0, 0.1, 1.0])
-
+    _test_elementwise(
+        ops.relu, [-1.0, -0.1, 0.0, 0.1, 1.0], [0.0, 0.0, 0.0, 0.1, 1.0]
+    )
 
 
 def test_softplus():
     """Tests softplus"""
-    sp = lambda x: np.log(1.0+np.exp(x))
-    _test_elementwise(ops.softplus, 
-                      [-2.0, -1.0, 0.0, 1.0, 2.0], 
-                      [sp(e) for e in [-2.0, -1.0, 0.0, 1.0, 2.0]])
-
+    sp = lambda x: np.log(1.0 + np.exp(x))
+    _test_elementwise(
+        ops.softplus,
+        [-2.0, -1.0, 0.0, 1.0, 2.0],
+        [sp(e) for e in [-2.0, -1.0, 0.0, 1.0, 2.0]],
+    )
 
 
 def test_sigmoid():
     """Tests sigmoid"""
-    sm = lambda x: 1.0/(1.0 + np.exp(-x))
-    _test_elementwise(ops.sigmoid, 
-                      [-5.0, -1.0, 0.0, 1.0, 5.0], 
-                      [sm(e) for e in [-5.0, -1.0, 0.0, 1.0, 5.0]])
-
+    sm = lambda x: 1.0 / (1.0 + np.exp(-x))
+    _test_elementwise(
+        ops.sigmoid,
+        [-5.0, -1.0, 0.0, 1.0, 5.0],
+        [sm(e) for e in [-5.0, -1.0, 0.0, 1.0, 5.0]],
+    )
 
 
 def test_gather():

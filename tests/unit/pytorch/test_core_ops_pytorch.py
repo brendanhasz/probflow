@@ -1,7 +1,6 @@
 """Tests the probflow.core.ops module when backend = pytorch"""
 
 
-
 import pytest
 
 import numpy as np
@@ -11,16 +10,14 @@ import probflow as pf
 from probflow.core import ops
 
 
-
 def is_close(a, b, tol=1e-3):
-    return np.abs(a-b) < tol
-
+    return np.abs(a - b) < tol
 
 
 def test_kl_divergence():
     """Tests kl_divergence"""
 
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
 
     # Divergence between a distribution and itself should be 0
     dist = torch.distributions.normal.Normal(0, 1)
@@ -35,13 +32,13 @@ def test_kl_divergence():
     d1 = torch.distributions.normal.Normal(0, 1)
     d2 = torch.distributions.normal.Normal(1, 1)
     d3 = torch.distributions.normal.Normal(2, 1)
-    assert (ops.kl_divergence(d1, d2).numpy() <
-            ops.kl_divergence(d1, d3).numpy())
+    assert (
+        ops.kl_divergence(d1, d2).numpy() < ops.kl_divergence(d1, d3).numpy()
+    )
 
     # Should auto-convert probflow distibutions
     dist = pf.Normal(0, 1)
     assert ops.kl_divergence(dist, dist).numpy() == 0.0
-
 
 
 def test_squeeze():
@@ -62,11 +59,10 @@ def test_squeeze():
     assert xo.shape[1] == 2
 
 
-
 def test_expand_dims():
     """Tests expand_dims"""
 
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
 
     val = torch.randn(3)
     val = ops.expand_dims(val, 1)
@@ -81,11 +77,10 @@ def test_expand_dims():
     assert val.shape[1] == 3
 
 
-
 def test_ones():
     """Tests ones"""
 
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
 
     # Scalar
     ones = ops.ones([1])
@@ -119,11 +114,10 @@ def test_ones():
     assert np.all(ones.numpy() == 1.0)
 
 
-
 def test_zeros():
     """Tests zeros"""
 
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
 
     # Scalar
     zeros = ops.zeros([1])
@@ -157,7 +151,6 @@ def test_zeros():
     assert np.all(zeros.numpy() == 0.0)
 
 
-
 def test_eye():
     """Tests eye"""
 
@@ -171,11 +164,10 @@ def test_eye():
     assert eye.numpy()[0, 1] == 0.0
 
 
-
 def test_sum():
     """Tests sum"""
 
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
 
     # Should sum along the last dimension by default
     ones = torch.ones([5, 4, 3])
@@ -207,11 +199,10 @@ def test_sum():
     assert is_close(val.numpy(), 6.4)
 
 
-
 def test_prod():
     """Tests prod"""
 
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
 
     # Should prod along the last dimension by default
     ones = torch.ones([5, 4, 3])
@@ -236,11 +227,10 @@ def test_prod():
     assert is_close(val.numpy(), 7.26)
 
 
-
 def test_mean():
     """Tests mean"""
 
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
 
     # Should mean along the last dimension by default
     ones = torch.ones([5, 4, 3])
@@ -265,11 +255,10 @@ def test_mean():
     assert is_close(val.numpy(), 2.0)
 
 
-
 def test_std():
     """Tests std"""
 
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
 
     # Should std along the last dimension by default
     ones = torch.ones([5, 4, 3])
@@ -296,7 +285,6 @@ def test_std():
     assert is_close(val.numpy(), np.std([1.0, 2.0, 3.0], ddof=1))
 
 
-
 def _test_elementwise(fn, inputs, outputs):
     """Test elementwise function"""
 
@@ -314,85 +302,76 @@ def _test_elementwise(fn, inputs, outputs):
         assert is_close(val.numpy()[i], outputs[i])
 
 
-
 def test_round():
     """Tests round"""
-    pf.set_backend('pytorch')
-    _test_elementwise(ops.round, 
-                      [-0.9, 0.00001, 1.0, 3.14],
-                      [-1.0, 0.0, 1.0, 3.0])
-
+    pf.set_backend("pytorch")
+    _test_elementwise(
+        ops.round, [-0.9, 0.00001, 1.0, 3.14], [-1.0, 0.0, 1.0, 3.0]
+    )
 
 
 def test_abs():
     """Tests abs"""
-    pf.set_backend('pytorch')
-    _test_elementwise(ops.abs, 
-                      [-1.0, 0.0, 1.0], 
-                      [1.0, 0.0, 1.0])
-
+    pf.set_backend("pytorch")
+    _test_elementwise(ops.abs, [-1.0, 0.0, 1.0], [1.0, 0.0, 1.0])
 
 
 def test_square():
     """Tests square"""
-    pf.set_backend('pytorch')
-    _test_elementwise(ops.square, 
-                      [-2.0, -1.0, 0.0, 1.0, 3.0], 
-                      [4.0, 1.0, 0.0, 1.0, 9.0])
-
+    pf.set_backend("pytorch")
+    _test_elementwise(
+        ops.square, [-2.0, -1.0, 0.0, 1.0, 3.0], [4.0, 1.0, 0.0, 1.0, 9.0]
+    )
 
 
 def test_sqrt():
     """Tests sqrt"""
-    pf.set_backend('pytorch')
-    _test_elementwise(ops.sqrt, 
-                      [0.0, 1.0, 4.0, 100.0], 
-                      [0.0, 1.0, 2.0, 10.0])
-
+    pf.set_backend("pytorch")
+    _test_elementwise(ops.sqrt, [0.0, 1.0, 4.0, 100.0], [0.0, 1.0, 2.0, 10.0])
 
 
 def test_exp():
     """Tests exp"""
-    pf.set_backend('pytorch')
-    _test_elementwise(ops.exp, 
-                      [-1.0, 0.0, 1.0, 4.0], 
-                      [np.exp(-1.0), 1.0, np.e, np.exp(4.0)])
-
+    pf.set_backend("pytorch")
+    _test_elementwise(
+        ops.exp, [-1.0, 0.0, 1.0, 4.0], [np.exp(-1.0), 1.0, np.e, np.exp(4.0)]
+    )
 
 
 def test_relu():
     """Tests relu"""
-    pf.set_backend('pytorch')
-    _test_elementwise(ops.relu, 
-                      [-1.0, -0.1, 0.0, 0.1, 1.0], 
-                      [0.0, 0.0, 0.0, 0.1, 1.0])
-
+    pf.set_backend("pytorch")
+    _test_elementwise(
+        ops.relu, [-1.0, -0.1, 0.0, 0.1, 1.0], [0.0, 0.0, 0.0, 0.1, 1.0]
+    )
 
 
 def test_softplus():
     """Tests softplus"""
-    pf.set_backend('pytorch')
-    sp = lambda x: np.log(1.0+np.exp(x))
-    _test_elementwise(ops.softplus, 
-                      [-2.0, -1.0, 0.0, 1.0, 2.0], 
-                      [sp(e) for e in [-2.0, -1.0, 0.0, 1.0, 2.0]])
-
+    pf.set_backend("pytorch")
+    sp = lambda x: np.log(1.0 + np.exp(x))
+    _test_elementwise(
+        ops.softplus,
+        [-2.0, -1.0, 0.0, 1.0, 2.0],
+        [sp(e) for e in [-2.0, -1.0, 0.0, 1.0, 2.0]],
+    )
 
 
 def test_sigmoid():
     """Tests sigmoid"""
-    pf.set_backend('pytorch')
-    sm = lambda x: 1.0/(1.0 + np.exp(-x))
-    _test_elementwise(ops.sigmoid, 
-                      [-5.0, -1.0, 0.0, 1.0, 5.0], 
-                      [sm(e) for e in [-5.0, -1.0, 0.0, 1.0, 5.0]])
-
+    pf.set_backend("pytorch")
+    sm = lambda x: 1.0 / (1.0 + np.exp(-x))
+    _test_elementwise(
+        ops.sigmoid,
+        [-5.0, -1.0, 0.0, 1.0, 5.0],
+        [sm(e) for e in [-5.0, -1.0, 0.0, 1.0, 5.0]],
+    )
 
 
 def test_gather():
     """Tests gather"""
 
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
 
     # Should lookup along 1st axis by default
     vals = torch.Tensor([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
@@ -432,10 +411,9 @@ def test_gather():
     assert output.numpy()[2, 3] == 5.0
 
 
-
 def test_cat():
     """Tests cat"""
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
     a = torch.randn([2, 3, 5])
     b = torch.randn([2, 3, 5])
     val = ops.cat([a, b])
@@ -455,10 +433,9 @@ def test_cat():
     assert val.shape[2] == 10
 
 
-
 def test_additive_logistic_transform():
     """Tests additive_logistic_transform"""
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
     a = torch.randn([2, 3, 5])
     val = ops.additive_logistic_transform(a)
     assert val.ndim == 3
@@ -467,10 +444,9 @@ def test_additive_logistic_transform():
     assert val.shape[2] == 6
 
 
-
 def test_add_col_of():
     """Tests add_col_of"""
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
     a = torch.randn([2, 3, 5])
     val = ops.add_col_of(a, 1)
     assert val.ndim == 3

@@ -1,12 +1,10 @@
 """Tests probflow.utils.initializers"""
 
 
-
 import numpy as np
 import tensorflow as tf
 
 from probflow.utils import initializers
-
 
 
 def test_xavier():
@@ -30,7 +28,6 @@ def test_xavier():
     assert np.std(val1.numpy()) > np.std(val2.numpy())
 
 
-
 def test_scale_xavier():
     """Tests probflow.utils.initializers.scale_xavier"""
 
@@ -52,7 +49,6 @@ def test_scale_xavier():
     assert np.mean(val1.numpy()) > np.mean(val2.numpy())
 
 
-
 def test_pos_xavier():
     """Tests probflow.utils.initializers.pos_xavier"""
 
@@ -72,4 +68,3 @@ def test_pos_xavier():
 
     # Large array should have smaller value spread
     assert np.mean(val1.numpy()) < np.mean(val2.numpy())
-

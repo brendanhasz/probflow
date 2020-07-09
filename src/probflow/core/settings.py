@@ -6,8 +6,8 @@ what sampling method to use, the default device, and default datatype.
 Backend
 -------
 
-Which backend to use.  Can be either 
-`TensorFlow 2.0 <http://www.tensorflow.org/beta/>`_ 
+Which backend to use.  Can be either
+`TensorFlow 2.0 <http://www.tensorflow.org/beta/>`_
 or `PyTorch <http://pytorch.org/>`_.
 
 * :func:`.get_backend`
@@ -15,7 +15,7 @@ or `PyTorch <http://pytorch.org/>`_.
 
 
 Datatype
---------    
+--------
 
 Which datatype to use as the default for parameters.  Depending on your model,
 you might have to set the default datatype to match the datatype of your data.
@@ -48,7 +48,7 @@ Whether to use `Flipout <https://arxiv.org/abs/1803.04386>`_ where possible.
 Sampling context manager
 ------------------------
 
-A context manager which controls how |Parameters| sample from their 
+A context manager which controls how |Parameters| sample from their
 variational distributions while inside the context manager.
 
 * :class:`.Sampling`
@@ -264,7 +264,7 @@ class Sampling:
         >>>     param() #samples are different
         [1.3473024]
 
-    To use multiple samples, use the sampling context manager and set the 
+    To use multiple samples, use the sampling context manager and set the
     number of samples to take with the ``n`` keyword argument:
 
     .. code-block:: pycon

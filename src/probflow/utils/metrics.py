@@ -164,11 +164,11 @@ def get_metric_fn(metric):
         "precision": precision,
         "f1_score": f1_score,
         "f1": f1_score,
-        #'jaccard_similarity': jaccard_similarity,
-        #'jaccard': jaccard_similarity,
-        #'roc_auc': roc_auc,
-        #'auroc': roc_auc,
-        #'auc': roc_auc,
+        # 'jaccard_similarity': jaccard_similarity,
+        # 'jaccard': jaccard_similarity,
+        # 'roc_auc': roc_auc,
+        # 'auroc': roc_auc,
+        # 'auc': roc_auc,
     }
 
     # Return the corresponding function

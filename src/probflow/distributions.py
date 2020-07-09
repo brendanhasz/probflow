@@ -78,10 +78,10 @@ def _ensure_tensor_like(obj, name):
 class Deterministic(BaseDistribution):
     r"""A deterministic distribution.
 
-    A 
+    A
     `deterministic distribution <https://en.wikipedia.org/wiki/Degenerate_distribution>`_
     is a continuous distribution defined over all real numbers, and has one
-    parameter: 
+    parameter:
 
     - a location parameter (``loc`` or :math:`k_0`) which determines the mean
       of the distribution.
@@ -91,7 +91,7 @@ class Deterministic(BaseDistribution):
 
     .. math::
 
-        p(x) = 
+        p(x) =
         \begin{cases}
             1, & \text{if}~x=k_0 \\
             0, & \text{otherwise}
@@ -129,13 +129,13 @@ class Deterministic(BaseDistribution):
 class Normal(BaseDistribution):
     r"""The Normal distribution.
 
-    The 
+    The
     `normal distribution <https://en.wikipedia.org/wiki/Normal_distribution>`_
     is a continuous distribution defined over all real numbers, and has two
-    parameters: 
+    parameters:
 
     - a location parameter (``loc`` or :math:`\mu`) which determines the mean
-      of the distribution, and 
+      of the distribution, and
     - a scale parameter (``scale`` or :math:`\sigma > 0`) which determines the
       standard deviation of the distribution.
 
@@ -190,18 +190,18 @@ class Normal(BaseDistribution):
 class MultivariateNormal(BaseDistribution):
     r"""The multivariate Normal distribution.
 
-    The 
+    The
     `multivariate normal distribution <https://en.wikipedia.org/wiki/Multivariate_normal_distribution>`_
     is a continuous distribution in :math:`d`-dimensional space, and has two
-    parameters: 
+    parameters:
 
     - a location vector (``loc`` or :math:`\boldsymbol{\mu} \in \mathbb{R}^d`)
-      which determines the mean of the distribution, and 
-    - a covariance matrix (``scale`` or 
+      which determines the mean of the distribution, and
+    - a covariance matrix (``scale`` or
       :math:`\boldsymbol{\Sigma} \in \mathbb{R}^{d \times d}_{>0}`) which
       determines the spread and covariance of the distribution.
 
-    A random variable :math:`\mathbf{x} \in \mathbb{R}^d` drawn from a 
+    A random variable :math:`\mathbf{x} \in \mathbb{R}^d` drawn from a
     multivariate normal distribution
 
     .. math::
@@ -214,7 +214,7 @@ class MultivariateNormal(BaseDistribution):
 
         p(\mathbf{x}) = (2\pi)^{-\frac{d}{2}}
             \det(\boldsymbol{\Sigma})^{-\frac{1}{2}}
-            \exp \left( 
+            \exp \left(
                 -\frac{1}{2}
                 (\mathbf{x}-\boldsymbol{\mu})^\top
                 \boldsymbol{\Sigma}^{-1}
@@ -227,10 +227,10 @@ class MultivariateNormal(BaseDistribution):
     Parameters
     ----------
     loc : |ndarray|, or Tensor
-        Mean of the multivariate normal distribution 
+        Mean of the multivariate normal distribution
         (:math:`\boldsymbol{\mu}`).
     cov : |ndarray|, or Tensor
-        Covariance matrix of the multivariate normal distribution 
+        Covariance matrix of the multivariate normal distribution
         (:math:`\boldsymbol{\Sigma}`).
     """
 
@@ -263,7 +263,7 @@ class MultivariateNormal(BaseDistribution):
 class StudentT(BaseDistribution):
     r"""The Student-t distribution.
 
-    The 
+    The
     `Student's t-distribution <https://en.wikipedia.org/wiki/Student%27s_t-distribution>`_
     is a continuous distribution defined over all real numbers, and has three
     parameters:
@@ -272,7 +272,7 @@ class StudentT(BaseDistribution):
       determines how many degrees of freedom the distribution has,
     - a location parameter (``loc`` or :math:`\mu`) which determines the mean
       of the distribution, and
-    - a scale parameter (``scale`` or :math:`\sigma > 0`) which determines the 
+    - a scale parameter (``scale`` or :math:`\sigma > 0`) which determines the
       standard deviation of the distribution.
 
     A random variable :math:`x` drawn from a Student's t-distribution
@@ -336,7 +336,7 @@ class StudentT(BaseDistribution):
     def mean(self):
         """Compute the mean of this distribution.
 
-        Note that the mean of a StudentT distribution is technically 
+        Note that the mean of a StudentT distribution is technically
         undefined when df=1.
         """
         return self.loc
@@ -345,13 +345,13 @@ class StudentT(BaseDistribution):
 class Cauchy(BaseDistribution):
     r"""The Cauchy distribution.
 
-    The 
+    The
     `Cauchy distribution <https://en.wikipedia.org/wiki/Cauchy_distribution>`_
     is a continuous distribution defined over all real numbers, and has two
-    parameters: 
+    parameters:
 
     - a location parameter (``loc`` or :math:`\mu`) which determines the
-      median of the distribution, and 
+      median of the distribution, and
     - a scale parameter (``scale`` or :math:`\gamma > 0`) which determines the
       spread of the distribution.
 
@@ -365,7 +365,7 @@ class Cauchy(BaseDistribution):
 
     .. math::
 
-        p(x) = \frac{1}{\pi \gamma \left[  1 + 
+        p(x) = \frac{1}{\pi \gamma \left[  1 +
                \left(  \frac{x-\mu}{\gamma} \right)^2 \right]}
 
     The Cauchy distribution is equivalent to a Student's t-distribution with
@@ -416,12 +416,12 @@ class Cauchy(BaseDistribution):
 class Gamma(BaseDistribution):
     r"""The Gamma distribution.
 
-    The 
+    The
     `Gamma distribution <https://en.wikipedia.org/wiki/Gamma_distribution>`_
     is a continuous distribution defined over all positive real numbers, and
-    has two parameters: 
+    has two parameters:
 
-    - a shape parameter (``shape`` or :math:`\alpha > 0`, a.k.a. 
+    - a shape parameter (``shape`` or :math:`\alpha > 0`, a.k.a.
       "concentration"), and
     - a rate parameter (``rate`` or :math:`\beta > 0`).
 
@@ -482,12 +482,12 @@ class Gamma(BaseDistribution):
 class InverseGamma(BaseDistribution):
     r"""The Inverse-gamma distribution.
 
-    The 
+    The
     `Inverse-gamma distribution <https://en.wikipedia.org/wiki/Inverse-gamma_distribution>`_
     is a continuous distribution defined over all positive real numbers, and
-    has two parameters: 
+    has two parameters:
 
-    - a shape parameter (``shape`` or :math:`\alpha > 0`, a.k.a. 
+    - a shape parameter (``shape`` or :math:`\alpha > 0`, a.k.a.
       "concentration"), and
     - a rate parameter (``rate`` or :math:`\beta > 0`, a.k.a. "scale").
 
@@ -556,10 +556,10 @@ class InverseGamma(BaseDistribution):
 class Bernoulli(BaseDistribution):
     r"""The Bernoulli distribution.
 
-    The 
+    The
     `Bernoulli distribution <https://en.wikipedia.org/wiki/Bernoulli_distribution>`_
     is a discrete distribution defined over only two integers: 0 and 1.
-    It has one parameter: 
+    It has one parameter:
 
     - a probability parameter (:math:`0 \leq p \leq 1`).
 
@@ -580,10 +580,10 @@ class Bernoulli(BaseDistribution):
     Parameters
     ----------
     logits : int, float, |ndarray|, or Tensor
-        Logit-transformed probability parameter of the  Bernoulli 
+        Logit-transformed probability parameter of the  Bernoulli
         distribution (:math:`\p`)
     probs : int, float, |ndarray|, or Tensor
-        Logit-transformed probability parameter of the  Bernoulli 
+        Logit-transformed probability parameter of the  Bernoulli
         distribution (:math:`\p`)
     """
 
@@ -618,9 +618,9 @@ class Bernoulli(BaseDistribution):
 class Categorical(BaseDistribution):
     r"""The Categorical distribution.
 
-    The 
+    The
     `Categorical distribution <https://en.wikipedia.org/wiki/Categorical_distribution>`_
-    is a discrete distribution defined over :math:`N` integers: 0 through 
+    is a discrete distribution defined over :math:`N` integers: 0 through
     :math:`N-1`. A random variable :math:`x` drawn from a Categorical
     distribution
 
@@ -642,7 +642,7 @@ class Categorical(BaseDistribution):
     Parameters
     ----------
     logits : int, float, |ndarray|, or Tensor
-        Logit-transformed category probabilities 
+        Logit-transformed category probabilities
         (:math:`\frac{\mathbf{\theta}}{1-\mathbf{\theta}}`)
     probs : int, float, |ndarray|, or Tensor
         Raw category probabilities (:math:`\mathbf{\theta}`)
@@ -742,10 +742,10 @@ class OneHotCategorical(BaseDistribution):
 class Poisson(BaseDistribution):
     r"""The Poisson distribution.
 
-    The 
+    The
     `Poisson distribution <https://en.wikipedia.org/wiki/Poisson_distribution>`_
     is a discrete distribution defined over all non-negativve real integers,
-    and has one parameter: 
+    and has one parameter:
 
     - a rate parameter (``rate`` or :math:`\lambda`) which determines the mean
       of the distribution.
@@ -794,14 +794,14 @@ class Poisson(BaseDistribution):
 class Dirichlet(BaseDistribution):
     r"""The Dirichlet distribution.
 
-    The 
+    The
     `Dirichlet distribution <http://en.wikipedia.org/wiki/Dirichlet_distribution>`_
     is a continuous distribution defined over the :math:`k`-simplex, and has
-    one vector of parameters: 
+    one vector of parameters:
 
-    - concentration parameters (``concentration`` or 
+    - concentration parameters (``concentration`` or
       :math:`\boldsymbol{\alpha} \in \mathbb{R}^{k}_{>0}`),
-      a vector of positive numbers which determine the relative likelihoods of 
+      a vector of positive numbers which determine the relative likelihoods of
       different categories represented by the distribution.
 
     A random variable (a vector) :math:`\mathbf{x}` drawn from a Dirichlet
@@ -815,7 +815,7 @@ class Dirichlet(BaseDistribution):
 
     .. math::
 
-        p(\mathbf{x}) = \frac{1}{\mathbf{\text{B}}(\boldsymbol{\alpha})} 
+        p(\mathbf{x}) = \frac{1}{\mathbf{\text{B}}(\boldsymbol{\alpha})}
                         \prod_{i=1}^K x_i^{\alpha_i-1}
 
     where :math:`\mathbf{\text{B}}` is the multivariate beta function.
@@ -882,8 +882,7 @@ class Mixture(BaseDistribution):
     def __call__(self):
         """Get the distribution object from the backend"""
         if get_backend() == "pytorch":
-            import torch.distributions as tod
-
+            # import torch.distributions as tod
             raise NotImplementedError
         else:
             import tensorflow as tf
@@ -951,8 +950,7 @@ class HiddenMarkovModel(BaseDistribution):
     def __call__(self):
         """Get the distribution object from the backend"""
         if get_backend() == "pytorch":
-            import torch.distributions as tod
-
+            # import torch.distributions as tod
             raise NotImplementedError
         else:
             from tensorflow_probability import distributions as tfd

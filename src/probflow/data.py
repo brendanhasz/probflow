@@ -22,8 +22,6 @@ import multiprocessing as mp
 import numpy as np
 import pandas as pd
 
-from probflow.core.settings import get_backend
-from probflow.core.settings import get_datatype
 from probflow.core.base import BaseDataGenerator
 
 
@@ -119,14 +117,14 @@ class ArrayDataGenerator(DataGenerator):
         Independent variable values (or, if fitting a generative model,
         the dependent variable values).  Should be of shape (Nsamples,...)
     y : |None| or |ndarray| or |DataFrame| or |Series|
-        Dependent variable values (or, if fitting a generative model, 
+        Dependent variable values (or, if fitting a generative model,
         ``None``). Should be of shape (Nsamples,...).  Default = ``None``
     batch_size : int
         Number of samples to use per minibatch.  Use ``None`` to use a single
         batch for all the data.
         Default = ``None``
     shuffle : bool
-        Whether to shuffle the data each epoch.  
+        Whether to shuffle the data each epoch.
         Default = ``False``
     testing : bool
         Whether to treat data as testing data (allow no dependent variable).

@@ -1,37 +1,32 @@
 """Tests the probflow.modules module when backend = tensorflow"""
 
 
-
 import pytest
-
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
-tfd = tfp.distributions
-
 from probflow.core.settings import Sampling
 import probflow.core.ops as O
 from probflow.parameters import *
 from probflow.modules import *
 
+tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
-    return np.abs(a-b) < tol
-
+    return np.abs(a - b) < tol
 
 
 def test_Module():
     """Tests the Module abstract base class"""
 
     class TestModule(Module):
-
         def __init__(self):
-            self.p1 = Parameter(name='TestParam1')
-            self.p2 = Parameter(name='TestParam2', shape=[5, 4])
+            self.p1 = Parameter(name="TestParam1")
+            self.p2 = Parameter(name="TestParam2", shape=[5, 4])
 
         def __call__(self, x):
-            return O.sum(self.p2(), axis=None) + x*self.p1()
+            return O.sum(self.p2(), axis=None) + x * self.p1()
 
     the_module = TestModule()
 
@@ -41,8 +36,8 @@ def test_Module():
     assert len(param_list) == 2
     assert all(isinstance(p, Parameter) for p in param_list)
     param_names = [p.name for p in param_list]
-    assert 'TestParam1' in param_names
-    assert 'TestParam2' in param_names
+    assert "TestParam1" in param_names
+    assert "TestParam2" in param_names
 
     # n_parameters property
     nparams = the_module.n_parameters
@@ -84,10 +79,9 @@ def test_Module():
 
     # A second test module which contains sub-modules
     class TestModule2(Module):
-
         def __init__(self, shape):
             self.mod = TestModule()
-            self.p3 = Parameter(name='TestParam3', shape=shape)
+            self.p3 = Parameter(name="TestParam3", shape=shape)
 
         def __call__(self, x):
             return self.mod(x) + O.sum(self.p3(), axis=None)
@@ -100,9 +94,9 @@ def test_Module():
     assert len(param_list) == 3
     assert all(isinstance(p, Parameter) for p in param_list)
     param_names = [p.name for p in param_list]
-    assert 'TestParam1' in param_names
-    assert 'TestParam2' in param_names
-    assert 'TestParam3' in param_names
+    assert "TestParam1" in param_names
+    assert "TestParam2" in param_names
+    assert "TestParam3" in param_names
 
     # n_params property
     nparams = the_module.n_parameters
@@ -140,17 +134,24 @@ def test_Module():
 
     # Another test module which contains lists/dicts w/ parameters
     class TestModule3(Module):
-
         def __init__(self):
-            self.a_list = [Parameter(name='TestParam4'),
-                           Parameter(name='TestParam5')]
-            self.a_dict = {'a': Parameter(name='TestParam6'),
-                           'b': Parameter(name='TestParam7')}
+            self.a_list = [
+                Parameter(name="TestParam4"),
+                Parameter(name="TestParam5"),
+            ]
+            self.a_dict = {
+                "a": Parameter(name="TestParam6"),
+                "b": Parameter(name="TestParam7"),
+            }
 
         def __call__(self, x):
-            return (tf.ones([x.shape[0], 1]) + 
-                    self.a_list[0]() + self.a_list[1]() + 
-                    self.a_dict['a']() + self.a_dict['b']())
+            return (
+                tf.ones([x.shape[0], 1])
+                + self.a_list[0]()
+                + self.a_list[1]()
+                + self.a_dict["a"]()
+                + self.a_dict["b"]()
+            )
 
     the_module = TestModule3()
 
@@ -160,10 +161,10 @@ def test_Module():
     assert len(param_list) == 4
     assert all(isinstance(p, Parameter) for p in param_list)
     param_names = [p.name for p in param_list]
-    assert 'TestParam4' in param_names
-    assert 'TestParam5' in param_names
-    assert 'TestParam6' in param_names
-    assert 'TestParam7' in param_names
+    assert "TestParam4" in param_names
+    assert "TestParam5" in param_names
+    assert "TestParam6" in param_names
+    assert "TestParam7" in param_names
 
     # n_params property
     nparams = the_module.n_parameters
@@ -178,12 +179,11 @@ def test_Module():
 
     # And should also be able to pass two dists to add_kl_loss
     the_module.reset_kl_loss()
-    d1 = tfd.Normal(0., 1.)
-    d2 = tfd.Normal(1., 1.)
+    d1 = tfd.Normal(0.0, 1.0)
+    d2 = tfd.Normal(1.0, 1.0)
     assert the_module.kl_loss_batch() == 0
     the_module.add_kl_loss(d1, d2)
-    assert the_module.kl_loss_batch().numpy() > 0.
-
+    assert the_module.kl_loss_batch().numpy() > 0.0
 
 
 def test_Dense():
@@ -222,11 +222,11 @@ def test_Dense():
     assert len(param_list) == 2
     assert all(isinstance(p, Parameter) for p in param_list)
     param_names = [p.name for p in dense.parameters]
-    assert 'Dense_weights' in param_names
-    assert 'Dense_bias' in param_names
-    weights = [p for p in dense.parameters if p.name=='Dense_weights']
+    assert "Dense_weights" in param_names
+    assert "Dense_bias" in param_names
+    weights = [p for p in dense.parameters if p.name == "Dense_weights"]
     assert weights[0].shape == [5, 1]
-    bias = [p for p in dense.parameters if p.name=='Dense_bias']
+    bias = [p for p in dense.parameters if p.name == "Dense_bias"]
     assert bias[0].shape == [1, 1]
 
     # kl_loss should return sum of KL losses
@@ -244,18 +244,13 @@ def test_Dense():
     assert samples1.shape[1] == 1
 
 
-
 def test_Sequential():
     """Tests probflow.modules.Sequential"""
 
     # Create the module
-    seq = Sequential([
-        Dense(5, 10),
-        tf.nn.relu,
-        Dense(10, 3),
-        tf.nn.relu,
-        Dense(3, 1),
-    ])
+    seq = Sequential(
+        [Dense(5, 10), tf.nn.relu, Dense(10, 3), tf.nn.relu, Dense(3, 1)]
+    )
 
     # Steps should be list
     assert isinstance(seq.steps, list)
@@ -285,8 +280,8 @@ def test_Sequential():
     assert len(param_list) == 6
     assert all(isinstance(p, Parameter) for p in param_list)
     param_names = [p.name for p in seq.parameters]
-    assert 'Dense_weights' in param_names
-    assert 'Dense_bias' in param_names
+    assert "Dense_weights" in param_names
+    assert "Dense_bias" in param_names
     param_shapes = [p.shape for p in seq.parameters]
     assert [5, 10] in param_shapes
     assert [1, 10] in param_shapes
@@ -299,7 +294,6 @@ def test_Sequential():
     kl_loss = seq.kl_loss()
     assert isinstance(kl_loss, tf.Tensor)
     assert kl_loss.ndim == 0
-
 
 
 def test_BatchNormalization():
@@ -332,8 +326,8 @@ def test_BatchNormalization():
     assert len(param_list) == 2
     assert all(isinstance(p, Parameter) for p in param_list)
     param_names = [p.name for p in bn.parameters]
-    assert 'BatchNormalization_weight' in param_names
-    assert 'BatchNormalization_bias' in param_names
+    assert "BatchNormalization_weight" in param_names
+    assert "BatchNormalization_bias" in param_names
     param_shapes = [p.shape for p in bn.parameters]
     assert [5] in param_shapes
 
@@ -343,17 +337,18 @@ def test_BatchNormalization():
     assert kl_loss.ndim == 0
 
     # Test it works w/ dense layer and sequential
-    seq = Sequential([
-        Dense(5, 10),
-        BatchNormalization(10),
-        tf.nn.relu,
-        Dense(10, 3),
-        BatchNormalization(3),
-        tf.nn.relu,
-        Dense(3, 1),
-    ])
+    seq = Sequential(
+        [
+            Dense(5, 10),
+            BatchNormalization(10),
+            tf.nn.relu,
+            Dense(10, 3),
+            BatchNormalization(3),
+            tf.nn.relu,
+            Dense(3, 1),
+        ]
+    )
     assert len(seq.parameters) == 10
-
 
 
 def test_Embedding():
@@ -374,7 +369,7 @@ def test_Embedding():
 
     # Check parameters
     assert len(emb.parameters) == 1
-    assert emb.parameters[0].name == 'Embeddings_0'
+    assert emb.parameters[0].name == "Embeddings_0"
     assert emb.parameters[0].shape == [10, 5]
 
     # Test MAP outputs are the same
@@ -399,17 +394,16 @@ def test_Embedding():
     kl_loss = emb.kl_loss()
     assert isinstance(kl_loss, tf.Tensor)
     assert kl_loss.ndim == 0
-    
+
     # Should be able to embed multiple columns by passing list of k and d
     emb = Embedding([10, 20], [5, 4])
 
     # Check parameters
     assert len(emb.parameters) == 2
-    assert emb.parameters[0].name == 'Embeddings_0'
+    assert emb.parameters[0].name == "Embeddings_0"
     assert emb.parameters[0].shape == [10, 5]
-    assert emb.parameters[1].name == 'Embeddings_1'
+    assert emb.parameters[1].name == "Embeddings_1"
     assert emb.parameters[1].shape == [20, 4]
-    
 
     # Test MAP outputs are the same
     x1 = tf.random.uniform([20, 1], minval=0, maxval=9, dtype=tf.dtypes.int32)

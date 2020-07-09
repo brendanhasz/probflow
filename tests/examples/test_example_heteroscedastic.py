@@ -7,17 +7,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow_probability as tfp
-tfd = tfp.distributions
-
 import probflow as pf
 
+tfd = tfp.distributions
 
 
 def test_correlation(plot):
     """Tests correlation example"""
 
     class RobustHeteroscedasticRegression(pf.ContinuousModel):
-
         def __init__(self, dims):
             self.w = pf.Parameter([dims, 2])
             self.b = pf.Parameter(2)
@@ -34,7 +32,7 @@ def test_correlation(plot):
     y = np.random.randn(100, 1)
 
     model.fit(X, y)
-    
+
     # TODO: check output looks correct
-    #if plot:
+    # if plot:
     #    plt.show()

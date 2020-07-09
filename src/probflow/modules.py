@@ -1,7 +1,7 @@
 """
 Modules are objects which take Tensor(s) as input, perform some computation on
 that Tensor, and output a Tensor.  Modules can create and contain |Parameters|.
-For example, neural network layers are good examples of a |Module|, since 
+For example, neural network layers are good examples of a |Module|, since
 they store parameters, and use those parameters to perform a computation
 (the forward pass of the data through the layer).
 
@@ -30,7 +30,9 @@ from typing import Union, List, Dict, Callable, Type
 import probflow.core.ops as O
 from probflow.core.settings import get_flipout
 from probflow.core.settings import get_backend
-from probflow.core.base import *
+from probflow.core.base import BaseDistribution
+from probflow.core.base import BaseModule
+from probflow.core.base import BaseParameter
 from probflow.distributions import Deterministic
 from probflow.distributions import Normal
 from probflow.parameters import Parameter
@@ -137,7 +139,7 @@ class Module(BaseModule):
 
         Example
         -------
-        
+
         .. code-block:: python3
 
             import numpy as np
@@ -256,7 +258,7 @@ class Sequential(Module):
 class BatchNormalization(Module):
     r"""A layer which normalizes its inputs.
 
-    Batch normalization is a technique which normalizes, re-scales, and 
+    Batch normalization is a technique which normalizes, re-scales, and
     offsets the output of one layer before passing it on to another layer
     [1]_.  It often leads to faster training of neural networks, and better
     generalization error by stabilizing the change in the layers' input
@@ -269,7 +271,7 @@ class BatchNormalization(Module):
 
     .. math::
 
-        \text{BatchNorm}(x_{ij}) = 
+        \text{BatchNorm}(x_{ij}) =
         \gamma_i \left( \frac{x_{ij} - \mu_i}{\sigma_i} \right)
         + \beta_i
 
@@ -280,14 +282,14 @@ class BatchNormalization(Module):
 
         \mu_i = \frac{1}{N} \sum_{k=1}^{N} x_{ik}
 
-    and :math:`\sigma_i` is the standard deviation of the :math:`i`-th 
+    and :math:`\sigma_i` is the standard deviation of the :math:`i`-th
     element across the batch:
 
     .. math::
 
         \sigma_i = \frac{1}{N} \sum_{k=1}^{N} (x_{ik} - \mu_i)^2
 
-    and :math:`\gamma` and :math:`\beta` are two free parameters for each 
+    and :math:`\gamma` and :math:`\beta` are two free parameters for each
     element.
 
 
@@ -354,7 +356,7 @@ class BatchNormalization(Module):
         Batch Normalization: Accelerating Deep Network Training by
         Reducing Internal Covariate Shift.
         *arXiv preprint*, 2015. http://arxiv.org/abs/1502.03167
-    .. [2] Shibani Santurkar, Dimitris Tsipras, Andrew Ilyas, and 
+    .. [2] Shibani Santurkar, Dimitris Tsipras, Andrew Ilyas, and
         Aleksander Madry. How Does Batch Normalization Help Optimization?
         *arXiv preprint*, 2018. http://arxiv.org/abs/1805.11604
     """
@@ -446,7 +448,7 @@ class Embedding(Module):
 
         emb = Embedding(k=10000, d=50)
 
-        ids = tf.random.uniform([1000000], minval=1, maxval=10000, 
+        ids = tf.random.uniform([1000000], minval=1, maxval=10000,
                                 dtype=tf.dtypes.int64)
 
         embeddings = emb(ids)

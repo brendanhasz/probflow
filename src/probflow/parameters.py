@@ -2,23 +2,23 @@
 Parameters are values which characterize the behavior of a model.  When
 fitting a model, we want to find the values of the parameters which
 best allow the model to explain the data.  However, with Bayesian modeling
-we want not only to find the single *best* value for each parameter, but a 
-probability distribution which describes how likely any given value of 
+we want not only to find the single *best* value for each parameter, but a
+probability distribution which describes how likely any given value of
 a parameter is to be the best or true value.
 
 Parameters have both priors (probability distributions which describe how
 likely we think different values for the parameter are *before* taking into
-consideration the current data), and posteriors (probability distributions 
+consideration the current data), and posteriors (probability distributions
 which describe how likely we think different values for the parameter are
-*after* taking into consideration the current data).  The prior is set 
-to a specific distribution before fitting the model.  While the *type* of 
-distribution used for the posterior is set before fitting the model, the 
+*after* taking into consideration the current data).  The prior is set
+to a specific distribution before fitting the model.  While the *type* of
+distribution used for the posterior is set before fitting the model, the
 shape of that distribution (the value of the parameters which define the
 distribution) is optimized while fitting the model.
 See the :ref:`ug_math` section for more info.
 
 The :class:`.Parameter` class can be used to create any probabilistic
-parameter. 
+parameter.
 
 For convenience, ProbFlow also includes some classes which are special cases
 of a :class:`.Parameter`:
@@ -92,8 +92,8 @@ class Parameter(BaseParameter):
     This makes it easier to access specific parameters after fitting the
     model (e.g. in order to view the posterior distribution).
 
-    The number of independent parameters represented by this 
-    :class:`.Parameter` object can be set using the ``shape`` argument.  For 
+    The number of independent parameters represented by this
+    :class:`.Parameter` object can be set using the ``shape`` argument.  For
     example, to create a vector of 5 parameters, set ``shape=5``, or to create
     a 20x7 matrix of parameters set ``shape=[20,7]``.
 
@@ -123,7 +123,7 @@ class Parameter(BaseParameter):
         variables given ``shape`` as the single argument.
     var_transform : Dict[str, callable]
         Transform to apply to each variable of the variational posterior.
-        For example to transform the standard deviation parameter from 
+        For example to transform the standard deviation parameter from
         untransformed space to transformed, positive, space, use
         ``initializer={'scale': tf.random.randn}`` and
         ``var_transform={'scale': tf.nn.softplus}``
@@ -366,7 +366,7 @@ class Parameter(BaseParameter):
             * ``'hist'`` - histogram
 
         bins : int or list or |ndarray|
-            Number of bins to use for the posterior density histogram (if 
+            Number of bins to use for the posterior density histogram (if
             ``style='hist'``), or a list or vector of bin edges.
         ci : float between 0 and 1
             Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
@@ -380,7 +380,7 @@ class Parameter(BaseParameter):
             See https://matplotlib.org/tutorials/colors/colors.html
             Default = use the default matplotlib color cycle
         kwargs
-            Additional keyword arguments are passed to 
+            Additional keyword arguments are passed to
             :meth:`.utils.plotting.plot_dist`
         """
 
@@ -428,7 +428,7 @@ class Parameter(BaseParameter):
             * ``'hist'`` - histogram
 
         bins : int or list or |ndarray|
-            Number of bins to use for the prior density histogram (if 
+            Number of bins to use for the prior density histogram (if
             ``style='hist'``), or a list or vector of bin edges.
         ci : float between 0 and 1
             Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
@@ -508,7 +508,7 @@ class ScaleParameter(Parameter):
     r"""Standard deviation parameter.
 
     This is a convenience class for creating a standard deviation parameter
-    (:math:`\sigma`).  It is created by first constructing a variance 
+    (:math:`\sigma`).  It is created by first constructing a variance
     parameter (:math:`\sigma^2`) which uses an inverse gamma distribution as
     the variational posterior.
 
@@ -589,7 +589,7 @@ class ScaleParameter(Parameter):
 class CategoricalParameter(Parameter):
     r"""Categorical parameter.
 
-    This is a convenience class for creating a categorical parameter 
+    This is a convenience class for creating a categorical parameter
     :math:`\beta` with a Categorical posterior:
 
     .. math::
@@ -684,7 +684,7 @@ class CategoricalParameter(Parameter):
 class DirichletParameter(Parameter):
     r"""Dirichlet parameter.
 
-    This is a convenience class for creating a parameter 
+    This is a convenience class for creating a parameter
     :math:`\theta` with a Dirichlet posterior:
 
     .. math::
@@ -786,7 +786,7 @@ class BoundedParameter(Parameter):
 
     .. math::
 
-        \text{Logit}(\beta) = \log \left( \frac{\beta}{1-\beta} \right) 
+        \text{Logit}(\beta) = \log \left( \frac{\beta}{1-\beta} \right)
             \sim \text{Normal}(\mu, \sigma)
 
 
@@ -865,7 +865,7 @@ class BoundedParameter(Parameter):
 class PositiveParameter(Parameter):
     r"""A parameter which takes only positive values.
 
-    This is a convenience class for creating a parameter :math:`\beta` which 
+    This is a convenience class for creating a parameter :math:`\beta` which
     can only take positive values.  It uses a normal variational posterior
     distribution and a softplus transform:
 
@@ -935,7 +935,7 @@ class PositiveParameter(Parameter):
 
 
 class DeterministicParameter(Parameter):
-    r"""A parameter which takes only a single value (i.e., the posterior is a 
+    r"""A parameter which takes only a single value (i.e., the posterior is a
     single point value, not a probability distribution).
 
 
@@ -1022,7 +1022,7 @@ class MultivariateNormalParameter(Parameter):
     References
     ----------
 
-    - Jose C. Pinheiro & Douglas M. Bates. 
+    - Jose C. Pinheiro & Douglas M. Bates.
       `Unconstrained Parameterizations for Variance-Covariance Matrices <https://dx.doi.org/10.1007/BF00140873>`_
       *Statistics and Computing*, 1996.
 

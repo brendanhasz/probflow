@@ -1,7 +1,6 @@
 """Tests the probflow.core.settings module"""
 
 
-
 import pytest
 
 import tensorflow as tf
@@ -9,27 +8,25 @@ import tensorflow as tf
 from probflow.core import settings
 
 
-
 def test_backend():
     """Tests setting and getting the backend"""
 
     # Default should be tensorflow
-    assert settings.get_backend() == 'tensorflow'
+    assert settings.get_backend() == "tensorflow"
 
     # Should be able to change to pytorch and back
-    settings.set_backend('pytorch')
-    assert settings.get_backend() == 'pytorch'
-    settings.set_backend('tensorflow')
-    assert settings.get_backend() == 'tensorflow'
+    settings.set_backend("pytorch")
+    assert settings.get_backend() == "pytorch"
+    settings.set_backend("tensorflow")
+    assert settings.get_backend() == "tensorflow"
 
     # But not anything else
     with pytest.raises(ValueError):
-        settings.set_backend('lalala')
+        settings.set_backend("lalala")
 
     # And it has to be a str
     with pytest.raises(TypeError):
         settings.set_backend(1)
-
 
 
 def test_datatype():
@@ -44,8 +41,7 @@ def test_datatype():
     settings.set_datatype(tf.float32)
 
     with pytest.raises(TypeError):
-        settings.set_datatype('lala')
-
+        settings.set_datatype("lala")
 
 
 def test_samples():
@@ -60,7 +56,7 @@ def test_samples():
     settings.set_samples(10)
     assert settings.get_samples() == 10
     settings.set_samples(None)
-    assert settings.get_samples() == None
+    assert settings.get_samples() is None
 
     # But not anything <1
     with pytest.raises(ValueError):
@@ -72,8 +68,7 @@ def test_samples():
     with pytest.raises(TypeError):
         settings.set_samples(3.14)
     with pytest.raises(TypeError):
-        settings.set_samples('lalala')
-
+        settings.set_samples("lalala")
 
 
 def test_flipout():
@@ -84,9 +79,9 @@ def test_flipout():
 
     # Should be able to change to True or False
     settings.set_flipout(True)
-    assert settings.get_flipout() == True
+    assert settings.get_flipout() is True
     settings.set_flipout(False)
-    assert settings.get_flipout() == False
+    assert settings.get_flipout() is False
 
     # But only bool
     with pytest.raises(TypeError):
@@ -94,15 +89,14 @@ def test_flipout():
     with pytest.raises(TypeError):
         settings.set_flipout(1)
     with pytest.raises(TypeError):
-        settings.set_flipout('lalala')
-
+        settings.set_flipout("lalala")
 
 
 def test_sampling():
     """Tests the Sampling context manager"""
 
     # Defaults before sampling
-    assert settings.get_backend() == 'tensorflow'
+    assert settings.get_backend() == "tensorflow"
     assert settings.get_samples() is None
     assert settings.get_flipout() is False
 
@@ -112,7 +106,7 @@ def test_sampling():
         assert settings.get_flipout() is False
 
     # Should return to defaults after sampling
-    assert settings.get_backend() == 'tensorflow'
+    assert settings.get_backend() == "tensorflow"
     assert settings.get_samples() is None
     assert settings.get_flipout() is False
 
@@ -122,6 +116,6 @@ def test_sampling():
         assert settings.get_flipout() is True
 
     # Again should return to defaults after __exit__
-    assert settings.get_backend() == 'tensorflow'
+    assert settings.get_backend() == "tensorflow"
     assert settings.get_samples() is None
     assert settings.get_flipout() is False

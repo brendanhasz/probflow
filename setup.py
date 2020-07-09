@@ -29,7 +29,8 @@ setup(
             "torch >= 1.2.0",
             "pytest >= 5.1.2",
             "pytest-cov >= 2.7.1",
-            "pylint >= 2.3.1",
+            "flake8 >= 3.8.3",
+            "black >= 19.10b0",
         ],
         "docs": [
             "tensorflow == 2.2.0",

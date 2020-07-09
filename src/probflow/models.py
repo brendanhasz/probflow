@@ -22,7 +22,6 @@ __all__ = [
 ]
 
 
-import warnings
 from typing import List, Union, Callable
 
 import numpy as np
@@ -30,10 +29,6 @@ import matplotlib.pyplot as plt
 
 from probflow.core.settings import get_backend
 from probflow.core.settings import Sampling
-from probflow.core.base import BaseParameter
-from probflow.core.base import BaseDistribution
-from probflow.core.base import BaseModule
-from probflow.core.base import BaseDataGenerator
 from probflow.core.base import BaseCallback
 import probflow.core.ops as O
 from probflow.utils.casting import to_numpy
@@ -140,7 +135,7 @@ class Model(Module):
     def _train_step_pytorch(self, n, flipout=False, eager=False):
         """Get the training step function for PyTorch"""
 
-        import torch
+        # import torch
 
         def train_fn(x_data, y_data):
             self.reset_kl_loss()
@@ -191,7 +186,7 @@ class Model(Module):
             Independent variable values (or, if fitting a generative model,
             the dependent variable values).  Should be of shape (Nsamples,...)
         y : |None| or |ndarray| or |DataFrame| or |Series|
-            Dependent variable values (or, if fitting a generative model, 
+            Dependent variable values (or, if fitting a generative model,
             ``None``). Should be of shape (Nsamples,...).  Default = ``None``
         batch_size : int
             Number of samples to use per minibatch.
@@ -216,14 +211,14 @@ class Model(Module):
             Note that the learning rate can be updated during training using
             the set_learning_rate method.
             Default is :math:`\exp (- \log_{10} (N_p N_b))`, where :math:`N_p`
-            is the number of parameters in the model, and :math:`N_b` is the 
+            is the number of parameters in the model, and :math:`N_b` is the
             number of samples per batch (``batch_size``).
         flipout : bool
             Whether to use flipout during training where possible
             Default = True
         num_workers : None or int > 0
-            Number of parallel processes to run for loading the data.  If 
-            ``None``, will not use parallel processes.  If an integer, will 
+            Number of parallel processes to run for loading the data.  If
+            ``None``, will not use parallel processes.  If an integer, will
             use a process pool with that many processes.
             Default = None
         callbacks : List[BaseCallback]
@@ -347,8 +342,8 @@ class Model(Module):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
-            "features"). 
+            Independent variable values of the dataset to evaluate (aka the
+            "features").
         n : int
             Number of samples to draw from the model per datapoint.
 
@@ -372,8 +367,8 @@ class Model(Module):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
-            "features"). 
+            Independent variable values of the dataset to evaluate (aka the
+            "features").
         n : int
             Number of samples to draw from the model per datapoint.
 
@@ -397,8 +392,8 @@ class Model(Module):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
-            "features"). 
+            Independent variable values of the dataset to evaluate (aka the
+            "features").
         n : int
             Number of samples to draw from the model per datapoint.
 
@@ -421,8 +416,8 @@ class Model(Module):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
-            "features"). 
+            Independent variable values of the dataset to evaluate (aka the
+            "features").
         method : str
             Method to use for prediction.  If ``'mean'``, uses the mean of the
             predicted target distribution as the prediction.  If ``'mode'``,
@@ -487,11 +482,11 @@ class Model(Module):
             * callable: a function which takes (y_true, y_pred)
 
         x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| to generate both x and y.
         y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the 
-            "target"). 
+            Dependent variable values of the dataset to evaluate (aka the
+            "target").
 
         Returns
         -------
@@ -541,7 +536,7 @@ class Model(Module):
             Means of the parameter posterior distributions.  A dictionary
             where the keys contain the parameter names and the values contain
             |ndarrays| with the posterior means.  The |ndarrays| are the same
-            size as each parameter. Or just the |ndarray| if 
+            size as each parameter. Or just the |ndarray| if
             ``params`` was a str.
 
         """
@@ -556,7 +551,7 @@ class Model(Module):
         Parameters
         ----------
         params : str or List[str] or None
-            Parameter name(s) to sample. 
+            Parameter name(s) to sample.
             Default is to get a sample for all parameters in the model.
         num_samples : int
             Number of samples to take from each posterior distribution.
@@ -569,7 +564,7 @@ class Model(Module):
             Samples from the parameter posterior distributions.  A dictionary
             where the keys contain the parameter names and the values contain
             |ndarrays| with the posterior samples.  The |ndarrays| are of size
-            (``num_samples``, param.shape). Or just the |ndarray| if 
+            (``num_samples``, param.shape). Or just the |ndarray| if
             ``params`` was a str.
         """
         return self._param_data(params, lambda x: x.posterior_sample(n=n))
@@ -583,8 +578,8 @@ class Model(Module):
         Parameters
         ----------
         params : str or List[str] or None
-            Parameter name(s) to sample. 
-            Default is to get the confidence intervals for all parameters in 
+            Parameter name(s) to sample.
+            Default is to get the confidence intervals for all parameters in
             the model.
         ci : float
             Confidence interval for which to compute the upper and lower
@@ -599,10 +594,10 @@ class Model(Module):
         Returns
         -------
         dict
-            Confidence intervals of the parameter posterior distributions.  
+            Confidence intervals of the parameter posterior distributions.
             A dictionary
             where the keys contain the parameter names and the values contain
-            tuples.  The first element of each tuple is the lower bound, and 
+            tuples.  The first element of each tuple is the lower bound, and
             the second element is the upper bound.
             Or just a single tuple if params was a str
         """
@@ -663,12 +658,12 @@ class Model(Module):
         Parameters
         ----------
         params : str or list or None
-            List of names of parameters to plot.  Default is to plot the 
+            List of names of parameters to plot.  Default is to plot the
             posterior of all parameters in the model.
         cols : int
             Divide the subplots into a grid with this many columns.
         kwargs
-            Additional keyword arguments are passed to 
+            Additional keyword arguments are passed to
             :meth:`.Parameter.posterior_plot`
         """
         self._param_plot(lambda x: x.posterior_plot(**kwargs), params, cols)
@@ -682,12 +677,12 @@ class Model(Module):
         Parameters
         ----------
         params : str or list or None
-            List of names of parameters to plot.  Default is to plot the 
+            List of names of parameters to plot.  Default is to plot the
             prior of all parameters in the model.
         cols : int
             Divide the subplots into a grid with this many columns.
         kwargs
-            Additional keyword arguments are passed to 
+            Additional keyword arguments are passed to
             :meth:`.Parameter.prior_plot`
         """
         self._param_plot(lambda x: x.prior_plot(**kwargs), params, cols)
@@ -703,13 +698,13 @@ class Model(Module):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or Tensor
-            Independent variable values of the dataset to evaluate (aka the 
-            "features").  
+            Independent variable values of the dataset to evaluate (aka the
+            "features").
         y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the 
-            "target"). 
+            Dependent variable values of the dataset to evaluate (aka the
+            "target").
         individually : bool
-            If ``individually`` is True, returns log probability for each 
+            If ``individually`` is True, returns log probability for each
             sample individually, so return shape is ``(x.shape[0], ?)``.
             If ``individually`` is False, returns sum of all log probabilities,
             so return shape is ``(1, ?)``.
@@ -721,13 +716,13 @@ class Model(Module):
             using the maximum a posteriori estimate for each parameter,
             so the return shape is ``(?, 1)``.
         n : int
-            Number of samples to draw for each distribution if 
+            Number of samples to draw for each distribution if
             ``distribution=True``.
 
         Returns
         -------
         log_probs : |ndarray|
-            Log probabilities. Shape is determined by ``individually``, 
+            Log probabilities. Shape is determined by ``individually``,
             ``distribution``, and ``n`` kwargs.
         """
 
@@ -770,13 +765,13 @@ class Model(Module):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| for both x and y.
         y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the 
-            "target"). 
+            Dependent variable values of the dataset to evaluate (aka the
+            "target").
         individually : bool
-            If ``individually`` is True, returns probability for each 
+            If ``individually`` is True, returns probability for each
             sample individually, so return shape is ``(x.shape[0], ?)``.
             If ``individually`` is False, returns product of all probabilities,
             so return shape is ``(1, ?)``.
@@ -788,13 +783,13 @@ class Model(Module):
             using the maximum a posteriori estimate for each parameter,
             so the return shape is ``(?, 1)``.
         n : int
-            Number of samples to draw for each distribution if 
+            Number of samples to draw for each distribution if
             ``distribution=True``.
 
         Returns
         -------
         probs : |ndarray|
-            Probabilities. Shape is determined by ``individually``, 
+            Probabilities. Shape is determined by ``individually``,
             ``distribution``, and ``n`` kwargs.
         """
         return np.exp(self.log_prob(x, y, **kwargs))
@@ -813,12 +808,12 @@ class Model(Module):
 
 
 class ContinuousModel(Model):
-    """Abstract base class for probflow models where the dependent variable 
+    """Abstract base class for probflow models where the dependent variable
     (the target) is continuous and 1-dimensional.
 
     TODO : why use this over just Model
 
-    TODO: note that only supports discriminative models with scalar, 
+    TODO: note that only supports discriminative models with scalar,
     continuous dependent variables
 
     This class inherits several methods from :class:`.Module`:
@@ -898,7 +893,7 @@ class ContinuousModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").
         ci : float between 0 and 1
             Inner proportion of predictive distribution to use a the
@@ -937,7 +932,7 @@ class ContinuousModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").
         ci : float between 0 and 1
             Inner proportion of predictive distribution to use a the
@@ -976,7 +971,7 @@ class ContinuousModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").
         ci : float between 0 and 1
             Inner proportion of predictive distribution to use a the
@@ -1013,13 +1008,13 @@ class ContinuousModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").
         n : int
             Number of samples to draw from the model given ``x``.
             Default = 10000
         cols : int
-            Divide the subplots into a grid with this many columns (if 
+            Divide the subplots into a grid with this many columns (if
             ``individually=True``.
         individually : bool
             If ``True``, plot one subplot per datapoint in ``x``, otherwise
@@ -1076,10 +1071,10 @@ class ContinuousModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| for both x and y.
         y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the 
+            Dependent variable values of the dataset to evaluate (aka the
             "target").
         n : int
             Number of samples to draw from the model given ``x``.
@@ -1127,10 +1122,10 @@ class ContinuousModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| for both x and y.
         y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the 
+            Dependent variable values of the dataset to evaluate (aka the
             "target").
         n : int
             Number of samples to draw from the model given ``x``.
@@ -1166,10 +1161,10 @@ class ContinuousModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| for both x and y.
         y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the 
+            Dependent variable values of the dataset to evaluate (aka the
             "target").
         n : int
             Number of samples to draw from the model given ``x``.
@@ -1210,14 +1205,14 @@ class ContinuousModel(Model):
             Which independent variable(s) to plot the log probability as a
             function of.  That is, which columns in ``x`` to plot by.
         x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| for both x and y.
         y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the 
+            Dependent variable values of the dataset to evaluate (aka the
             "target").
         ci : float between 0 and 1
-            Inner percentile to find the coverage of.  For example, if 
-            ``ci=0.95``, will compute the coverage of the inner 95% of the 
+            Inner percentile to find the coverage of.  For example, if
+            ``ci=0.95``, will compute the coverage of the inner 95% of the
             posterior predictive distribution.
         bins : int
             Number of bins to use for x_by
@@ -1265,10 +1260,10 @@ class ContinuousModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| for both x and y.
         y : |ndarray| or |DataFrame| or |Series|
-            Dependent variable values of the dataset to evaluate (aka the 
+            Dependent variable values of the dataset to evaluate (aka the
             "target").
         n : int
             Number of posterior draws to use for computing the r-squared
@@ -1314,10 +1309,10 @@ class ContinuousModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| for both x and y.
         y : |ndarray| or |DataFrame| or |Series|
-            Dependent variable values of the dataset to evaluate (aka the 
+            Dependent variable values of the dataset to evaluate (aka the
             "target").
         n : int
             Number of posterior draws to use for computing the r-squared
@@ -1343,10 +1338,10 @@ class ContinuousModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| for both x and y.
         y : |ndarray| or |DataFrame| or |Series|
-            Dependent variable values of the dataset to evaluate (aka the 
+            Dependent variable values of the dataset to evaluate (aka the
             "target").
         **kwargs
             Additional keyword arguments are passed to :func:`.plot_dist`
@@ -1374,10 +1369,10 @@ class ContinuousModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| for both x and y.
         y : |ndarray| or |DataFrame| or |Series|
-            Dependent variable values of the dataset to evaluate (aka the 
+            Dependent variable values of the dataset to evaluate (aka the
             "target").
         **kwargs
             Additional keyword arguments are passed to :func:`.plot_dist`
@@ -1394,7 +1389,7 @@ class ContinuousModel(Model):
 
 
 class DiscreteModel(ContinuousModel):
-    """Abstract base class for probflow models where the dependent variable 
+    """Abstract base class for probflow models where the dependent variable
     (the target) is discrete (e.g. drawn from a Poisson distribution).
 
     TODO : why use this over just Model
@@ -1465,16 +1460,16 @@ class DiscreteModel(ContinuousModel):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").
         n : int
             Number of samples to draw from the model given ``x``.
             Default = 10000
         cols : int
-            Divide the subplots into a grid with this many columns (if 
+            Divide the subplots into a grid with this many columns (if
             ``individually=True``.
         **kwargs
-            Additional keyword arguments are passed to 
+            Additional keyword arguments are passed to
             :func:`.plot_discrete_dist`
         """
 
@@ -1509,11 +1504,11 @@ class DiscreteModel(ContinuousModel):
 
 
 class CategoricalModel(Model):
-    """Abstract base class for probflow models where the dependent variable 
+    """Abstract base class for probflow models where the dependent variable
     (the target) is categorical (e.g. drawn from a Bernoulli distribution).
 
     TODO : why use this over just Model
-    
+
     This class inherits several methods from :class:`.Module`:
 
     * :attr:`~parameters`
@@ -1568,16 +1563,16 @@ class CategoricalModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").
         n : int
             Number of samples to draw from the model given ``x``.
             Default = 10000
         cols : int
-            Divide the subplots into a grid with this many columns (if 
+            Divide the subplots into a grid with this many columns (if
             ``individually=True``.
         **kwargs
-            Additional keyword arguments are passed to 
+            Additional keyword arguments are passed to
             :func:`.plot_discrete_dist`
         """
 
@@ -1612,10 +1607,10 @@ class CategoricalModel(Model):
         Parameters
         ----------
         x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the 
+            Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| for both x and y.
         y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the 
+            Dependent variable values of the dataset to evaluate (aka the
             "target").
         split_by : int
             Draw the calibration curve independently for datapoints

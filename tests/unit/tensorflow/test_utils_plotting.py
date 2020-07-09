@@ -1,7 +1,6 @@
 """Tests probflow.utils.plotting module and methods which use it"""
 
 
-
 import pytest
 
 import numpy as np
@@ -11,7 +10,6 @@ import tensorflow as tf
 import probflow as pf
 
 
-
 def test_approx_kde(plot):
     """Tests utils.plotting.approx_kde"""
     data = np.random.randn(1000)
@@ -19,9 +17,8 @@ def test_approx_kde(plot):
     assert x.shape[0] == y.shape[0]
     if plot:
         plt.plot(x, y)
-        plt.title('should be kde density of samples from norm dist')
+        plt.title("should be kde density of samples from norm dist")
         plt.show()
-
 
 
 def test_get_next_color():
@@ -30,17 +27,17 @@ def test_get_next_color():
     # default
     col = pf.utils.plotting.get_next_color(None, 0)
     assert isinstance(col, str)
-    assert col[0] == '#'
+    assert col[0] == "#"
 
     # list of colors
-    col = pf.utils.plotting.get_next_color(['#eeefff', '#gggaaa'], 1)
+    col = pf.utils.plotting.get_next_color(["#eeefff", "#gggaaa"], 1)
     assert isinstance(col, str)
-    assert col[0] == '#'
+    assert col[0] == "#"
 
     # single color
-    col = pf.utils.plotting.get_next_color('#eeefff', 1)
+    col = pf.utils.plotting.get_next_color("#eeefff", 1)
     assert isinstance(col, str)
-    assert col[0] == '#'
+    assert col[0] == "#"
 
 
 def test_get_ix_label():
@@ -49,18 +46,17 @@ def test_get_ix_label():
     # 1d
     lab = pf.utils.plotting.get_ix_label(2, [3])
     assert isinstance(lab, str)
-    assert lab == '2'
+    assert lab == "2"
 
     # 2d
     lab = pf.utils.plotting.get_ix_label(5, [3, 3])
     assert isinstance(lab, str)
-    assert lab == '[2, 1]'
+    assert lab == "[2, 1]"
 
     # 3d
     lab = pf.utils.plotting.get_ix_label(5, [3, 3, 3])
     assert isinstance(lab, str)
-    assert lab == '[2, 1, 0]'
-
+    assert lab == "[2, 1, 0]"
 
 
 def test_plot_dist(plot):
@@ -76,45 +72,46 @@ def test_plot_dist(plot):
 
     pf.utils.plotting.plot_dist(data)
     if plot:
-        plt.title('should be kde density (filled) of samples from norm dist')
+        plt.title("should be kde density (filled) of samples from norm dist")
         plt.show()
 
     pf.utils.plotting.plot_dist(data, ci=0.9)
     if plot:
-        plt.title('should be kde density (filled) of samples from norm dist w/ ci')
+        plt.title(
+            "should be kde density (filled) of samples from norm dist w/ ci"
+        )
         plt.show()
 
-    pf.utils.plotting.plot_dist(data, style='line')
+    pf.utils.plotting.plot_dist(data, style="line")
     if plot:
-        plt.title('should be line plot of samples from norm dist')
+        plt.title("should be line plot of samples from norm dist")
         plt.show()
 
-    pf.utils.plotting.plot_dist(data, style='line', ci=0.9)
+    pf.utils.plotting.plot_dist(data, style="line", ci=0.9)
     if plot:
-        plt.title('should be line plot of samples from norm dist w/ ci')
+        plt.title("should be line plot of samples from norm dist w/ ci")
         plt.show()
 
-    pf.utils.plotting.plot_dist(data, style='hist')
+    pf.utils.plotting.plot_dist(data, style="hist")
     if plot:
-        plt.title('should be line plot of samples from norm dist')
+        plt.title("should be line plot of samples from norm dist")
         plt.show()
 
-    pf.utils.plotting.plot_dist(data, style='hist', ci=0.9)
+    pf.utils.plotting.plot_dist(data, style="hist", ci=0.9)
     if plot:
-        plt.title('should be line plot of samples from norm dist w/ ci')
+        plt.title("should be line plot of samples from norm dist w/ ci")
         plt.show()
 
     # Should error on invalid style
     with pytest.raises(ValueError):
-        pf.utils.plotting.plot_dist(data, style='lala')
+        pf.utils.plotting.plot_dist(data, style="lala")
 
     # Should be able to show multiple distributions
-    data = np.random.randn(1000, 3) + np.array([[-2., 0., 2.]])
+    data = np.random.randn(1000, 3) + np.array([[-2.0, 0.0, 2.0]])
     pf.utils.plotting.plot_dist(data, ci=0.9)
     if plot:
-        plt.title('should be 3 kde density (filled) w/ ci')
+        plt.title("should be 3 kde density (filled) w/ ci")
         plt.show()
-
 
 
 def test_plot_line(plot):
@@ -129,14 +126,13 @@ def test_plot_line(plot):
 
     pf.utils.plotting.plot_line(x, y)
     if plot:
-        plt.title('should be noisy line')
+        plt.title("should be noisy line")
         plt.show()
 
     pf.utils.plotting.plot_line(x, np.random.randn(100, 3))
     if plot:
-        plt.title('should be 3 noisy lines w/ labels')
+        plt.title("should be 3 noisy lines w/ labels")
         plt.show()
-
 
 
 def test_fill_between(plot):
@@ -144,7 +140,7 @@ def test_fill_between(plot):
 
     x = np.linspace(0, 10, 100)
     y1 = np.random.randn(100)
-    y2 = np.random.randn(100)+5
+    y2 = np.random.randn(100) + 5
 
     # Should error on invalid shapes
     with pytest.raises(ValueError):
@@ -154,26 +150,25 @@ def test_fill_between(plot):
 
     pf.utils.plotting.fill_between(x, y1, y2)
     if plot:
-        plt.title('should be one filled area')
+        plt.title("should be one filled area")
         plt.show()
 
     y1 = np.random.randn(100, 3)
-    y2 = np.random.randn(100, 3)+3
+    y2 = np.random.randn(100, 3) + 3
     y1 += np.array([0, 5, 10])
     y2 += np.array([0, 5, 10])
     pf.utils.plotting.fill_between(x, y1, y2)
     if plot:
-        plt.title('should be 3 filled areas')
+        plt.title("should be 3 filled areas")
         plt.show()
-
 
 
 def test_centered_text(plot):
     """Tests utils.plotting.centered_text"""
     plt.plot(np.linspace(0, 1, 10), np.random.randn(10))
-    pf.utils.plotting.centered_text('lala')
+    pf.utils.plotting.centered_text("lala")
     if plot:
-        plt.title('should be fig w/ lala in middle')
+        plt.title("should be fig w/ lala in middle")
         plt.show()
 
 
@@ -183,21 +178,20 @@ def test_plot_discrete_dist(plot):
     # Should work for categorical variables
     pf.utils.plotting.plot_discrete_dist(np.array([0, 0, 1, 1, 1, 2]))
     if plot:
-        plt.title('should be 0 1 2')
+        plt.title("should be 0 1 2")
         plt.show()
 
     # Should work for discrete variables
     pf.utils.plotting.plot_discrete_dist(tf.random.poisson([200], 5).numpy())
     if plot:
-        plt.title('should be poisson-y')
+        plt.title("should be poisson-y")
         plt.show()
 
     # xlabel shouldn't show ALL values if lots of uniques
     pf.utils.plotting.plot_discrete_dist(tf.random.poisson([2000], 10).numpy())
     if plot:
-        plt.title('should be poisson-y')
+        plt.title("should be poisson-y")
         plt.show()
-
 
 
 def test_plot_categorical_dist(plot):
@@ -206,15 +200,16 @@ def test_plot_categorical_dist(plot):
     # Should work for categorical variables
     pf.utils.plotting.plot_categorical_dist(np.array([0, 0, 1, 1, 1, 2]))
     if plot:
-        plt.title('should be 0 1 2')
+        plt.title("should be 0 1 2")
         plt.show()
 
     # xlabel shouldn't show ALL values if lots of uniques
-    pf.utils.plotting.plot_categorical_dist(tf.random.poisson([2000], 50).numpy())
+    pf.utils.plotting.plot_categorical_dist(
+        tf.random.poisson([2000], 50).numpy()
+    )
     if plot:
-        plt.title('should be poisson-y, not showing all xticklabels')
+        plt.title("should be poisson-y, not showing all xticklabels")
         plt.show()
-
 
 
 def test_plot_by(plot):
@@ -229,13 +224,13 @@ def test_plot_by(plot):
     with pytest.raises(ValueError):
         pf.utils.plotting.plot_by(x, data, bins=0)
     with pytest.raises(TypeError):
-        pf.utils.plotting.plot_by(x, data, plot='asdf')
+        pf.utils.plotting.plot_by(x, data, plot="asdf")
     with pytest.raises(TypeError):
-        pf.utils.plotting.plot_by(x, data, bootstrap='asdf')
+        pf.utils.plotting.plot_by(x, data, bootstrap="asdf")
     with pytest.raises(ValueError):
         pf.utils.plotting.plot_by(x, data, bootstrap=0)
     with pytest.raises(ValueError):
-        pf.utils.plotting.plot_by(x, data, func='asdf')
+        pf.utils.plotting.plot_by(x, data, func="asdf")
     with pytest.raises(TypeError):
         pf.utils.plotting.plot_by(x, data, func=0)
     with pytest.raises(ValueError):
@@ -246,22 +241,22 @@ def test_plot_by(plot):
         pf.utils.plotting.plot_by(x, data, ci=1.1)
 
     pf.utils.plotting.plot_by(x, data, func=lambda x: np.mean(x))
-    pf.utils.plotting.plot_by(x, data, func='mean', color='#eeefff')
-    pf.utils.plotting.plot_by(x, data, func='median')
-    pf.utils.plotting.plot_by(x, data, func='count')
+    pf.utils.plotting.plot_by(x, data, func="mean", color="#eeefff")
+    pf.utils.plotting.plot_by(x, data, func="median")
+    pf.utils.plotting.plot_by(x, data, func="count")
 
     # Should plot mean data by x
     plt.clf()
     pf.utils.plotting.plot_by(x, data)
     if plot:
-        plt.title('plot mean(randn) by x')
+        plt.title("plot mean(randn) by x")
         plt.show()
 
     # Should plot 2D plot of mean(data) by x[:, 0] and x[:, 1]
     x = np.random.randn(100, 2)
     pf.utils.plotting.plot_by(x, data)
     if plot:
-        plt.title('plot mean(randn) by x')
+        plt.title("plot mean(randn) by x")
         plt.show()
 
 
@@ -269,14 +264,13 @@ def test_posterior_plot(plot):
     """Tests posterior_plot method of parameter and model"""
 
     class MyModel(pf.Model):
-
         def __init__(self):
-            self.weight = pf.Parameter(name='Weight')
-            self.bias = pf.Parameter(name='Bias')
-            self.std = pf.ScaleParameter(name='Noise Std Dev')
+            self.weight = pf.Parameter(name="Weight")
+            self.bias = pf.Parameter(name="Bias")
+            self.std = pf.ScaleParameter(name="Noise Std Dev")
 
         def __call__(self, x):
-            return pf.Normal(x*self.weight() + self.bias(), self.std())
+            return pf.Normal(x * self.weight() + self.bias(), self.std())
 
     # Create the model
     model = MyModel()
@@ -293,7 +287,7 @@ def test_posterior_plot(plot):
 
     # Should be able to plot just some params
     # and pass kwargs to Parameter.posterior_plot
-    model.posterior_plot(params=['Weight', 'Bias'], ci=0.95)
+    model.posterior_plot(params=["Weight", "Bias"], ci=0.95)
     if plot:
         plt.show()
 
@@ -303,20 +297,19 @@ def test_posterior_plot(plot):
         plt.show()
 
 
-
 def test_prior_plot(plot):
     """Tests prior_plot method of parameter and model"""
 
     class MyModel(pf.Model):
-
         def __init__(self):
-            self.weight = pf.Parameter(name='Weight')
-            self.bias = pf.Parameter(name='Bias')
-            self.std = pf.ScaleParameter(name='Noise Std Dev',
-                prior=pf.Gamma(1., 1.))
+            self.weight = pf.Parameter(name="Weight")
+            self.bias = pf.Parameter(name="Bias")
+            self.std = pf.ScaleParameter(
+                name="Noise Std Dev", prior=pf.Gamma(1.0, 1.0)
+            )
 
         def __call__(self, x):
-            return pf.Normal(x*self.weight() + self.bias(), self.std())
+            return pf.Normal(x * self.weight() + self.bias(), self.std())
 
     # Create the model
     model = MyModel()
@@ -337,7 +330,7 @@ def test_prior_plot(plot):
         plt.show()
 
     # Should be able to plot just some params
-    model.prior_plot(params=['Weight', 'Bias'], ci=0.95)
+    model.prior_plot(params=["Weight", "Bias"], ci=0.95)
     if plot:
         plt.show()
 
@@ -345,4 +338,3 @@ def test_prior_plot(plot):
     model.prior_plot(cols=2)
     if plot:
         plt.show()
-

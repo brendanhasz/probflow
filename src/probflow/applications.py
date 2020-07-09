@@ -30,7 +30,6 @@ from probflow.utils.casting import to_tensor
 from probflow.parameters import Parameter
 from probflow.parameters import ScaleParameter
 from probflow.distributions import Normal
-from probflow.distributions import Bernoulli
 from probflow.distributions import Categorical
 from probflow.distributions import Poisson
 from probflow.modules import Module
@@ -49,7 +48,7 @@ class LinearRegression(ContinuousModel):
     ----------
     d : int
         Dimensionality of the independent variable (number of features)
-    heteroscedastic : bool 
+    heteroscedastic : bool
         Whether to model a change in noise as a function of :math:`\mathbf{x}`
         (if ``heteroscedastic=True``), or not (if ``heteroscedastic=False``,
         the default).
@@ -207,7 +206,7 @@ class DenseRegression(ContinuousModel):
         variable (number of features), and the last element should be the
         dimensionality of the dependent variable (number of dimensions of the
         target).
-    heteroscedastic : bool 
+    heteroscedastic : bool
         Whether to model a change in noise as a function of :math:`\mathbf{x}`
         (if ``heteroscedastic=True``), or not (if ``heteroscedastic=False``,
         the default).

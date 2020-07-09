@@ -1,7 +1,6 @@
 """Tests probflow.utils.initializers w/ torch backend"""
 
 
-
 import numpy as np
 import torch
 
@@ -9,11 +8,10 @@ import probflow as pf
 from probflow.utils import initializers
 
 
-
 def test_xavier_torch():
     """Tests probflow.utils.initializers.xavier w/ torch backend"""
 
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
 
     # Small array
     val1 = initializers.xavier([4, 3])
@@ -33,11 +31,10 @@ def test_xavier_torch():
     assert np.std(val1.numpy()) > np.std(val2.numpy())
 
 
-
 def test_scale_xavier_torch():
     """Tests probflow.utils.initializers.scale_xavier w/ torch backend"""
 
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
 
     # Small array
     val1 = initializers.scale_xavier([4, 3])
@@ -57,11 +54,10 @@ def test_scale_xavier_torch():
     assert np.mean(val1.numpy()) > np.mean(val2.numpy())
 
 
-
 def test_pos_xavier_torch():
     """Tests probflow.utils.initializers.pos_xavier w/ torch backend"""
 
-    pf.set_backend('pytorch')
+    pf.set_backend("pytorch")
 
     # Small array
     val1 = initializers.pos_xavier([4, 3])
@@ -79,4 +75,3 @@ def test_pos_xavier_torch():
 
     # Large array should have smaller value spread
     assert np.mean(val1.numpy()) < np.mean(val2.numpy())
-

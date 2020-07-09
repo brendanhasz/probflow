@@ -1,22 +1,18 @@
 """Tests the probflow.distributions module when backend = tensorflow"""
 
 
-
 import pytest
-
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
-tfd = tfp.distributions
-
 import probflow.distributions as pfd
 import probflow as pf
 
+tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
-    return np.abs(a-b) < tol
-
+    return np.abs(a - b) < tol
 
 
 def test_Deterministic():
@@ -60,7 +56,7 @@ def test_Deterministic():
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
-	    dist = pfd.Deterministic(loc='lalala')
+        dist = pfd.Deterministic(loc="lalala")
 
     # Test using a parameter as an argument
     p = pf.Parameter()
@@ -82,8 +78,11 @@ def test_Normal():
     assert isinstance(dist(), tfd.Normal)
 
     # Test methods
-    npdf = lambda x, m, s: (1.0/np.sqrt(2*np.pi*s*s) * 
-    						np.exp(-np.power(x-m, 2)/(2*s*s)))
+    npdf = lambda x, m, s: (
+        1.0
+        / np.sqrt(2 * np.pi * s * s)
+        * np.exp(-np.power(x - m, 2) / (2 * s * s))
+    )
     assert is_close(dist.prob(0).numpy(), npdf(0, 0, 1))
     assert is_close(dist.prob(1).numpy(), npdf(1, 0, 1))
     assert is_close(dist.log_prob(0).numpy(), np.log(npdf(0, 0, 1)))
@@ -106,37 +105,35 @@ def test_Normal():
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
-	    dist = pfd.Normal(loc='lalala', scale='lalala')
-
+        dist = pfd.Normal(loc="lalala", scale="lalala")
 
 
 def test_MultivariateNormal():
     """Tests the MultivariateNormal distribution"""
 
     # Create the distribution
-    loc = tf.constant([1., 2.])
-    cov = tf.constant([[1., 0.], [0., 1.]])
+    loc = tf.constant([1.0, 2.0])
+    cov = tf.constant([[1.0, 0.0], [0.0, 1.0]])
     dist = pfd.MultivariateNormal(loc, cov)
-
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
-        dist = pfd.MultivariateNormal('loc', cov)
+        dist = pfd.MultivariateNormal("loc", cov)
     with pytest.raises(TypeError):
-        dist = pfd.MultivariateNormal(loc, 'cov')
+        dist = pfd.MultivariateNormal(loc, "cov")
 
     # Call should return backend obj
     assert isinstance(dist(), tfd.MultivariateNormalTriL)
 
     # Test methods
-    prob1 = dist.prob([1., 2.])
-    prob2 = dist.prob([0., 2.])
-    prob3 = dist.prob([0., 3.])
+    prob1 = dist.prob([1.0, 2.0])
+    prob2 = dist.prob([0.0, 2.0])
+    prob3 = dist.prob([0.0, 3.0])
     assert prob1 > prob2
     assert prob2 > prob3
-    prob1 = dist.log_prob([1., 2.])
-    prob2 = dist.log_prob([0., 2.])
-    prob3 = dist.log_prob([0., 3.])
+    prob1 = dist.log_prob([1.0, 2.0])
+    prob2 = dist.log_prob([0.0, 2.0])
+    prob3 = dist.log_prob([0.0, 3.0])
     assert prob1 > prob2
     assert prob2 > prob3
 
@@ -150,7 +147,6 @@ def test_MultivariateNormal():
     assert samples.ndim == 2
     assert samples.shape[0] == 10
     assert samples.shape[1] == 2
-
 
 
 def test_StudentT():
@@ -168,7 +164,7 @@ def test_StudentT():
     assert isinstance(dist(), tfd.StudentT)
 
     # Test methods
-    cpdf = lambda x, m, s: 1.0/(np.pi*s*(1+(np.power((x-m)/s, 2))))
+    cpdf = lambda x, m, s: 1.0 / (np.pi * s * (1 + (np.power((x - m) / s, 2))))
     assert is_close(dist.prob(0).numpy(), cpdf(0, 0, 1))
     assert is_close(dist.prob(1).numpy(), cpdf(1, 0, 1))
     assert is_close(dist.log_prob(0).numpy(), np.log(cpdf(0, 0, 1)))
@@ -192,8 +188,7 @@ def test_StudentT():
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
-	    dist = pfd.StudentT(df='lalala', loc='lalala', scale='lalala')
-
+        dist = pfd.StudentT(df="lalala", loc="lalala", scale="lalala")
 
 
 def test_Cauchy():
@@ -210,7 +205,7 @@ def test_Cauchy():
     assert isinstance(dist(), tfd.Cauchy)
 
     # Test methods
-    cpdf = lambda x, m, s: 1.0/(np.pi*s*(1+(np.power((x-m)/s, 2))))
+    cpdf = lambda x, m, s: 1.0 / (np.pi * s * (1 + (np.power((x - m) / s, 2))))
     assert is_close(dist.prob(0).numpy(), cpdf(0, 0, 1))
     assert is_close(dist.prob(1).numpy(), cpdf(1, 0, 1))
     assert is_close(dist.log_prob(0).numpy(), np.log(cpdf(0, 0, 1)))
@@ -233,8 +228,7 @@ def test_Cauchy():
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
-	    dist = pfd.Cauchy(loc='lalala', scale='lalala')
-
+        dist = pfd.Cauchy(loc="lalala", scale="lalala")
 
 
 def test_Gamma():
@@ -255,7 +249,7 @@ def test_Gamma():
     assert is_close(dist.prob(1).numpy(), 0.78146726)
     assert dist.log_prob(0).numpy() == -np.inf
     assert is_close(dist.log_prob(1).numpy(), np.log(0.78146726))
-    assert is_close(dist.mean(), 5.0/4.0)
+    assert is_close(dist.mean(), 5.0 / 4.0)
 
     # Test sampling
     samples = dist.sample()
@@ -273,8 +267,7 @@ def test_Gamma():
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
-	    dist = pfd.Gamma('lalala', 'lalala')
-
+        dist = pfd.Gamma("lalala", "lalala")
 
 
 def test_InverseGamma():
@@ -313,8 +306,7 @@ def test_InverseGamma():
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
-	    dist = pfd.InverseGamma('lalala', 'lalala')
-
+        dist = pfd.InverseGamma("lalala", "lalala")
 
 
 def test_Bernoulli():
@@ -355,17 +347,16 @@ def test_Bernoulli():
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
-	    dist = pfd.Bernoulli('lalala')
+        dist = pfd.Bernoulli("lalala")
     with pytest.raises(TypeError):
-	    dist = pfd.Bernoulli()
-
+        dist = pfd.Bernoulli()
 
 
 def test_Categorical():
     """Tests Categorical distribution"""
 
     # Create the distribution
-    dist = pfd.Categorical(tf.constant([0., 1., 2.]))
+    dist = pfd.Categorical(tf.constant([0.0, 1.0, 2.0]))
 
     # Check default params
     assert isinstance(dist.logits, tf.Tensor)
@@ -375,9 +366,9 @@ def test_Categorical():
     assert isinstance(dist(), tfd.Categorical)
 
     # Test methods
-    zero = np.array([0.])
-    one = np.array([1.])
-    two = np.array([2.])
+    zero = np.array([0.0])
+    one = np.array([1.0])
+    two = np.array([2.0])
     assert dist.prob(zero).numpy() < dist.prob(one).numpy()
     assert dist.prob(one).numpy() < dist.prob(two).numpy()
     assert dist.log_prob(zero).numpy() < dist.log_prob(one).numpy()
@@ -406,17 +397,23 @@ def test_Categorical():
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
-	    dist = pfd.Categorical('lalala')
+        dist = pfd.Categorical("lalala")
     with pytest.raises(TypeError):
-	    dist = pfd.Categorical()
+        dist = pfd.Categorical()
 
-	# Should use the last dim if passed a Tensor arg
-    dist = pfd.Categorical(probs=tf.constant([[0.1, 0.7, 0.2], 
-    							  [0.8, 0.1, 0.1], 
-    	                          [0.01, 0.01, 0.98],
-    	                          [0.3, 0.3, 0.4]]))
-    a1 = tf.constant([0., 1., 2., 2.])
-    a2 = tf.constant([2., 1., 0., 0.])
+    # Should use the last dim if passed a Tensor arg
+    dist = pfd.Categorical(
+        probs=tf.constant(
+            [
+                [0.1, 0.7, 0.2],
+                [0.8, 0.1, 0.1],
+                [0.01, 0.01, 0.98],
+                [0.3, 0.3, 0.4],
+            ]
+        )
+    )
+    a1 = tf.constant([0.0, 1.0, 2.0, 2.0])
+    a2 = tf.constant([2.0, 1.0, 0.0, 0.0])
     assert is_close(dist.prob(a1).numpy()[0], 0.1)
     assert is_close(dist.prob(a1).numpy()[1], 0.1)
     assert is_close(dist.prob(a1).numpy()[2], 0.98)
@@ -436,7 +433,6 @@ def test_Categorical():
     assert samples.ndim == 2
     assert samples.shape[0] == 10
     assert samples.shape[1] == 4
-
 
 
 def test_OneHotCategorical():
@@ -474,19 +470,22 @@ def test_OneHotCategorical():
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
-	    dist = pfd.OneHotCategorical('lalala')
+        dist = pfd.OneHotCategorical("lalala")
     with pytest.raises(TypeError):
-	    dist = pfd.OneHotCategorical()
+        dist = pfd.OneHotCategorical()
 
     # Multi-dim
-    dist = pfd.OneHotCategorical(probs=[[0.1, 0.7, 0.2], 
-    				  [0.8, 0.1, 0.1], 
-    	                          [0.01, 0.01, 0.98],
-    	                          [0.3, 0.3, 0.4]])
-    probs = dist.prob([[0.0, 1.0, 0.0],
-                       [1.0, 0.0, 0.0],
-                       [1.0, 0.0, 0.0],
-                       [0.0, 0.0, 1.0]])
+    dist = pfd.OneHotCategorical(
+        probs=[
+            [0.1, 0.7, 0.2],
+            [0.8, 0.1, 0.1],
+            [0.01, 0.01, 0.98],
+            [0.3, 0.3, 0.4],
+        ]
+    )
+    probs = dist.prob(
+        [[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]
+    )
     assert is_close(probs[0], 0.7)
     assert is_close(probs[1], 0.8)
     assert is_close(probs[2], 0.01)
@@ -506,7 +505,6 @@ def test_OneHotCategorical():
     assert samples.shape[2] == 3
 
 
-
 def test_Poisson():
     """Tests Poisson distribution"""
 
@@ -520,7 +518,7 @@ def test_Poisson():
     assert isinstance(dist(), tfd.Poisson)
 
     # Test methods
-    ppdf = lambda x, r: np.power(r, x)*np.exp(-r)/np.math.factorial(x)
+    ppdf = lambda x, r: np.power(r, x) * np.exp(-r) / np.math.factorial(x)
     assert is_close(dist.prob(0).numpy(), ppdf(0, 3))
     assert is_close(dist.prob(1).numpy(), ppdf(1, 3))
     assert is_close(dist.prob(2).numpy(), ppdf(2, 3))
@@ -542,8 +540,7 @@ def test_Poisson():
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
-	    dist = pfd.Poisson('lalala')
-
+        dist = pfd.Poisson("lalala")
 
 
 def test_Dirichlet():
@@ -565,9 +562,9 @@ def test_Dirichlet():
     assert is_close(dist.prob([0.3, 0.3, 0.4]).numpy(), 2.88)
     assert dist.log_prob([0, 0, 1]).numpy() == -np.inf
     assert is_close(dist.log_prob([0.3, 0.3, 0.4]).numpy(), np.log(2.88))
-    assert is_close(dist.mean().numpy()[0], 1.0/6.0)
-    assert is_close(dist.mean().numpy()[1], 2.0/6.0)
-    assert is_close(dist.mean().numpy()[2], 3.0/6.0)
+    assert is_close(dist.mean().numpy()[0], 1.0 / 6.0)
+    assert is_close(dist.mean().numpy()[1], 2.0 / 6.0)
+    assert is_close(dist.mean().numpy()[2], 3.0 / 6.0)
 
     # Test sampling
     samples = dist.sample()
@@ -582,17 +579,18 @@ def test_Dirichlet():
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):
-	    dist = pfd.Dirichlet('lalala')
+        dist = pfd.Dirichlet("lalala")
 
-	# Should use the last dim if passed a Tensor arg
-    dist = pfd.Dirichlet([[1, 2, 3],
-    					  [3, 2, 1],
-    					  [1, 1, 1],
-    					  [100, 100, 100]])
-    probs = dist.prob([[0, 0, 1],
-    	 			   [1, 0, 0],
-    	 			   [0.2, 0.2, 0.6],
-    	 			   [1.0/3.0, 1.0/3.0, 1.0/3.0]]).numpy()
+    # Should use the last dim if passed a Tensor arg
+    dist = pfd.Dirichlet([[1, 2, 3], [3, 2, 1], [1, 1, 1], [100, 100, 100]])
+    probs = dist.prob(
+        [
+            [0, 0, 1],
+            [1, 0, 0],
+            [0.2, 0.2, 0.6],
+            [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
+        ]
+    ).numpy()
     assert probs.ndim == 1
     assert is_close(probs[0], 0.0)
     assert is_close(probs[1], 0.0)
@@ -613,7 +611,6 @@ def test_Dirichlet():
     assert samples.shape[2] == 3
 
 
-
 def test_Mixture():
     """Tests Mixture distribution"""
 
@@ -621,11 +618,11 @@ def test_Mixture():
     with pytest.raises(ValueError):
         dist = pfd.Mixture(pfd.Normal([1, 2], [1, 2]))
     with pytest.raises(TypeError):
-        dist = pfd.Mixture(pfd.Normal([1, 2], [1, 2]), 'lala')
+        dist = pfd.Mixture(pfd.Normal([1, 2], [1, 2]), "lala")
     with pytest.raises(TypeError):
-        dist = pfd.Mixture(pfd.Normal([1, 2], [1, 2]), logits='lala')
+        dist = pfd.Mixture(pfd.Normal([1, 2], [1, 2]), logits="lala")
     with pytest.raises(TypeError):
-        dist = pfd.Mixture(pfd.Normal([1, 2], [1, 2]), probs='lala')
+        dist = pfd.Mixture(pfd.Normal([1, 2], [1, 2]), probs="lala")
 
     # Create the distribution
     weights = tf.random.normal([5, 3])
@@ -649,32 +646,38 @@ def test_Mixture():
 
     # Test methods
 
-    dist = pfd.Mixture(pfd.Normal([-1., 1.], [1e-3, 1e-3]),
-                       [0.5, 0.5])
-    probs = dist.prob([-1., 1.])
-    assert is_close(probs[0]/probs[1], 1.0)
+    dist = pfd.Mixture(pfd.Normal([-1.0, 1.0], [1e-3, 1e-3]), [0.5, 0.5])
+    probs = dist.prob([-1.0, 1.0])
+    assert is_close(probs[0] / probs[1], 1.0)
 
-    dist = pfd.Mixture(pfd.Normal([-1., 1.], [1e-3, 1e-3]),
-                       np.log(np.array([0.8, 0.2]).astype('float32')))
-    probs = dist.prob([-1., 1.])
-    assert is_close(probs[0]/probs[1], 4.0)
+    dist = pfd.Mixture(
+        pfd.Normal([-1.0, 1.0], [1e-3, 1e-3]),
+        np.log(np.array([0.8, 0.2]).astype("float32")),
+    )
+    probs = dist.prob([-1.0, 1.0])
+    assert is_close(probs[0] / probs[1], 4.0)
 
-    dist = pfd.Mixture(pfd.Normal([-1., 1.], [1e-3, 1e-3]),
-                       np.log(np.array([0.1, 0.9]).astype('float32')))
-    probs = dist.prob([-1., 1.])
-    assert is_close(probs[0]/probs[1], 1.0/9.0)
+    dist = pfd.Mixture(
+        pfd.Normal([-1.0, 1.0], [1e-3, 1e-3]),
+        np.log(np.array([0.1, 0.9]).astype("float32")),
+    )
+    probs = dist.prob([-1.0, 1.0])
+    assert is_close(probs[0] / probs[1], 1.0 / 9.0)
 
     # try w/ weight_type
-    dist = pfd.Mixture(pfd.Normal([-1., 1.], [1e-3, 1e-3]),  
-                       logits=np.log(np.array([0.1, 0.9]).astype('float32')))
-    probs = dist.prob([-1., 1.])
-    assert is_close(probs[0]/probs[1], 1.0/9.0)
+    dist = pfd.Mixture(
+        pfd.Normal([-1.0, 1.0], [1e-3, 1e-3]),
+        logits=np.log(np.array([0.1, 0.9]).astype("float32")),
+    )
+    probs = dist.prob([-1.0, 1.0])
+    assert is_close(probs[0] / probs[1], 1.0 / 9.0)
 
-    dist = pfd.Mixture(pfd.Normal([-1., 1.], [1e-3, 1e-3]),  
-                       probs=np.array([0.1, 0.9]).astype('float32'))
-    probs = dist.prob([-1., 1.])
-    assert is_close(probs[0]/probs[1], 1.0/9.0)
-
+    dist = pfd.Mixture(
+        pfd.Normal([-1.0, 1.0], [1e-3, 1e-3]),
+        probs=np.array([0.1, 0.9]).astype("float32"),
+    )
+    probs = dist.prob([-1.0, 1.0])
+    assert is_close(probs[0] / probs[1], 1.0 / 9.0)
 
 
 def test_HiddenMarkovModel():
@@ -683,19 +686,21 @@ def test_HiddenMarkovModel():
     # Create the distribution (3 states)
     initial = tf.random.normal([3])
     transition = tf.random.normal([3, 3])
-    observation = pfd.Normal(tf.random.normal([3]), tf.exp(tf.random.normal([3])))
+    observation = pfd.Normal(
+        tf.random.normal([3]), tf.exp(tf.random.normal([3]))
+    )
     steps = 5
     dist = pfd.HiddenMarkovModel(initial, transition, observation, steps)
-    
+
     # Should fail w incorrect args
     with pytest.raises(TypeError):
-        d2 = pfd.HiddenMarkovModel('lala', transition, observation, steps)
+        pfd.HiddenMarkovModel("lala", transition, observation, steps)
     with pytest.raises(TypeError):
-        d2 = pfd.HiddenMarkovModel(initial, 'lala', observation, steps)
+        pfd.HiddenMarkovModel(initial, "lala", observation, steps)
     with pytest.raises(TypeError):
-        d2 = pfd.HiddenMarkovModel(initial, transition, observation, 'lala')
+        pfd.HiddenMarkovModel(initial, transition, observation, "lala")
     with pytest.raises(ValueError):
-        d2 = pfd.HiddenMarkovModel(initial, transition, observation, -1)
+        pfd.HiddenMarkovModel(initial, transition, observation, -1)
 
     # Call should return backend obj
     assert isinstance(dist(), tfd.HiddenMarkovModel)
@@ -712,14 +717,16 @@ def test_HiddenMarkovModel():
     assert samples.shape[1] == 5
 
     # Test methods
-    probs = dist.prob([-1., 1., 0., 0., 0.])
+    probs = dist.prob([-1.0, 1.0, 0.0, 0.0, 0.0])
     assert probs.ndim == 0
     probs = dist.prob(np.random.randn(7, 5))
     assert probs.ndim == 1
     assert probs.shape[0] == 7
 
     # Should also work w/ a backend distribution
-    observation = tfd.Normal(tf.random.normal([3]), tf.exp(tf.random.normal([3])))
+    observation = tfd.Normal(
+        tf.random.normal([3]), tf.exp(tf.random.normal([3]))
+    )
     dist = pfd.HiddenMarkovModel(initial, transition, observation, steps)
 
     # Test sampling

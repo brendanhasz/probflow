@@ -7,7 +7,6 @@ import torch
 import probflow as pf
 
 
-
 def test_datatype():
     """Tests get and set_datatype"""
 
@@ -20,4 +19,4 @@ def test_datatype():
     pf.set_datatype(torch.float32)
 
     with pytest.raises(TypeError):
-        pf.set_datatype('lala')
+        pf.set_datatype("lala")

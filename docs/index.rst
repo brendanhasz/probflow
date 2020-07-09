@@ -28,6 +28,7 @@ ProbFlow
    user_guide
    examples
    api
+   dev_guide
    todo
 
 .. include:: macros.hrst
@@ -60,7 +61,7 @@ can be built by creating a ProbFlow |Model|:
 .. tabs::
 
     .. group-tab:: TensorFlow
-            
+
         .. code-block:: python3
 
             import probflow as pf
@@ -75,11 +76,11 @@ can be built by creating a ProbFlow |Model|:
 
                 def __call__(self, x):
                     return pf.Normal(x*self.weight()+self.bias(), self.std())
-            
+
             model = LinearRegression()
 
     .. group-tab:: PyTorch
-            
+
         .. code-block:: python3
 
             import probflow as pf
@@ -95,7 +96,7 @@ can be built by creating a ProbFlow |Model|:
                 def __call__(self, x):
                     x = torch.tensor(x)
                     return pf.Normal(x*self.weight()+self.bias(), self.std())
-            
+
             model = LinearRegression()
 
 
@@ -164,12 +165,12 @@ ProbFlow also provides more complex modules, such as those required for building
    :width: 99 %
    :align: center
 
-Can be built and fit with ProbFlow in only a few lines:  
+Can be built and fit with ProbFlow in only a few lines:
 
 .. tabs::
 
     .. group-tab:: TensorFlow
-        
+
         .. code-block:: python3
 
             class DensityNetwork(pf.ContinuousModel):
@@ -190,7 +191,7 @@ Can be built and fit with ProbFlow in only a few lines:
             model.fit(x, y)
 
     .. group-tab:: PyTorch
-        
+
         .. code-block:: python3
 
             class DensityNetwork(pf.ContinuousModel):
@@ -209,7 +210,7 @@ Can be built and fit with ProbFlow in only a few lines:
 
             # Fit it!
             model.fit(x, y)
-            
+
 
 For convenience, ProbFlow also includes several :doc:`pre-built models </api_applications>` for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made :class:`LinearRegression <probflow.applications.LinearRegression>` model:
 
@@ -238,26 +239,26 @@ Before installing ProbFlow, you'll first need to install either `PyTorch <https:
     .. tab:: TensorFlow CPU
 
         .. code-block:: bash
-            
+
             pip install tensorflow==2.0.0 tensorflow-probability==0.8.0
 
     .. tab:: TensorFlow GPU
 
         .. code-block:: bash
-            
+
             pip install tensorflow-gpu==2.0.0 tensorflow-probability==0.8.0
 
     .. tab:: PyTorch
 
         .. code-block:: bash
-            
+
             pip install torch
 
 
 Then, you can install ProbFlow itself:
 
 .. code-block:: bash
-    
+
     pip install probflow
 
 
@@ -270,7 +271,7 @@ Post bug reports, feature requests, and tutorial requests in `GitHub issues <htt
 Contributing
 ------------
 
-`Pull requests <https://github.com/brendanhasz/probflow/pulls>`_ are totally welcome!  Any contribution would be appreciated, from things as minor as pointing out typos to things as major as writing new applications and distributions.
+`Pull requests <https://github.com/brendanhasz/probflow/pulls>`_ are totally welcome!  Any contribution would be appreciated, from things as minor as pointing out typos to things as major as writing new applications and distributions.  For info on how to set up a development environment and run the tests, see the :doc:`dev_guide`.
 
 
 Why the name, ProbFlow?

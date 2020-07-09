@@ -1,5 +1,5 @@
 """
-The callbacks module contains classes for monitoring and adjusting the 
+The callbacks module contains classes for monitoring and adjusting the
 training process.
 
 * :class:`.Callback` - abstract base class for all callbacks
@@ -33,7 +33,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from probflow.core.base import BaseCallback
-from probflow.data import DataGenerator
 from probflow.data import make_generator
 from probflow.utils.metrics import get_metric_fn
 
@@ -66,7 +65,7 @@ class LearningRateScheduler(Callback):
     Parameters
     ----------
     fn : callable
-        Function which takes the current epoch as an argument and returns a 
+        Function which takes the current epoch as an argument and returns a
         learning rate.
 
 
@@ -111,7 +110,7 @@ class KLWeightScheduler(Callback):
     Parameters
     ----------
     fn : callable
-        Function which takes the current epoch as an argument and returns a 
+        Function which takes the current epoch as an argument and returns a
         kl weight, a float between 0 and 1
 
 

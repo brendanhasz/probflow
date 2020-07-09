@@ -5,13 +5,13 @@ import probflow as pf
 
 
 def isclose(a, b, thresh=1e-6):
-    return np.all(np.abs(a-b) < thresh)
+    return np.all(np.abs(a - b) < thresh)
 
 
 def get_test_data(N, D):
-    x = np.random.randn(N, D).astype('float32')
-    w = np.random.randn(D, 1).astype('float32')
-    y = x@w + 0.1*np.random.randn(N, 1).astype('float32')
+    x = np.random.randn(N, D).astype("float32")
+    w = np.random.randn(D, 1).astype("float32")
+    y = x @ w + 0.1 * np.random.randn(N, 1).astype("float32")
     return x, y
 
 
@@ -28,7 +28,7 @@ def test_dumps_and_loads_before_fitting():
 
 def test_dump_and_load_before_fitting(tmpdir):
     model1 = pf.LinearRegression(7)
-    fname = str(tmpdir.join('test_model.pkl'))
+    fname = str(tmpdir.join("test_model.pkl"))
     model1.save(fname)
     model2 = pf.load(fname)
     assert isinstance(model2, pf.LinearRegression)
@@ -56,7 +56,7 @@ def test_dump_and_load_after_fitting(tmpdir):
     model1 = pf.LinearRegression(7)
     x, y = get_test_data(1024, 7)
     model1.fit(x, y, epochs=2)
-    fname = str(tmpdir.join('test_model.pkl'))
+    fname = str(tmpdir.join("test_model.pkl"))
     model1.save(fname)
     model2 = pf.load(fname)
     assert isinstance(model2, pf.LinearRegression)

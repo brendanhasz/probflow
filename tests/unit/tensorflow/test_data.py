@@ -1,7 +1,6 @@
 """Tests the probflow.data module"""
 
 
-
 import pytest
 
 import numpy as np
@@ -11,15 +10,14 @@ import probflow as pf
 from probflow.data import *
 
 
-
 def test_ArrayDataGenerator():
     """Tests probflow.data.ArrayDataGenerator"""
 
     # Should error with invalid args
     with pytest.raises(TypeError):
-        dg = ArrayDataGenerator(x='lala')
+        dg = ArrayDataGenerator(x="lala")
     with pytest.raises(TypeError):
-        dg = ArrayDataGenerator(y='lala')
+        dg = ArrayDataGenerator(y="lala")
     with pytest.raises(TypeError):
         dg = ArrayDataGenerator(batch_size=1.1)
     with pytest.raises(ValueError):
@@ -36,16 +34,16 @@ def test_ArrayDataGenerator():
     w = np.random.randn(3, 1)
     b = np.random.randn()
     y = x @ w + b
-    
+
     # Create the generator
     dg = ArrayDataGenerator(x, y, batch_size=5)
 
     # Check properties
     assert dg.n_samples == 100
     assert dg.batch_size == 5
-    assert dg.shuffle == False
+    assert dg.shuffle is False
 
-    #len should return # batches per epoch
+    # len should return # batches per epoch
     assert len(dg) == 20
 
     # __getitem__ should return a batch
@@ -56,19 +54,19 @@ def test_ArrayDataGenerator():
     assert x1.shape[1] == 3
     assert y1.shape[0] == 5
     assert y1.shape[1] == 1
-    
+
     # should return the same data if called twice
     x2, y2 = dg[0]
-    assert np.all(x1==x2)
-    assert np.all(y1==y2)
-    
+    assert np.all(x1 == x2)
+    assert np.all(y1 == y2)
+
     # but not after shuffling
     dg.shuffle = True
     dg.on_epoch_end()
     x2, y2 = dg[0]
-    assert np.sum(x1==x2) < 10
-    assert np.sum(y1==y2) < 10
-    
+    assert np.sum(x1 == x2) < 10
+    assert np.sum(y1 == y2) < 10
+
     # should be able to iterate over batches
     i = 0
     for xx, yy in dg:
@@ -111,11 +109,11 @@ def test_ArrayDataGenerator():
     y = x @ w + b
     x = pd.DataFrame(x)
     y = pd.Series(y[:, 0])
-    
+
     dg = ArrayDataGenerator(x, y, batch_size=5)
     assert dg.n_samples == 100
     assert dg.batch_size == 5
-    assert dg.shuffle == False
+    assert dg.shuffle is False
     assert len(dg) == 20
     x1, y1 = dg[0]
     assert isinstance(x1, pd.DataFrame)
@@ -124,13 +122,13 @@ def test_ArrayDataGenerator():
     assert x1.shape[1] == 3
     assert y1.shape[0] == 5
     x2, y2 = dg[0]
-    assert np.all(x1.values==x2.values)
-    assert np.all(y1.values==y2.values)
+    assert np.all(x1.values == x2.values)
+    assert np.all(y1.values == y2.values)
 
     dg = ArrayDataGenerator(y, x, batch_size=5)
     assert dg.n_samples == 100
     assert dg.batch_size == 5
-    assert dg.shuffle == False
+    assert dg.shuffle is False
     assert len(dg) == 20
     x1, y1 = dg[0]
     assert isinstance(y1, pd.DataFrame)
@@ -139,18 +137,17 @@ def test_ArrayDataGenerator():
     assert y1.shape[1] == 3
     assert x1.shape[0] == 5
     x2, y2 = dg[0]
-    assert np.all(x1.values==x2.values)
-    assert np.all(y1.values==y2.values)
-
+    assert np.all(x1.values == x2.values)
+    assert np.all(y1.values == y2.values)
 
 
 def test_DataGenerator_workers():
     """Tests probflow.data.DataGenerator w/ multiple worker processes"""
 
     # Data
-    x = np.random.randn(100, 3).astype('float32')
-    w = np.random.randn(3, 1).astype('float32')
-    y = x@w
+    x = np.random.randn(100, 3).astype("float32")
+    w = np.random.randn(3, 1).astype("float32")
+    y = x @ w
 
     # Fit a model with 1 worker
     model = pf.LinearRegression(3)
@@ -159,4 +156,3 @@ def test_DataGenerator_workers():
     # Fit a model with 4 workers
     model = pf.LinearRegression(3)
     model.fit(x, y, batch_size=10, epochs=10, num_workers=4)
-

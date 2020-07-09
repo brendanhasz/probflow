@@ -84,7 +84,7 @@ def plot_dist(
         * ``'hist'`` - histogram
 
     bins : int or list or |ndarray|
-        Number of bins to use for the histogram (if 
+        Number of bins to use for the histogram (if
         ``kde=False``), or a list or vector of bin edges.
     ci : float between 0 and 1
         Confidence interval to plot.  Default = 0.0 (i.e., not plotted)
@@ -263,7 +263,6 @@ def fill_between(xdata, lb, ub, xlabel="", ylabel="", alpha=0.3, color=None):
     # Number of fills and datasets
     dims = lb.shape[1:]
     Nd = int(np.prod(dims))
-    Np = lb.shape[0]
 
     # Flatten if >1D
     lb = np.reshape(lb, (lb.shape[0], Nd), order="F")
@@ -354,7 +353,7 @@ def plot_by(
         Whether to plot ``data`` as a function of ``x``
         Default = False
     bootstrap : None or int > 0
-        Number of bootstrap samples to use for estimating the uncertainty of 
+        Number of bootstrap samples to use for estimating the uncertainty of
         the true coverage.
     ci : list of float between 0 and 1
         Bootstrapped confidence interval percentiles of coverage to show.

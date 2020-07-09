@@ -16,7 +16,7 @@ def dumps(obj):
 
     Note
     ----
-    This removes the compiled ``_train_fn`` attribute of a |Model| which is 
+    This removes the compiled ``_train_fn`` attribute of a |Model| which is
     either a |TensorFlow| or |PyTorch| compiled function to perform a single
     training step.  Cloudpickle can't serialize it, and after de-serializing
     will just JIT re-compile if needed.
@@ -36,7 +36,7 @@ def dump(obj, filename):
 
     Note
     ----
-    This removes the compiled ``_train_fn`` attribute of a |Model| which is 
+    This removes the compiled ``_train_fn`` attribute of a |Model| which is
     either a |TensorFlow| or |PyTorch| compiled function to perform a single
     training step.  Cloudpickle can't serialize it, and after de-serializing
     will just JIT re-compile if needed.
