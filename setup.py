@@ -23,6 +23,17 @@ setup(
     ],
     zip_safe=False,
     extras_require={
+        "tensorflow_cpu": [
+            "tensorflow == 2.2.0",
+            "tensorflow-probability == 0.10.0",
+        ],
+        "tensorflow_gpu": [
+            "tensorflow-gpu == 2.2.0",
+            "tensorflow-probability == 0.10.0",
+        ],
+        "pytorch": [
+            "torch >= 1.2.0",
+        ],
         "tests": [
             "tensorflow == 2.2.0",
             "tensorflow-probability == 0.10.0",
@@ -31,11 +42,17 @@ setup(
             "pytest-cov >= 2.7.1",
             "flake8 >= 3.8.3",
             "black >= 19.10b0",
+            "sphinx >= 3.1.2",
+            "sphinx-tabs >= 1.1.13",
+            "sphinx_rtd_theme >= 0.5.0",
+            "setuptools >= 49.1.0",
+            "wheel >= 0.34.2",
+            "twine >= 3.2.0",
         ],
         "docs": [
             "tensorflow == 2.2.0",
             "tensorflow-probability == 0.10.0",
-            "sphinx-tabs",
+            "sphinx-tabs >= 1.1.13",
         ],
     },
 )

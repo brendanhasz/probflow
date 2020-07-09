@@ -13,8 +13,8 @@ Backend graph optimization during fitting
 By default, ProbFlow uses
 `tf.function <https://www.tensorflow.org/api_docs/python/tf/function>`_
 (for TensorFlow) or
-`tracing <https://pytorch.org/docs/master/generated/torch.jit.trace.html>`_ 
-(for PyTorch) to optimize the gradient computations during training.  This 
+`tracing <https://pytorch.org/docs/master/generated/torch.jit.trace.html>`_
+(for PyTorch) to optimize the gradient computations during training.  This
 generally makes training faster.
 
 .. code-block:: python3
@@ -31,9 +31,10 @@ generally makes training faster.
     model.fit(x, y)
     # takes around 5s
 
-But to disable autograph/tracing and use only eager execution during model fitting
-just pass the ``eager=True`` kwarg to ``fit``.  This takes longer but can be more
-flexible in certiain situations that autograph/tracing can't handle.
+But to disable autograph/tracing and use only eager execution during model
+fitting just pass the ``eager=True`` kwarg to ``fit``.  This takes longer but
+can be more flexible in certiain situations that autograph/tracing can't
+handle.
 
 .. code-block:: python3
 
@@ -45,9 +46,15 @@ flexible in certiain situations that autograph/tracing can't handle.
     Tracing during model is not yet implemented when using PyTorch as the
     backend.  Hopefully will be implemented soon!
 
-However, eager mode is used for all other ProbFlow functionality (e.g. 
-``model.predict``).  If you want an optimized version of one of ProbFlow's
-inference-time methods, for TensorFlow you can wrap it in a ``tf.function``:
+It's much easier to debug models in eager mode, since you can step through your
+own code using `pdb <https://docs.python.org/3/library/pdb.html>`_, instead of
+trying to step through the tensorflow or pytorch compilation functions.
+
+However, eager mode is used for all other ProbFlow functionality (e.g.
+:meth:`.Model.predict`, :meth:`.Model.predictive_sample`,
+:meth:`.Model.metric`, :meth:`.Model.posterior_sample`, etc).  If you want an
+optimized version of one of ProbFlow's inference-time methods, for TensorFlow
+you can wrap it in a ``tf.function``:
 
 .. code-block:: python3
 
