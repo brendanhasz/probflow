@@ -1,5 +1,6 @@
 """Functions for saving and loading ProbFlow  objects"""
 
+import base64
 import cloudpickle
 
 __all__ = [
@@ -11,7 +12,7 @@ __all__ = [
 
 
 def dumps(obj):
-    """Serialize a probflow object to bytes.
+    """Serialize a probflow object to a json-safe string.
 
     Note
     ----
@@ -22,12 +23,12 @@ def dumps(obj):
     """
     if hasattr(obj, "_train_fn"):
         delattr(obj, "_train_fn")
-    return cloudpickle.dumps(obj)
+    return base64.b64encode(cloudpickle.dumps(obj)).decode("utf8")
 
 
 def loads(s):
-    """Deserialize a probflow object from bytes"""
-    return cloudpickle.loads(s)
+    """Deserialize a probflow object from string"""
+    return cloudpickle.loads(base64.b64decode(s.encode("utf8")))
 
 
 def dump(obj, filename):
