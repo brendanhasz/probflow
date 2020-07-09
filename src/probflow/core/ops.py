@@ -23,29 +23,27 @@ The core.ops module contains operations which run using the current backend.
 """
 
 
-
 __all__ = [
-    'kl_divergence',
-    'ones',
-    'zeros',
-    'sum',
-    'prod',
-    'mean',
-    'std',
-    'round',
-    'abs',
-    'square',
-    'exp',
-    'sqrt',
-    'relu',
-    'softplus',
-    'sigmoid',
-    'gather',
-    'cat',
-    'additive_logistic_transform',
-    'add_col_of',
+    "kl_divergence",
+    "ones",
+    "zeros",
+    "sum",
+    "prod",
+    "mean",
+    "std",
+    "round",
+    "abs",
+    "square",
+    "exp",
+    "sqrt",
+    "relu",
+    "softplus",
+    "sigmoid",
+    "gather",
+    "cat",
+    "additive_logistic_transform",
+    "add_col_of",
 ]
-
 
 
 from probflow.core.settings import get_backend
@@ -76,13 +74,14 @@ def kl_divergence(P, Q):
         Q = Q()
 
     # Compute KL divergence with the backend
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.distributions.kl.kl_divergence(P, Q)
     else:
         import tensorflow_probability as tfp
-        return tfp.distributions.kl_divergence(P, Q)
 
+        return tfp.distributions.kl_divergence(P, Q)
 
 
 @make_input_tensor
@@ -90,253 +89,275 @@ def expand_dims(val, axis):
     """Add a singular dimension to a Tensor"""
     if axis is None:
         return val
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.unsqueeze(val, axis)
     else:
         import tensorflow as tf
-        return tf.expand_dims(val, axis)
 
+        return tf.expand_dims(val, axis)
 
 
 @make_input_tensor
 def squeeze(val):
     """Remove singleton dimensions"""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.squeeze(val)
     else:
         import tensorflow as tf
-        return tf.squeeze(val)
 
+        return tf.squeeze(val)
 
 
 def ones(shape):
     """Tensor full of ones."""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.ones(shape)
     else:
         import tensorflow as tf
-        return tf.ones(shape)
 
+        return tf.ones(shape)
 
 
 def zeros(shape):
     """Tensor full of zeros."""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.zeros(shape)
     else:
         import tensorflow as tf
-        return tf.zeros(shape)
 
+        return tf.zeros(shape)
 
 
 def eye(dims):
     """Identity matrix."""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.eye(dims)
     else:
         import tensorflow as tf
-        return tf.eye(dims)
 
+        return tf.eye(dims)
 
 
 def sum(val, axis=-1):
     """The sum."""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         if axis is None:
             return torch.sum(val)
         else:
             return torch.sum(val, axis)
     else:
         import tensorflow as tf
-        return tf.reduce_sum(val, axis=axis)
 
+        return tf.reduce_sum(val, axis=axis)
 
 
 def prod(val, axis=-1):
     """The product."""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.prod(val, dim=axis)
     else:
         import tensorflow as tf
-        return tf.reduce_prod(val, axis=axis)
 
+        return tf.reduce_prod(val, axis=axis)
 
 
 def mean(val, axis=-1):
     """The mean."""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.mean(val, dim=axis)
     else:
         import tensorflow as tf
-        return tf.reduce_mean(val, axis=axis)
 
+        return tf.reduce_mean(val, axis=axis)
 
 
 def std(val, axis=-1):
     """The uncorrected sample standard deviation."""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.std(val, dim=axis)
     else:
         import tensorflow as tf
-        return tf.math.reduce_std(val, axis=axis)
 
+        return tf.math.reduce_std(val, axis=axis)
 
 
 def round(val):
     """Round to the closest integer"""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.round(val)
     else:
         import tensorflow as tf
-        return tf.math.round(val)
 
+        return tf.math.round(val)
 
 
 def abs(val):
     """Absolute value"""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.abs(val)
     else:
         import tensorflow as tf
-        return tf.math.abs(val)
 
+        return tf.math.abs(val)
 
 
 def square(val):
     """Power of 2"""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
-        return val**2
+
+        return val ** 2
     else:
         import tensorflow as tf
-        return tf.math.square(val)
 
+        return tf.math.square(val)
 
 
 def sqrt(val):
     """The square root."""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.sqrt(val)
     else:
         import tensorflow as tf
-        return tf.sqrt(val)
 
+        return tf.sqrt(val)
 
 
 def exp(val):
     """The natural exponent."""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.exp(val)
     else:
         import tensorflow as tf
-        return tf.exp(val)
 
+        return tf.exp(val)
 
 
 def relu(val):
     """Linear rectification."""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.nn.ReLU()(val)
     else:
         import tensorflow as tf
-        return tf.nn.relu(val)
 
+        return tf.nn.relu(val)
 
 
 def softplus(val):
     """Linear rectification."""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.nn.Softplus()(val)
     else:
         import tensorflow as tf
-        return tf.math.softplus(val)
 
+        return tf.math.softplus(val)
 
 
 def sigmoid(val):
     """Sigmoid function."""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.nn.Sigmoid()(val)
     else:
         import tensorflow as tf
-        return tf.math.sigmoid(val)
 
+        return tf.math.sigmoid(val)
 
 
 def gather(vals, inds, axis=0):
     """Gather values by index"""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.index_select(vals, axis, inds)
     else:
         import tensorflow as tf
-        return tf.gather(vals, inds, axis=axis)
 
+        return tf.gather(vals, inds, axis=axis)
 
 
 def cat(vals, axis=0):
     """Concatenate tensors"""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         return torch.cat(vals, dim=axis)
     else:
         import tensorflow as tf
-        return tf.concat(vals, axis=axis)
 
+        return tf.concat(vals, axis=axis)
 
 
 def additive_logistic_transform(vals):
     """The additive logistic transformation"""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         ones_shape = [s for s in vals.shape[:-1]] + [1]
         exp_vals = torch.cat([torch.exp(vals), torch.ones(ones_shape)], dim=-1)
-        return exp_vals/torch.sum(exp_vals, dim=-1, keepdim=True)
+        return exp_vals / torch.sum(exp_vals, dim=-1, keepdim=True)
     else:
         import tensorflow as tf
+
         ones_shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
         exp_vals = tf.concat([tf.exp(vals), tf.ones(ones_shape)], axis=-1)
-        return exp_vals/tf.reduce_sum(exp_vals, axis=-1, keepdims=True)
-
+        return exp_vals / tf.reduce_sum(exp_vals, axis=-1, keepdims=True)
 
 
 def add_col_of(vals, val):
     """Add a column of a value to a tensor"""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         shape = [s for s in vals.shape[:-1]] + [1]
-        return torch.cat([vals, val*torch.ones(shape)], dim=-1)
+        return torch.cat([vals, val * torch.ones(shape)], dim=-1)
     else:
         import tensorflow as tf
-        shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
-        return tf.concat([vals, val*tf.ones(shape)], axis=-1)
 
+        shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
+        return tf.concat([vals, val * tf.ones(shape)], axis=-1)
 
 
 def insert_col_of(vals, val):
     """Add a column of a value to the left side of a tensor"""
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         shape = [s for s in vals.shape[:-1]] + [1]
-        return torch.cat([val*torch.ones(shape), vals], dim=-1)
+        return torch.cat([val * torch.ones(shape), vals], dim=-1)
     else:
         import tensorflow as tf
-        shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
-        return tf.concat([val*tf.ones(shape), vals], axis=-1)
 
+        shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
+        return tf.concat([val * tf.ones(shape), vals], axis=-1)

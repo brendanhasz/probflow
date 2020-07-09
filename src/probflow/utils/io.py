@@ -4,10 +4,10 @@ import base64
 import cloudpickle
 
 __all__ = [
-    'dumps',
-    'loads',
-    'dump',
-    'load',
+    "dumps",
+    "loads",
+    "dump",
+    "load",
 ]
 
 

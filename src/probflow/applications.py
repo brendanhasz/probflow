@@ -14,14 +14,13 @@ The applications module contains pre-built |Models| and |Modules|.
 
 
 __all__ = [
-    'LinearRegression',
-    'LogisticRegression',
-    'PoissonRegression',
-    'DenseNetwork',
-    'DenseRegression',
-    'DenseClassifier',
+    "LinearRegression",
+    "LogisticRegression",
+    "PoissonRegression",
+    "DenseNetwork",
+    "DenseRegression",
+    "DenseClassifier",
 ]
-
 
 
 from typing import List, Callable, Union
@@ -39,7 +38,6 @@ from probflow.modules import Dense
 from probflow.models import ContinuousModel
 from probflow.models import DiscreteModel
 from probflow.models import CategoricalModel
-
 
 
 class LinearRegression(ContinuousModel):
@@ -69,13 +67,12 @@ class LinearRegression(ContinuousModel):
     def __init__(self, d: int, heteroscedastic: bool = False):
         self.heteroscedastic = heteroscedastic
         if heteroscedastic:
-            self.weights = Parameter([d, 2], name='weights')
-            self.bias = Parameter([1, 1], name='bias')
+            self.weights = Parameter([d, 2], name="weights")
+            self.bias = Parameter([1, 1], name="bias")
         else:
-            self.weights = Parameter([d, 1], name='weights')
-            self.bias = Parameter([1, 1], name='bias')
-            self.std = ScaleParameter([1, 1], name='std')
-
+            self.weights = Parameter([d, 1], name="weights")
+            self.bias = Parameter([1, 1], name="bias")
+            self.std = ScaleParameter([1, 1], name="std")
 
     def __call__(self, x):
         x = to_tensor(x)
@@ -86,7 +83,6 @@ class LinearRegression(ContinuousModel):
             return Normal(m_preds, s_preds)
         else:
             return Normal(x @ self.weights() + self.bias(), self.std())
-
 
 
 class LogisticRegression(CategoricalModel):
@@ -112,14 +108,14 @@ class LogisticRegression(CategoricalModel):
     """
 
     def __init__(self, d: int, k: int = 2):
-        self.weights = Parameter([d, k-1], name='weights')
-        self.bias = Parameter([1, k-1], name='bias')
-
+        self.weights = Parameter([d, k - 1], name="weights")
+        self.bias = Parameter([1, k - 1], name="bias")
 
     def __call__(self, x):
         x = to_tensor(x)
-        return Categorical(O.insert_col_of(x@self.weights() + self.bias(), 0))
-
+        return Categorical(
+            O.insert_col_of(x @ self.weights() + self.bias(), 0)
+        )
 
 
 class PoissonRegression(DiscreteModel):
@@ -141,14 +137,12 @@ class PoissonRegression(DiscreteModel):
     """
 
     def __init__(self, d: int):
-        self.weights = Parameter([d, 1], name='weights')
-        self.bias = Parameter([1, 1], name='bias')
-
+        self.weights = Parameter([d, 1], name="weights")
+        self.bias = Parameter([1, 1], name="bias")
 
     def __call__(self, x):
         x = to_tensor(x)
         return Poisson(O.exp(x @ self.weights() + self.bias()))
-
 
 
 class DenseNetwork(Module):
@@ -178,17 +172,19 @@ class DenseNetwork(Module):
         Activation function for each layer
     """
 
-    def __init__(self, 
-                 d: List[int], 
-                 activation: Callable = O.relu,
-                 name: Union[str, None] = None):
-        self.activations = [activation for i in range(len(d)-2)]
+    def __init__(
+        self,
+        d: List[int],
+        activation: Callable = O.relu,
+        name: Union[str, None] = None,
+    ):
+        self.activations = [activation for i in range(len(d) - 2)]
         self.activations += [lambda x: x]
-        name = '' if name is None else name+'_'
-        names = [name+'Dense'+str(i) for i in range(len(d)-1)]
-        self.layers = [Dense(d[i], d[i+1], name=names[i]) 
-                       for i in range(len(d)-1)]
-
+        name = "" if name is None else name + "_"
+        names = [name + "Dense" + str(i) for i in range(len(d) - 1)]
+        self.layers = [
+            Dense(d[i], d[i + 1], name=names[i]) for i in range(len(d) - 1)
+        ]
 
     def __call__(self, x):
         x = to_tensor(x)
@@ -196,7 +192,6 @@ class DenseNetwork(Module):
             x = self.layers[i](x)
             x = self.activations[i](x)
         return x
-
 
 
 class DenseRegression(ContinuousModel):
@@ -231,24 +226,22 @@ class DenseRegression(ContinuousModel):
     def __init__(self, d: List[int], heteroscedastic: bool = False, **kwargs):
         self.heteroscedastic = heteroscedastic
         if heteroscedastic:
-            d[-1] = 2*d[-1]
+            d[-1] = 2 * d[-1]
             self.network = DenseNetwork(d, **kwargs)
         else:
             self.network = DenseNetwork(d, **kwargs)
-            self.std = ScaleParameter([1, 1], name='std')
-
+            self.std = ScaleParameter([1, 1], name="std")
 
     def __call__(self, x):
         x = to_tensor(x)
         if self.heteroscedastic:
             p = self.network(x)
-            Nd = int(p.shape[-1]/2)
+            Nd = int(p.shape[-1] / 2)
             m_preds = p[..., :, 0:Nd]
-            s_preds = O.exp(p[..., :, Nd:2*Nd])
+            s_preds = O.exp(p[..., :, Nd : 2 * Nd])
             return Normal(m_preds, s_preds)
         else:
             return Normal(self.network(x), self.std())
-
 
 
 class DenseClassifier(CategoricalModel):
@@ -276,7 +269,6 @@ class DenseClassifier(CategoricalModel):
     def __init__(self, d: List[int], **kwargs):
         d[-1] -= 1
         self.network = DenseNetwork(d, **kwargs)
-
 
     def __call__(self, x):
         x = to_tensor(x)

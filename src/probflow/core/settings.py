@@ -58,20 +58,19 @@ variational distributions while inside the context manager.
 
 
 __all__ = [
-    'get_backend',
-    'set_backend',
-    'get_datatype',
-    'set_datatype',
-    'get_samples',
-    'set_samples',
-    'get_flipout',
-    'set_flipout',
-    'Sampling',
+    "get_backend",
+    "set_backend",
+    "get_datatype",
+    "set_datatype",
+    "get_samples",
+    "set_samples",
+    "get_flipout",
+    "set_flipout",
+    "Sampling",
 ]
 
 
-
-class _Settings():
+class _Settings:
     """Class to store ProbFlow global settings
 
     Attributes
@@ -88,16 +87,14 @@ class _Settings():
     """
 
     def __init__(self):
-        self._BACKEND = 'tensorflow'
+        self._BACKEND = "tensorflow"
         self._SAMPLES = None
         self._FLIPOUT = False
         self._DATATYPE = None
 
 
-
 # Global ProbFlow settings
 __SETTINGS__ = _Settings()
-
 
 
 def get_backend():
@@ -111,7 +108,6 @@ def get_backend():
     return __SETTINGS__._BACKEND
 
 
-
 def set_backend(backend):
     """Set which backend is currently being used.
 
@@ -121,13 +117,12 @@ def set_backend(backend):
         The backend to use
     """
     if isinstance(backend, str):
-        if backend in ['tensorflow', 'pytorch']:
+        if backend in ["tensorflow", "pytorch"]:
             __SETTINGS__._BACKEND = backend
         else:
-            raise ValueError('backend must be either tensorflow or pytorch')
+            raise ValueError("backend must be either tensorflow or pytorch")
     else:
-        raise TypeError('backend must be a string')
-
+        raise TypeError("backend must be a string")
 
 
 def get_datatype():
@@ -139,15 +134,16 @@ def get_datatype():
         The current default datatype
     """
     if __SETTINGS__._DATATYPE is None:
-        if get_backend() == 'pytorch':
+        if get_backend() == "pytorch":
             import torch
+
             return torch.float32
         else:
             import tensorflow as tf
+
             return tf.dtypes.float32
     else:
         return __SETTINGS__._DATATYPE
-
 
 
 def set_datatype(datatype):
@@ -158,19 +154,20 @@ def set_datatype(datatype):
     datatype : tf.dtype or torch.dtype
         The default datatype to use
     """
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         if datatype is None or isinstance(datatype, torch.dtype):
             __SETTINGS__._DATATYPE = datatype
         else:
-            raise TypeError('datatype must be a torch.dtype')
+            raise TypeError("datatype must be a torch.dtype")
     else:
         import tensorflow as tf
+
         if datatype is None or isinstance(datatype, tf.dtypes.DType):
             __SETTINGS__._DATATYPE = datatype
         else:
-            raise TypeError('datatype must be a tf.dtypes.DType')
-
+            raise TypeError("datatype must be a tf.dtypes.DType")
 
 
 def get_samples():
@@ -185,7 +182,6 @@ def get_samples():
     return __SETTINGS__._SAMPLES
 
 
-
 def set_samples(samples):
     """Set how many samples (if any) to draw from parameter posteriors
 
@@ -195,12 +191,11 @@ def set_samples(samples):
         Number of samples (if any) to draw from parameters' posteriors.
     """
     if samples is not None and not isinstance(samples, int):
-        raise TypeError('samples must be an int or None')
+        raise TypeError("samples must be an int or None")
     elif isinstance(samples, int) and samples < 1:
-        raise ValueError('samples must be positive')
+        raise ValueError("samples must be positive")
     else:
         __SETTINGS__._SAMPLES = samples
-
 
 
 def get_flipout():
@@ -215,7 +210,6 @@ def get_flipout():
     return __SETTINGS__._FLIPOUT
 
 
-
 def set_flipout(flipout):
     """Set whether to use flipout where possible while sampling during training
 
@@ -227,11 +221,10 @@ def set_flipout(flipout):
     if isinstance(flipout, bool):
         __SETTINGS__._FLIPOUT = flipout
     else:
-        raise TypeError('flipout must be True or False')
+        raise TypeError("flipout must be True or False")
 
 
-
-class Sampling():
+class Sampling:
     """Use sampling while within this context manager.
 
 
@@ -291,17 +284,14 @@ class Sampling():
 
     """
 
-
     def __init__(self, n=1, flipout=False):
         self._n = n
         self._flipout = flipout
-
 
     def __enter__(self):
         """Begin sampling."""
         set_samples(self._n)
         set_flipout(self._flipout)
-
 
     def __exit__(self, _type, _val, _tb):
         """End sampling and reset sampling settings to defaults"""

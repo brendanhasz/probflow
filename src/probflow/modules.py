@@ -17,13 +17,12 @@ they store parameters, and use those parameters to perform a computation
 
 
 __all__ = [
-    'Module',
-    'Dense',
-    'Sequential',
-    'BatchNormalization',
-    'Embedding',    
+    "Module",
+    "Dense",
+    "Sequential",
+    "BatchNormalization",
+    "Embedding",
 ]
-
 
 
 from typing import Union, List, Dict, Callable, Type
@@ -39,7 +38,6 @@ from probflow.utils.initializers import xavier
 from probflow.utils.initializers import scale_xavier
 from probflow.utils.io import dumps
 from probflow.utils.io import dump
-
 
 
 class Module(BaseModule):
@@ -62,50 +60,45 @@ class Module(BaseModule):
         else:
             return []
 
-
     def _list_params(self, the_list: List):
         """Recursively search for |Parameters| contained in a list"""
         return [p for e in the_list for p in self._params(e)]
 
-
     def _dict_params(self, the_dict: Dict):
         """Recursively search for |Parameters| contained in a dict"""
         return [p for _, e in the_dict.items() for p in self._params(e)]
-
 
     @property
     def parameters(self):
         """A list of |Parameters| in this |Module| and its sub-Modules."""
         return [p for _, a in vars(self).items() for p in self._params(a)]
 
-
     @property
     def modules(self):
         """A list of sub-Modules in this |Module|, including itself."""
-        return [m for a in vars(self).values()
-                if isinstance(a, BaseModule)
-                for m in a.modules] + [self]
-
+        return [
+            m
+            for a in vars(self).values()
+            if isinstance(a, BaseModule)
+            for m in a.modules
+        ] + [self]
 
     @property
     def trainable_variables(self):
         """A list of trainable backend variables within this |Module|"""
         return [v for p in self.parameters for v in p.trainable_variables]
         # TODO: look for variables NOT in parameters too
-        # so users can mix-n-match tf.Variables and pf.Parameters in modules 
-
+        # so users can mix-n-match tf.Variables and pf.Parameters in modules
 
     @property
     def n_parameters(self):
         """Get the number of independent parameters of this module"""
         return sum([p.n_parameters for p in self.parameters])
 
-
     @property
     def n_variables(self):
         """Get the number of underlying variables in this module"""
         return sum([p.n_variables for p in self.parameters])
-
 
     def kl_loss(self):
         """Compute the sum of the Kullback-Leibler divergences between
@@ -113,18 +106,15 @@ class Module(BaseModule):
         |Module| and its sub-Modules."""
         return sum([p.kl_loss() for p in self.parameters])
 
-
     def kl_loss_batch(self):
         """Compute the sum of additional Kullback-Leibler divergences due to
         data in this batch"""
         return sum([e for m in self.modules for e in m._kl_losses])
 
-
     def reset_kl_loss(self):
         """Reset additional loss due to KL divergences"""
         for m in self.modules:
             m._kl_losses = []
-
 
     def add_kl_loss(self, loss, d2=None):
         """Add additional loss due to KL divergences."""
@@ -133,11 +123,9 @@ class Module(BaseModule):
         else:
             self._kl_losses += [O.sum(O.kl_divergence(loss, d2), axis=None)]
 
-    
     def dumps(self):
         """Serialize module object to bytes"""
         return dumps(self)
-        
 
     def save(self, filename: str):
         """Save module object to file
@@ -172,8 +160,6 @@ class Module(BaseModule):
 
         """
         dump(self, filename)
-        
-
 
 
 class Dense(Module):
@@ -191,30 +177,28 @@ class Dense(Module):
         Name of this layer
     """
 
-
-    def __init__(self, d_in: int, d_out: int = 1, name: str = 'Dense'):
+    def __init__(self, d_in: int, d_out: int = 1, name: str = "Dense"):
 
         # Check types
         if d_in < 1:
-            raise ValueError('d_in must be >0')
+            raise ValueError("d_in must be >0")
         if d_out < 1:
-            raise ValueError('d_out must be >0')
+            raise ValueError("d_out must be >0")
 
         # Create the parameters
         self.d_in = d_in
         self.d_out = d_out
-        self.weights = Parameter(shape=[d_in, d_out], name=name+'_weights')
-        self.bias = Parameter(shape=[1, d_out], name=name+'_bias')
-
+        self.weights = Parameter(shape=[d_in, d_out], name=name + "_weights")
+        self.bias = Parameter(shape=[1, d_out], name=name + "_bias")
 
     def __call__(self, x):
         """Perform the forward pass"""
 
         # Using the Flipout estimator
         if get_flipout():
-        
+
             # With PyTorch
-            if get_backend() == 'pytorch':
+            if get_backend() == "pytorch":
                 raise NotImplementedError
 
             # With Tensorflow
@@ -225,24 +209,23 @@ class Dense(Module):
 
                 # Flipout-estimated weight samples
                 s = tfp.python.math.random_rademacher(tf.shape(x))
-                r = tfp.python.math.random_rademacher([x.shape[0],self.d_out])
+                r = tfp.python.math.random_rademacher([x.shape[0], self.d_out])
                 norm_samples = tf.random.normal([self.d_in, self.d_out])
-                w_samples = self.weights.variables['scale'] * norm_samples
-                w_noise = r*((x*s) @ w_samples)
-                w_outputs = x @ self.weights.variables['loc'] + w_noise
-                
+                w_samples = self.weights.variables["scale"] * norm_samples
+                w_noise = r * ((x * s) @ w_samples)
+                w_outputs = x @ self.weights.variables["loc"] + w_noise
+
                 # Flipout-estimated bias samples
-                r = tfp.python.math.random_rademacher([x.shape[0],self.d_out])
+                r = tfp.python.math.random_rademacher([x.shape[0], self.d_out])
                 norm_samples = tf.random.normal([self.d_out])
-                b_samples = self.bias.variables['scale'] * norm_samples
-                b_outputs = self.bias.variables['loc'] + r*b_samples
-                
+                b_samples = self.bias.variables["scale"] * norm_samples
+                b_outputs = self.bias.variables["loc"] + r * b_samples
+
                 return w_outputs + b_outputs
-        
+
         # Without Flipout
         else:
             return x @ self.weights() + self.bias()
-
 
 
 class Sequential(Module):
@@ -258,19 +241,16 @@ class Sequential(Module):
         Name of this module
     """
 
-
-    def __init__(self, steps: List[Callable], name: str = 'Sequential'):
+    def __init__(self, steps: List[Callable], name: str = "Sequential"):
 
         # Store the list of steps
         self.steps = steps
-
 
     def __call__(self, x):
         """Perform the forward pass"""
         for step in self.steps:
             x = step(x)
         return x
-
 
 
 class BatchNormalization(Module):
@@ -379,35 +359,39 @@ class BatchNormalization(Module):
         *arXiv preprint*, 2018. http://arxiv.org/abs/1805.11604
     """
 
-    def __init__(self, 
-                 shape: Union[int, List[int]],
-                 weight_posterior: Type[BaseDistribution] = Deterministic,
-                 bias_posterior: Type[BaseDistribution] = Deterministic,
-                 weight_prior: BaseDistribution = Normal(0, 1),
-                 bias_prior: BaseDistribution = Normal(0, 1),
-                 weight_initializer: Dict[str, Callable] = {'loc': xavier},
-                 bias_initializer: Dict[str, Callable] = {'loc': xavier},
-                 name='BatchNormalization'):
+    def __init__(
+        self,
+        shape: Union[int, List[int]],
+        weight_posterior: Type[BaseDistribution] = Deterministic,
+        bias_posterior: Type[BaseDistribution] = Deterministic,
+        weight_prior: BaseDistribution = Normal(0, 1),
+        bias_prior: BaseDistribution = Normal(0, 1),
+        weight_initializer: Dict[str, Callable] = {"loc": xavier},
+        bias_initializer: Dict[str, Callable] = {"loc": xavier},
+        name="BatchNormalization",
+    ):
 
         # Create the parameters
-        self.weight = Parameter(shape=shape,
-                                posterior=weight_posterior,
-                                prior=weight_prior,
-                                initializer=weight_initializer,
-                                name=name+'_weight')
-        self.bias = Parameter(shape=shape,
-                              posterior=bias_posterior,
-                              prior=bias_prior,
-                              initializer=bias_initializer,
-                              name=name+'_bias')
-
+        self.weight = Parameter(
+            shape=shape,
+            posterior=weight_posterior,
+            prior=weight_prior,
+            initializer=weight_initializer,
+            name=name + "_weight",
+        )
+        self.bias = Parameter(
+            shape=shape,
+            posterior=bias_posterior,
+            prior=bias_prior,
+            initializer=bias_initializer,
+            name=name + "_bias",
+        )
 
     def __call__(self, x):
         """Perform the forward pass"""
         mean = O.mean(x, axis=0)
         std = O.std(x, axis=0)
-        return self.weight()*(x-mean)/std+self.bias()
-
+        return self.weight() * (x - mean) / std + self.bias()
 
 
 class Embedding(Module):
@@ -471,13 +455,15 @@ class Embedding(Module):
 
     """
 
-    def __init__(self, 
-                 k: Union[int, List[int]],
-                 d: Union[int, List[int]],
-                 posterior: Type[BaseDistribution] = Deterministic,
-                 prior: BaseDistribution = Normal(0, 1),
-                 initializer: Dict[str, Callable] = {'loc': xavier},
-                 name: str = 'Embeddings'):
+    def __init__(
+        self,
+        k: Union[int, List[int]],
+        d: Union[int, List[int]],
+        posterior: Type[BaseDistribution] = Deterministic,
+        prior: BaseDistribution = Normal(0, 1),
+        initializer: Dict[str, Callable] = {"loc": xavier},
+        name: str = "Embeddings",
+    ):
 
         # Convert to list if not already
         if isinstance(k, int):
@@ -487,23 +473,28 @@ class Embedding(Module):
 
         # Check values
         if len(k) != len(d):
-            raise ValueError('d and k must be the same length')
-        if any(e<1 for e in k):
-            raise ValueError('k must be >0')
-        if any(e<1 for e in d):
-            raise ValueError('d must be >0')
+            raise ValueError("d and k must be the same length")
+        if any(e < 1 for e in k):
+            raise ValueError("k must be >0")
+        if any(e < 1 for e in d):
+            raise ValueError("d must be >0")
 
         # Create the parameters
-        self.embeddings = [Parameter(shape=[k[i], d[i]],
-                                     posterior=posterior,
-                                     prior=prior,
-                                     initializer=initializer,
-                                     name=name+'_'+str(i))
-                           for i in range(len(d))]
-
+        self.embeddings = [
+            Parameter(
+                shape=[k[i], d[i]],
+                posterior=posterior,
+                prior=prior,
+                initializer=initializer,
+                name=name + "_" + str(i),
+            )
+            for i in range(len(d))
+        ]
 
     def __call__(self, x):
         """Perform the forward pass"""
-        embs = [O.gather(self.embeddings[i](), x[:, i])
-                for i in range(len(self.embeddings))]
+        embs = [
+            O.gather(self.embeddings[i](), x[:, i])
+            for i in range(len(self.embeddings))
+        ]
         return O.cat(embs, -1)

@@ -14,25 +14,22 @@ Evaluation metrics
 """
 
 
-
 __all__ = [
-    'accuracy',
-    'mean_squared_error',
-    'sum_squared_error',
-    'mean_absolute_error',
-    'r_squared',
-    'true_positive_rate',
-    'true_negative_rate',
-    'precision',
-    'f1_score',
-    'get_metric_fn',
+    "accuracy",
+    "mean_squared_error",
+    "sum_squared_error",
+    "mean_absolute_error",
+    "r_squared",
+    "true_positive_rate",
+    "true_negative_rate",
+    "precision",
+    "f1_score",
+    "get_metric_fn",
 ]
-
 
 
 import numpy as np
 import pandas as pd
-
 
 
 def as_numpy(fn):
@@ -68,42 +65,36 @@ def as_numpy(fn):
     return metric_fn
 
 
-
 @as_numpy
 def accuracy(y_true, y_pred):
     """Accuracy of predictions."""
     return np.mean(y_pred == y_true)
 
 
-
 @as_numpy
 def mean_squared_error(y_true, y_pred):
     """Mean squared error."""
-    return np.mean(np.square(y_true-y_pred))
-
+    return np.mean(np.square(y_true - y_pred))
 
 
 @as_numpy
 def sum_squared_error(y_true, y_pred):
     """Sum of squared error."""
-    return np.sum(np.square(y_true-y_pred))
-
+    return np.sum(np.square(y_true - y_pred))
 
 
 @as_numpy
 def mean_absolute_error(y_true, y_pred):
     """Mean absolute error."""
-    return np.mean(np.abs(y_true-y_pred))
-
+    return np.mean(np.abs(y_true - y_pred))
 
 
 @as_numpy
 def r_squared(y_true, y_pred):
     """Coefficient of determination."""
-    ss_tot = np.sum(np.square(y_true-np.mean(y_true)))
-    ss_res = np.sum(np.square(y_true-y_pred))
+    ss_tot = np.sum(np.square(y_true - np.mean(y_true)))
+    ss_res = np.sum(np.square(y_true - y_pred))
     return 1.0 - ss_res / ss_tot
-
 
 
 @as_numpy
@@ -111,8 +102,7 @@ def true_positive_rate(y_true, y_pred):
     """True positive rate aka sensitivity aka recall."""
     p = np.sum(y_true == 1)
     tp = np.sum((y_pred == y_true) & (y_true == 1))
-    return tp/p
-
+    return tp / p
 
 
 @as_numpy
@@ -120,8 +110,7 @@ def true_negative_rate(y_true, y_pred):
     """True negative rate aka specificity aka selectivity."""
     n = np.sum(y_true == 0)
     tn = np.sum((y_pred == y_true) & (y_true == 0))
-    return tn/n
-
+    return tn / n
 
 
 @as_numpy
@@ -129,8 +118,7 @@ def precision(y_true, y_pred):
     """Precision."""
     ap = np.sum(y_pred)
     tp = np.sum((y_pred == y_true) & (y_true == 1))
-    return tp/ap
-
+    return tp / ap
 
 
 @as_numpy
@@ -138,20 +126,16 @@ def f1_score(y_true, y_pred):
     """F-measure."""
     p = precision(y_true, y_pred)
     r = true_positive_rate(y_true, y_pred)
-    return 2*(p*r)/(p+r)
-
+    return 2 * (p * r) / (p + r)
 
 
 # TODO: jaccard_similarity
 
 
-
 # TODO: roc_auc
 
 
-
 # TODO: cross_entropy
-
 
 
 def get_metric_fn(metric):
@@ -159,27 +143,27 @@ def get_metric_fn(metric):
 
     # List of valid metric strings
     metrics = {
-        'accuracy': accuracy,
-        'acc': accuracy,
-        'mean_squared_error': mean_squared_error,
-        'mse': mean_squared_error,
-        'sum_squared_error': sum_squared_error,
-        'sse': sum_squared_error,
-        'mean_absolute_error': mean_absolute_error,
-        'mae': mean_absolute_error,
-        'r_squared': r_squared,
-        'r2': r_squared,
-        'recall': true_positive_rate,
-        'sensitivity': true_positive_rate,
-        'true_positive_rate': true_positive_rate,
-        'tpr': true_positive_rate,
-        'specificity': true_negative_rate,
-        'selectivity': true_negative_rate,
-        'true_negative_rate': true_negative_rate,
-        'tnr': true_negative_rate,
-        'precision': precision,
-        'f1_score': f1_score,
-        'f1': f1_score,
+        "accuracy": accuracy,
+        "acc": accuracy,
+        "mean_squared_error": mean_squared_error,
+        "mse": mean_squared_error,
+        "sum_squared_error": sum_squared_error,
+        "sse": sum_squared_error,
+        "mean_absolute_error": mean_absolute_error,
+        "mae": mean_absolute_error,
+        "r_squared": r_squared,
+        "r2": r_squared,
+        "recall": true_positive_rate,
+        "sensitivity": true_positive_rate,
+        "true_positive_rate": true_positive_rate,
+        "tpr": true_positive_rate,
+        "specificity": true_negative_rate,
+        "selectivity": true_negative_rate,
+        "true_negative_rate": true_negative_rate,
+        "tnr": true_negative_rate,
+        "precision": precision,
+        "f1_score": f1_score,
+        "f1": f1_score,
         #'jaccard_similarity': jaccard_similarity,
         #'jaccard': jaccard_similarity,
         #'roc_auc': roc_auc,
@@ -192,10 +176,13 @@ def get_metric_fn(metric):
         return metric
     elif isinstance(metric, str):
         if metric not in metrics:
-            raise ValueError(metric+' is not a valid metric string. '+
-                             'Valid strings are: '+', '.join(metrics.keys()))
+            raise ValueError(
+                metric
+                + " is not a valid metric string. "
+                + "Valid strings are: "
+                + ", ".join(metrics.keys())
+            )
         else:
             return metrics[metric]
     else:
-        raise TypeError('metric must be a str or callable')
-
+        raise TypeError("metric must be a str or callable")

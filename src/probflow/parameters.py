@@ -39,16 +39,15 @@ See the :ref:`user guide <ug_parameters>` for more information on Parameters.
 
 
 __all__ = [
-    'Parameter',
-    'ScaleParameter',
-    'CategoricalParameter',
-    'DirichletParameter',
-    'BoundedParameter',
-    'PositiveParameter',
-    'DeterministicParameter',
-    'MultivariateNormalParameter',
+    "Parameter",
+    "ScaleParameter",
+    "CategoricalParameter",
+    "DirichletParameter",
+    "BoundedParameter",
+    "PositiveParameter",
+    "DeterministicParameter",
+    "MultivariateNormalParameter",
 ]
-
 
 
 from typing import Union, List, Dict, Type, Callable
@@ -74,7 +73,6 @@ from probflow.utils.initializers import xavier
 from probflow.utils.initializers import scale_xavier
 from probflow.utils.initializers import pos_xavier
 from probflow.utils.initializers import full_of
-
 
 
 class Parameter(BaseParameter):
@@ -147,24 +145,30 @@ class Parameter(BaseParameter):
 
     """
 
-    def __init__(self,
-                 shape: Union[int, List[int]] = 1,
-                 posterior: Type[BaseDistribution] = Normal,
-                 prior: BaseDistribution = Normal(0, 1),
-                 transform: Callable = None,
-                 initializer: Dict[str, Callable] = {'loc': xavier,
-                                                     'scale': scale_xavier},
-                 var_transform : Dict[str, Callable] = {'loc': None,
-                                                        'scale': O.softplus},
-                 name: str = 'Parameter'):
+    def __init__(
+        self,
+        shape: Union[int, List[int]] = 1,
+        posterior: Type[BaseDistribution] = Normal,
+        prior: BaseDistribution = Normal(0, 1),
+        transform: Callable = None,
+        initializer: Dict[str, Callable] = {
+            "loc": xavier,
+            "scale": scale_xavier,
+        },
+        var_transform: Dict[str, Callable] = {
+            "loc": None,
+            "scale": O.softplus,
+        },
+        name: str = "Parameter",
+    ):
 
         # Make shape a list
         if isinstance(shape, int):
             shape = [shape]
 
         # Check values
-        if any(e<1 for e in shape):
-            raise ValueError('all shapes must be >0')
+        if any(e < 1 for e in shape):
+            raise ValueError("all shapes must be >0")
 
         # Assign attributes
         self.shape = shape
@@ -173,51 +177,55 @@ class Parameter(BaseParameter):
         self.transform = transform if transform else lambda x: x
         self.initializer = initializer
         self.name = name
-        self.var_transform = {n: (f if f else lambda x: x)
-                              for (n, f) in var_transform.items()}
+        self.var_transform = {
+            n: (f if f else lambda x: x) for (n, f) in var_transform.items()
+        }
 
         # Create variables for the variational distribution
         self.untransformed_variables = dict()
         for var, init in initializer.items():
-            if get_backend() == 'pytorch':
+            if get_backend() == "pytorch":
                 self.untransformed_variables[var] = init(shape)
                 self.untransformed_variables[var].requires_grad = True
             else:
                 import tensorflow as tf
-                self.untransformed_variables[var] = tf.Variable(init(shape))
 
+                self.untransformed_variables[var] = tf.Variable(init(shape))
 
     @property
     def n_parameters(self):
         """Get the number of independent parameters"""
         return int(np.prod(self.shape))
 
-
     @property
     def n_variables(self):
         """Get the number of underlying variables"""
-        return int(sum([np.prod(e.shape.as_list()) for e in 
-                        self.untransformed_variables.values()]))
-
+        return int(
+            sum(
+                [
+                    np.prod(e.shape.as_list())
+                    for e in self.untransformed_variables.values()
+                ]
+            )
+        )
 
     @property
     def trainable_variables(self):
         """Get a list of trainable variables from the backend"""
         return [e for e in self.untransformed_variables.values()]
 
-
     @property
     def variables(self):
         """Variables after applying their respective transformations"""
-        return {name: self.var_transform[name](val)
-                for name, val in self.untransformed_variables.items()}
-
+        return {
+            name: self.var_transform[name](val)
+            for name, val in self.untransformed_variables.items()
+        }
 
     @property
     def posterior(self):
         """This Parameter's variational posterior distribution"""
         return self.posterior_fn(**self.variables)
-
 
     def __call__(self):
         """Return a sample from or the MAP estimate of this parameter.
@@ -237,16 +245,15 @@ class Parameter(BaseParameter):
         else:
             return self.transform(self.posterior.sample(n_samples))
 
-
     def kl_loss(self):
         """Compute the sum of the Kullback–Leibler divergences between this
         parameter's priors and its variational posteriors."""
         if self.prior is None:
             return O.zeros([])
         else:
-            return O.sum(O.kl_divergence(self.posterior, self.prior),
-                         axis=None)
-
+            return O.sum(
+                O.kl_divergence(self.posterior, self.prior), axis=None
+            )
 
     def posterior_mean(self):
         """Get the mean of the posterior distribution(s).
@@ -254,7 +261,6 @@ class Parameter(BaseParameter):
         TODO
         """
         return to_numpy(self())
-
 
     def posterior_sample(self, n: int = 1):
         """Sample from the posterior distribution.
@@ -270,10 +276,9 @@ class Parameter(BaseParameter):
         TODO
         """
         if n < 1:
-            raise ValueError('n must be positive')
+            raise ValueError("n must be positive")
         with Sampling(n=n):
             return to_numpy(self())
-
 
     def prior_sample(self, n: int = 1):
         """Sample from the prior distribution.
@@ -295,11 +300,10 @@ class Parameter(BaseParameter):
         """
         if self.prior is None:
             return np.full(n, np.nan)
-        elif n==1:
+        elif n == 1:
             return to_numpy(self.transform(self.prior.sample()))
         else:
             return to_numpy(self.transform(self.prior.sample(n)))
-
 
     def posterior_ci(self, ci: float = 0.95, n: int = 10000):
         """Posterior confidence intervals
@@ -324,28 +328,29 @@ class Parameter(BaseParameter):
         """
 
         # Check values
-        if ci<0.0 or ci>1.0:
-            raise ValueError('ci must be between 0 and 1')
+        if ci < 0.0 or ci > 1.0:
+            raise ValueError("ci must be between 0 and 1")
 
         # Sample from the posterior
         samples = self.posterior_sample(n=n)
 
         # Compute confidence intervals
-        ci0 = 100 * (0.5 - ci/2.0)
-        ci1 = 100 * (0.5 + ci/2.0)
+        ci0 = 100 * (0.5 - ci / 2.0)
+        ci1 = 100 * (0.5 + ci / 2.0)
         bounds = np.percentile(samples, q=[ci0, ci1], axis=0)
         return bounds[0, ...], bounds[1, ...]
 
-
-    def posterior_plot(self,
-                       n: int = 10000,
-                       style: str = 'fill',
-                       bins: Union[int, list, np.ndarray] = 20,
-                       ci: float = 0.0,
-                       bw: float = 0.075,
-                       alpha: float = 0.4,
-                       color=None,
-                       **kwargs):
+    def posterior_plot(
+        self,
+        n: int = 10000,
+        style: str = "fill",
+        bins: Union[int, list, np.ndarray] = 20,
+        ci: float = 0.0,
+        bw: float = 0.075,
+        alpha: float = 0.4,
+        color=None,
+        **kwargs
+    ):
         """Plot distribution of samples from the posterior distribution.
 
         Parameters
@@ -381,23 +386,33 @@ class Parameter(BaseParameter):
 
         # Sample from the posterior
         samples = self.posterior_sample(n=n)
-        
+
         # Plot the posterior densities
-        plot_dist(samples, xlabel=self.name, style=style, bins=bins, 
-                  ci=ci, bw=bw, alpha=alpha, color=color, **kwargs)
+        plot_dist(
+            samples,
+            xlabel=self.name,
+            style=style,
+            bins=bins,
+            ci=ci,
+            bw=bw,
+            alpha=alpha,
+            color=color,
+            **kwargs
+        )
 
         # Label with parameter name
         plt.xlabel(self.name)
 
-
-    def prior_plot(self,
-                   n: int = 10000,
-                   style: str = 'fill',
-                   bins: Union[int, list, np.ndarray] = 20,
-                   ci: float = 0.0,
-                   bw: float = 0.075,
-                   alpha: float = 0.4,
-                   color=None):
+    def prior_plot(
+        self,
+        n: int = 10000,
+        style: str = "fill",
+        bins: Union[int, list, np.ndarray] = 20,
+        ci: float = 0.0,
+        bw: float = 0.075,
+        alpha: float = 0.4,
+        color=None,
+    ):
         """Plot distribution of samples from the prior distribution.
 
         Parameters
@@ -430,14 +445,21 @@ class Parameter(BaseParameter):
 
         # Sample from the posterior
         samples = self.prior_sample(n=n)
-        
+
         # Plot the posterior densities
-        plot_dist(samples, xlabel=self.name, style=style, bins=bins, 
-                  ci=ci, bw=bw, alpha=alpha, color=color)
+        plot_dist(
+            samples,
+            xlabel=self.name,
+            style=style,
+            bins=bins,
+            ci=ci,
+            bw=bw,
+            alpha=alpha,
+            color=color,
+        )
 
         # Label with parameter name
-        plt.xlabel(self.name+' prior')
-
+        plt.xlabel(self.name + " prior")
 
     def _get_one_dim(self, val, key, axis):
         """Slice along one axis, keeping the dimensionality of the input"""
@@ -452,7 +474,6 @@ class Parameter(BaseParameter):
             return O.gather(val, [key], axis=axis)
         else:
             return O.gather(val, key, axis=axis)
-
 
     def __getitem__(self, key):
         """Get a slice of a sample from the parameter"""
@@ -471,11 +492,16 @@ class Parameter(BaseParameter):
         else:
             return self._get_one_dim(x, key, 0)
 
-
     def __repr__(self):
-        return ('<pf.' + self.__class__.__name__ + ' ' + self.name + 
-                ' shape=' + str(self.shape) + '>')
-
+        return (
+            "<pf."
+            + self.__class__.__name__
+            + " "
+            + self.name
+            + " shape="
+            + str(self.shape)
+            + ">"
+        )
 
 
 class ScaleParameter(Parameter):
@@ -539,24 +565,25 @@ class ScaleParameter(Parameter):
 
     """
 
-    def __init__(self,
-                 shape=1,
-                 posterior=Gamma,
-                 prior=None,
-                 transform=lambda x: O.sqrt(1.0/x),
-                 initializer={'concentration': full_of(4.), 
-                              'rate': full_of(1.)},
-                 var_transform={'concentration': O.exp,
-                                'rate': O.exp},
-                 name='ScaleParameter'):
-        super().__init__(shape=shape,
-                         posterior=posterior,
-                         prior=prior,
-                         transform=transform,
-                         initializer=initializer,
-                         var_transform=var_transform,
-                         name=name)
-
+    def __init__(
+        self,
+        shape=1,
+        posterior=Gamma,
+        prior=None,
+        transform=lambda x: O.sqrt(1.0 / x),
+        initializer={"concentration": full_of(4.0), "rate": full_of(1.0)},
+        var_transform={"concentration": O.exp, "rate": O.exp},
+        name="ScaleParameter",
+    ):
+        super().__init__(
+            shape=shape,
+            posterior=posterior,
+            prior=prior,
+            transform=transform,
+            initializer=initializer,
+            var_transform=var_transform,
+            name=name,
+        )
 
 
 class CategoricalParameter(Parameter):
@@ -610,21 +637,23 @@ class CategoricalParameter(Parameter):
 
     """
 
-    def __init__(self,
-                 k: int = 2,
-                 shape: Union[int, List[int]] = [],
-                 posterior=Categorical,
-                 prior=None,
-                 transform=None,
-                 initializer={'probs': xavier},
-                 var_transform={'probs': O.additive_logistic_transform},
-                 name='CategoricalParameter'):
+    def __init__(
+        self,
+        k: int = 2,
+        shape: Union[int, List[int]] = [],
+        posterior=Categorical,
+        prior=None,
+        transform=None,
+        initializer={"probs": xavier},
+        var_transform={"probs": O.additive_logistic_transform},
+        name="CategoricalParameter",
+    ):
 
         # Check type of k
         if not isinstance(k, int):
-            raise TypeError('k must be an integer')
-        if k<2:
-            raise ValueError('k must be >1')
+            raise TypeError("k must be an integer")
+        if k < 2:
+            raise ValueError("k must be >1")
 
         # Make shape a list
         if isinstance(shape, int):
@@ -632,23 +661,24 @@ class CategoricalParameter(Parameter):
 
         # Use a uniform prior
         if prior is None:
-            prior = Categorical(O.ones(shape)/float(k))
+            prior = Categorical(O.ones(shape) / float(k))
 
         # Create shape of underlying variable array
-        shape = shape+[k-1]
+        shape = shape + [k - 1]
 
         # Initialize the parameter
-        super().__init__(shape=shape,
-                         posterior=posterior,
-                         prior=prior,
-                         transform=transform,
-                         initializer=initializer,
-                         var_transform=var_transform,
-                         name=name)
+        super().__init__(
+            shape=shape,
+            posterior=posterior,
+            prior=prior,
+            transform=transform,
+            initializer=initializer,
+            var_transform=var_transform,
+            name=name,
+        )
 
         # shape should correspond to the sample shape
         self.shape = shape
-
 
 
 class DirichletParameter(Parameter):
@@ -707,42 +737,45 @@ class DirichletParameter(Parameter):
 
     """
 
-    def __init__(self,
-                 k: int = 2,
-                 shape: Union[int, List[int]] = [],
-                 posterior=Dirichlet,
-                 prior=None,
-                 transform=None,
-                 initializer={'concentration': pos_xavier},
-                 var_transform={'concentration': O.softplus},
-                 name='DirichletParameter'):
+    def __init__(
+        self,
+        k: int = 2,
+        shape: Union[int, List[int]] = [],
+        posterior=Dirichlet,
+        prior=None,
+        transform=None,
+        initializer={"concentration": pos_xavier},
+        var_transform={"concentration": O.softplus},
+        name="DirichletParameter",
+    ):
 
         # Check type of k
         if not isinstance(k, int):
-            raise TypeError('k must be an integer')
-        if k<2:
-            raise ValueError('k must be >1')
+            raise TypeError("k must be an integer")
+        if k < 2:
+            raise ValueError("k must be >1")
 
         # Make shape a list
         if isinstance(shape, int):
             shape = [shape]
 
         # Create shape of underlying variable array
-        shape = shape+[k]
+        shape = shape + [k]
 
         # Use a uniform prior
         if prior is None:
             prior = Dirichlet(O.ones(shape))
 
         # Initialize the parameter
-        super().__init__(shape=shape,
-                         posterior=posterior,
-                         prior=prior,
-                         transform=transform,
-                         initializer=initializer,
-                         var_transform=var_transform,
-                         name=name)
-
+        super().__init__(
+            shape=shape,
+            posterior=posterior,
+            prior=prior,
+            transform=transform,
+            initializer=initializer,
+            var_transform=var_transform,
+            name=name,
+        )
 
 
 class BoundedParameter(Parameter):
@@ -796,34 +829,37 @@ class BoundedParameter(Parameter):
 
     """
 
-    def __init__(self,
-                 shape=1,
-                 posterior=Normal,
-                 prior=Normal(0, 1),
-                 transform=None,
-                 initializer={'loc': xavier, 'scale': scale_xavier},
-                 var_transform={'loc': None, 'scale': O.softplus},
-                 min: float = 0.0,
-                 max: float = 1.0,
-                 name='BoundedParameter'):
+    def __init__(
+        self,
+        shape=1,
+        posterior=Normal,
+        prior=Normal(0, 1),
+        transform=None,
+        initializer={"loc": xavier, "scale": scale_xavier},
+        var_transform={"loc": None, "scale": O.softplus},
+        min: float = 0.0,
+        max: float = 1.0,
+        name="BoundedParameter",
+    ):
 
         # Check bounds
         if min > max:
-            raise ValueError('min is larger than max')
+            raise ValueError("min is larger than max")
 
         # Create the transform based on the bounds
         if transform is None:
-            transform = lambda x: min + (max-min)*O.sigmoid(x)
+            transform = lambda x: min + (max - min) * O.sigmoid(x)
 
         # Create the parameter
-        super().__init__(shape=shape,
-                         posterior=posterior,
-                         prior=prior,
-                         transform=transform,
-                         initializer=initializer,
-                         var_transform=var_transform,
-                         name=name)
-
+        super().__init__(
+            shape=shape,
+            posterior=posterior,
+            prior=prior,
+            transform=transform,
+            initializer=initializer,
+            var_transform=var_transform,
+            name=name,
+        )
 
 
 class PositiveParameter(Parameter):
@@ -877,22 +913,25 @@ class PositiveParameter(Parameter):
 
     """
 
-    def __init__(self,
-                 shape=1,
-                 posterior=Normal,
-                 prior=Normal(0, 1),
-                 transform=O.softplus,
-                 initializer={'loc': xavier, 'scale': scale_xavier},
-                 var_transform={'loc': None, 'scale': O.softplus},
-                 name='PositiveParameter'):
-        super().__init__(shape=shape,
-                         posterior=posterior,
-                         prior=prior,
-                         transform=transform,
-                         initializer=initializer,
-                         var_transform=var_transform,
-                         name=name)
-
+    def __init__(
+        self,
+        shape=1,
+        posterior=Normal,
+        prior=Normal(0, 1),
+        transform=O.softplus,
+        initializer={"loc": xavier, "scale": scale_xavier},
+        var_transform={"loc": None, "scale": O.softplus},
+        name="PositiveParameter",
+    ):
+        super().__init__(
+            shape=shape,
+            posterior=posterior,
+            prior=prior,
+            transform=transform,
+            initializer=initializer,
+            var_transform=var_transform,
+            name=name,
+        )
 
 
 class DeterministicParameter(Parameter):
@@ -933,22 +972,25 @@ class DeterministicParameter(Parameter):
 
     """
 
-    def __init__(self,
-                 shape=1,
-                 posterior=Deterministic,
-                 prior=Normal(0, 1),
-                 transform=None,
-                 initializer={'loc': xavier},
-                 var_transform={'loc': None},
-                 name='DeterministicParameter'):
-        super().__init__(shape=shape,
-                         posterior=posterior,
-                         prior=prior,
-                         transform=transform,
-                         initializer=initializer,
-                         var_transform=var_transform,
-                         name=name)
-
+    def __init__(
+        self,
+        shape=1,
+        posterior=Deterministic,
+        prior=Normal(0, 1),
+        transform=None,
+        initializer={"loc": xavier},
+        var_transform={"loc": None},
+        name="DeterministicParameter",
+    ):
+        super().__init__(
+            shape=shape,
+            posterior=posterior,
+            prior=prior,
+            transform=transform,
+            initializer=initializer,
+            var_transform=var_transform,
+            name=name,
+        )
 
 
 class MultivariateNormalParameter(Parameter):
@@ -986,21 +1028,26 @@ class MultivariateNormalParameter(Parameter):
 
     """
 
-    def __init__(self,
-                 d: int = 1,
-                 prior = None,
-                 expand_dims: int = -1,
-                 name='MultivariateNormalParameter'):
+    def __init__(
+        self,
+        d: int = 1,
+        prior=None,
+        expand_dims: int = -1,
+        name="MultivariateNormalParameter",
+    ):
 
         # Transformation for scale parameters
         def log_cholesky_transform(x):
-            if get_backend() == 'pytorch':
+            if get_backend() == "pytorch":
                 raise NotImplementedError
             else:
                 import tensorflow as tf
                 import tensorflow_probability as tfp
+
                 E = tfp.math.fill_triangular(x)
-                E = tf.linalg.set_diag(E,tf.exp(tf.linalg.tensor_diag_part(E)))
+                E = tf.linalg.set_diag(
+                    E, tf.exp(tf.linalg.tensor_diag_part(E))
+                )
                 return E @ tf.transpose(E)
 
         # Prior
@@ -1014,14 +1061,17 @@ class MultivariateNormalParameter(Parameter):
             transform = None
 
         # Initializer and variable transforms
-        initializer = {'loc': lambda x: xavier([d]), 
-                       'cov': lambda x: xavier([int(d*(d+1)/2)])}
-        var_transform = {'loc': None, 'cov': log_cholesky_transform}
+        initializer = {
+            "loc": lambda x: xavier([d]),
+            "cov": lambda x: xavier([int(d * (d + 1) / 2)]),
+        }
+        var_transform = {"loc": None, "cov": log_cholesky_transform}
 
-        super().__init__(posterior=MultivariateNormal,
-                         prior=prior,
-                         transform=transform,
-                         initializer=initializer,
-                         var_transform=var_transform,
-                         name=name)
-
+        super().__init__(
+            posterior=MultivariateNormal,
+            prior=prior,
+            transform=transform,
+            initializer=initializer,
+            var_transform=var_transform,
+            name=name,
+        )

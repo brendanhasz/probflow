@@ -12,57 +12,62 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
 
-COLORS = plt.rcParams['axes.prop_cycle'].by_key()['color']
-
+COLORS = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
 
 def approx_kde(data, bins=500, bw=0.075):
     """A fast approximation to kernel density estimation."""
-    stds = 3 #use a gaussian kernel w/ this many std devs
+    stds = 3  # use a gaussian kernel w/ this many std devs
     counts, be = np.histogram(data, bins=bins)
-    db = be[1]-be[0]
-    pad = 0.5*bins*bw*stds*db
+    db = be[1] - be[0]
+    pad = 0.5 * bins * bw * stds * db
     pbe = np.arange(db, pad, db)
-    x_out = np.concatenate((be[0]-np.flip(pbe),
-                           be[0:-1] + np.diff(be),
-                           be[-1]+pbe))
+    x_out = np.concatenate(
+        (be[0] - np.flip(pbe), be[0:-1] + np.diff(be), be[-1] + pbe)
+    )
     z_pad = np.zeros(pbe.shape[0])
     raw = np.concatenate((z_pad, counts, z_pad))
-    k_x = np.linspace(-stds, stds, int(bins*bw*stds))
-    kernel = 1.0/np.sqrt(2.0*np.pi)*np.exp(-np.square(k_x)/2.0)
-    y_out = np.convolve(raw, kernel, mode='same')
+    k_x = np.linspace(-stds, stds, int(bins * bw * stds))
+    kernel = 1.0 / np.sqrt(2.0 * np.pi) * np.exp(-np.square(k_x) / 2.0)
+    y_out = np.convolve(raw, kernel, mode="same")
     return x_out, y_out
-
 
 
 def get_next_color(def_color, ix):
     """Get the next color in the color cycle"""
     if def_color is None:
-        return COLORS[ix%len(COLORS)]
+        return COLORS[ix % len(COLORS)]
     elif isinstance(def_color, list):
-        return def_color[ix%len(def_color)]
+        return def_color[ix % len(def_color)]
     else:
         return def_color
-
 
 
 def get_ix_label(ix, shape):
     """Get a string representation of the current index"""
     dims = np.zeros(len(shape))
-    for d in range(len(shape)-1, 0, -1):
+    for d in range(len(shape) - 1, 0, -1):
         prod = np.prod(shape[:d])
-        dims[d] = np.floor(ix/prod)
-        ix -= dims[d]*prod
+        dims[d] = np.floor(ix / prod)
+        ix -= dims[d] * prod
     dims[0] = ix
     if len(shape) == 1:
-        return str(dims[0].astype('int32'))
+        return str(dims[0].astype("int32"))
     else:
-        return str(list(dims.astype('int32')))
+        return str(list(dims.astype("int32")))
 
 
-
-def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075, 
-              alpha=0.4, color=None, legend=True):
+def plot_dist(
+    data,
+    xlabel="",
+    style="fill",
+    bins=20,
+    ci=0.0,
+    bw=0.075,
+    alpha=0.4,
+    color=None,
+    legend=True,
+):
     """Plot the distribution of samples.
 
     Parameters
@@ -98,8 +103,8 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
     """
 
     # Check inputs
-    if ci<0.0 or ci>1.0:
-        raise ValueError('ci must be between 0 and 1')
+    if ci < 0.0 or ci > 1.0:
+        raise ValueError("ci must be between 0 and 1")
 
     # If 1d make 2d
     if data.ndim == 1:
@@ -110,47 +115,53 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
     Nd = np.prod(dims)
 
     # Flatten if >1D
-    data = np.reshape(data, (data.shape[0], Nd), order='F')
+    data = np.reshape(data, (data.shape[0], Nd), order="F")
 
     # Compute confidence intervals
     if ci:
         cis = np.empty((Nd, 2))
-        ci0 = 100 * (0.5 - ci/2.0)
-        ci1 = 100 * (0.5 + ci/2.0)
+        ci0 = 100 * (0.5 - ci / 2.0)
+        ci1 = 100 * (0.5 + ci / 2.0)
         for i in range(Nd):
-            cis[i,:] = np.percentile(data[:,i], [ci0, ci1])
+            cis[i, :] = np.percentile(data[:, i], [ci0, ci1])
 
     # Plot the data
     for i in range(Nd):
         next_color = get_next_color(color, i)
         lab = get_ix_label(i, dims)
-        if style == 'line':
-            px, py = approx_kde(data[:,i], bw=bw)
+        if style == "line":
+            px, py = approx_kde(data[:, i], bw=bw)
             plt.plot(px, py, color=next_color, label=lab)
             if ci:
-                yci = np.interp(cis[i,:], px, py)
-                plt.plot([cis[i,0], cis[i,0]], [0, yci[0]], 
-                         ':', color=next_color)
-                plt.plot([cis[i,1], cis[i,1]], [0, yci[1]], 
-                         ':', color=next_color)
-        elif style == 'fill':
-            px, py = approx_kde(data[:,i], bw=bw)
+                yci = np.interp(cis[i, :], px, py)
+                plt.plot(
+                    [cis[i, 0], cis[i, 0]], [0, yci[0]], ":", color=next_color
+                )
+                plt.plot(
+                    [cis[i, 1], cis[i, 1]], [0, yci[1]], ":", color=next_color
+                )
+        elif style == "fill":
+            px, py = approx_kde(data[:, i], bw=bw)
             plt.fill(px, py, facecolor=next_color, alpha=alpha, label=lab)
             if ci:
-                k = (px>cis[i,0]) & (px<cis[i,1])
+                k = (px > cis[i, 0]) & (px < cis[i, 1])
                 kx = px[k]
                 ky = py[k]
-                plt.fill(np.concatenate(([kx[0]], kx, [kx[-1]])),
-                         np.concatenate(([0], ky, [0])),
-                         facecolor=next_color, alpha=alpha)
-        elif style == 'hist':
-            _, be, patches = plt.hist(data[:,i], alpha=alpha,
-                                      bins=bins, color=next_color, label=lab)
+                plt.fill(
+                    np.concatenate(([kx[0]], kx, [kx[-1]])),
+                    np.concatenate(([0], ky, [0])),
+                    facecolor=next_color,
+                    alpha=alpha,
+                )
+        elif style == "hist":
+            _, be, patches = plt.hist(
+                data[:, i], alpha=alpha, bins=bins, color=next_color, label=lab
+            )
             if ci:
-                k = (data[:,i]>cis[i,0]) & (data[:,i]<cis[i,1])
-                plt.hist(data[k,i], alpha=alpha, bins=be, color=next_color)
+                k = (data[:, i] > cis[i, 0]) & (data[:, i] < cis[i, 1])
+                plt.hist(data[k, i], alpha=alpha, bins=be, color=next_color)
         else:
-            raise ValueError("style must be \'fill\', \'line\', or \'hist\'")
+            raise ValueError("style must be 'fill', 'line', or 'hist'")
 
     # Only show the legend if there are >1 sample set
     if Nd > 1 and legend:
@@ -159,13 +170,12 @@ def plot_dist(data, xlabel='', style='fill', bins=20, ci=0.0, bw=0.075,
     # Set x axis label, and no y axis or bounding box needed
     plt.xlabel(xlabel)
     plt.gca().get_yaxis().set_visible(False)
-    plt.gca().spines['left'].set_visible(False)
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines["left"].set_visible(False)
+    plt.gca().spines["top"].set_visible(False)
+    plt.gca().spines["right"].set_visible(False)
 
 
-
-def plot_line(xdata, ydata, xlabel='', ylabel='', fmt='-', color=None):
+def plot_line(xdata, ydata, xlabel="", ylabel="", fmt="-", color=None):
     """Plot lines.
 
     Parameters
@@ -192,20 +202,20 @@ def plot_line(xdata, ydata, xlabel='', ylabel='', fmt='-', color=None):
 
     # Check x and y are the same size
     if xdata.shape[0] != ydata.shape[0]:
-        raise ValueError('x and y data do not have same length')
+        raise ValueError("x and y data do not have same length")
 
     # Number of datasets
     dims = ydata.shape[1:]
     Nd = np.prod(dims)
 
     # Flatten if >1D
-    ydata = np.reshape(ydata, (ydata.shape[0], Nd), order='F')
+    ydata = np.reshape(ydata, (ydata.shape[0], Nd), order="F")
 
     # Plot the data
     for i in range(Nd):
         next_color = get_next_color(color, i)
         lab = get_ix_label(i, dims)
-        plt.plot(xdata, ydata[:,i], fmt, color=next_color, label=lab)
+        plt.plot(xdata, ydata[:, i], fmt, color=next_color, label=lab)
 
     # Only show the legend if there are >1 sample set
     if Nd > 1:
@@ -216,8 +226,7 @@ def plot_line(xdata, ydata, xlabel='', ylabel='', fmt='-', color=None):
     plt.ylabel(ylabel)
 
 
-
-def fill_between(xdata, lb, ub, xlabel='', ylabel='', alpha=0.3, color=None):
+def fill_between(xdata, lb, ub, xlabel="", ylabel="", alpha=0.3, color=None):
     """Fill between lines.
 
     Parameters
@@ -242,9 +251,9 @@ def fill_between(xdata, lb, ub, xlabel='', ylabel='', alpha=0.3, color=None):
 
     # Check shapes
     if not np.all(lb.shape == ub.shape):
-        raise ValueError('lb and ub must have same shape')
+        raise ValueError("lb and ub must have same shape")
     if len(xdata) != lb.shape[0]:
-        raise ValueError('xdata does not match shape of lb and ub')
+        raise ValueError("xdata does not match shape of lb and ub")
 
     # If 1d make 2d
     if lb.ndim == 1:
@@ -257,16 +266,21 @@ def fill_between(xdata, lb, ub, xlabel='', ylabel='', alpha=0.3, color=None):
     Np = lb.shape[0]
 
     # Flatten if >1D
-    lb = np.reshape(lb, (lb.shape[0], Nd), order='F')
-    ub = np.reshape(ub, (ub.shape[0], Nd), order='F')
+    lb = np.reshape(lb, (lb.shape[0], Nd), order="F")
+    ub = np.reshape(ub, (ub.shape[0], Nd), order="F")
 
     # Plot the data
-    for iD in range(Nd): #for each dataset,
+    for iD in range(Nd):  # for each dataset,
         next_color = get_next_color(color, iD)
         lab = get_ix_label(iD, dims)
-        plt.fill_between(xdata, lb[:,iD], ub[:,iD],
-                         alpha=alpha, facecolor=next_color,
-                         label=lab)
+        plt.fill_between(
+            xdata,
+            lb[:, iD],
+            ub[:, iD],
+            alpha=alpha,
+            facecolor=next_color,
+            label=lab,
+        )
 
     # Only show the legend if there are >1 datasets
     if Nd > 1:
@@ -277,44 +291,44 @@ def fill_between(xdata, lb, ub, xlabel='', ylabel='', alpha=0.3, color=None):
     plt.ylabel(ylabel)
 
 
-
 def centered_text(text):
     """Display text centered in the figure"""
-    plt.gca().text(0.5, 0.5, text,
-               horizontalalignment='center',
-               verticalalignment='center',
-               transform=plt.gca().transAxes)
-
+    plt.gca().text(
+        0.5,
+        0.5,
+        text,
+        horizontalalignment="center",
+        verticalalignment="center",
+        transform=plt.gca().transAxes,
+    )
 
 
 def plot_discrete_dist(x):
     """Plot histogram of discrete variable"""
     minx = np.min(x)
     maxx = np.max(x)
-    be = np.linspace(minx-0.5, maxx+0.5, int(maxx-minx+2))
-    bc = np.linspace(minx, maxx, int(maxx-minx+1))
+    be = np.linspace(minx - 0.5, maxx + 0.5, int(maxx - minx + 2))
+    bc = np.linspace(minx, maxx, int(maxx - minx + 1))
     xc, _ = np.histogram(x, be)
-    xc = xc/xc.sum() #normalize
+    xc = xc / xc.sum()  # normalize
     plt.bar(bc, xc)
-    
 
 
 def plot_categorical_dist(x):
     """Plot histogram of categorical variable"""
     xc = pd.Series(x.ravel()).value_counts().sort_index()
-    xc = xc/xc.sum() #normalize
+    xc = xc / xc.sum()  # normalize
     plt.bar(xc.index, xc.values)
     if len(xc.index) < 15:
         plt.xticks(xc.index, [str(e) for e in xc.index])
     else:
         step = int(len(xc.index) / 7)
-        plt.xticks(xc.index[::step],
-                   [str(e) for e in xc.index[::step]])
+        plt.xticks(xc.index[::step], [str(e) for e in xc.index[::step]])
 
 
-
-def plot_by(x, data, bins=30, func='mean', plot=True, 
-            bootstrap=100, ci=0.95, **kwargs):
+def plot_by(
+    x, data, bins=30, func="mean", plot=True, bootstrap=100, ci=0.95, **kwargs
+):
     """Compute and plot some function func of data as a function of x.
 
     Parameters
@@ -357,36 +371,36 @@ def plot_by(x, data, bins=30, func='mean', plot=True,
 
     # Check types
     if not isinstance(bins, int):
-        raise TypeError('bins must be an int')
+        raise TypeError("bins must be an int")
     if bins < 1:
-        raise ValueError('bins must be positive')
+        raise ValueError("bins must be positive")
     if not isinstance(plot, bool):
-        raise TypeError('plot must be True or False')
+        raise TypeError("plot must be True or False")
     if bootstrap is not None and not isinstance(bootstrap, int):
-        raise TypeError('bootstrap must be None or an int')
+        raise TypeError("bootstrap must be None or an int")
     if isinstance(bootstrap, int) and bootstrap < 1:
-        raise ValueError('bootstrap must be > 0')
-    if ci<0.0 or ci>1.0:
-        raise ValueError('ci must be between 0 and 1')
+        raise ValueError("bootstrap must be > 0")
+    if ci < 0.0 or ci > 1.0:
+        raise ValueError("ci must be between 0 and 1")
 
     # Determine what function to use
     if callable(func):
         pass
     elif isinstance(func, str):
-        if func == 'mean':
+        if func == "mean":
             func = np.mean
-        elif func == 'median':
+        elif func == "median":
             func = np.median
-        elif func == 'count':
+        elif func == "count":
             func = len
         else:
-            raise ValueError('Unknown function name '+func)
+            raise ValueError("Unknown function name " + func)
     else:
-        raise TypeError('func must be a callable or a function name str')
+        raise TypeError("func must be a callable or a function name str")
 
     # Default color
-    if 'color' in kwargs:
-        color = kwargs['color']
+    if "color" in kwargs:
+        color = kwargs["color"]
     else:
         color = COLORS[0]
 
@@ -401,35 +415,36 @@ def plot_by(x, data, bins=30, func='mean', plot=True,
         edges = np.linspace(min(x), max(x), int(bins)).flatten()
         edges[-1] += 1e-9
         bin_id = np.digitize(x, edges)
-        x_o = (edges[:-1]+edges[1:])/2.0 #bin centers
+        x_o = (edges[:-1] + edges[1:]) / 2.0  # bin centers
 
         # Bootstrap estimate coverage uncertainty
         if bootstrap is not None:
 
-            # Compute func for data in each bins 
+            # Compute func for data in each bins
             boots = pd.DataFrame(index=range(1, bins))
             for iB in range(bootstrap):
                 ix = np.random.choice(range(data.size), size=data.size)
-                boots[str(iB)] = (pd.Series(data[ix].flatten())
-                                    .groupby(bin_id[ix].flatten())
-                                    .agg(func))
+                boots[str(iB)] = (
+                    pd.Series(data[ix].flatten())
+                    .groupby(bin_id[ix].flatten())
+                    .agg(func)
+                )
 
             # Plot coverage confidence intervals
             ci = np.array(ci)
-            ci_lb = 100*(0.5-ci/2.0)
-            ci_ub = 100*(0.5+ci/2.0)
+            ci_lb = 100 * (0.5 - ci / 2.0)
+            ci_ub = 100 * (0.5 + ci / 2.0)
             boots = boots.values
             prc_lb = np.nanpercentile(boots, ci_lb, axis=1)
             prc_ub = np.nanpercentile(boots, ci_ub, axis=1)
-            plt.fill_between(x_o, prc_lb, prc_ub,
-                             alpha=0.3, facecolor=color)
+            plt.fill_between(x_o, prc_lb, prc_ub, alpha=0.3, facecolor=color)
 
-        # Compute func for data in each bins 
+        # Compute func for data in each bins
         data_o = pd.DataFrame(index=range(1, bins))
-        data_o['data'] = (pd.Series(data.flatten())
-                            .groupby(bin_id.flatten())
-                            .agg(func))
-        data_o = data_o['data']
+        data_o["data"] = (
+            pd.Series(data.flatten()).groupby(bin_id.flatten()).agg(func)
+        )
+        data_o = data_o["data"]
 
         # Plot coverage
         plt.plot(x_o, data_o, **kwargs)
@@ -441,7 +456,7 @@ def plot_by(x, data, bins=30, func='mean', plot=True,
     elif x.shape[1] == 2:
 
         pass
-        #TODO
+        # TODO
 
     else:
-        raise ValueError('x.shape[1] cannot be >2')
+        raise ValueError("x.shape[1] cannot be >2")

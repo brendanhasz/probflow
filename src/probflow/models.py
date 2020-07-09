@@ -1,6 +1,6 @@
 """
-Models are objects which take Tensor(s) as input, perform some computation on 
-those Tensor(s), and output probability distributions.
+Models are objects which take Tensor(s) as input, perform some computation
+on those Tensor(s), and output probability distributions.
 
 TODO: more...
 
@@ -15,12 +15,11 @@ TODO: more...
 
 
 __all__ = [
-    'Model',
-    'ContinuousModel',
-    'DiscreteModel',
-    'CategoricalModel',
+    "Model",
+    "ContinuousModel",
+    "DiscreteModel",
+    "CategoricalModel",
 ]
-
 
 
 import warnings
@@ -46,7 +45,6 @@ from probflow.utils.plotting import plot_by
 from probflow.data import DataGenerator
 from probflow.data import make_generator
 from probflow.utils.metrics import get_metric_fn
-
 
 
 class Model(Module):
@@ -93,14 +91,12 @@ class Model(Module):
 
     """
 
-
     # Parameters
     _optimizer = None
     _is_training = False
     _learning_rate = None
     _kl_weight = 1.0
     _current_elbo = None
-
 
     def log_likelihood(self, x_data, y_data):
         """Compute the sum log likelihood of the model given a batch of data"""
@@ -110,26 +106,22 @@ class Model(Module):
             log_likelihoods = self(x_data).log_prob(y_data)
         return O.sum(log_likelihoods, axis=None)
 
-
     def elbo_loss(self, x_data, y_data, n):
         """Compute the negative ELBO, scaled to a single sample"""
-        nb = y_data.shape[0] #number of samples in this batch
-        log_loss = self.log_likelihood(x_data, y_data)/nb
-        kl_loss = self.kl_loss()/n + self.kl_loss_batch()/nb
-        return self._kl_weight*kl_loss - log_loss
-
+        nb = y_data.shape[0]  # number of samples in this batch
+        log_loss = self.log_likelihood(x_data, y_data) / nb
+        kl_loss = self.kl_loss() / n + self.kl_loss_batch() / nb
+        return self._kl_weight * kl_loss - log_loss
 
     def get_elbo(self):
         """Get the current ELBO on training data"""
         return self._current_elbo
-
 
     def _train_step_tensorflow(self, n, flipout=False, eager=False):
         """Get the training step function for TensorFlow"""
 
         import tensorflow as tf
 
-        #@tf.function
         def train_fn(x_data, y_data):
             self.reset_kl_loss()
             with Sampling(n=1, flipout=flipout):
@@ -144,7 +136,6 @@ class Model(Module):
             return train_fn
         else:
             return tf.function(train_fn)
-
 
     def _train_step_pytorch(self, n, flipout=False, eager=False):
         """Get the training step function for PyTorch"""
@@ -166,15 +157,13 @@ class Model(Module):
             # TODO: if eager=false, return traced function
             return train_fn
 
-
     def train_step(self, x_data, y_data):
         """Perform one training step"""
         elbo = self._train_fn(x_data, y_data)
-        if get_backend() == 'pytorch':
+        if get_backend() == "pytorch":
             self._current_elbo += elbo.detach().numpy()
         else:
             self._current_elbo += elbo.numpy()
-
 
     def fit(
         self,
@@ -216,9 +205,9 @@ class Model(Module):
             Default = ``True``
         optimizer : |None| or a backend-specific optimizer
             What optimizer to use for optimizing the variational posterior
-            distributions' variables.  When the backend is |TensorFlow|
-            the default is to use adam (``tf.keras.optimizers.Adam``).
-            When the backend is |PyTorch| the default is to use TODO
+            distributions' variables.  When the backend is |TensorFlow| the
+            default is to use adam (``tf.keras.optimizers.Adam``).  When the
+            backend is |PyTorch| the default is to use TODO
         optimizer_kwargs : dict
             Keyword arguments to pass to the optimizer.
             Default is an empty dict.
@@ -250,27 +239,37 @@ class Model(Module):
         if lr is not None:
             self._learning_rate = lr
         elif self._learning_rate is None:
-            default_lr = np.exp(-np.log10(self.n_parameters*batch_size))
+            default_lr = np.exp(-np.log10(self.n_parameters * batch_size))
             self._learning_rate = default_lr
 
         # Create DataGenerator from input data if not already
-        self._data = make_generator(x, y, batch_size=batch_size, 
-                                    shuffle=shuffle, num_workers=num_workers)
+        self._data = make_generator(
+            x,
+            y,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
+        )
 
         # Use default optimizer if none specified
         if optimizer is None and self._optimizer is None:
-            if get_backend() == 'pytorch':
+            if get_backend() == "pytorch":
                 import torch
+
                 self._optimizer = torch.optim.Adam(
                     self.trainable_variables,
-                    lr=self._learning_rate, **optimizer_kwargs)
+                    lr=self._learning_rate,
+                    **optimizer_kwargs
+                )
             else:
                 import tensorflow as tf
+
                 self._optimizer = tf.keras.optimizers.Adam(
-                    lambda: self._learning_rate, **optimizer_kwargs)
+                    lambda: self._learning_rate, **optimizer_kwargs
+                )
 
         # Create a function to perform one training step
-        if get_backend() == 'pytorch':
+        if get_backend() == "pytorch":
             self._train_fn = self._train_step_pytorch(
                 self._data.n_samples, flipout, eager=eager
             )
@@ -311,27 +310,23 @@ class Model(Module):
         for c in callbacks:
             c.on_train_end()
 
-
     def stop_training(self):
         """Stop the training of the model"""
         self._is_training = False
 
-
     def set_learning_rate(self, lr):
         """Set the learning rate used by this model's optimizer"""
         if not isinstance(lr, float):
-            raise TypeError('lr must be a float')
+            raise TypeError("lr must be a float")
         else:
             self._learning_rate = lr
-
 
     def set_kl_weight(self, w):
         """Set the weight of the KL term's contribution to the ELBO loss"""
         if not isinstance(w, float):
-            raise TypeError('w must be a float')
+            raise TypeError("w must be a float")
         else:
             self._kl_weight = w
-
 
     def _sample(self, x, func, ed=None, axis=1):
         """Sample from the model"""
@@ -342,7 +337,6 @@ class Model(Module):
             else:
                 samples += [func(self(O.expand_dims(x_data, ed)))]
         return np.concatenate(to_numpy(samples), axis=axis)
-
 
     def predictive_sample(self, x=None, n=1000):
         """Draw samples from the posterior predictive distribution given x
@@ -368,7 +362,6 @@ class Model(Module):
         with Sampling(n=n, flipout=False):
             return self._sample(x, lambda x: x.sample(), ed=0)
 
-
     def aleatoric_sample(self, x=None, n=1000):
         """Draw samples of the model's estimate given x, including only
         aleatoric uncertainty (uncertainty due to noise)
@@ -392,7 +385,6 @@ class Model(Module):
             (num_samples,x.shape[0],...)
         """
         return self._sample(x, lambda x: x.sample(n=n))
-
 
     def epistemic_sample(self, x=None, n=1000):
         """Draw samples of the model's estimate given x, including only
@@ -420,8 +412,7 @@ class Model(Module):
         with Sampling(n=n, flipout=False):
             return self._sample(x, lambda x: x.mean(), ed=0)
 
-
-    def predict(self, x=None, method='mean'):
+    def predict(self, x=None, method="mean"):
         """Predict dependent variable using the model
 
         TODO... using maximum a posteriori param estimates etc
@@ -450,13 +441,12 @@ class Model(Module):
         TODO: Docs...
 
         """
-        if method == 'mean':
+        if method == "mean":
             return self._sample(x, lambda x: x.mean(), axis=0)
-        elif method == 'mode':
+        elif method == "mode":
             return self._sample(x, lambda x: x.mode(), axis=0)
         else:
-            raise ValueError('unknown method '+str(method))
-
+            raise ValueError("unknown method " + str(method))
 
     def metric(self, metric, x, y=None):
         """Compute a metric of model performance
@@ -521,19 +511,16 @@ class Model(Module):
         metric_fn = get_metric_fn(metric)
         return metric_fn(y_true, y_pred)
 
-
-    def _param_data(self,
-                    params: Union[str, List[str], None],
-                    func: Callable):
+    def _param_data(self, params: Union[str, List[str], None], func: Callable):
         """Get data about parameters in the model"""
         if isinstance(params, str):
             return [func(p) for p in self.parameters if p.name == params][0]
         elif isinstance(params, list):
-            return {p.name: func(p) for p in self.parameters
-                    if p.name in params}
+            return {
+                p.name: func(p) for p in self.parameters if p.name in params
+            }
         else:
             return {p.name: func(p) for p in self.parameters}
-        
 
     def posterior_mean(self, params=None):
         """Get the mean of the posterior distribution(s)
@@ -559,7 +546,6 @@ class Model(Module):
 
         """
         return self._param_data(params, lambda x: x.posterior_mean())
-
 
     def posterior_sample(self, params=None, n=10000):
         """Draw samples from parameter posteriors
@@ -587,7 +573,6 @@ class Model(Module):
             ``params`` was a str.
         """
         return self._param_data(params, lambda x: x.posterior_sample(n=n))
-
 
     def posterior_ci(self, params=None, ci=0.95, n=10000):
         """Posterior confidence intervals
@@ -623,7 +608,6 @@ class Model(Module):
         """
         return self._param_data(params, lambda x: x.posterior_ci(ci=ci, n=n))
 
-
     def prior_sample(self, params=None, n=10000):
         """Draw samples from parameter priors
 
@@ -650,30 +634,27 @@ class Model(Module):
         """
         return self._param_data(params, lambda x: x.prior_sample(n=n))
 
-
-    def _param_plot(self,
-                    func: Callable,
-                    params: Union[None, List[str]] = None,
-                    cols: int = 1,
-                    tight_layout: bool = True,
-                    **kwargs):
+    def _param_plot(
+        self,
+        func: Callable,
+        params: Union[None, List[str]] = None,
+        cols: int = 1,
+        tight_layout: bool = True,
+        **kwargs
+    ):
         """Plot parameter data"""
         if params is None:
             param_list = self.parameters
         else:
             param_list = [p for p in self.parameters if p.name in params]
-        rows = np.ceil(len(param_list)/cols)
+        rows = np.ceil(len(param_list) / cols)
         for iP in range(len(param_list)):
-            plt.subplot(rows, cols, iP+1)
+            plt.subplot(rows, cols, iP + 1)
             func(param_list[iP])
         if tight_layout:
             plt.tight_layout()
 
-
-    def posterior_plot(self,
-                       params=None,
-                       cols=1,
-                       **kwargs):
+    def posterior_plot(self, params=None, cols=1, **kwargs):
         """Plot posterior distributions of the model's parameters
 
         TODO: Docs... params is a list of strings of params to plot
@@ -692,11 +673,7 @@ class Model(Module):
         """
         self._param_plot(lambda x: x.posterior_plot(**kwargs), params, cols)
 
-
-    def prior_plot(self,
-                   params=None,
-                   cols=1,
-                   **kwargs):
+    def prior_plot(self, params=None, cols=1, **kwargs):
         """Plot prior distributions of the model's parameters
 
         TODO: Docs... params is a list of strings of params to plot
@@ -715,13 +692,9 @@ class Model(Module):
         """
         self._param_plot(lambda x: x.prior_plot(**kwargs), params, cols)
 
-
-    def log_prob(self, 
-                 x, 
-                 y=None,
-                 individually=True,
-                 distribution=False,
-                 n=1000):
+    def log_prob(
+        self, x, y=None, individually=True, distribution=False, n=1000
+    ):
         """Compute the log probability of `y` given the model
 
         TODO: Docs...
@@ -788,11 +761,7 @@ class Model(Module):
         else:
             return np.sum(probs, axis=0)
 
-
-    def prob(self, 
-             x, 
-             y=None,
-             **kwargs):
+    def prob(self, x, y=None, **kwargs):
         """Compute the probability of ``y`` given the model
 
         TODO: Docs...
@@ -830,7 +799,6 @@ class Model(Module):
         """
         return np.exp(self.log_prob(x, y, **kwargs))
 
-
     def summary(self):
         """Show a summary of the model and its parameters.
 
@@ -842,7 +810,6 @@ class Model(Module):
         """
         pass
         # TODO
-
 
 
 class ContinuousModel(Model):
@@ -907,25 +874,19 @@ class ContinuousModel(Model):
 
     """
 
-
     def _intervals(self, fn, x, side, ci=0.95, n=1000):
         """Compute intervals on some type of sample"""
         samples = fn(x, n=n)
-        if side == 'lower':
-            return np.percentile(samples, 100*(1.0-ci), axis=0)
-        elif side == 'upper':
-            return np.percentile(samples, 100*ci, axis=0)
+        if side == "lower":
+            return np.percentile(samples, 100 * (1.0 - ci), axis=0)
+        elif side == "upper":
+            return np.percentile(samples, 100 * ci, axis=0)
         else:
-            lb = 100*(1.0-ci)/2.0
-            prcs = np.percentile(samples, [lb, 100.0-lb], axis=0)
+            lb = 100 * (1.0 - ci) / 2.0
+            prcs = np.percentile(samples, [lb, 100.0 - lb], axis=0)
             return prcs[0, ...], prcs[1, ...]
 
-
-    def predictive_interval(self, 
-                            x,
-                            ci=0.95,
-                            side='both',
-                            n=1000):
+    def predictive_interval(self, x, ci=0.95, side="both", n=1000):
         """Compute confidence intervals on the model's estimate of the target
         given ``x``, including all sources of uncertainty.
 
@@ -965,12 +926,7 @@ class ContinuousModel(Model):
         """
         return self._intervals(self.predictive_sample, x, side, ci=ci, n=n)
 
-
-    def aleatoric_interval(self, 
-                           x,
-                           ci=0.95,
-                           side='both',
-                           n=1000):
+    def aleatoric_interval(self, x, ci=0.95, side="both", n=1000):
         """Compute confidence intervals on the model's estimate of the target
         given ``x``, including only aleatoric uncertainty (uncertainty due to
         noise).
@@ -1009,12 +965,7 @@ class ContinuousModel(Model):
         """
         return self._intervals(self.aleatoric_sample, x, side, ci=ci, n=n)
 
-
-    def epistemic_interval(self, 
-                           x,
-                           ci=0.95,
-                           side='both',
-                           n=1000):
+    def epistemic_interval(self, x, ci=0.95, side="both", n=1000):
         """Compute confidence intervals on the model's estimate of the target
         given ``x``, including only epistemic uncertainty (uncertainty due to
         uncertainty as to the model's parameter values).
@@ -1053,13 +1004,7 @@ class ContinuousModel(Model):
         """
         return self._intervals(self.epistemic_sample, x, side, ci=ci, n=n)
 
-
-    def pred_dist_plot(self, 
-                       x,
-                       n=10000,
-                       cols=1,
-                       individually=False,
-                       **kwargs):
+    def pred_dist_plot(self, x, n=10000, cols=1, individually=False, **kwargs):
         """Plot posterior predictive distribution from the model given ``x``.
 
         TODO: Docs...
@@ -1095,24 +1040,24 @@ class ContinuousModel(Model):
         # Independent variable must be scalar
         Ns = samples.shape[0]
         N = samples.shape[1]
-        if samples.ndim > 2 and any(e>1 for e in samples.shape[2:]):
-            raise NotImplementedError('only scalar dependent variables are '
-                                      'supported')
+        if samples.ndim > 2 and any(e > 1 for e in samples.shape[2:]):
+            raise NotImplementedError(
+                "only scalar dependent variables are " "supported"
+            )
         else:
             samples = samples.reshape([Ns, N])
 
         # Plot the predictive distributions
         if individually:
-            rows = np.ceil(N/cols)
+            rows = np.ceil(N / cols)
             for i in range(N):
-                plt.subplot(rows, cols, i+1)
-                plot_dist(samples[:,i], **kwargs)
-                plt.xlabel('Predicted dependent variable value for '+str(i))
+                plt.subplot(rows, cols, i + 1)
+                plot_dist(samples[:, i], **kwargs)
+                plt.xlabel("Predicted dependent variable value for " + str(i))
             plt.tight_layout()
         else:
             plot_dist(samples, **kwargs)
-            plt.xlabel('Predicted dependent variable value')
-
+            plt.xlabel("Predicted dependent variable value")
 
     def _get_y(self, x, y):
         """Get y, even when x is a DataGenerator and y is None"""
@@ -1121,7 +1066,6 @@ class ContinuousModel(Model):
         else:
             y_true = [d for _, d in make_generator(x, y, test=True)]
             return np.concatenate(to_numpy(y_true), axis=0)
-
 
     def predictive_prc(self, x, y=None, n=1000):
         """Compute the percentile of each observation along the posterior
@@ -1148,15 +1092,16 @@ class ContinuousModel(Model):
 
         # Need both x and y data
         if y is None and not isinstance(x, DataGenerator):
-            raise TypeError('need both x and y to compute predictive prc')
+            raise TypeError("need both x and y to compute predictive prc")
 
         # Sample from the predictive distribution
         samples = self.predictive_sample(x, n=n)
-        
+
         # Independent variable must be scalar
-        if samples.ndim > 2 and any(e>1 for e in samples.shape[2:]):
-            raise NotImplementedError('only scalar dependent variables are '
-                                      'supported')
+        if samples.ndim > 2 and any(e > 1 for e in samples.shape[2:]):
+            raise NotImplementedError(
+                "only scalar dependent variables are " "supported"
+            )
 
         # Reshape
         Ns = samples.shape[0]
@@ -1172,7 +1117,6 @@ class ContinuousModel(Model):
 
         # Return percentiles
         return prcs.reshape([N, 1])
-
 
     def pred_dist_covered(self, x, y=None, n: int = 1000, ci: float = 0.95):
         """Compute whether each observation was covered by a given confidence
@@ -1201,18 +1145,17 @@ class ContinuousModel(Model):
 
         # Check values
         if n < 1:
-            raise ValueError('n must be greater than 0')
+            raise ValueError("n must be greater than 0")
         if ci < 0.0 or ci > 1.0:
-            raise ValueError('ci must be between 0 and 1')
+            raise ValueError("ci must be between 0 and 1")
 
         # Compute the predictive percentile of each observation
         pred_prcs = self.predictive_prc(x, y=y, n=n)
 
         # Determine what samples fall in the inner ci proportion
-        lb = (1.0-ci)/2.0
-        ub = 1.0-lb
-        return (pred_prcs>=lb) & (pred_prcs<ub)
-
+        lb = (1.0 - ci) / 2.0
+        ub = 1.0 - lb
+        return (pred_prcs >= lb) & (pred_prcs < ub)
 
     def pred_dist_coverage(self, x, y=None, n=1000, ci=0.95):
         """Compute what percent of samples are covered by a given confidence
@@ -1243,17 +1186,18 @@ class ContinuousModel(Model):
         """
         return self.pred_dist_covered(x, y=y, n=n, ci=ci).mean()
 
-
-    def coverage_by(self, 
-                    x_by,
-                    x, 
-                    y=None,
-                    n: int = 1000,
-                    ci: float = 0.95, 
-                    bins: int = 30, 
-                    plot: bool = True,
-                    ideal_line_kwargs: dict = {},
-                    **kwargs):
+    def coverage_by(
+        self,
+        x_by,
+        x,
+        y=None,
+        n: int = 1000,
+        ci: float = 0.95,
+        bins: int = 30,
+        plot: bool = True,
+        ideal_line_kwargs: dict = {},
+        **kwargs
+    ):
         """Compute and plot the coverage of a given confidence interval
         of the posterior predictive distribution as a function of specified
         independent variables.
@@ -1296,27 +1240,23 @@ class ContinuousModel(Model):
         covered = self.pred_dist_covered(x, y=y, n=n, ci=ci)
 
         # Plot coverage proportion as a fn of x_by cols of x
-        xo, co = plot_by(x_by, 100*covered, label='Actual', **kwargs)
+        xo, co = plot_by(x_by, 100 * covered, label="Actual", **kwargs)
 
         # Line kwargs
-        if 'linestyle' not in ideal_line_kwargs:
-            ideal_line_kwargs['linestyle'] = '--'
-        if 'color' not in ideal_line_kwargs:
-            ideal_line_kwargs['color'] = 'k'
+        if "linestyle" not in ideal_line_kwargs:
+            ideal_line_kwargs["linestyle"] = "--"
+        if "color" not in ideal_line_kwargs:
+            ideal_line_kwargs["color"] = "k"
 
         # Also plot ideal line
-        plt.axhline(100*ci, label='Ideal', **ideal_line_kwargs)
+        plt.axhline(100 * ci, label="Ideal", **ideal_line_kwargs)
         plt.legend()
-        plt.ylabel(str(100*ci)+'% predictive interval coverage')
-        plt.xlabel('Independent variable')
+        plt.ylabel(str(100 * ci) + "% predictive interval coverage")
+        plt.xlabel("Independent variable")
 
         return xo, co
 
-
-    def r_squared(self,
-                  x,
-                  y=None,
-                  n=1000):
+    def r_squared(self, x, y=None, n=1000):
         """Compute the Bayesian R-squared distribution (Gelman et al., 2018).
 
         TODO: more info
@@ -1363,16 +1303,10 @@ class ContinuousModel(Model):
 
         # Compute Bayesian R^2
         v_fit = np.var(y_pred, axis=1)
-        v_res = np.var(y_pred-np.expand_dims(y_true, 0), axis=1)
-        return v_fit/(v_fit+v_res)
+        v_res = np.var(y_pred - np.expand_dims(y_true, 0), axis=1)
+        return v_fit / (v_fit + v_res)
 
-
-    def r_squared_plot(self,
-                       x,
-                       y=None,
-                       n=1000, 
-                       style='hist',
-                       **kwargs):
+    def r_squared_plot(self, x, y=None, n=1000, style="hist", **kwargs):
         """Plot the Bayesian R-squared distribution.
 
         See :meth:`~r_squared` for more info on the Bayesian R-squared metric.
@@ -1399,8 +1333,7 @@ class ContinuousModel(Model):
         """
         r2 = self.r_squared(x, y, n=n)
         plot_dist(r2, style=style, **kwargs)
-        plt.xlabel('Bayesian R squared')
-
+        plt.xlabel("Bayesian R squared")
 
     def residuals(self, x, y=None):
         """Compute the residuals of the model's predictions.
@@ -1433,7 +1366,6 @@ class ContinuousModel(Model):
         y_pred = self.predict(x)
         return y_true - y_pred
 
-
     def residuals_plot(self, x, y=None, **kwargs):
         """Plot the distribution of residuals of the model's predictions.
 
@@ -1458,8 +1390,7 @@ class ContinuousModel(Model):
         """
         res = self.residuals(x, y)
         plot_dist(res, **kwargs)
-        plt.xlabel('Residual (True - Predicted)')
-
+        plt.xlabel("Residual (True - Predicted)")
 
 
 class DiscreteModel(ContinuousModel):
@@ -1525,11 +1456,7 @@ class DiscreteModel(ContinuousModel):
 
     """
 
-    def pred_dist_plot(self, 
-                       x,
-                       n=10000,
-                       cols=1,
-                       **kwargs):
+    def pred_dist_plot(self, x, n=10000, cols=1, **kwargs):
         """Plot posterior predictive distribution from the model given ``x``.
 
         TODO: Docs...
@@ -1557,30 +1484,28 @@ class DiscreteModel(ContinuousModel):
         # Independent variable must be scalar
         Ns = samples.shape[0]
         N = samples.shape[1]
-        if samples.ndim > 2 and any(e>1 for e in samples.shape[2:]):
-            raise NotImplementedError('only discrete dependent variables are '
-                                      'supported')
+        if samples.ndim > 2 and any(e > 1 for e in samples.shape[2:]):
+            raise NotImplementedError(
+                "only discrete dependent variables are " "supported"
+            )
         else:
             samples = samples.reshape([Ns, N])
 
         # Plot the predictive distributions
-        rows = np.ceil(N/cols)
+        rows = np.ceil(N / cols)
         for i in range(N):
-            plt.subplot(rows, cols, i+1)
-            plot_discrete_dist(samples[:,i])
-            plt.xlabel('Datapoint '+str(i))
+            plt.subplot(rows, cols, i + 1)
+            plot_discrete_dist(samples[:, i])
+            plt.xlabel("Datapoint " + str(i))
         plt.tight_layout()
-
 
     def r_squared(self, *args, **kwargs):
         """Cannot compute R squared for a discrete model"""
-        raise RuntimeError('Cannot compute R squared for a discrete model')
-
+        raise RuntimeError("Cannot compute R squared for a discrete model")
 
     def r_squared_plot(self, *args, **kwargs):
         """Cannot compute R squared for a discrete model"""
-        raise RuntimeError('Cannot compute R squared for a discrete model')
-
+        raise RuntimeError("Cannot compute R squared for a discrete model")
 
 
 class CategoricalModel(Model):
@@ -1634,12 +1559,7 @@ class CategoricalModel(Model):
 
     """
 
-
-    def pred_dist_plot(self, 
-                       x,
-                       n=10000,
-                       cols=1,
-                       **kwargs):
+    def pred_dist_plot(self, x, n=10000, cols=1, **kwargs):
         """Plot posterior predictive distribution from the model given ``x``.
 
         TODO: Docs...
@@ -1667,27 +1587,22 @@ class CategoricalModel(Model):
         # Independent variable must be scalar
         Ns = samples.shape[0]
         N = samples.shape[1]
-        if samples.ndim > 2 and any(e>1 for e in samples.shape[2:]):
-            raise NotImplementedError('only categorical dependent variables '
-                                      'are supported')
+        if samples.ndim > 2 and any(e > 1 for e in samples.shape[2:]):
+            raise NotImplementedError(
+                "only categorical dependent variables " "are supported"
+            )
         else:
             samples = samples.reshape([Ns, N])
 
         # Plot the predictive distributions
-        rows = np.ceil(N/cols)
+        rows = np.ceil(N / cols)
         for i in range(N):
-            plt.subplot(rows, cols, i+1)
-            plot_categorical_dist(samples[:,i])
-            plt.xlabel('Datapoint '+str(i))
+            plt.subplot(rows, cols, i + 1)
+            plot_categorical_dist(samples[:, i])
+            plt.xlabel("Datapoint " + str(i))
         plt.tight_layout()
 
-
-    def calibration_curve(self,
-                          x,
-                          y=None,
-                          split_by=None,
-                          bins=10,
-                          plot=True):
+    def calibration_curve(self, x, y=None, split_by=None, bins=10, plot=True):
         """Plot and return calibration curve.
 
         Plots and returns the calibration curve (estimated
@@ -1719,4 +1634,4 @@ class CategoricalModel(Model):
 
         """
         pass
-        #TODO
+        # TODO

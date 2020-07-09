@@ -8,4 +8,4 @@ from probflow.callbacks import *
 from probflow.data import *
 from probflow.utils.io import *
 
-__version__ = '2.0.0a3'
+__version__ = "2.0.0a3"

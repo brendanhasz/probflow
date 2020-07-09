@@ -10,11 +10,10 @@ TODO: Data utilities, more info...
 
 
 __all__ = [
-    'DataGenerator',
-    'ArrayDataGenerator',
-    'make_generator',
+    "DataGenerator",
+    "ArrayDataGenerator",
+    "make_generator",
 ]
-
 
 
 from abc import abstractmethod
@@ -26,7 +25,6 @@ import pandas as pd
 from probflow.core.settings import get_backend
 from probflow.core.settings import get_datatype
 from probflow.core.base import BaseDataGenerator
-
 
 
 class DataGenerator(BaseDataGenerator):
@@ -49,15 +47,12 @@ class DataGenerator(BaseDataGenerator):
 
     """
 
-
     def __init__(self, num_workers=None):
         self.num_workers = num_workers
-
 
     @abstractmethod
     def get_batch(self, index):
         """Generate one batch of data"""
-
 
     def __getitem__(self, index):
         """Generate one batch of data"""
@@ -78,7 +73,6 @@ class DataGenerator(BaseDataGenerator):
             # Return data from the multiprocessing queue
             return self._queue.get()
 
-
     def __iter__(self):
         """Get an iterator over batches"""
 
@@ -90,8 +84,10 @@ class DataGenerator(BaseDataGenerator):
 
             # Create the queue and worker processes
             self._queue = mp.Queue()
-            self._workers = [mp.Process(target=get_data, args=(i, self._queue))
-                             for i in range(len(self))]
+            self._workers = [
+                mp.Process(target=get_data, args=(i, self._queue))
+                for i in range(len(self))
+            ]
 
             # Start the first num_workers workers
             for i in range(min(self.num_workers, len(self))):
@@ -103,7 +99,6 @@ class DataGenerator(BaseDataGenerator):
         # Return iterator
         return self
 
-    
     def __next__(self):
         """Get the next batch"""
         self._batch += 1
@@ -111,7 +106,6 @@ class DataGenerator(BaseDataGenerator):
             return self[self._batch]
         else:
             raise StopIteration()
-
 
 
 class ArrayDataGenerator(DataGenerator):
@@ -139,13 +133,15 @@ class ArrayDataGenerator(DataGenerator):
         Default = ``False``
     """
 
-    def __init__(self,
-                 x=None,
-                 y=None,
-                 batch_size=None,
-                 shuffle=False,
-                 test=False,
-                 num_workers=None):
+    def __init__(
+        self,
+        x=None,
+        y=None,
+        batch_size=None,
+        shuffle=False,
+        test=False,
+        num_workers=None,
+    ):
 
         # Set number of worker threads
         super().__init__(num_workers=num_workers)
@@ -153,18 +149,18 @@ class ArrayDataGenerator(DataGenerator):
         # Check types
         data_types = (np.ndarray, pd.DataFrame, pd.Series)
         if x is not None and not isinstance(x, data_types):
-            raise TypeError('x must be an ndarray, a DataFrame, or a Series')
+            raise TypeError("x must be an ndarray, a DataFrame, or a Series")
         if y is not None and not isinstance(y, data_types):
-            raise TypeError('y must be an ndarray, a DataFrame, or a Series')
+            raise TypeError("y must be an ndarray, a DataFrame, or a Series")
         if batch_size is not None:
             if not isinstance(batch_size, int):
-                raise TypeError('batch_size must be an int')
+                raise TypeError("batch_size must be an int")
             if batch_size < 1:
-                raise ValueError('batch_size must be >0')
+                raise ValueError("batch_size must be >0")
         if not isinstance(shuffle, bool):
-            raise TypeError('shuffle must be True or False')
+            raise TypeError("shuffle must be True or False")
         if not isinstance(test, bool):
-            raise TypeError('test must be True or False')
+            raise TypeError("test must be True or False")
 
         # No data? (eg when sampling from a generative model)
         if x is None and y is None:
@@ -178,7 +174,7 @@ class ArrayDataGenerator(DataGenerator):
         # Check sizes are consistent
         if x is not None and y is not None:
             if x.shape[0] != y.shape[0]:
-                raise ValueError('x and y must contain same number of samples')
+                raise ValueError("x and y must contain same number of samples")
 
         # Generative model?
         if not test and y is None:
@@ -205,18 +201,15 @@ class ArrayDataGenerator(DataGenerator):
         self.shuffle = shuffle
         self.on_epoch_end()
 
-
     @property
     def n_samples(self):
         """Number of samples in the dataset"""
         return self._n_samples
 
-
     @property
     def batch_size(self):
         """Number of samples to generate each minibatch"""
         return self._batch_size
-
 
     def get_batch(self, index):
         """Generate one batch of data"""
@@ -226,7 +219,7 @@ class ArrayDataGenerator(DataGenerator):
             return None, None
 
         # Get shuffled indexes
-        ix = slice(index*self.batch_size, (index+1)*self.batch_size)
+        ix = slice(index * self.batch_size, (index + 1) * self.batch_size)
         if self.shuffle:
             ix = self.ids[ix]
 
@@ -253,24 +246,30 @@ class ArrayDataGenerator(DataGenerator):
         # Return both x and y
         return x, y
 
-
     def on_epoch_end(self):
         """Shuffle data each epoch"""
         if self.shuffle:
             self.ids = np.random.permutation(self.n_samples)
 
 
-
-def make_generator(x=None,
-                   y=None,
-                   batch_size=None,
-                   shuffle=False,
-                   test=False,
-                   num_workers=None):
+def make_generator(
+    x=None,
+    y=None,
+    batch_size=None,
+    shuffle=False,
+    test=False,
+    num_workers=None,
+):
     """Make input a DataGenerator if not already"""
     if isinstance(x, DataGenerator):
         return x
     else:
-        dg = ArrayDataGenerator(x, y, batch_size=batch_size, test=test,
-                                shuffle=shuffle, num_workers=num_workers)
+        dg = ArrayDataGenerator(
+            x,
+            y,
+            batch_size=batch_size,
+            test=test,
+            shuffle=shuffle,
+            num_workers=num_workers,
+        )
         return dg

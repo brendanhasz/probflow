@@ -11,20 +11,17 @@ betweeen Tensors and numpy arrays.
 """
 
 
-
 __all__ = [
-    'to_numpy',
-    'to_tensor',
-    'make_input_tensor',
+    "to_numpy",
+    "to_tensor",
+    "make_input_tensor",
 ]
-
 
 
 import numpy as np
 import pandas as pd
 
 from probflow.core.settings import get_backend
-
 
 
 def to_numpy(x):
@@ -35,11 +32,10 @@ def to_numpy(x):
         return x
     elif isinstance(x, (pd.DataFrame, pd.Series)):
         return x.values
-    elif get_backend() == 'pytorch':
+    elif get_backend() == "pytorch":
         return x.detach().numpy()
     else:
         return x.numpy()
-
 
 
 def to_tensor(x):
@@ -52,19 +48,18 @@ def to_tensor(x):
         x = x.to_frame().values
 
     # Convert to backend tensor
-    if get_backend() == 'pytorch':
+    if get_backend() == "pytorch":
         import torch
+
         if isinstance(x, torch.Tensor):
             return x
         else:
             return torch.tensor(x)
     else:
-        return x #TensorFlow auto-converts numpy arrays to tensors
-
+        return x  # TensorFlow auto-converts numpy arrays to tensors
 
 
 def make_input_tensor(fn):
-
     def tensor_fn(*args, **kwargs):
         return fn(to_tensor(args[0]), *args[1:], **kwargs)
 
