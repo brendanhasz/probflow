@@ -61,7 +61,22 @@ def test_LinearRegression_heteroscedastic():
     model.fit(x, y, batch_size=10, epochs=3)
 
     # Predictive functions
-    model.predict(x)
+    preds = model.predict(x[:11, :])
+    assert isinstance(preds, np.ndarray)
+    assert preds.ndim == 2
+    assert preds.shape[0] == 11
+    assert preds.shape[1] == 1
+
+    # predictive interval
+    lb, ub = model.predictive_interval(x[:12, :], ci=0.9)
+    assert isinstance(lb, np.ndarray)
+    assert lb.ndim == 2
+    assert lb.shape[0] == 12
+    assert lb.shape[1] == 1
+    assert isinstance(ub, np.ndarray)
+    assert ub.ndim == 2
+    assert ub.shape[0] == 12
+    assert ub.shape[1] == 1
 
 
 def test_LogisticRegression():

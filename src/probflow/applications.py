@@ -67,7 +67,7 @@ class LinearRegression(ContinuousModel):
         self.heteroscedastic = heteroscedastic
         if heteroscedastic:
             self.weights = Parameter([d, 2], name="weights")
-            self.bias = Parameter([1, 1], name="bias")
+            self.bias = Parameter([1, 2], name="bias")
         else:
             self.weights = Parameter([d, 1], name="weights")
             self.bias = Parameter([1, 1], name="bias")
@@ -76,8 +76,8 @@ class LinearRegression(ContinuousModel):
     def __call__(self, x):
         x = to_tensor(x)
         if self.heteroscedastic:
-            p = x @ self.weights()
-            m_preds = p[..., :, 0:1] + self.bias()
+            p = x @ self.weights() + self.bias()
+            m_preds = p[..., :, 0:1]
             s_preds = O.exp(p[..., :, 1:2])
             return Normal(m_preds, s_preds)
         else:
