@@ -185,8 +185,11 @@ class Parameter(BaseParameter):
         self.untransformed_variables = dict()
         for var, init in initializer.items():
             if get_backend() == "pytorch":
-                self.untransformed_variables[var] = init(shape)
-                self.untransformed_variables[var].requires_grad = True
+                import torch
+
+                self.untransformed_variables[var] = torch.nn.Parameter(
+                    init(shape)
+                )
             else:
                 import tensorflow as tf
 
@@ -569,7 +572,7 @@ class ScaleParameter(Parameter):
         self,
         shape=1,
         posterior=Gamma,
-        prior=None,
+        prior=Gamma(5, 1),
         transform=lambda x: O.sqrt(1.0 / x),
         initializer={"concentration": full_of(4.0), "rate": full_of(1.0)},
         var_transform={"concentration": O.exp, "rate": O.exp},
