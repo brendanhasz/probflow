@@ -32,12 +32,12 @@ setup(
             "tensorflow-probability == 0.10.0",
         ],
         "pytorch": [
-            "torch >= 1.2.0",
+            "torch >= 1.5.0",
         ],
         "tests": [
             "tensorflow == 2.2.0",
             "tensorflow-probability == 0.10.0",
-            "torch >= 1.2.0",
+            "torch >= 1.5.0",
             "pytest >= 5.1.2",
             "pytest-cov >= 2.7.1",
             "flake8 >= 3.8.3",

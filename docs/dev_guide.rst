@@ -47,7 +47,7 @@ package in editable mode from your version of the source code - see the
 
 .. code-block:: bash
 
-   make dev-env
+   make init
 
 
 Tests
@@ -84,12 +84,13 @@ To run the autoformatting (using ``black``) and style checks (using
 Documentation
 -------------
 
-To build the documentation locally (this creates html files in the
+To build the documentation locally (the docs are written for and built with
+`Sphinx <http://www.sphinx-doc.org>`_, this command creates html files in the
 ``docs/_html`` directory, the main page being ``docs/_html/index.html``), run:
 
 .. code-block:: bash
 
-   make documentation
+   make docs
 
 
 Contributing your changes

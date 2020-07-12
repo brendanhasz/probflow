@@ -1,4 +1,7 @@
-dev-env:
+
+.PHONY: init test format docs package push-package clean
+
+init:
 	. venv/bin/activate; \
 	pip install -r requirements.txt; \
 	pip install -e .[tests]
@@ -12,7 +15,7 @@ format:
 	black src/probflow tests; \
 	flake8 src/probflow tests
 
-documentation:
+docs:
 	. venv/bin/activate; \
 	sphinx-build -b html docs docs/_html
 

@@ -135,21 +135,82 @@ class Model(Module):
     def _train_step_pytorch(self, n, flipout=False, eager=False):
         """Get the training step function for PyTorch"""
 
-        # import torch
-
-        def train_fn(x_data, y_data):
-            self.reset_kl_loss()
-            with Sampling(n=1, flipout=flipout):
-                self._optimizer.zero_grad()
-                elbo_loss = self.elbo_loss(x_data, y_data, n)
-                elbo_loss.backward()
-                self._optimizer.step()
-            return elbo_loss
+        import torch
 
         if eager:
+
+            def train_fn(x_data, y_data):
+                self.reset_kl_loss()
+                with Sampling(n=1, flipout=flipout):
+                    self._optimizer.zero_grad()
+                    elbo_loss = self.elbo_loss(x_data, y_data, n)
+                    elbo_loss.backward()
+                    self._optimizer.step()
+                return elbo_loss
+
             return train_fn
+
+        # Use PyTorch tracing, for which we have to build a module :roll_eyes:
+        # and also a caching class for inputs of different sizes, b/c
+        # last batch might have different number of datapoints :vomiting_face:
         else:
-            # TODO: if eager=false, return traced function
+
+            class PyTorchModule(torch.nn.Module):
+                def __init__(self, model):
+                    super(PyTorchModule, self).__init__()
+                    for i, p in enumerate(model.trainable_variables):
+                        setattr(self, str(i), p)
+                    self._probflow_model = model
+
+                def elbo_loss(self, *args):
+                    self._probflow_model.reset_kl_loss()
+                    with Sampling(n=1, flipout=False):
+                        if len(args) == 1:
+                            elbo_loss = self._probflow_model.elbo_loss(
+                                None, args[0], n
+                            )
+                        else:
+                            elbo_loss = self._probflow_model.elbo_loss(
+                                args[0], args[1], n
+                            )
+                    return elbo_loss
+
+            class TraceCacher:
+                """Cache traces for inputs of different sizes"""
+
+                def __init__(self, model):
+                    self.fns = {}  # map from input shapes to traced function
+                    self.model = model
+
+                def get_traced_module(self, *args):
+                    shape = "_".join(str(e.shape) for e in args)
+                    if shape in self.fns:
+                        return self.fns[shape]
+                    else:
+                        m = PyTorchModule(self.model)
+                        inputs = {"elbo_loss": args}
+                        self.fns[shape] = torch.jit.trace_module(m, inputs)
+                        return self.fns[shape]
+
+                def __call__(self, *args):
+                    self.model._optimizer.zero_grad()
+                    traced_module = self.get_traced_module(*args)
+                    elbo_loss = traced_module.elbo_loss(*args)
+                    elbo_loss.backward()
+                    self.model._optimizer.step()
+                    return elbo_loss
+
+            pytorch_trainer = TraceCacher(self)
+
+            def train_fn(x_data, y_data):
+                if x_data is None:
+                    elbo_loss = pytorch_trainer(torch.tensor(y_data))
+                else:
+                    elbo_loss = pytorch_trainer(
+                        torch.tensor(x_data), torch.tensor(y_data),
+                    )
+                return elbo_loss
+
             return train_fn
 
     def train_step(self, x_data, y_data):
