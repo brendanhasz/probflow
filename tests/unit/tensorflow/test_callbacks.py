@@ -111,6 +111,24 @@ def test_Callback(plot):
     if plot:
         plt.show()
 
+    # MontiorMetric with custom metric function
+    x_val = np.random.randn(100).astype("float32")
+    y_val = -x_val + 1
+    fn = lambda y_true, y_pred: sum((y_true - y_pred) * (y_true - y_pred))
+    mm2 = MonitorMetric(fn, x_val, y_val, verbose=True)
+    my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[mm2])
+    assert isinstance(mm2.current_epoch, int)
+    assert mm2.current_epoch == 10
+    assert isinstance(mm2.current_metric, np.floating)
+    assert mm2.current_metric > 0.0
+    assert isinstance(mm2.epochs, list)
+    assert len(mm2.epochs) == 10
+    assert isinstance(mm2.metrics, list)
+    assert len(mm2.metrics) == 10
+    mm.plot()
+    if plot:
+        plt.show()
+
     # Test MontiorELBO
     x_val = np.random.randn(100).astype("float32")
     y_val = -x_val + 1

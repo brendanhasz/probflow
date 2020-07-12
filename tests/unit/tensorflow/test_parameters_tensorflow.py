@@ -109,6 +109,16 @@ def test_Parameter_no_prior():
     assert kl_loss.ndim == 0
     assert kl_loss.numpy() == 0.0
 
+    # prior_sample should return nans with prior=None
+    prior_sample = param.prior_sample()
+    assert prior_sample.ndim == 1
+    assert prior_sample.shape[0] == 1
+    assert np.all(np.isnan(prior_sample))
+    prior_sample = param.prior_sample(n=7)
+    assert prior_sample.ndim == 1
+    assert prior_sample.shape[0] == 7
+    assert np.all(np.isnan(prior_sample))
+
 
 def test_Parameter_1D():
     """Tests a 1D Parameter"""

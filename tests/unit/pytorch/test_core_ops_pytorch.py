@@ -444,12 +444,13 @@ def test_additive_logistic_transform():
     assert val.shape[2] == 6
 
 
-def test_add_col_of():
+def test_insert_col_of():
     """Tests add_col_of"""
     pf.set_backend("pytorch")
     a = torch.randn([2, 3, 5])
-    val = ops.add_col_of(a, 1)
+    val = ops.insert_col_of(a, 1)
     assert val.ndim == 3
     assert val.shape[0] == 2
     assert val.shape[1] == 3
     assert val.shape[2] == 6
+    assert (val[:, :, 0] == 1).all()

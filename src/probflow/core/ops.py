@@ -2,8 +2,11 @@
 The core.ops module contains operations which run using the current backend.
 
 * :func:`.kl_divergence`
+* :func:`.expand_dims`
+* :func:`.squeeze`
 * :func:`.ones`
 * :func:`.zeros`
+* :func:`.eye`
 * :func:`.sum`
 * :func:`.prod`
 * :func:`.mean`
@@ -11,12 +14,15 @@ The core.ops module contains operations which run using the current backend.
 * :func:`.round`
 * :func:`.abs`
 * :func:`.square`
-* :func:`.exp`
 * :func:`.sqrt`
+* :func:`.exp`
 * :func:`.relu`
 * :func:`.softplus`
 * :func:`.sigmoid`
 * :func:`.gather`
+* :func:`.cat`
+* :func:`.additive_logistic_transform`
+* :func:`.insert_col_of`
 
 ----------
 
@@ -25,8 +31,11 @@ The core.ops module contains operations which run using the current backend.
 
 __all__ = [
     "kl_divergence",
+    "expand_dims",
+    "squeeze",
     "ones",
     "zeros",
+    "eye",
     "sum",
     "prod",
     "mean",
@@ -34,15 +43,15 @@ __all__ = [
     "round",
     "abs",
     "square",
-    "exp",
     "sqrt",
+    "exp",
     "relu",
     "softplus",
     "sigmoid",
     "gather",
     "cat",
     "additive_logistic_transform",
-    "add_col_of",
+    "insert_col_of",
 ]
 
 
@@ -335,20 +344,6 @@ def additive_logistic_transform(vals):
         return exp_vals / tf.reduce_sum(exp_vals, axis=-1, keepdims=True)
 
 
-def add_col_of(vals, val):
-    """Add a column of a value to a tensor"""
-    if get_backend() == "pytorch":
-        import torch
-
-        shape = [s for s in vals.shape[:-1]] + [1]
-        return torch.cat([vals, val * torch.ones(shape)], dim=-1)
-    else:
-        import tensorflow as tf
-
-        shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
-        return tf.concat([vals, val * tf.ones(shape)], axis=-1)
-
-
 def insert_col_of(vals, val):
     """Add a column of a value to the left side of a tensor"""
     if get_backend() == "pytorch":
@@ -360,4 +355,3 @@ def insert_col_of(vals, val):
         import tensorflow as tf
 
         shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
-        return tf.concat([val * tf.ones(shape), vals], axis=-1)
