@@ -1,11 +1,11 @@
-"""Tests the probflow.core.settings module"""
+"""Tests the probflow.utils.settings module"""
 
 
 import pytest
 
 import tensorflow as tf
 
-from probflow.core import settings
+from probflow.utils import settings
 
 
 def test_backend():

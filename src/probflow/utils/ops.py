@@ -1,5 +1,5 @@
 """
-The core.ops module contains operations which run using the current backend.
+The utils.ops module contains operations which run using the current backend.
 
 * :func:`.kl_divergence`
 * :func:`.expand_dims`
@@ -55,8 +55,8 @@ __all__ = [
 ]
 
 
-from probflow.core.settings import get_backend
-from probflow.core.base import BaseDistribution
+from probflow.utils.settings import get_backend
+from probflow.utils.base import BaseDistribution
 from probflow.utils.casting import make_input_tensor
 
 
@@ -355,3 +355,4 @@ def insert_col_of(vals, val):
         import tensorflow as tf
 
         shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
+        return tf.concat([val * tf.ones(shape), vals], axis=-1)

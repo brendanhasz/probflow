@@ -13,8 +13,8 @@ Functions to initialize posterior distribution variables.
 
 import numpy as np
 
-from probflow.core.settings import get_backend
-from probflow.core.settings import get_datatype
+from probflow.utils.settings import get_backend
+from probflow.utils.settings import get_datatype
 
 
 def xavier(shape):
@@ -68,7 +68,7 @@ def pos_xavier(shape):
 def full_of(val):
     """Get initializer which returns tensor full of single value"""
 
-    import probflow.core.ops as O
+    import probflow.utils.ops as O
 
     def init(shape):
         return val * O.ones(shape)

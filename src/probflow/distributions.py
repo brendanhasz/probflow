@@ -54,11 +54,11 @@ __all__ = [
 
 import numpy as np
 
-from probflow.core.settings import get_backend
-import probflow.core.ops as O
+from probflow.utils.settings import get_backend
+import probflow.utils.ops as O
 from probflow.utils.torch_distributions import get_TorchDeterministic
-from probflow.core.base import BaseDistribution
-from probflow.core.base import BaseParameter
+from probflow.utils.base import BaseDistribution
+from probflow.utils.base import BaseParameter
 
 
 def _ensure_tensor_like(obj, name):

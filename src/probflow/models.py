@@ -27,10 +27,10 @@ from typing import List, Union, Callable
 import numpy as np
 import matplotlib.pyplot as plt
 
-from probflow.core.settings import get_backend
-from probflow.core.settings import Sampling
-from probflow.core.base import BaseCallback
-import probflow.core.ops as O
+from probflow.utils.settings import get_backend
+from probflow.utils.settings import Sampling
+from probflow.utils.base import BaseCallback
+import probflow.utils.ops as O
 from probflow.utils.casting import to_numpy
 from probflow.modules import Module
 from probflow.utils.plotting import plot_dist

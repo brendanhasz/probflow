@@ -1,4 +1,4 @@
-"""Tests the probflow.core.settings module when backend = pytorch"""
+"""Tests the probflow.utils.settings module when backend = pytorch"""
 
 import pytest
 

@@ -1,4 +1,4 @@
-"""Tests the probflow.core.ops module when backend = pytorch"""
+"""Tests the probflow.utils.ops module when backend = pytorch"""
 
 
 import pytest
@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 import probflow as pf
-from probflow.core import ops
+from probflow.utils import ops
 
 
 def is_close(a, b, tol=1e-3):

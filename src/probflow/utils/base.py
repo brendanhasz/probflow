@@ -1,5 +1,5 @@
 """
-The core.base module contains abstract base classes (ABCs) for all of
+The utils.base module contains abstract base classes (ABCs) for all of
 ProbFlow’s classes.
 
 """
@@ -17,7 +17,7 @@ __all__ = [
 from abc import ABC, abstractmethod
 from math import ceil
 
-from probflow.core.settings import get_backend
+from probflow.utils.settings import get_backend
 from probflow.utils.casting import to_tensor
 
 

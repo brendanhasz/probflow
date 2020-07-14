@@ -7,8 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow_probability as tfp
-from probflow.core.settings import Sampling
-import probflow.core.ops as O
+from probflow.utils.settings import Sampling
+import probflow.utils.ops as O
 from probflow.distributions import Normal
 from probflow.distributions import Poisson
 from probflow.distributions import Bernoulli

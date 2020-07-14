@@ -55,12 +55,12 @@ from typing import Union, List, Dict, Type, Callable
 import numpy as np
 import matplotlib.pyplot as plt
 
-from probflow.core.settings import get_samples
-from probflow.core.settings import get_backend
-from probflow.core.settings import Sampling
-from probflow.core.base import BaseParameter
-from probflow.core.base import BaseDistribution
-import probflow.core.ops as O
+from probflow.utils.settings import get_samples
+from probflow.utils.settings import get_backend
+from probflow.utils.settings import Sampling
+from probflow.utils.base import BaseParameter
+from probflow.utils.base import BaseDistribution
+import probflow.utils.ops as O
 from probflow.utils.casting import to_numpy
 from probflow.distributions import Normal
 from probflow.distributions import Gamma

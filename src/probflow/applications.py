@@ -25,7 +25,7 @@ __all__ = [
 
 from typing import List, Callable, Union
 
-import probflow.core.ops as O
+import probflow.utils.ops as O
 from probflow.utils.casting import to_tensor
 from probflow.parameters import Parameter
 from probflow.parameters import ScaleParameter

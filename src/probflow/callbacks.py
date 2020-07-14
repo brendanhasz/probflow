@@ -32,7 +32,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-from probflow.core.base import BaseCallback
+from probflow.utils.base import BaseCallback
 from probflow.data import make_generator
 from probflow.utils.metrics import get_metric_fn
 

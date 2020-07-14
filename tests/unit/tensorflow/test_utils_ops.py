@@ -1,4 +1,4 @@
-"""Tests the probflow.core.ops module when backend = tensorflow"""
+"""Tests the probflow.utils.ops module when backend = tensorflow"""
 
 
 import pytest
@@ -8,7 +8,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 import probflow as pf
-from probflow.core import ops
+from probflow.utils import ops
 
 
 def is_close(a, b, tol=1e-3):

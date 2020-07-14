@@ -22,7 +22,7 @@ import multiprocessing as mp
 import numpy as np
 import pandas as pd
 
-from probflow.core.base import BaseDataGenerator
+from probflow.utils.base import BaseDataGenerator
 
 
 class DataGenerator(BaseDataGenerator):

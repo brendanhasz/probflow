@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
-from probflow.core.settings import Sampling
+from probflow.utils.settings import Sampling
 from probflow.parameters import *
 from probflow.distributions import BaseDistribution
 

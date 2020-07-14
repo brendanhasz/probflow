@@ -6,8 +6,8 @@ import pytest
 import numpy as np
 import torch
 
-from probflow.core.settings import Sampling
-import probflow.core.ops as O
+from probflow.utils.settings import Sampling
+import probflow.utils.ops as O
 from probflow.distributions import Normal
 from probflow.parameters import *
 from probflow.modules import *

@@ -27,12 +27,12 @@ __all__ = [
 
 from typing import Union, List, Dict, Callable, Type
 
-import probflow.core.ops as O
-from probflow.core.settings import get_flipout
-from probflow.core.settings import get_backend
-from probflow.core.base import BaseDistribution
-from probflow.core.base import BaseModule
-from probflow.core.base import BaseParameter
+import probflow.utils.ops as O
+from probflow.utils.settings import get_flipout
+from probflow.utils.settings import get_backend
+from probflow.utils.base import BaseDistribution
+from probflow.utils.base import BaseModule
+from probflow.utils.base import BaseParameter
 from probflow.distributions import Deterministic
 from probflow.distributions import Normal
 from probflow.parameters import Parameter

@@ -1,5 +1,5 @@
 """
-The core.utils.casting module contains functions for casting back and forth
+The utils.utils.casting module contains functions for casting back and forth
 betweeen Tensors and numpy arrays.
 
 * :func:`.to_numpy`
@@ -21,7 +21,7 @@ __all__ = [
 import numpy as np
 import pandas as pd
 
-from probflow.core.settings import get_backend
+from probflow.utils.settings import get_backend
 
 
 def to_numpy(x):
