@@ -7,7 +7,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 from probflow.utils.settings import Sampling
 from probflow.parameters import *
-from probflow.distributions import BaseDistribution
+from probflow.utils.base import BaseDistribution
 
 tfd = tfp.distributions
 

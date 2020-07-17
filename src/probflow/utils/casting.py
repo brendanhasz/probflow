@@ -1,5 +1,5 @@
 """
-The utils.utils.casting module contains functions for casting back and forth
+The utils.casting module contains functions for casting back and forth
 betweeen Tensors and numpy arrays.
 
 * :func:`.to_numpy`

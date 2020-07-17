@@ -106,31 +106,6 @@ def test_PoissonRegression():
     model.predict(x)
 
 
-def test_DenseNetwork():
-    """Tests probflow.applications.DenseNetwork"""
-
-    class DenseNet(Model):
-        def __init__(self, dims):
-            self.net = apps.DenseNetwork(dims)
-
-        def __call__(self, x):
-            return Normal(self.net(x), 1.0)
-
-    # Data
-    x = np.random.randn(100, 5).astype("float32")
-    w = np.random.randn(5, 1).astype("float32")
-    y = x @ w + 1
-
-    # Create the model
-    model = DenseNet([5, 20, 15, 1])
-
-    # Fit the model
-    model.fit(x, y, batch_size=10, epochs=3, flipout=False)
-
-    # Predictive functions
-    model.predict(x)
-
-
 def test_DenseRegression():
     """Tests probflow.applications.DenseRegression"""
 

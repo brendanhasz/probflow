@@ -244,6 +244,75 @@ def test_Dense():
     assert samples1.shape[1] == 1
 
 
+def test_DenseNetwork():
+    """Tests probflow.modules.DenseNetwork"""
+
+    # Should error w/ int < 1
+    with pytest.raises(ValueError):
+        dense = DenseNetwork([0, 1, 5])
+    with pytest.raises(ValueError):
+        dense = DenseNetwork([5, -1, 4])
+
+    # Create the module
+    dense_net = DenseNetwork([5, 4, 3, 2])
+
+    # Test MAP outputs are same
+    x = tf.random.normal([7, 5])
+    samples1 = dense_net(x)
+    samples2 = dense_net(x)
+    assert np.all(samples1.numpy() == samples2.numpy())
+    assert samples1.ndim == 2
+    assert samples1.shape[0] == 7
+    assert samples1.shape[1] == 2
+
+    # Test samples are different
+    with Sampling():
+        samples1 = dense_net(x)
+        samples2 = dense_net(x)
+    assert np.all(samples1.numpy() != samples2.numpy())
+    assert samples1.ndim == 2
+    assert samples1.shape[0] == 7
+    assert samples1.shape[1] == 2
+
+    # parameters should return [weights, bias] for each layer
+    param_list = dense_net.parameters
+    assert isinstance(param_list, list)
+    assert len(param_list) == 6
+    assert all(isinstance(p, Parameter) for p in param_list)
+    param_names = [p.name for p in dense_net.parameters]
+    assert "DenseNetwork_Dense0_weights" in param_names
+    assert "DenseNetwork_Dense0_bias" in param_names
+    assert "DenseNetwork_Dense1_weights" in param_names
+    assert "DenseNetwork_Dense1_bias" in param_names
+    assert "DenseNetwork_Dense2_weights" in param_names
+    assert "DenseNetwork_Dense2_bias" in param_names
+    shapes = {
+        "DenseNetwork_Dense0_weights": [5, 4],
+        "DenseNetwork_Dense0_bias": [1, 4],
+        "DenseNetwork_Dense1_weights": [4, 3],
+        "DenseNetwork_Dense1_bias": [1, 3],
+        "DenseNetwork_Dense2_weights": [3, 2],
+        "DenseNetwork_Dense2_bias": [1, 2],
+    }
+    for name, shape in shapes.items():
+        param = [p for p in dense_net.parameters if p.name == name]
+        assert param[0].shape == shape
+
+    # kl_loss should return sum of KL losses
+    kl_loss = dense_net.kl_loss()
+    assert isinstance(kl_loss, tf.Tensor)
+    assert kl_loss.ndim == 0
+
+    # test Flipout
+    with Sampling(flipout=True):
+        samples1 = dense_net(x)
+        samples2 = dense_net(x)
+    assert np.all(samples1.numpy() != samples2.numpy())
+    assert samples1.ndim == 2
+    assert samples1.shape[0] == 7
+    assert samples1.shape[1] == 2
+
+
 def test_Sequential():
     """Tests probflow.modules.Sequential"""
 
@@ -369,7 +438,7 @@ def test_Embedding():
 
     # Check parameters
     assert len(emb.parameters) == 1
-    assert emb.parameters[0].name == "Embeddings_0"
+    assert emb.parameters[0].name == "Embedding_0"
     assert emb.parameters[0].shape == [10, 5]
 
     # Test MAP outputs are the same
@@ -400,9 +469,9 @@ def test_Embedding():
 
     # Check parameters
     assert len(emb.parameters) == 2
-    assert emb.parameters[0].name == "Embeddings_0"
+    assert emb.parameters[0].name == "Embedding_0"
     assert emb.parameters[0].shape == [10, 5]
-    assert emb.parameters[1].name == "Embeddings_1"
+    assert emb.parameters[1].name == "Embedding_1"
     assert emb.parameters[1].shape == [20, 4]
 
     # Test MAP outputs are the same
