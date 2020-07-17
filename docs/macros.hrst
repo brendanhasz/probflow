@@ -8,19 +8,19 @@
 .. |tfp.Distribution| replace:: `tensorflow_probability.distributions.Distribution <http://www.tensorflow.org/probability/api_docs/python/tfp/distributions/Distribution>`__
 .. |torch.Distribution| replace:: `torch.distributions.distribution.Distribution <https://pytorch.org/docs/stable/distributions.html#torch.distributions.distribution.Distribution>`__
 
-.. |Application| replace:: :doc:`Application </api_applications>`
-.. |Applications| replace:: :doc:`Applications </api_applications>`
-.. |Callback| replace:: :doc:`Callback </api_callbacks>`
-.. |Callbacks| replace:: :doc:`Callbacks </api_callbacks>`
-.. |Data| replace:: :doc:`Data </api_data>`
-.. |Distribution| replace:: :doc:`Distribution </api_distributions>`
-.. |Distributions| replace:: :doc:`Distributions </api_distributions>`
-.. |Model| replace:: :doc:`Model </api_models>`
-.. |Models| replace:: :doc:`Models </api_models>`
-.. |Module| replace:: :doc:`Module </api_modules>`
-.. |Modules| replace:: :doc:`Modules </api_modules>`
-.. |Parameter| replace:: :doc:`Parameter </api_parameters>`
-.. |Parameters| replace:: :doc:`Parameters </api_parameters>`
+.. |Application| replace:: :doc:`Application </api/applications>`
+.. |Applications| replace:: :doc:`Applications </api/applications>`
+.. |Callback| replace:: :doc:`Callback </api/callbacks>`
+.. |Callbacks| replace:: :doc:`Callbacks </api/callbacks>`
+.. |Data| replace:: :doc:`Data </api/data>`
+.. |Distribution| replace:: :doc:`Distribution </api/distributions>`
+.. |Distributions| replace:: :doc:`Distributions </api/distributions>`
+.. |Model| replace:: :doc:`Model </api/models>`
+.. |Models| replace:: :doc:`Models </api/models>`
+.. |Module| replace:: :doc:`Module </api/modules>`
+.. |Modules| replace:: :doc:`Modules </api/modules>`
+.. |Parameter| replace:: :doc:`Parameter </api/parameters>`
+.. |Parameters| replace:: :doc:`Parameters </api/parameters>`
 
 .. |DataGenerator| replace:: :class:`.DataGenerator`
 

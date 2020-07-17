@@ -25,15 +25,20 @@ ProbFlow
    :caption: Contents:
    :hidden:
 
-   user_guide
-   examples
-   api
-   dev_guide
+   user_guide/user_guide
+   examples/examples
+   api/api
+   dev_guide/dev_guide
    todo
 
 .. include:: macros.hrst
 
-ProbFlow is a Python package for building probabilistic Bayesian models with |TensorFlow 2.0| or |PyTorch|, performing stochastic variational inference with those models, and evaluating the models' inferences.  It provides both high-level |Modules| for building Bayesian neural networks, as well as low-level |Parameters| and |Distributions| for constructing custom Bayesian models.
+ProbFlow is a Python package for building probabilistic Bayesian models with
+|TensorFlow 2.0| or |PyTorch|, performing stochastic variational inference with
+those models, and evaluating the models' inferences.  It provides both
+high-level |Modules| for building Bayesian neural networks, as well as
+low-level |Parameters| and |Distributions| for constructing custom Bayesian
+models.
 
 It's very much still a work in progress.
 
@@ -45,9 +50,15 @@ It's very much still a work in progress.
 Getting Started
 ---------------
 
-**ProbFlow** allows you to quickly and :raw-html:`<del>painlessly</del>` less painfully build, fit, and evaluate custom Bayesian models (or :doc:`ready-made <api_applications>` ones!) which run on top of either |TensorFlow| and |TensorFlow Probability| or |PyTorch|.
+**ProbFlow** allows you to quickly and :raw-html:`<del>painlessly</del>` less
+painfully build, fit, and evaluate custom Bayesian models (or :doc:`ready-made
+<api/applications>` ones!) which run on top of either |TensorFlow| and
+|TensorFlow Probability| or |PyTorch|.
 
-With ProbFlow, the core building blocks of a Bayesian model are parameters and probability distributions (and, of course, the input data).  Parameters define how the independent variables (the features) predict the probability distribution of the dependent variables (the target).
+With ProbFlow, the core building blocks of a Bayesian model are parameters and
+probability distributions (and, of course, the input data).  Parameters define
+how the independent variables (the features) predict the probability
+distribution of the dependent variables (the target).
 
 For example, a simple Bayesian linear regression
 
@@ -121,7 +132,7 @@ Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
     model.pred_dist_plot(x_test, ci=0.95)
 
-.. image:: img/readme/pred_dist.svg
+.. image:: img/pred_dist.svg
    :width: 90 %
    :align: center
 
@@ -138,7 +149,7 @@ Inspect the posterior distributions of your fit model's parameters, with 95% con
 
     model.posterior_plot(ci=0.95)
 
-.. image:: img/readme/posteriors.svg
+.. image:: img/posteriors.svg
    :width: 90 %
    :align: center
 
@@ -155,13 +166,13 @@ and diagnose *where* your model is having problems capturing uncertainty:
 
     model.coverage_by(ci=0.95)
 
-.. image:: img/readme/coverage.svg
+.. image:: img/coverage.svg
    :width: 90 %
    :align: center
 
-ProbFlow also provides more complex modules, such as those required for building :doc:`Bayesian neural networks <example_fully_connected>`.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, even a somewhat complex multi-layer Bayesian neural network like this:
+ProbFlow also provides more complex modules, such as those required for building :doc:`Bayesian neural networks <examples/fully_connected>`.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, even a somewhat complex multi-layer Bayesian neural network like this:
 
-.. image:: img/readme/dual_headed_net.svg
+.. image:: img/dual_headed_net.svg
    :width: 99 %
    :align: center
 
@@ -212,7 +223,7 @@ Can be built and fit with ProbFlow in only a few lines:
             model.fit(x, y)
 
 
-For convenience, ProbFlow also includes several :doc:`pre-built models </api_applications>` for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made :class:`LinearRegression <probflow.applications.LinearRegression>` model:
+For convenience, ProbFlow also includes several :doc:`pre-built models </api/applications>` for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made :class:`LinearRegression <probflow.applications.LinearRegression>` model:
 
 .. code-block:: python3
 
@@ -226,7 +237,7 @@ And a multi-layer Bayesian neural net can be made easily using ProbFlow's ready-
     model = pf.DenseRegression([x.shape[1], 128, 64, 1])
     model.fit(x, y)
 
-Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like :doc:`generalized linear models <example_glm>`, :doc:`deep time-to-event models <example_time_to_event>`, :doc:`neural matrix factorization <example_nmf>` models, and :doc:`Gaussian mixture models <example_gmm>`.  Take a look at the :doc:`examples` and the :doc:`user_guide` for more!
+Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like :doc:`generalized linear models <examples/glm>`, :doc:`deep time-to-event models <examples/time_to_event>`, :doc:`neural matrix factorization <examples/nmf>` models, and :doc:`Gaussian mixture models <examples/gmm>`.  Take a look at the :doc:`examples/examples` and the :doc:`user_guide/user_guide` for more!
 
 
 Installation
@@ -271,7 +282,7 @@ Post bug reports, feature requests, and tutorial requests in `GitHub issues <htt
 Contributing
 ------------
 
-`Pull requests <https://github.com/brendanhasz/probflow/pulls>`_ are totally welcome!  Any contribution would be appreciated, from things as minor as pointing out typos to things as major as writing new applications and distributions.  For info on how to set up a development environment and run the tests, see the :doc:`dev_guide`.
+`Pull requests <https://github.com/brendanhasz/probflow/pulls>`_ are totally welcome!  Any contribution would be appreciated, from things as minor as pointing out typos to things as major as writing new applications and distributions.  For info on how to set up a development environment and run the tests, see the :doc:`dev_guide/dev_guide`.
 
 
 Why the name, ProbFlow?

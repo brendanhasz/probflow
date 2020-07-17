@@ -249,9 +249,9 @@ def test_DenseNetwork():
 
     # Should error w/ int < 1
     with pytest.raises(ValueError):
-        dense = DenseNetwork([0, 1, 5])
+        DenseNetwork([0, 1, 5])
     with pytest.raises(ValueError):
-        dense = DenseNetwork([5, -1, 4])
+        DenseNetwork([5, -1, 4])
 
     # Create the module
     dense_net = DenseNetwork([5, 4, 3, 2])

@@ -34,7 +34,7 @@ With ProbFlow, the core building blocks of a Bayesian model are parameters and p
 
 For example, a simple Bayesian linear regression
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/readme/regression_equation.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/regression_equation.svg?sanitize=true
    :width: 30 %
    :align: center
 
@@ -54,7 +54,7 @@ can be built by creating a ProbFlow Model:
 
         def __call__(self, x):
             return pf.Normal(x*self.weight()+self.bias(), self.std())
-    
+
     model = LinearRegression()
 
 Then, the model can be fit using stochastic variational inference, in *one line*:
@@ -78,7 +78,7 @@ Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
     model.pred_dist_plot(x_test, ci=0.95)
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/readme/pred_dist.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/pred_dist.svg?sanitize=true
    :width: 90 %
    :align: center
 
@@ -95,7 +95,7 @@ Inspect the posterior distributions of your fit model's parameters, with 95% con
 
     model.posterior_plot(ci=0.95)
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/readme/posteriors.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/posteriors.svg?sanitize=true
    :width: 90 %
    :align: center
 
@@ -112,17 +112,17 @@ and diagnose *where* your model is having problems capturing uncertainty:
 
     model.coverage_by(ci=0.95)
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/readme/coverage.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/coverage.svg?sanitize=true
    :width: 90 %
    :align: center
 
 ProbFlow also provides more complex modules, such as those required for building Bayesian neural networks.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, even a somewhat complex multi-layer Bayesian neural network like this:
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/readme/dual_headed_net.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/dual_headed_net.svg?sanitize=true
    :width: 99 %
    :align: center
 
-Can be built and fit with ProbFlow in only a few lines:  
+Can be built and fit with ProbFlow in only a few lines:
 
 .. code-block:: python
 
@@ -158,10 +158,10 @@ And a multi-layer Bayesian neural net can be made easily using ProbFlow's ready-
     model = pf.DenseRegression([x.shape[1], 128, 64, 1])
     model.fit(x, y)
 
-Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like 
+Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like
 `generalized linear models <http://probflow.readthedocs.io/en/latest/example_glm.html>`_,
-`deep time-to-event models <http://probflow.readthedocs.io/en/latest/example_time_to_event.html>`_, 
-`neural matrix factorization <http://probflow.readthedocs.io/en/latest/example_nmf.html>`_ models, and 
+`deep time-to-event models <http://probflow.readthedocs.io/en/latest/example_time_to_event.html>`_,
+`neural matrix factorization <http://probflow.readthedocs.io/en/latest/example_nmf.html>`_ models, and
 `Gaussian mixture models <http://probflow.readthedocs.io/en/latest/example_gmm.html>`_.  Take a look at the `examples <http://probflow.readthedocs.io/en/latest/examples.html>`_ and the `user guide <http://probflow.readthedocs.io/en/latest/user_guide.html>`_ for more!
 
 
@@ -173,7 +173,7 @@ Before installing ProbFlow, you'll first need to install either PyTorch, or Tens
 Then, you can install ProbFlow itself:
 
 .. code-block:: bash
-    
+
     pip install probflow
 
 

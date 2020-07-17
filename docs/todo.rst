@@ -9,7 +9,7 @@ worked on currently in the "In progress tab".
 
 If you're interested in tackling one of them, I'd be thrilled!
 `Pull requests <https://github.com/brendanhasz/probflow/pulls>`_
-are totally welcome!  Also take a look at the :doc:`dev_guide`.
+are totally welcome!  Also take a look at the :doc:`dev_guide/dev_guide`.
 
 
 Out of scope

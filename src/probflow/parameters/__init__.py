@@ -15,7 +15,7 @@ to a specific distribution before fitting the model.  While the *type* of
 distribution used for the posterior is set before fitting the model, the
 shape of that distribution (the value of the parameters which define the
 distribution) is optimized while fitting the model.
-See the :ref:`ug_math` section for more info.
+See the :doc:`../user_guide/math` section for more info.
 
 The :class:`.Parameter` class can be used to create any probabilistic
 parameter.
@@ -31,7 +31,7 @@ of a :class:`.Parameter`:
 * :class:`.DeterministicParameter` - a non-probabilistic parameter
 * :class:`.MultivariateNormalParameter` - parameter with a multivariate Normal posterior
 
-See the :ref:`user guide <ug_parameters>` for more information on Parameters.
+See the :doc:`user guide <../user_guide/parameters>` for more information on Parameters.
 
 ----------
 
