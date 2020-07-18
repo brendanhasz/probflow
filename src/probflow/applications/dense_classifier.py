@@ -1,10 +1,10 @@
 from typing import List
 
 import probflow.utils.ops as O
-from probflow.utils.casting import to_tensor
 from probflow.distributions import Categorical
-from probflow.modules import DenseNetwork
 from probflow.models import CategoricalModel
+from probflow.modules import DenseNetwork
+from probflow.utils.casting import to_tensor
 
 
 class DenseClassifier(CategoricalModel):

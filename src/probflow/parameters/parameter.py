@@ -1,19 +1,15 @@
-from typing import Union, List, Dict, Type, Callable
+from typing import Callable, Dict, List, Type, Union
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from probflow.utils.settings import get_samples
-from probflow.utils.settings import get_backend
-from probflow.utils.settings import Sampling
-from probflow.utils.base import BaseParameter
-from probflow.utils.base import BaseDistribution
 import probflow.utils.ops as O
-from probflow.utils.casting import to_numpy
 from probflow.distributions import Normal
+from probflow.utils.base import BaseDistribution, BaseParameter
+from probflow.utils.casting import to_numpy
+from probflow.utils.initializers import scale_xavier, xavier
 from probflow.utils.plotting import plot_dist
-from probflow.utils.initializers import xavier
-from probflow.utils.initializers import scale_xavier
+from probflow.utils.settings import Sampling, get_backend, get_samples
 
 
 class Parameter(BaseParameter):

@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+
 from .callback import Callback
 
 

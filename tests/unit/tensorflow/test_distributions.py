@@ -1,12 +1,13 @@
 """Tests the probflow.distributions module when backend = tensorflow"""
 
 
-import pytest
 import numpy as np
+import pytest
 import tensorflow as tf
 import tensorflow_probability as tfp
-import probflow.distributions as pfd
+
 import probflow as pf
+import probflow.distributions as pfd
 
 tfd = tfp.distributions
 

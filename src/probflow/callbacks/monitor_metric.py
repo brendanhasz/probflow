@@ -1,8 +1,9 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from probflow.data import make_generator
 from probflow.utils.metrics import get_metric_fn
+
 from .callback import Callback
 
 

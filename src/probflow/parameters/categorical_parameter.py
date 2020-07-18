@@ -1,8 +1,9 @@
-from typing import Union, List
+from typing import List, Union
 
 import probflow.utils.ops as O
 from probflow.distributions import Categorical
 from probflow.utils.initializers import xavier
+
 from .parameter import Parameter
 
 

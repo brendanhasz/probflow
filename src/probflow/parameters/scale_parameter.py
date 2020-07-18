@@ -1,6 +1,7 @@
 import probflow.utils.ops as O
 from probflow.distributions import Gamma
 from probflow.utils.initializers import full_of
+
 from .parameter import Parameter
 
 

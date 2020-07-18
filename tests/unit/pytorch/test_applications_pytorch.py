@@ -1,14 +1,13 @@
 """Tests the probflow.applications module when backend = pytorch"""
 
 
-import pytest
-
 import numpy as np
+import pytest
 import torch
 
 from probflow import applications as apps
-from probflow.models import Model
 from probflow.distributions import Normal
+from probflow.models import Model
 
 
 def test_LinearRegression():

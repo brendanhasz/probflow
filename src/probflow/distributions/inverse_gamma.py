@@ -1,5 +1,5 @@
-from probflow.utils.settings import get_backend
 from probflow.utils.base import BaseDistribution
+from probflow.utils.settings import get_backend
 from probflow.utils.validation import ensure_tensor_like
 
 

@@ -21,8 +21,8 @@ __all__ = [
 ]
 
 
+from .dense_classifier import DenseClassifier
+from .dense_regression import DenseRegression
 from .linear_regression import LinearRegression
 from .logistic_regression import LogisticRegression
 from .poisson_regression import PoissonRegression
-from .dense_regression import DenseRegression
-from .dense_classifier import DenseClassifier

@@ -55,9 +55,9 @@ __all__ = [
 ]
 
 
-from probflow.utils.settings import get_backend
 from probflow.utils.base import BaseDistribution
 from probflow.utils.casting import make_input_tensor
+from probflow.utils.settings import get_backend
 
 
 def kl_divergence(P, Q):

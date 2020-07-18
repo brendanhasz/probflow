@@ -1,11 +1,10 @@
-from typing import List, Callable, Union
+from typing import Callable, List, Union
 
 import probflow.utils.ops as O
-from probflow.utils.casting import to_tensor
-from probflow.parameters import Parameter
-from probflow.parameters import ScaleParameter
 from probflow.distributions import Normal
 from probflow.models import ContinuousModel
+from probflow.parameters import Parameter, ScaleParameter
+from probflow.utils.casting import to_tensor
 
 
 class LinearRegression(ContinuousModel):

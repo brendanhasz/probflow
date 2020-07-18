@@ -1,7 +1,8 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from probflow.utils.plotting import plot_discrete_dist
+
 from .continuous_model import ContinuousModel
 
 

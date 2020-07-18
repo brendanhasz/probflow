@@ -1,7 +1,7 @@
 import probflow.utils.ops as O
-from probflow.distributions import Normal
-from probflow.distributions import Deterministic
+from probflow.distributions import Deterministic, Normal
 from probflow.utils.initializers import xavier
+
 from .parameter import Parameter
 
 

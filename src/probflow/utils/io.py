@@ -1,6 +1,7 @@
 """Functions for saving and loading ProbFlow  objects"""
 
 import base64
+
 import cloudpickle
 
 __all__ = [

@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-from .model import Model
+from .categorical_model import CategoricalModel
 from .continuous_model import ContinuousModel
 from .discrete_model import DiscreteModel
-from .categorical_model import CategoricalModel
+from .model import Model

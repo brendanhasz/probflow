@@ -3,6 +3,7 @@
 
 import numpy as np
 import tensorflow as tf
+
 import probflow as pf
 
 

@@ -17,8 +17,8 @@ __all__ = [
 from abc import ABC, abstractmethod
 from math import ceil
 
-from probflow.utils.settings import get_backend
 from probflow.utils.casting import to_tensor
+from probflow.utils.settings import get_backend
 
 
 class BaseDistribution(ABC):

@@ -1,9 +1,8 @@
 """Tests the probflow.utils.ops module when backend = tensorflow"""
 
 
-import pytest
-
 import numpy as np
+import pytest
 import tensorflow as tf
 import tensorflow_probability as tfp
 

@@ -1,13 +1,14 @@
 """Tests the probflow.parameters module when backend = tensorflow"""
 
 
-import pytest
 import numpy as np
+import pytest
 import tensorflow as tf
 import tensorflow_probability as tfp
-from probflow.utils.settings import Sampling
+
 from probflow.parameters import *
 from probflow.utils.base import BaseDistribution
+from probflow.utils.settings import Sampling
 
 tfd = tfp.distributions
 

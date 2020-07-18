@@ -1,15 +1,13 @@
 """Tests probflow.utils.metrics module when backend = tensorflow"""
 
 
-import pytest
-
 import numpy as np
 import pandas as pd
+import pytest
 import tensorflow as tf
 
 from probflow.distributions import *
-from probflow.utils import metrics
-from probflow.utils import casting
+from probflow.utils import casting, metrics
 
 
 def is_close(a, b, tol=1e-5):

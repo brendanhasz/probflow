@@ -13,8 +13,7 @@ Functions to initialize posterior distribution variables.
 
 import numpy as np
 
-from probflow.utils.settings import get_backend
-from probflow.utils.settings import get_datatype
+from probflow.utils.settings import get_backend, get_datatype
 
 
 def xavier(shape):

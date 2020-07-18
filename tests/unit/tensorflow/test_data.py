@@ -1,10 +1,9 @@
 """Tests the probflow.data module"""
 
 
-import pytest
-
 import numpy as np
 import pandas as pd
+import pytest
 
 import probflow as pf
 from probflow.data import *

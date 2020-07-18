@@ -1,6 +1,7 @@
-from typing import List, Callable, Union
+from typing import Callable, List, Union
 
 import probflow.utils.ops as O
+
 from .dense import Dense
 from .module import Module
 

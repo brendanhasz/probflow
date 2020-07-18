@@ -1,7 +1,9 @@
 import time
 from itertools import product
+
 import numpy as np
 import pandas as pd
+
 import probflow as pf
 
 EPOCHS = 100

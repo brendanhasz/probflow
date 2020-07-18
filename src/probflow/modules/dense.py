@@ -1,7 +1,7 @@
 import probflow.utils.ops as O
-from probflow.utils.settings import get_flipout
-from probflow.utils.settings import get_backend
 from probflow.parameters import Parameter
+from probflow.utils.settings import get_backend, get_flipout
+
 from .module import Module
 
 

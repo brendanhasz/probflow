@@ -1,8 +1,8 @@
 import probflow.utils.ops as O
-from probflow.utils.casting import to_tensor
-from probflow.parameters import Parameter
 from probflow.distributions import Categorical
 from probflow.models import CategoricalModel
+from probflow.parameters import Parameter
+from probflow.utils.casting import to_tensor
 
 
 class LogisticRegression(CategoricalModel):

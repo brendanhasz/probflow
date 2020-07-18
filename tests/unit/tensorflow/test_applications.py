@@ -1,13 +1,14 @@
 """Tests the probflow.applications module when backend = tensorflow"""
 
 
-import pytest
 import numpy as np
+import pytest
 import tensorflow as tf
 import tensorflow_probability as tfp
+
 from probflow import applications as apps
-from probflow.models import Model, ContinuousModel
 from probflow.distributions import Normal
+from probflow.models import ContinuousModel, Model
 
 tfd = tfp.distributions
 

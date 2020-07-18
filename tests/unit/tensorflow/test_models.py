@@ -1,23 +1,24 @@
 """Tests the probflow.models module when backend = tensorflow"""
 
 
-import pytest
-
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 import tensorflow as tf
 import tensorflow_probability as tfp
-from probflow.utils.settings import Sampling
+
 import probflow.utils.ops as O
-from probflow.distributions import Normal
-from probflow.distributions import Poisson
-from probflow.distributions import Bernoulli
-from probflow.parameters import *
+from probflow.data import ArrayDataGenerator, make_generator
+from probflow.distributions import Bernoulli, Normal, Poisson
+from probflow.models import (
+    CategoricalModel,
+    ContinuousModel,
+    DiscreteModel,
+    Model
+)
 from probflow.modules import *
-from probflow.models import Model
-from probflow.models import ContinuousModel, DiscreteModel, CategoricalModel
-from probflow.data import ArrayDataGenerator
-from probflow.data import make_generator
+from probflow.parameters import *
+from probflow.utils.settings import Sampling
 
 tfd = tfp.distributions
 

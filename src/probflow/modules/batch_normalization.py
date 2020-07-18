@@ -1,11 +1,11 @@
-from typing import Union, List, Dict, Callable, Type
+from typing import Callable, Dict, List, Type, Union
 
 import probflow.utils.ops as O
-from probflow.utils.base import BaseDistribution
-from probflow.distributions import Deterministic
-from probflow.distributions import Normal
+from probflow.distributions import Deterministic, Normal
 from probflow.parameters import Parameter
+from probflow.utils.base import BaseDistribution
 from probflow.utils.initializers import xavier
+
 from .module import Module
 
 

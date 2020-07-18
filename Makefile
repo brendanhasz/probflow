@@ -13,6 +13,7 @@ test:
 format:
 	. venv/bin/activate; \
 	black src/probflow tests; \
+        isort src/probflow tests; \
 	flake8 src/probflow tests
 
 docs:

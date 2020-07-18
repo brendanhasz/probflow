@@ -1,11 +1,10 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
+from probflow.data import DataGenerator, make_generator
 from probflow.utils.casting import to_numpy
-from probflow.utils.plotting import plot_dist
-from probflow.utils.plotting import plot_by
-from probflow.data import DataGenerator
-from probflow.data import make_generator
+from probflow.utils.plotting import plot_by, plot_dist
+
 from .model import Model
 
 

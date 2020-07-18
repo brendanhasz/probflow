@@ -11,8 +11,8 @@ the correct type.
 
 import numpy as np
 
-from probflow.utils.settings import get_backend
 from probflow.utils.base import BaseParameter
+from probflow.utils.settings import get_backend
 
 
 def ensure_tensor_like(obj, name):

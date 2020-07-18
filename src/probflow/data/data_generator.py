@@ -1,5 +1,5 @@
-from abc import abstractmethod
 import multiprocessing as mp
+from abc import abstractmethod
 
 from probflow.utils.base import BaseDataGenerator
 

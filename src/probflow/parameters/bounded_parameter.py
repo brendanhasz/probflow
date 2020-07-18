@@ -1,8 +1,8 @@
 import probflow.utils.ops as O
-from probflow.utils.casting import to_numpy
 from probflow.distributions import Normal
-from probflow.utils.initializers import xavier
-from probflow.utils.initializers import scale_xavier
+from probflow.utils.casting import to_numpy
+from probflow.utils.initializers import scale_xavier, xavier
+
 from .parameter import Parameter
 
 

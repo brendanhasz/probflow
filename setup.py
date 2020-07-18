@@ -42,6 +42,7 @@ setup(
             "pytest-cov >= 2.7.1",
             "flake8 >= 3.8.3",
             "black >= 19.10b0",
+            "isort >= 5.1.2",
             "sphinx >= 3.1.2",
             "sphinx-tabs >= 1.1.13",
             "sphinx_rtd_theme >= 0.5.0",

@@ -1,18 +1,17 @@
 """Tests the probflow.models module when backend = tensorflow"""
 
 
-import pytest
-
 import numpy as np
+import pytest
 import torch
 
-from probflow.utils.settings import Sampling
 import probflow.utils.ops as O
-from probflow.distributions import Normal
-from probflow.parameters import *
-from probflow.modules import *
-from probflow.models import *
 from probflow.data import ArrayDataGenerator
+from probflow.distributions import Normal
+from probflow.models import *
+from probflow.modules import *
+from probflow.parameters import *
+from probflow.utils.settings import Sampling
 
 
 def is_close(a, b, tol=1e-3):

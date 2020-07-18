@@ -1,10 +1,8 @@
-from typing import List, Dict
+from typing import Dict, List
 
 import probflow.utils.ops as O
-from probflow.utils.base import BaseModule
-from probflow.utils.base import BaseParameter
-from probflow.utils.io import dumps
-from probflow.utils.io import dump
+from probflow.utils.base import BaseModule, BaseParameter
+from probflow.utils.io import dump, dumps
 
 
 class Module(BaseModule):

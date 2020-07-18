@@ -1,7 +1,6 @@
 """Tests the probflow.utils.settings module when backend = pytorch"""
 
 import pytest
-
 import torch
 
 import probflow as pf

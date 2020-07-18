@@ -1,16 +1,15 @@
-from typing import List, Union, Callable
+from typing import Callable, List, Union
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from probflow.utils.settings import get_backend
-from probflow.utils.settings import Sampling
-from probflow.utils.base import BaseCallback
 import probflow.utils.ops as O
-from probflow.utils.casting import to_numpy
-from probflow.modules import Module
 from probflow.data import make_generator
+from probflow.modules import Module
+from probflow.utils.base import BaseCallback
+from probflow.utils.casting import to_numpy
 from probflow.utils.metrics import get_metric_fn
+from probflow.utils.settings import Sampling, get_backend
 
 
 class Model(Module):

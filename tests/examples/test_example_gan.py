@@ -1,12 +1,12 @@
 """Tests example GAN model"""
 
 
-import pytest
-
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 import tensorflow as tf
 import tensorflow_probability as tfp
+
 import probflow as pf
 
 tfd = tfp.distributions

@@ -1,17 +1,17 @@
 """Tests the probflow.callbacks module"""
 
 
-import pytest
 import time
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
-from probflow.distributions import Normal
-from probflow.parameters import *
-from probflow.modules import *
-from probflow.models import *
 from probflow.callbacks import *
+from probflow.distributions import Normal
+from probflow.models import *
+from probflow.modules import *
+from probflow.parameters import *
 
 
 def test_Callback(plot):

@@ -2,7 +2,6 @@
 
 
 import pytest
-
 import tensorflow as tf
 
 from probflow.utils import settings

@@ -1,5 +1,5 @@
-from .data_generator import DataGenerator
 from .array_data_generator import ArrayDataGenerator
+from .data_generator import DataGenerator
 
 
 def make_generator(

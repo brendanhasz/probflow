@@ -1,9 +1,10 @@
 """Tests the probflow.distributions module when backend = tensorflow"""
 
 
-import pytest
 import numpy as np
+import pytest
 import torch
+
 import probflow as pf
 import probflow.distributions as pfd
 

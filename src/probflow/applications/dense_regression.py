@@ -1,11 +1,11 @@
 from typing import List
 
 import probflow.utils.ops as O
-from probflow.utils.casting import to_tensor
-from probflow.parameters import ScaleParameter
 from probflow.distributions import Normal
-from probflow.modules import DenseNetwork
 from probflow.models import ContinuousModel
+from probflow.modules import DenseNetwork
+from probflow.parameters import ScaleParameter
+from probflow.utils.casting import to_tensor
 
 
 class DenseRegression(ContinuousModel):

@@ -27,9 +27,9 @@ __all__ = [
 ]
 
 
-from .module import Module
+from .batch_normalization import BatchNormalization
 from .dense import Dense
 from .dense_network import DenseNetwork
-from .sequential import Sequential
-from .batch_normalization import BatchNormalization
 from .embedding import Embedding
+from .module import Module
+from .sequential import Sequential

@@ -1,7 +1,7 @@
-from probflow.utils.settings import get_backend
-from probflow.utils.base import BaseDistribution
-from probflow.utils.validation import ensure_tensor_like
 import probflow.utils.ops as O
+from probflow.utils.base import BaseDistribution
+from probflow.utils.settings import get_backend
+from probflow.utils.validation import ensure_tensor_like
 
 
 class Categorical(BaseDistribution):
