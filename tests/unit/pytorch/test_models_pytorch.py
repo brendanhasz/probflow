@@ -290,6 +290,42 @@ def test_Model_force_eager():
     my_model.fit(x, y, batch_size=50, epochs=2, eager=True)
 
 
+def test_Model_with_dataframe():
+    """Tests fitting probflow.model.Model w/ DataFrame and eager=False"""
+
+    import pandas as pd
+
+    class MyModel(Model):
+        def __init__(self, cols):
+            self.cols = cols
+            self.weight = Parameter([len(cols), 1], name="Weight")
+            self.bias = Parameter([1, 1], name="Bias")
+            self.std = ScaleParameter([1, 1], name="Std")
+
+        def __call__(self, x):
+            x = torch.tensor(x[self.cols].values)
+            return Normal(x @ self.weight() + self.bias(), self.std())
+
+    # Data
+    N = 256
+    D = 3
+    cols = ["feature1", "feature2", "feature3"]
+    x_np = np.random.randn(N, D).astype("float32")
+    w = np.random.randn(D, 1).astype("float32")
+    y = x_np @ w + 0.1 * np.random.randn(N, 1).astype("float32")
+    x_df = pd.DataFrame(x_np, columns=cols)
+    y_s = pd.Series(y[:, 0])
+
+    # Instantiate the model
+    my_model = MyModel(cols)
+
+    # Fitting should work w/ DataFrame b/c it falls back on eager
+    my_model.fit(x_df, y_s, epochs=2)
+
+    # And should still work with eager execution when set
+    my_model.fit(x_df, y_s, epochs=2, eager=True)
+
+
 def test_Model_ArrayDataGenerators():
     """Tests the probflow.models.Model sampling/predictive methods when
     passed ArrayDataGenerators"""

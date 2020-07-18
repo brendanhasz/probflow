@@ -2,6 +2,7 @@ from typing import Callable, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 import probflow.utils.ops as O
 from probflow.data import make_generator
@@ -293,6 +294,11 @@ class Model(Module):
                 self._optimizer = tf.keras.optimizers.Adam(
                     lambda: self._learning_rate, **optimizer_kwargs
                 )
+
+        # Use eager if input type is dataframe or series
+        eager_types = (pd.DataFrame, pd.Series)
+        if any(isinstance(e, eager_types) for e in self._data.get_batch(0)):
+            eager = True
 
         # Create a function to perform one training step
         if get_backend() == "pytorch":
