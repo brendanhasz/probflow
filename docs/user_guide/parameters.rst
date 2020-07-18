@@ -59,6 +59,7 @@ or a :math:`5 \times 3` matrix of parameters:
 
     param = pf.Parameter(shape=[5, 3])
 
+.. _specifying-the-variational-posterior:
 
 Specifying the Variational Posterior
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -81,6 +82,7 @@ variational posterior:
 
     param = pf.Parameter(posterior=pf.Cauchy)
 
+.. _setting-the-prior:
 
 Setting the Prior
 ^^^^^^^^^^^^^^^^^
@@ -93,11 +95,11 @@ example, to create a parameter with a prior of :math:`\text{Normal(0, 1)}`:
 
     param = pf.Parameter(prior=pf.Normal(0, 1))
 
-The default prior on a parameter is a :class:`.Normal` distribution with a
-mean of 0 and a standard deviation of 1.  However, we can manually set the
-prior on any parameter to be any |Distribution| (with any parameters).
-The only limitation is that the backend must be able to analytically compute
-the Kullback–Leibler divergence between the prior and the posterior (which is
+The default prior on a parameter is a :class:`.Normal` distribution with a mean
+of 0 and a standard deviation of 1.  However, we can manually set the prior on
+any parameter to be any |Distribution| (with any parameters).  The only
+limitation is that the backend must be able to analytically compute the
+Kullback–Leibler divergence between the prior and the posterior (which is
 usually possible as long as you use the same type of distribution for both the
 prior and posterior).
 
@@ -123,9 +125,9 @@ posterior will have posterior samples above and below zero:
    :width: 70 %
    :align: center
 
-But if we initialize a parameter with a softplus transform, the samples
-will all be greater than zero (because the samples were piped through the
-softplus function):
+But if we initialize a parameter with a softplus transform, the samples will
+all be greater than zero (because the samples were piped through the softplus
+function):
 
 .. code-block:: python3
 
@@ -158,13 +160,12 @@ distribution, and a shifted Xavier initializer for the standard deviation
 variable.
 
 To use a custom initializer, use the ``initializer`` keyword argument to the
-parameter constructor.  Pass a dictionary where the keys are the variable
-names and the values are functions which have one argument - the parameter's
-shape - and return a tensor of initial values.  For example, to create a
-matrix of parameters with Normal priors and posteriors, and initialize the
-posterior's ``loc`` (the mean) variable by drawing values from a normal
-distribution, and the ``scale`` (the standard deviation) parameter with all
-ones:
+parameter constructor.  Pass a dictionary where the keys are the variable names
+and the values are functions which have one argument - the parameter's shape -
+and return a tensor of initial values.  For example, to create a matrix of
+parameters with Normal priors and posteriors, and initialize the posterior's
+``loc`` (the mean) variable by drawing values from a normal distribution, and
+the ``scale`` (the standard deviation) parameter with all ones:
 
 .. code-block:: python3
 
@@ -183,20 +184,19 @@ Setting the variable transforms
 
 The raw untransformed variables can be transformed before they are used to
 construct the variational posterior.  This comes in handy when you want the
-underlying variables which are being optimized to be unconstrained, but
-require the variables to take certain values to construct the variational
-posterior.
+underlying variables which are being optimized to be unconstrained, but require
+the variables to take certain values to construct the variational posterior.
 
 For example, if we're using a normal distribution as the variational posterior
 for a parameter, we need the standard deviation parameter to be positive
 (because the variance can't be negative!).  But, we want to optimize the
-variable in unconstrained space.  In this case, we can use a softplus
-function to transform the unconstrained (raw) variable into a value which is
-always positive.  To define what transforms to use for each unconstrained
-variable, pass a dictionary to the ``var_transform`` keyword argument
-when initializing a parameter, where the keys are strings (the names of the
-variables) and the values are callables (the transforms to apply, note that
-these transforms must use only backend operations).
+variable in unconstrained space.  In this case, we can use a softplus function
+to transform the unconstrained (raw) variable into a value which is always
+positive.  To define what transforms to use for each unconstrained variable,
+pass a dictionary to the ``var_transform`` keyword argument when initializing a
+parameter, where the keys are strings (the names of the variables) and the
+values are callables (the transforms to apply, note that these transforms must
+use only backend operations).
 
 .. code-block:: python3
 
@@ -208,15 +208,14 @@ these transforms must use only backend operations).
 There's no transformation for the ``loc`` variable because that variable can
 take any value, and so it doesn't need to be transformed.
 
-The transforms in the example above are the default transforms for a
-Parameter, which assumes a Gaussian variational posterior.
+The transforms in the example above are the default transforms for a Parameter,
+which assumes a Gaussian variational posterior.
 
 The ``var_transform`` keyword argument can be used with more complicated
 functions, for example see the implementation of
-:class:`.MultivariateNormalParameter` which uses ``var_transform`` to
-implement the log Cholesky reparameterization, which transforms
-:math:`N(N+1)/2` unconstrained variables in to a :math:`N \times N`
-covariance matrix.
+:class:`.MultivariateNormalParameter` which uses ``var_transform`` to implement
+the log Cholesky reparameterization, which transforms :math:`N(N+1)/2`
+unconstrained variables in to a :math:`N \times N` covariance matrix.
 
 
 Working with Parameters
@@ -229,8 +228,8 @@ posterior, as well as examine and plot the posterior and priors.
 Sampling from a Parameter's variational posterior
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Parameters return a sample from their variational posterior when called,
-as a backend tensor:
+Parameters return a sample from their variational posterior when called, as a
+backend tensor:
 
 .. code-block:: pycon
 
@@ -244,7 +243,7 @@ the sample will either be a random sample from the variational distribution
 (used during model fitting, drawing epistemic samples, or predictive samples)
 or the variational posterior's mean (used during prediction, drawing aleatoric
 samples, and computing the residuals).  See
-:doc:`creating a model <user_guide/models>`_ for more info.
+:doc:`creating a model <models>` for more info.
 
 You can also index a parameter to take a slice of a sample from the
 parameter's variational posterior distribution.  This will even work with
@@ -289,8 +288,8 @@ To specify how many samples to get, use the ``n`` keyword argument:
     samples = param.posterior_sample(n=1000)
     # samples is a ndarray with shape (1000,)
 
-To compute confidence intervals on a parameter's posterior, use
-the :meth:`posterior_ci <.Parameter.posterior_ci>` method:
+To compute confidence intervals on a parameter's posterior, use the
+:meth:`posterior_ci <.Parameter.posterior_ci>` method:
 
 .. code-block:: python3
 
@@ -298,17 +297,17 @@ the :meth:`posterior_ci <.Parameter.posterior_ci>` method:
     #lb is lower bound on 95% confidence interval
     #ub is upper bound
 
-The default is to compute the 95% confidence interval using 10,000 samples
-from the posterior, but these defaults can be changed with the ``ci`` and
-``n`` keyword arguments.  For example, to compute the 80% confidence interval
-using 100k samples,
+The default is to compute the 95% confidence interval using 10,000 samples from
+the posterior, but these defaults can be changed with the ``ci`` and ``n``
+keyword arguments.  For example, to compute the 80% confidence interval using
+100k samples,
 
 .. code-block:: python3
 
     lb, ub = param.posterior_ci(ci=0.8, n=100000)
 
-To plot the variational posterior distribution, use
-the :meth:`posterior_plot <.Parameter.posterior_plot>` method:
+To plot the variational posterior distribution, use the
+:meth:`posterior_plot <.Parameter.posterior_plot>` method:
 
 .. code-block:: python3
 
@@ -318,8 +317,8 @@ the :meth:`posterior_plot <.Parameter.posterior_plot>` method:
    :width: 70 %
    :align: center
 
-To plot confidence intervals, use the ``ci``
-keyword argument.  For example, to plot the 90% confidence intervals:
+To plot confidence intervals, use the ``ci`` keyword argument.  For example, to
+plot the 90% confidence intervals:
 
 .. code-block:: python3
 
@@ -329,9 +328,9 @@ keyword argument.  For example, to plot the 90% confidence intervals:
    :width: 70 %
    :align: center
 
-The default plot style is a kernel-density-estimated distribution, but this
-can be changed with the ``style`` keyword.  For example, to plot with the
-histogram style:
+The default plot style is a kernel-density-estimated distribution, but this can
+be changed with the ``style`` keyword.  For example, to plot with the histogram
+style:
 
 
 .. code-block:: python3
@@ -356,16 +355,16 @@ Or just using plain lines:
 Examining a Parameter's prior
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Similarly, you can take samples from a parameter's prior distribution using
-the :meth:`prior_sample <.Parameter.prior_sample>` method:
+Similarly, you can take samples from a parameter's prior distribution using the
+:meth:`prior_sample <.Parameter.prior_sample>` method:
 
 .. code-block:: python3
 
     samples = param.prior_sample(n=1000)
     # samples is a ndarray with shape (1000,)
 
-And you can plot the prior distribution using
-the :meth:`prior_plot <.Parameter.prior_plot>` method:
+And you can plot the prior distribution using the
+:meth:`prior_plot <.Parameter.prior_plot>` method:
 
 .. code-block:: python3
 
@@ -394,20 +393,22 @@ TL;DR: to make a standard deviation parameter, use the
 
     std_dev = pf.ScaleParameter()
 
-A parameter which comes up often in Bayesian modeling is a "scale" parameter.  For example, the standard deviation (:math:`\sigma`) in a linear regression with normally-distributed noise:
+A parameter which comes up often in Bayesian modeling is a "scale" parameter.
+For example, the standard deviation (:math:`\sigma`) in a linear regression
+with normally-distributed noise:
 
 .. math::
 
     p(y~|~x) = \mathcal{N}(\beta x + \beta_0, ~ \sigma)
 
 This :math:`\sigma` parameter cannot take values below 0, because the standard
-deviation cannot be negative.  So, we can't use the default posterior and
-prior for a parameter (which is a :class:`.Normal` distribution for the
-posterior and ``Normal(0, 1)`` for the prior), because this default allows
-negative values.
+deviation cannot be negative.  So, we can't use the default posterior and prior
+for a parameter (which is a :class:`.Normal` distribution for the posterior and
+``Normal(0, 1)`` for the prior), because this default allows negative values.
 
-In Bayesian modeling, the `gamma distribution <https://en.wikipedia.org/wiki/
-Gamma_distribution>`_ is often used as a posterior for the
+In Bayesian modeling, the
+`gamma distribution <https://en.wikipedia.org/wiki/Gamma_distribution>`_ is
+often used as a posterior for the
 `precision <https://en.wikipedia.org/wiki/Precision_(statistics)>`_.  The
 precision is the reciprocal of the variance, and so the
 `inverse gamma distribution <https://en.wikipedia.org/wiki/Inverse-gamma_distribution>`_
@@ -462,12 +463,12 @@ Categorical Parameter
 
 Another type of specialized parameter provided by ProbFlow is the
 :class:`.CategoricalParameter`, which uses a
-`categorical distribution <https://en.wikipedia.org/wiki/Categorical_distribution>`_ as the variational posterior, and a uniform
-categorical prior.
+`categorical distribution <https://en.wikipedia.org/wiki/Categorical_distribution>`_
+as the variational posterior, and a uniform categorical prior.
 
-To specify how many categories the parameter represents, use the ``k``
-keyword argument.  For example, to create a categorical parameter which takes
-one of three classes,
+To specify how many categories the parameter represents, use the ``k`` keyword
+argument.  For example, to create a categorical parameter which takes one of
+three classes,
 
 .. code-block:: pycon
 
@@ -501,11 +502,10 @@ Dirichlet Parameter
 The :class:`.DirichletParameter` is similar to the Categorical parameter,
 except it uses the
 `Dirichlet distribution <https://en.wikipedia.org/wiki/Dirichlet_distribution>`_
-as the variational posterior, and a uniform
-Dirichlet prior.  This means that samples from this parameter return
-categorical probability distributions, *not* samples from a categorical
-distribution.  The ``k`` keyword argument controls how many categories
-the parameter represents:
+as the variational posterior, and a uniform Dirichlet prior.  This means that
+samples from this parameter return categorical probability distributions, *not*
+samples from a categorical distribution.  The ``k`` keyword argument controls
+how many categories the parameter represents:
 
 .. code-block:: pycon
 
@@ -534,9 +534,9 @@ Note that samples from this parameter have size
 Bounded Parameter
 ^^^^^^^^^^^^^^^^^
 
-The :class:`.BoundedParameter` can be used to represent a parameter which
-has both an upper and a lower bound, and uses a normal posterior and prior,
-with a logit transform to bound the parameter's values on both ends.
+The :class:`.BoundedParameter` can be used to represent a parameter which has
+both an upper and a lower bound, and uses a normal posterior and prior, with a
+logit transform to bound the parameter's values on both ends.
 
 By default, the parameter is bounded between 0 and 1:
 
@@ -549,8 +549,8 @@ By default, the parameter is bounded between 0 and 1:
    :width: 70 %
    :align: center
 
-But the upper and lower bounds can be set using the ``max`` and ``min``
-keyword arguments:
+But the upper and lower bounds can be set using the ``max`` and ``min`` keyword
+arguments:
 
 .. code-block:: python3
 
@@ -565,9 +565,9 @@ keyword arguments:
 Positive Parameter
 ^^^^^^^^^^^^^^^^^^
 
-The :class:`.PositiveParameter` can be used to represent a parameter which
-must be positive, but has no upper bound.  It uses a normal variational
-posterior and prior, with a softplus transformation.
+The :class:`.PositiveParameter` can be used to represent a parameter which must
+be positive, but has no upper bound.  It uses a normal variational posterior
+and prior, with a softplus transformation.
 
 .. code-block:: python3
 
@@ -605,11 +605,11 @@ Multivariate Normal Parameter
 
 The :class:`.MultivariateNormalParameter` uses a multivariate normal
 distribution (with full covariance) as the variational posterior, with a
-multivariate normal prior.  This comes in handy when you want to model
-a potential correlation between parameter(s).
+multivariate normal prior.  This comes in handy when you want to model a
+potential correlation between parameter(s).
 
-The ``d`` keyword argument sets the dimensionality of the multivariate
-normal variational posterior used:
+The ``d`` keyword argument sets the dimensionality of the multivariate normal
+variational posterior used:
 
 .. code-block:: python3
 

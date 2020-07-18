@@ -5,8 +5,8 @@
 .. |TensorFlow 2.0| replace:: `TensorFlow <http://www.tensorflow.org>`__
 .. |TensorFlow Probability| replace:: `TensorFlow Probability <http://www.tensorflow.org/probability>`__
 .. |PyTorch| replace:: `PyTorch <http://pytorch.org>`__
-.. |tfp.Distribution| replace:: `tensorflow_probability.distributions.Distribution <http://www.tensorflow.org/probability/api_docs/python/tfp/distributions/Distribution>`__
-.. |torch.Distribution| replace:: `torch.distributions.distribution.Distribution <https://pytorch.org/docs/stable/distributions.html#torch.distributions.distribution.Distribution>`__
+.. |tfp.Distribution| replace:: `tensorflow_probability.distributions.Distribution <https://www.tensorflow.org/probability/api_docs/python/tfp/distributions>`__
+.. |torch.Distribution| replace:: `torch.distributions.distribution <https://pytorch.org/docs/stable/distributions.html>`__
 
 .. |Application| replace:: :doc:`Application </api/applications>`
 .. |Applications| replace:: :doc:`Applications </api/applications>`

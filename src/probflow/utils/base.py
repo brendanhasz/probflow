@@ -28,7 +28,6 @@ class BaseDistribution(ABC):
     def __init__(self, *args):
         """Initialize the distribution"""
 
-    @abstractmethod
     def __call__(self):
         """Get the distribution object from the backend"""
 

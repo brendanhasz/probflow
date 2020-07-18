@@ -38,7 +38,7 @@ setup(
             "tensorflow == 2.2.0",
             "tensorflow-probability == 0.10.0",
             "torch >= 1.5.0",
-            "pytest >= 5.1.2",
+            "pytest >= 6.0.0rc1",
             "pytest-cov >= 2.7.1",
             "flake8 >= 3.8.3",
             "black >= 19.10b0",
