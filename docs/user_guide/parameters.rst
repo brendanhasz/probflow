@@ -243,7 +243,8 @@ a model, because it returns a backend tensor.  Depending on the context,
 the sample will either be a random sample from the variational distribution
 (used during model fitting, drawing epistemic samples, or predictive samples)
 or the variational posterior's mean (used during prediction, drawing aleatoric
-samples, and computing the residuals).  See `creating a model <ug_models>`_ for more info.
+samples, and computing the residuals).  See
+:doc:`creating a model <user_guide/models>`_ for more info.
 
 You can also index a parameter to take a slice of a sample from the
 parameter's variational posterior distribution.  This will even work with

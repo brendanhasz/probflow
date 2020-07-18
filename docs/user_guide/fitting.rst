@@ -39,14 +39,13 @@ handle.
     model.fit(x, y, eager=True)
     # takes around 28s
 
-.. admonition:: Not yet implemented for torch
+.. admonition:: Debugging is easier in eager mode
 
-    Tracing during model is not yet implemented when using PyTorch as the
-    backend.  Hopefully will be implemented soon!
-
-It's much easier to debug models in eager mode, since you can step through your
-own code using `pdb <https://docs.python.org/3/library/pdb.html>`_, instead of
-trying to step through the tensorflow or pytorch compilation functions.
+    It's much easier to debug models in eager mode, since you can step through
+    your own code using `pdb <https://docs.python.org/3/library/pdb.html>`_,
+    instead of trying to step through the tensorflow or pytorch compilation
+    functions.  So, if you're getting an error when fitting your model and want
+    to debug the problem, try using ``eager=True`` when calling ``fit``.
 
 However, eager mode is used for all other ProbFlow functionality (e.g.
 :meth:`.Model.predict`, :meth:`.Model.predictive_sample`,
