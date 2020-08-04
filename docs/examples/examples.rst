@@ -14,6 +14,7 @@ Here are some examples of how to use ProbFlow to build, fit, and diagnose severa
    glm
    robust_heteroscedastic
    time_to_event
+   multivariate_regression
    lme
    ar
    correlation
