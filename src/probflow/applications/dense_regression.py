@@ -40,6 +40,7 @@ class DenseRegression(ContinuousModel):
     def __init__(self, d: List[int], heteroscedastic: bool = False, **kwargs):
         self.heteroscedastic = heteroscedastic
         if heteroscedastic:
+            self.d_out = d[-1]
             d[-1] = 2 * d[-1]
             self.network = DenseNetwork(d, **kwargs)
         else:
@@ -50,9 +51,8 @@ class DenseRegression(ContinuousModel):
         x = to_tensor(x)
         if self.heteroscedastic:
             p = self.network(x)
-            Nd = int(p.shape[-1] / 2)
-            m_preds = p[..., :, 0:Nd]
-            s_preds = O.exp(p[..., :, Nd : 2 * Nd])
+            m_preds = p[..., :, : self.d_out]
+            s_preds = O.exp(p[..., :, self.d_out :])
             return Normal(m_preds, s_preds)
         else:
             return Normal(self.network(x), self.std())
