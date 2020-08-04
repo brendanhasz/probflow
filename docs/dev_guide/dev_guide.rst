@@ -34,16 +34,11 @@ you're connecting to github
    git clone git@github.com:<your_github_username>/probflow.git
    cd probflow
 
-Then create a virtual environment called ``venv`` for testing by running:
-
-.. code-block:: bash
-
-   python3 -m venv venv
-
-To set up a development environment (this activates the virtual environment you
-just created, installs the requirements, dev requirements, and the ProbFlow
-package in editable mode from your version of the source code - see the
-``Makefile`` for the commands it's running), run:
+Then, to set up a development environment (this creates a new virtual
+environment called ``venv``, activates that virtual environment, installs the
+requirements, dev requirements, and the ProbFlow package in editable mode from
+your version of the source code - see the ``Makefile`` for the commands it's
+running), run:
 
 .. code-block:: bash
 
