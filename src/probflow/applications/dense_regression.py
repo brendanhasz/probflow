@@ -44,7 +44,7 @@ class DenseRegression(ContinuousModel):
             self.network = DenseNetwork(d, **kwargs)
         else:
             self.network = DenseNetwork(d, **kwargs)
-            self.std = ScaleParameter([1, 1], name="std")
+            self.std = ScaleParameter([1, d[-1]], name="std")
 
     def __call__(self, x):
         x = to_tensor(x)
