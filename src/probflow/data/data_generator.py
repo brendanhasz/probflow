@@ -59,6 +59,9 @@ class DataGenerator(BaseDataGenerator):
             def get_data(index, queue):
                 queue.put(self.get_batch(index))
 
+            # MacOS+Python3.8 workaround
+            mp.set_start_method("fork")
+
             # Create the queue and worker processes
             self._queue = mp.Queue()
             self._workers = [

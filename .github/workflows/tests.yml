@@ -38,3 +38,11 @@ jobs:
     - name: Run tests
       run: |
         pytest tests/unit/${{ matrix.backend }} --cov=probflow --cov-report xml:coverage.xml
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+    - name: Ensure the package builds
+      run: |
+        python setup.py sdist bdist_wheel
+	twine check dist/*
