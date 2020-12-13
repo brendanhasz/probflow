@@ -17,9 +17,7 @@ from probflow.utils.settings import get_backend, get_datatype
 
 
 def xavier(shape):
-    """Xavier initializer
-
-    """
+    """Xavier initializer"""
     scale = np.sqrt(2 / sum(shape))
     if get_backend() == "pytorch":
         # TODO: use truncated normal for torch

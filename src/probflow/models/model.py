@@ -178,7 +178,8 @@ class Model(Module):
                     elbo_loss = pytorch_trainer(torch.tensor(y_data))
                 else:
                     elbo_loss = pytorch_trainer(
-                        torch.tensor(x_data), torch.tensor(y_data),
+                        torch.tensor(x_data),
+                        torch.tensor(y_data),
                     )
                 return elbo_loss
 
