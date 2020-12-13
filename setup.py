@@ -29,7 +29,7 @@ setup(
         "cloudpickle == 1.4.1",
     ],
     extras_require={
-        "tensorflow_cpu": [
+        "tensorflow": [
             "tensorflow == 2.2.0",
             "tensorflow-probability == 0.10.0",
         ],
@@ -40,10 +40,7 @@ setup(
         "pytorch": [
             "torch >= 1.5.0",
         ],
-        "tests": [
-            "tensorflow == 2.2.0",
-            "tensorflow-probability == 0.10.0",
-            "torch >= 1.5.0",
+        "dev": [
             "pytest >= 6.0.0rc1",
             "pytest-cov >= 2.7.1",
             "flake8 >= 3.8.3",
