@@ -14,7 +14,7 @@ from probflow.models import (
     CategoricalModel,
     ContinuousModel,
     DiscreteModel,
-    Model
+    Model,
 )
 from probflow.modules import *
 from probflow.parameters import *
