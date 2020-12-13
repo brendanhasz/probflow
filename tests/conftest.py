@@ -2,7 +2,6 @@
 
 import numpy as np
 import pytest
-import tensorflow as tf
 
 
 def pytest_addoption(parser):
@@ -26,4 +25,9 @@ def pytest_generate_tests(metafunc):
 @pytest.fixture
 def random():
     np.random.seed(12345)
-    tf.random.set_seed(12345)
+    try:
+        import tensorflow as tf
+        tf.random.set_seed(12345)
+    except Exception:
+        import torch
+        torch.manual_seed(12345)

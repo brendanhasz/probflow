@@ -15,12 +15,8 @@ def is_close(a, b, th=1e-5):
     return np.abs(a - b) < th
 
 
-def test_fit_normal():
+def test_fit_normal(random):
     """Test fitting a normal distribution"""
-
-    # Set random seed
-    np.random.seed(1234)
-    tf.random.set_seed(1234)
 
     # Generate data
     N = 1000
@@ -54,12 +50,8 @@ def test_fit_normal():
     assert is_close(sig, model.posterior_mean("sig"), th=0.2)
 
 
-def test_fit_studentt():
+def test_fit_studentt(random):
     """Test fitting a student t distribution"""
-
-    # Set random seed
-    np.random.seed(1234)
-    tf.random.set_seed(1234)
 
     # Generate data
     N = 1000
@@ -93,12 +85,8 @@ def test_fit_studentt():
     assert is_close(sig, model.posterior_mean("sig"), th=0.2)
 
 
-def test_fit_cauchy():
+def test_fit_cauchy(random):
     """Test fitting a cauchy distribution"""
-
-    # Set random seed
-    np.random.seed(1234)
-    tf.random.set_seed(1234)
 
     # Generate data
     N = 1000
@@ -131,12 +119,8 @@ def test_fit_cauchy():
     assert is_close(sig, model.posterior_mean("sig"), th=0.2)
 
 
-def test_fit_gamma():
+def test_fit_gamma(random):
     """Test fitting a gamma distribution"""
-
-    # Set random seed
-    np.random.seed(1234)
-    tf.random.set_seed(1234)
 
     # Generate data
     N = 1000
@@ -169,12 +153,8 @@ def test_fit_gamma():
     assert is_close(beta, model.posterior_mean("beta"), th=0.2)
 
 
-def test_fit_bernoulli():
+def test_fit_bernoulli(random):
     """Test fitting a bernoulli distribution"""
-
-    # Set random seed
-    np.random.seed(1234)
-    tf.random.set_seed(1234)
 
     # Generate data
     N = 1000
@@ -199,12 +179,8 @@ def test_fit_bernoulli():
     assert is_close(prob, model.posterior_mean("prob"), th=0.1)
 
 
-def test_fit_categorical():
+def test_fit_categorical(random):
     """Test fitting a categorical distribution"""
-
-    # Set random seed
-    np.random.seed(1234)
-    tf.random.set_seed(1234)
 
     # Generate data
     N = 1000
@@ -230,12 +206,8 @@ def test_fit_categorical():
     assert all(is_close(probs, model.posterior_mean("probs"), th=0.05))
 
 
-def test_fit_poisson():
+def test_fit_poisson(random):
     """Test fitting a poisson distribution"""
-
-    # Set random seed
-    np.random.seed(1234)
-    tf.random.set_seed(1234)
 
     # Generate data
     N = 10000

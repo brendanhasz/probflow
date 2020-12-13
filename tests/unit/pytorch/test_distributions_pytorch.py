@@ -1,4 +1,4 @@
-"""Tests the probflow.distributions module when backend = tensorflow"""
+"""Tests the probflow.distributions module when backend = pytorch"""
 
 
 import numpy as np
