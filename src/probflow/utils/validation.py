@@ -17,6 +17,12 @@ from probflow.utils.settings import get_backend
 
 def ensure_tensor_like(obj, name):
     """Determine whether an object can be cast to a Tensor"""
+
+    # Check for non-backend-dependent types
+    if isinstance(obj, (int, float, np.ndarray, list)):
+        return
+
+    # Check for backend-dependent types
     if get_backend() == "pytorch":
         import torch
 
@@ -25,5 +31,5 @@ def ensure_tensor_like(obj, name):
         import tensorflow as tf
 
         tensor_types = (tf.Tensor, tf.Variable, BaseParameter)
-    if not isinstance(obj, (int, float, np.ndarray, list) + tensor_types):
+    if not isinstance(obj, tensor_types):
         raise TypeError(name + " must be Tensor-like")
