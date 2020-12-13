@@ -27,7 +27,9 @@ def random():
     np.random.seed(12345)
     try:
         import tensorflow as tf
+
         tf.random.set_seed(12345)
     except Exception:
         import torch
+
         torch.manual_seed(12345)

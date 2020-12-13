@@ -6,8 +6,8 @@ ProbFlow
 .. |Version Badge| image:: https://img.shields.io/pypi/v/probflow
     :target: https://pypi.org/project/probflow/
 
-.. |Build Badge| image:: https://travis-ci.com/brendanhasz/probflow.svg
-    :target: https://travis-ci.com/brendanhasz/probflow
+.. |Build Badge| image:: https://github.com/brendanhasz/probflow/workflows/tests/badge.svg
+    :target: https://github.com/brendanhasz/probflow/actions?query=branch%3Amaster
 
 .. |Docs Badge| image:: https://readthedocs.org/projects/probflow/badge/
     :target: http://probflow.readthedocs.io
