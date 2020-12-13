@@ -1,15 +1,23 @@
 
-.PHONY: init test format docs package push-package clean
+.PHONY: init-tensorflow init-pytorch test-tensorflow test-pytorch format docs package push-package clean
 
-init:
+init-tensorflow:
 	python3 -m venv venv; \
 	. venv/bin/activate; \
-	pip install -r requirements.txt; \
-	pip install -e .[tests]
+	pip install -e .[dev,tensorflow]
 
-test:
+init-pytorch:
+	python3 -m venv venv; \
 	. venv/bin/activate; \
-	pytest tests/unit
+	pip install -e .[dev,pytorch]
+
+test-tensorflow:
+	. venv/bin/activate; \
+	pytest tests/unit/tensorflow
+
+test-pytorch:
+	. venv/bin/activate; \
+	pytest tests/unit/pytorch
 
 format:
 	. venv/bin/activate; \
