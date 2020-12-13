@@ -1,4 +1,6 @@
 import multiprocessing as mp
+import platform
+import sys
 from abc import abstractmethod
 
 from probflow.utils.base import BaseDataGenerator
@@ -60,7 +62,12 @@ class DataGenerator(BaseDataGenerator):
                 queue.put(self.get_batch(index))
 
             # MacOS+Python3.8 workaround
-            mp.set_start_method("fork")
+            if (
+                platform.system() == "Darwin"
+                and sys.version_info.major == 3
+                and sys.version_info.minor >= 8
+            ):
+                mp.set_start_method("fork")
 
             # Create the queue and worker processes
             self._queue = mp.Queue()
