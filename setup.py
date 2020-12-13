@@ -22,6 +22,12 @@ setup(
         "Development Status :: 3 - Alpha",
     ],
     zip_safe=False,
+    install_requires=[
+        "matplotlib >= 3.1.0",
+        "numpy >= 1.17.0",
+        "pandas >= 0.25.0",
+        "cloudpickle == 1.4.1",
+    ],
     extras_require={
         "tensorflow_cpu": [
             "tensorflow == 2.2.0",
