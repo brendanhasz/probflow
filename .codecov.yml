@@ -1,3 +1,4 @@
+comment: false
 coverage:
   range: "90...100"
   status:
