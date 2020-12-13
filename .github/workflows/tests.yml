@@ -35,3 +35,6 @@ jobs:
     - name: Style checks with black
       run: |
         black --check src/probflow tests
+    - name: Run tests
+      run: |
+        pytest tests/unit/${{ matrix.backend }} --cov=probflow --cov-report xml:coverage.xml
