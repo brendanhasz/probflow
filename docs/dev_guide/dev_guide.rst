@@ -34,26 +34,40 @@ you're connecting to github
    git clone git@github.com:<your_github_username>/probflow.git
    cd probflow
 
-Then, to set up a development environment (this creates a new virtual
-environment called ``venv``, activates that virtual environment, installs the
-requirements, dev requirements, and the ProbFlow package in editable mode from
-your version of the source code - see the ``Makefile`` for the commands it's
-running), run:
+Then, to set up a development environment with tensorflow, run
 
 .. code-block:: bash
 
-   make init
+   make init-tensorflow
+
+or alternatively to set up a dev environment with pytorch,
+
+.. code-block:: bash
+
+   make init-tensorflow
+
+The above command creates a new virtual environment called ``venv``, activates
+that virtual environment, installs the requirements (including tensorflow or
+pytorch), dev requirements, and the ProbFlow package in editable mode from your
+version of the source code - see the ``Makefile`` for the commands it's
+running), run:
 
 
 Tests
 -----
 
 Then you can edit the source code, which is in ``src/probflow``.  The tests are
-in ``tests``.  To run the tests, run
+in ``tests``.  To run the tensorflow tests, run
 
 .. code-block:: bash
 
-   make tests
+   make test-tensorflow
+
+and to run the PyTorch tests, run
+
+.. code-block:: bash
+
+   make test-pytorch
 
 If you get an error during the tests and want to debug, the tests are written
 using `pytest <http://docs.pytest.org>`_, so to drop into the
@@ -68,8 +82,8 @@ using `pytest <http://docs.pytest.org>`_, so to drop into the
 Style
 -----
 
-To run the autoformatting (using ``black``) and style checks (using
-``flake8``), run
+To run the autoformatting (using ``isort`` and ``black``) and style checks
+(using ``flake8``), run
 
 .. code-block:: bash
 
