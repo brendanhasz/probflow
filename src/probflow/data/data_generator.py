@@ -1,17 +1,7 @@
 import multiprocessing as mp
-import platform
-import sys
 from abc import abstractmethod
 
 from probflow.utils.base import BaseDataGenerator
-
-# MacOS+Python3.8 workaround
-if (
-    platform.system() == "Darwin"
-    and sys.version_info.major == 3
-    and sys.version_info.minor >= 8
-):
-    mp.set_start_method("fork")
 
 
 class DataGenerator(BaseDataGenerator):
