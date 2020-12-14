@@ -5,6 +5,14 @@ from abc import abstractmethod
 
 from probflow.utils.base import BaseDataGenerator
 
+# MacOS+Python3.8 workaround
+if (
+    platform.system() == "Darwin"
+    and sys.version_info.major == 3
+    and sys.version_info.minor >= 8
+):
+    mp.set_start_method("fork")
+
 
 class DataGenerator(BaseDataGenerator):
     """Abstract base class for a data generator, which uses multiprocessing
@@ -60,14 +68,6 @@ class DataGenerator(BaseDataGenerator):
 
             def get_data(index, queue):
                 queue.put(self.get_batch(index))
-
-            # MacOS+Python3.8 workaround
-            if (
-                platform.system() == "Darwin"
-                and sys.version_info.major == 3
-                and sys.version_info.minor >= 8
-            ):
-                mp.set_start_method("fork")
 
             # Create the queue and worker processes
             self._queue = mp.Queue()
