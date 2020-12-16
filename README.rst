@@ -28,7 +28,7 @@ It's very much still a work in progress.
 Getting Started
 ---------------
 
-**ProbFlow** allows you to quickly and less painfully build, fit, and evaluate custom Bayesian models (or `ready-made <http://probflow.readthedocs.io/en/latest/api_applications.html>`_ ones!) which run on top of either `TensorFlow 2.0 <http://www.tensorflow.org/beta>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability>`_ or `PyTorch <http://pytorch.org>`_.
+**ProbFlow** allows you to quickly and less painfully build, fit, and evaluate custom Bayesian models (or `ready-made <http://probflow.readthedocs.io/en/latest/api/applications.html>`_ ones!) which run on top of either `TensorFlow 2.0 <http://www.tensorflow.org/beta>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability>`_ or `PyTorch <http://pytorch.org>`_.
 
 With ProbFlow, the core building blocks of a Bayesian model are parameters and probability distributions (and, of course, the input data).  Parameters define how the independent variables (the features) predict the probability distribution of the dependent variables (the target).
 
@@ -134,7 +134,7 @@ Can be built and fit with ProbFlow in only a few lines:
             self.std  = pf.DenseNetwork(head_units)
 
         def __call__(self, x):
-            x = self.core(x)
+            x = tf.nn.relu(self.core(x))
             return pf.Normal(self.mean(x), tf.exp(self.std(x)))
 
     # Create the model
@@ -144,7 +144,7 @@ Can be built and fit with ProbFlow in only a few lines:
     model.fit(x, y)
 
 
-For convenience, ProbFlow also includes several `pre-built models <http://probflow.readthedocs.io/en/latest/api_applications.html>`_ for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made LinearRegression model:
+For convenience, ProbFlow also includes several `pre-built models <http://probflow.readthedocs.io/en/latest/api/applications.html>`_ for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made LinearRegression model:
 
 .. code-block:: python
 
@@ -159,22 +159,32 @@ And a multi-layer Bayesian neural net can be made easily using ProbFlow's ready-
     model.fit(x, y)
 
 Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like
-`generalized linear models <http://probflow.readthedocs.io/en/latest/example_glm.html>`_,
-`deep time-to-event models <http://probflow.readthedocs.io/en/latest/example_time_to_event.html>`_,
-`neural matrix factorization <http://probflow.readthedocs.io/en/latest/example_nmf.html>`_ models, and
-`Gaussian mixture models <http://probflow.readthedocs.io/en/latest/example_gmm.html>`_.  Take a look at the `examples <http://probflow.readthedocs.io/en/latest/examples.html>`_ and the `user guide <http://probflow.readthedocs.io/en/latest/user_guide.html>`_ for more!
+`generalized linear models <http://probflow.readthedocs.io/en/latest/examples/glm.html>`_,
+`deep time-to-event models <http://probflow.readthedocs.io/en/latest/examples/time_to_event.html>`_,
+`neural matrix factorization <http://probflow.readthedocs.io/en/latest/examples/nmf.html>`_ models, and
+`Gaussian mixture models <http://probflow.readthedocs.io/en/latest/examples/gmm.html>`_.  Take a look at the `examples <http://probflow.readthedocs.io/en/latest/examples/examples.html>`_ and the `user guide <http://probflow.readthedocs.io/en/latest/user_guide/user_guide.html>`_ for more!
 
 
 Installation
 ------------
 
-Before installing ProbFlow, you'll first need to install either PyTorch, or TensorFlow 2.0 and TensorFlow Probability.  See `more details here <http://probflow.readthedocs.io/en/latest/#installation>`_.
-
-Then, you can install ProbFlow itself:
+To install ProbFlow for the CPU version of TensorFlow,
 
 .. code-block:: bash
 
-    pip install probflow
+    pip install probflow[tensorflow]
+
+Or, to install ProbFlow for the GPU version of TensorFlow,
+
+.. code-block:: bash
+
+    pip install probflow[tensorflow_gpu]
+
+Or, to install ProbFlow for PyTorch,
+
+.. code-block:: bash
+
+    pip install probflow[pytorch]
 
 
 Support
