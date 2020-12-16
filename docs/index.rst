@@ -192,7 +192,7 @@ Can be built and fit with ProbFlow in only a few lines:
                     self.std  = pf.DenseNetwork(head_units)
 
                 def __call__(self, x):
-                    x = self.core(x)
+                    x = tf.nn.relu(self.core(x))
                     return pf.Normal(self.mean(x), tf.exp(self.std(x)))
 
             # Create the model
@@ -211,9 +211,10 @@ Can be built and fit with ProbFlow in only a few lines:
                     self.core = pf.DenseNetwork(units)
                     self.mean = pf.DenseNetwork(head_units)
                     self.std  = pf.DenseNetwork(head_units)
+                    self.activation_fn = torch.nn.ReLU()
 
                 def __call__(self, x):
-                    x = self.core(x)
+                    x = self.activation_fn(self.core(x))
                     return pf.Normal(self.mean(x), torch.exp(self.std(x)))
 
             # Create the model
@@ -243,7 +244,7 @@ Using parameters and distributions as simple building blocks, ProbFlow allows fo
 Installation
 ------------
 
-Before installing ProbFlow, you'll first need to install either `PyTorch <https://pytorch.org/>`_, or `TensorFlow 2.0 <https://www.tensorflow.org/install/pip>`_ and `TensorFlow Probability <http://www.tensorflow.org/probability/install>`_.
+To install ProbFlow and a specific backend,
 
 .. tabs::
 
@@ -251,22 +252,22 @@ Before installing ProbFlow, you'll first need to install either `PyTorch <https:
 
         .. code-block:: bash
 
-            pip install tensorflow==2.2.0 tensorflow-probability==0.10.0
+            pip install probflow[tensorflow]
 
     .. tab:: TensorFlow GPU
 
         .. code-block:: bash
 
-            pip install tensorflow-gpu==2.2.0 tensorflow-probability==0.10.0
+            pip install probflow[tensorflow_gpu]
 
     .. tab:: PyTorch
 
         .. code-block:: bash
 
-            pip install torch
+            pip install probflow[pytorch]
 
 
-Then, you can install ProbFlow itself:
+Or, to install just ProbFlow (and use it with whatever backend you already have installed),
 
 .. code-block:: bash
 
