@@ -11,9 +11,9 @@ class EarlyStopping(Callback):
     Example
     -------
 
-    Stop training when the mean absolute error stops improving, we can create
-    a :class:`.EarlyStopping` callback which monitors the current value of
-    the MAE via a :class:`.MonitorMetric` callback:
+    To stop training when the mean absolute error stops improving, we can
+    create a :class:`.EarlyStopping` callback which monitors the current value
+    of the MAE via a :class:`.MonitorMetric` callback:
 
     .. code-block:: python3
 
