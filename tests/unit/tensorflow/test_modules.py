@@ -244,6 +244,28 @@ def test_Dense():
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 1
 
+    # With the probabilistic kwarg
+    dense = Dense(5, 3, probabilistic=False)
+    with Sampling():
+        samples1 = dense(x)
+        samples2 = dense(x)
+    assert np.all(samples1.numpy() == samples2.numpy())
+    assert samples1.ndim == 2
+    assert samples1.shape[0] == 4
+    assert samples1.shape[1] == 3
+
+    # With the weight and bias kwargs
+    weight_kwargs = {"transform": tf.exp}
+    bias_kwargs = {"transform": tf.math.softplus}
+    dense = Dense(5, 2, weight_kwargs=weight_kwargs, bias_kwargs=bias_kwargs)
+    with Sampling():
+        samples1 = dense(x)
+        samples2 = dense(x)
+    assert np.all(samples1.numpy() != samples2.numpy())
+    assert samples1.ndim == 2
+    assert samples1.shape[0] == 4
+    assert samples1.shape[1] == 2
+
 
 def test_DenseNetwork():
     """Tests probflow.modules.DenseNetwork"""
