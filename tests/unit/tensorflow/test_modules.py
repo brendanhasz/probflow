@@ -335,6 +335,16 @@ def test_DenseNetwork():
     assert samples1.shape[0] == 7
     assert samples1.shape[1] == 2
 
+    # With probabilistic = False
+    dense_net = DenseNetwork([5, 4, 3, 2], probabilistic=False)
+    with Sampling():
+        samples1 = dense_net(x)
+        samples2 = dense_net(x)
+    assert np.all(samples1.numpy() == samples2.numpy())
+    assert samples1.ndim == 2
+    assert samples1.shape[0] == 7
+    assert samples1.shape[1] == 2
+
 
 def test_Sequential():
     """Tests probflow.modules.Sequential"""
