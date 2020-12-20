@@ -26,16 +26,16 @@ setup(
         "matplotlib >= 3.1.0",
         "numpy >= 1.17.0",
         "pandas >= 0.25.0",
-        "cloudpickle == 1.4.1",
+        "cloudpickle >= 1.3",
     ],
     extras_require={
         "tensorflow": [
-            "tensorflow == 2.2.0",
-            "tensorflow-probability == 0.10.0",
+            "tensorflow >= 2.2.0",
+            "tensorflow-probability >= 0.10.0",
         ],
         "tensorflow_gpu": [
-            "tensorflow-gpu == 2.2.0",
-            "tensorflow-probability == 0.10.0",
+            "tensorflow-gpu >= 2.2.0",
+            "tensorflow-probability >= 0.10.0",
         ],
         "pytorch": [
             "torch >= 1.5.0",
@@ -55,8 +55,8 @@ setup(
             "wheel >= 0.34.2",
         ],
         "docs": [
-            "tensorflow == 2.2.0",
-            "tensorflow-probability == 0.10.0",
+            "tensorflow >= 2.2.0",
+            "tensorflow-probability >= 0.10.0",
             "sphinx-tabs >= 1.1.13",
         ],
     },
