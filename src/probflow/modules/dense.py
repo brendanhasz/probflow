@@ -21,6 +21,11 @@ class Dense(Module):
         probabilistic.  If True (the default), will use Normal distributions
         for the variational posteriors.  If False, will use Deterministic
         distributions.
+    flipout: bool
+        Whether to use the flipout estimator for this layer.  Default is True.
+        Usually, when the global flipout setting is set to True, will use
+        flipout during training but not during inference.  If this kwarg is set
+        to False, will not use flipout even during training.
     weight_kwargs : dict
         Additional kwargs to pass to the Parameter constructor for the weight
         parameters.  Default is an empty dict.
@@ -36,6 +41,7 @@ class Dense(Module):
         d_in: int,
         d_out: int = 1,
         probabilistic: bool = True,
+        flipout: bool = True,
         weight_kwargs: dict = {},
         bias_kwargs: dict = {},
         name: str = "Dense",
@@ -51,6 +57,8 @@ class Dense(Module):
         ParameterClass = Parameter if probabilistic else DeterministicParameter
 
         # Create the parameters
+        self.probabilistic = probabilistic
+        self.flipout = flipout
         self.d_in = d_in
         self.d_out = d_out
         self.weights = ParameterClass(
@@ -64,7 +72,7 @@ class Dense(Module):
         """Perform the forward pass"""
 
         # Using the Flipout estimator
-        if get_flipout():
+        if get_flipout() and self.flipout and self.probabilistic:
 
             # With PyTorch
             if get_backend() == "pytorch":

@@ -312,6 +312,50 @@ def test_Model_force_eager():
     my_model.fit(x, y, batch_size=50, epochs=2, eager=True)
 
 
+def test_Model_force_no_flipout():
+    """Tests fitting probflow.model.Model forcing flipout=False"""
+
+    class MyModel(Model):
+        def __init__(self):
+            self.weight = Parameter(name="Weight")
+            self.bias = Parameter(name="Bias")
+            self.std = ScaleParameter(name="Std")
+
+        def __call__(self, x):
+            return Normal(x * self.weight() + self.bias(), self.std())
+
+    # Instantiate the model
+    my_model = MyModel()
+
+    # Fit the model
+    x = np.random.randn(100).astype("float32")
+    y = -x + 1
+    my_model.fit(x, y, batch_size=50, epochs=2, flipout=False)
+
+
+def test_Model_nonprobabilistic():
+    """Tests fitting probflow.model.Model with a non-probabilistic dense layer.
+    Shouldn't use flipout in this case (default is to use it), will error if it
+    does.
+    """
+
+    class MyModel(Model):
+        def __init__(self):
+            self.net = Dense(1, 1, probabilistic=False)
+            self.std = DeterministicParameter(transform=tf.math.softplus)
+
+        def __call__(self, x):
+            return Normal(self.net(x), self.std())
+
+    # Instantiate the model
+    my_model = MyModel()
+
+    # Fit the model
+    x = np.random.randn(100, 1).astype("float32")
+    y = -x + 1
+    my_model.fit(x, y, batch_size=50, epochs=2)
+
+
 def test_Model_with_dataframe():
     """Tests fitting probflow.model.Model w/ DataFrame and eager=False"""
 
