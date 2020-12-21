@@ -1,3 +1,5 @@
+import time
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -44,6 +46,13 @@ class MonitorMetric(Callback):
         self.metrics = []
         self.epochs = []
         self.verbose = verbose
+        self.start_time = None
+        self.wall_times = []
+
+    def on_epoch_start(self):
+        """Record start time at the beginning of the first epoch"""
+        if self.start_time is None:
+            self.start_time = time.time()
 
     def on_epoch_end(self):
         """Compute the metric on validation data at the end of each epoch."""
@@ -51,6 +60,7 @@ class MonitorMetric(Callback):
         self.current_epoch += 1
         self.metrics += [self.current_metric]
         self.epochs += [self.current_epoch]
+        self.wall_times += [time.time() - self.start_time]
         if self.verbose:
             print(
                 "Epoch {} \t{}: {}".format(
@@ -58,14 +68,21 @@ class MonitorMetric(Callback):
                 )
             )
 
-    def plot(self, **kwargs):
+    def plot(self, x="epoch", **kwargs):
         """Plot the metric being monitored as a function of epoch
 
         Parameters
         ----------
+        x : str {'epoch' or 'time'}
+            Whether to plot the metric as a function of epoch or wall time.
+            Default is to plot by epoch.
         **kwargs
             Additional keyword arguments are passed to plt.plot
         """
-        plt.plot(self.epochs, self.metrics, **kwargs)
-        plt.xlabel("Epoch")
+        if x == "time":
+            plt.plot(self.wall_times, self.metrics, **kwargs)
+            plt.xlabel("Time")
+        else:
+            plt.plot(self.epochs, self.metrics, **kwargs)
+            plt.xlabel("Epoch")
         plt.ylabel(self.metric_name)

@@ -31,6 +31,13 @@ class MonitorELBO(Callback):
         self.elbos = []
         self.epochs = []
         self.verbose = verbose
+        self.start_time = None
+        self.wall_times = []
+
+    def on_epoch_start(self):
+        """Record start time at the beginning of the first epoch"""
+        if self.start_time is None:
+            self.start_time = time.time()
 
     def on_epoch_end(self):
         """Store the ELBO at the end of each epoch."""
@@ -38,6 +45,7 @@ class MonitorELBO(Callback):
         self.current_epoch += 1
         self.elbos += [self.current_elbo]
         self.epochs += [self.current_epoch]
+        self.wall_times += [time.time() - self.start_time]
         if self.verbose:
             print(
                 "Epoch {} \tELBO: {}".format(
@@ -45,14 +53,21 @@ class MonitorELBO(Callback):
                 )
             )
 
-    def plot(self, **kwargs):
+    def plot(self, x="epoch", **kwargs):
         """Plot the ELBO as a function of epoch
 
         Parameters
         ----------
+        x : str {'epoch' or 'time'}
+            Whether to plot the metric as a function of epoch or wall time
+            Default is to plot by epoch.
         **kwargs
             Additional keyword arguments are passed to plt.plot
         """
-        plt.plot(self.epochs, self.elbos, **kwargs)
-        plt.xlabel("Epoch")
+        if x == "time":
+            plt.plot(self.wall_times, self.elbos, **kwargs)
+            plt.xlabel("Time")
+        else:
+            plt.plot(self.epochs, self.elbos, **kwargs)
+            plt.xlabel("Epoch")
         plt.ylabel("ELBO")
