@@ -820,6 +820,17 @@ def test_ContinuousModel(plot):
     assert np.all(uub >= lb)
     assert np.all(uub >= llb)
 
+    # predictive intervals with batching
+    lb, ub = model.predictive_interval(x[:21, :], batch_size=7)
+    assert isinstance(lb, np.ndarray)
+    assert isinstance(ub, np.ndarray)
+    assert lb.ndim == 2
+    assert lb.shape[0] == 21
+    assert lb.shape[1] == 1
+    assert ub.ndim == 2
+    assert ub.shape[0] == 21
+    assert ub.shape[1] == 1
+
     # aleatoric intervals
     lb, ub = model.aleatoric_interval(x[:23, :])
     assert isinstance(lb, np.ndarray)
@@ -941,6 +952,58 @@ def test_ContinuousModel(plot):
     if plot:
         plt.title("should be residuals dist")
         plt.show()
+
+    # calibration curve
+    p, p_hat = model.calibration_curve(x[:90, :], y[:90, :], resolution=11)
+    assert isinstance(p, np.ndarray)
+    assert isinstance(p_hat, np.ndarray)
+    assert p.ndim == 1
+    assert p.shape[0] == 11
+    assert p_hat.ndim == 1
+    assert p_hat.shape[0] == 11
+    assert np.all(p >= 0)
+    assert np.all(p <= 1)
+    assert np.all(p_hat >= 0)
+    assert np.all(p_hat <= 1)
+
+    # calibration curve (with batching)
+    p, p_hat = model.calibration_curve(
+        x[:90, :], y[:90, :], resolution=11, batch_size=30
+    )
+    assert isinstance(p, np.ndarray)
+    assert isinstance(p_hat, np.ndarray)
+    assert p.ndim == 1
+    assert p.shape[0] == 11
+    assert p_hat.ndim == 1
+    assert p_hat.shape[0] == 11
+    assert np.all(p >= 0)
+    assert np.all(p <= 1)
+    assert np.all(p_hat >= 0)
+    assert np.all(p_hat <= 1)
+
+    # calibration curve
+    model.calibration_curve_plot(x, y, resolution=11)
+    if plot:
+        plt.title("should be calibration curve")
+        plt.show()
+
+    # calibration curve (with batching)
+    model.calibration_curve_plot(x, y, resolution=11, batch_size=25)
+    if plot:
+        plt.title("should be calibration curve (with batching)")
+        plt.show()
+
+    # expected calibration error
+    ece = model.expected_calibration_error(x[:90, :], y[:90, :], resolution=11)
+    assert isinstance(ece, float)
+    assert ece >= 0
+
+    # expected calibration error
+    ece = model.expected_calibration_error(
+        x[:90, :], y[:90, :], resolution=11, batch_size=30
+    )
+    assert isinstance(ece, float)
+    assert ece >= 0
 
 
 def test_DiscreteModel(plot):

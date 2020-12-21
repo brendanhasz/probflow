@@ -3,7 +3,14 @@ Fitting a Model
 
 .. include:: ../macros.hrst
 
-TODO: to fit a model to data, w/ either numpy arrays or pandas DataFrame/Series, etc
+TODO:
+
+* basic example of fitting w/ numpy arrays
+* fitting changing the batch_size, epochs, lr, and shuffle
+* fitting w/ a custom optimizer and/or optimizer kwargs
+* fitting w/ or w/o flipout
+* passing a pandas dataframe
+* passing a DataGenerator to fit
 
 Backend graph optimization during fitting
 -----------------------------------------
@@ -30,7 +37,7 @@ generally makes training faster.
     # takes around 5s
 
 But to disable autograph/tracing and use only eager execution during model
-fitting just pass the ``eager=True`` kwarg to ``fit``.  This takes longer but
+fitting, just pass the ``eager=True`` kwarg to ``fit``.  This takes longer but
 can be more flexible in certiain situations that autograph/tracing can't
 handle.
 
@@ -80,6 +87,3 @@ Or for PyTorch, use ``torch.jit.trace``:
 
     fast_predict(x_test)
 
-TODO: section on using a DataGenerator
-
-TODO: section on Callbacks

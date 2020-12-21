@@ -55,6 +55,12 @@ class Model(Module):
     * :meth:`~save`
     * :meth:`~summary`
 
+
+    Example
+    -------
+
+    TODO: example of creating a model via inheritance
+
     """
 
     # Parameters
@@ -251,16 +257,23 @@ class Model(Module):
             Default = True
         num_workers : None or int > 0
             Number of parallel processes to run for loading the data.  If
-            ``None``, will not use parallel processes.  If an integer, will
-            use a process pool with that many processes.
-            Default = None
+            ``None``, will not use parallel processes.  If an integer, will use
+            a process pool with that many processes.  Note that this parameter
+            is ignored if a |DataGenerator| is passed as ``x``.  Default = None
         callbacks : List[BaseCallback]
-            List of callbacks to run while training the model
+            List of callbacks to run while training the model.  Default is
+            ``[]``, i.e. no callbacks.
         eager : bool
             Whether to use eager execution.  If False, will use ``tf.function``
             (for TensorFlow) or tracing (for PyTorch) to optimize the model
             fitting.  Note that even if eager=True, you can still use eager
             execution when using the model after it is fit.  Default = False
+
+
+        Example
+        -------
+
+        See the user guide section on :doc:`/user_guide/fitting`.
         """
 
         # Determine a somewhat reasonable learning rate if none was passed

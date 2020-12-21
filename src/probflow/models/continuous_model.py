@@ -12,10 +12,21 @@ class ContinuousModel(Model):
     """Abstract base class for probflow models where the dependent variable
     (the target) is continuous and 1-dimensional.
 
-    TODO : why use this over just Model
+    The only advantage to using this over the more general :class:`.Model` is
+    that :class:`ContinuousModel` also includes several methods specific to
+    continuous models, for tasks such as getting the predictive intervals,
+    coverage, R-squared value, or calibration metrics (see below for the full
+    list of methods).
 
-    TODO: note that only supports discriminative models with scalar,
-    continuous dependent variables
+    .. admonition:: Only supports scalar dependent variables
+
+        Note that the methods of :class:`.ContinuousModel` only support scalar,
+        continuous dependent variables (not *any* continuous model, as the name
+        might suggest).  For models which have a multidimensional output, just
+        use the more general :class:`.Model`; for models with categorical
+        output (i.e., classifiers), use :class:`.CategoricalModel`; and for
+        models which have a discrete output (e.g. a Poisson regression), use
+        :class:`.DiscreteModel`.
 
     This class inherits several methods from :class:`.Module`:
 
@@ -62,6 +73,10 @@ class ContinuousModel(Model):
     * :meth:`~r_squared_plot`
     * :meth:`~residuals`
     * :meth:`~residuals_plot`
+    * :meth:`~calibration_curve`
+    * :meth:`~calibration_curve_plot`
+    * :meth:`~expected_calibration_error`
+
 
     Example
     -------
@@ -72,7 +87,19 @@ class ContinuousModel(Model):
 
     def _intervals(self, fn, x, side, ci=0.95, n=1000, batch_size=None):
         """Compute intervals on some type of sample"""
-        samples = fn(x, n=n, batch_size=batch_size)
+
+        # Compute in batches?
+        if batch_size is not None:
+            intervals = [
+                self._intervals(fn, x_data, side, ci=ci, n=n)
+                for x_data, y_data in make_generator(
+                    x, test=True, batch_size=batch_size
+                )
+            ]
+            return (np.concatenate(e, axis=0) for e in zip(*intervals))
+
+        # No batching (or this is a batch)
+        samples = fn(x, n=n)
         if side == "lower":
             return np.percentile(samples, 100 * (1.0 - ci), axis=0)
         elif side == "upper":
@@ -85,7 +112,7 @@ class ContinuousModel(Model):
     def predictive_interval(
         self, x, ci=0.95, side="both", n=1000, batch_size=None
     ):
-        """Compute confidence intervals on the model's estimate of the target
+        r"""Compute confidence intervals on the model's estimate of the target
         given ``x``, including all sources of uncertainty.
 
         TODO: docs
@@ -132,7 +159,7 @@ class ContinuousModel(Model):
     def aleatoric_interval(
         self, x, ci=0.95, side="both", n=1000, batch_size=None
     ):
-        """Compute confidence intervals on the model's estimate of the target
+        r"""Compute confidence intervals on the model's estimate of the target
         given ``x``, including only aleatoric uncertainty (uncertainty due to
         noise).
 
@@ -178,7 +205,7 @@ class ContinuousModel(Model):
     def epistemic_interval(
         self, x, ci=0.95, side="both", n=1000, batch_size=None
     ):
-        """Compute confidence intervals on the model's estimate of the target
+        r"""Compute confidence intervals on the model's estimate of the target
         given ``x``, including only epistemic uncertainty (uncertainty due to
         uncertainty as to the model's parameter values).
 
@@ -224,7 +251,7 @@ class ContinuousModel(Model):
     def pred_dist_plot(
         self, x, n=10000, cols=1, individually=False, batch_size=None, **kwargs
     ):
-        """Plot posterior predictive distribution from the model given ``x``.
+        r"""Plot posterior predictive distribution from the model given ``x``.
 
         TODO: Docs...
 
@@ -290,7 +317,7 @@ class ContinuousModel(Model):
             return np.concatenate(to_numpy(y_true), axis=0)
 
     def predictive_prc(self, x, y=None, n=1000, batch_size=None):
-        """Compute the percentile of each observation along the posterior
+        r"""Compute the percentile of each observation along the posterior
         predictive distribution.
 
         TODO: Docs...  Returns a percentile between 0 and 1
@@ -319,6 +346,18 @@ class ContinuousModel(Model):
         if y is None and not isinstance(x, DataGenerator):
             raise TypeError("need both x and y to compute predictive prc")
 
+        # Compute in batches?
+        if batch_size is not None:
+            return np.concatenate(
+                [
+                    self.predictive_prc(x_data, y_data, n=n)
+                    for x_data, y_data in make_generator(
+                        x, y, batch_size=batch_size
+                    )
+                ],
+                axis=0,
+            )
+
         # Sample from the predictive distribution
         samples = self.predictive_sample(x, n=n, batch_size=batch_size)
 
@@ -346,7 +385,7 @@ class ContinuousModel(Model):
     def pred_dist_covered(
         self, x, y=None, n: int = 1000, ci: float = 0.95, batch_size=None
     ):
-        """Compute whether each observation was covered by a given confidence
+        r"""Compute whether each observation was covered by a given confidence
         interval.
 
         TODO: Docs...
@@ -388,7 +427,7 @@ class ContinuousModel(Model):
         return (pred_prcs >= lb) & (pred_prcs < ub)
 
     def pred_dist_coverage(self, x, y=None, n=1000, ci=0.95, batch_size=None):
-        """Compute what percent of samples are covered by a given confidence
+        r"""Compute what percent of samples are covered by a given confidence
         interval.
 
         TODO: Docs...
@@ -434,7 +473,7 @@ class ContinuousModel(Model):
         batch_size=None,
         **kwargs
     ):
-        """Compute and plot the coverage of a given confidence interval
+        r"""Compute and plot the coverage of a given confidence interval
         of the posterior predictive distribution as a function of specified
         independent variables.
 
@@ -498,7 +537,7 @@ class ContinuousModel(Model):
         return xo, co
 
     def r_squared(self, x, y=None, n=1000, batch_size=None):
-        """Compute the Bayesian R-squared distribution (Gelman et al., 2018).
+        r"""Compute the Bayesian R-squared distribution (Gelman et al., 2018).
 
         TODO: more info
 
@@ -553,7 +592,7 @@ class ContinuousModel(Model):
     def r_squared_plot(
         self, x, y=None, n=1000, style="hist", batch_size=None, **kwargs
     ):
-        """Plot the Bayesian R-squared distribution.
+        r"""Plot the Bayesian R-squared distribution.
 
         See :meth:`~r_squared` for more info on the Bayesian R-squared metric.
 
@@ -585,7 +624,7 @@ class ContinuousModel(Model):
         plt.xlabel("Bayesian R squared")
 
     def residuals(self, x, y=None, batch_size=None):
-        """Compute the residuals of the model's predictions.
+        r"""Compute the residuals of the model's predictions.
 
         TODO: docs...
 
@@ -617,7 +656,7 @@ class ContinuousModel(Model):
         return y_true - y_pred
 
     def residuals_plot(self, x, y=None, batch_size=None, **kwargs):
-        """Plot the distribution of residuals of the model's predictions.
+        r"""Plot the distribution of residuals of the model's predictions.
 
         TODO: docs...
 
@@ -644,3 +683,258 @@ class ContinuousModel(Model):
         res = self.residuals(x, y, batch_size=batch_size)
         plot_dist(res, **kwargs)
         plt.xlabel("Residual (True - Predicted)")
+
+    def calibration_curve(self, x, y, n=1000, resolution=100, batch_size=None):
+        r"""Compute the regression calibration curve (Kuleshov et al., 2018).
+
+        The regression calibration curve compares the empirical cumulative
+        probability to the cumulative probability predicted by a regression
+        model (Kuleshov et al., 2018).  First, a vector :math:`p` of :math:`m`
+        confidence levels are chosen, which correspond to the predicted
+        cumulative probabilities:
+
+        .. math::
+
+            0 \leq p_1 \leq p_2 \leq \ldots \leq p_m \leq 1
+
+        Then, a vector of empirical frequencies :math:`\hat{p}` at each of the
+        predicted frequencies is computed by using validation data:
+
+        .. math::
+
+            \hat{p}_j = \frac{1}{N} \sum_{i=1}^N [ P_M(x_i \leq y_i) \leq p_j ]
+
+        where :math:`N` is the number of validation datapoints, :math:`P_M(x_i
+        \leq y_i)` is the model's predicted cumulative probability of datapoint
+        :math:`i`, and :math:`\sum_i [ a_i \leq b_i ]` is just the count of
+        elements of :math:`a` which are less than corresponding elements in
+        :math:`b`.
+
+        The calibration curve then plots :math:`p` against :math:`\hat{p}`.
+
+
+        Parameters
+        ----------
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
+            Independent variable values of the dataset to evaluate (aka the
+            "features").  Or a |DataGenerator| for both x and y.
+        y : |ndarray| or |DataFrame| or |Series|
+            Dependent variable values of the dataset to evaluate (aka the
+            "target").
+        n : int
+            Number of samples to draw from the model for computing the
+            predictive percentile.  Default = 1000
+        resolution : int
+            Number of confidence levels to evaluate at.  This corresponds to
+            the :math:`m` parameter in section 3.5 of (Kuleshov et al., 2018).
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
+
+        Returns
+        -------
+        p : |ndarray|
+            The predicted cumulative frequencies, :math:`p`.
+        p_hat : |ndarray|
+            The empirical cumulative frequencies, :math:`\hat{p}`.
+
+        Example
+        -------
+
+        Supposing we have some training data (``x_train`` and ``y_train``) and
+        validation data (``x_val`` and ``y_val``), and have already fit a model
+        to the training data,
+
+        .. code-block:: python3
+
+            model = # some ProbFlow model...
+            model.fit(x_train, y_train)
+
+        Then we can compute the calibration curve with
+        :meth:`~calibration_curve`:
+
+        .. code-block:: python3
+
+            p_pred, p_empirical = model.calibration_curve(x_val, y_val)
+
+        The returned values can be used directly or plotted against one another
+        to get the calibration curve (as in Figure 3 in  Kuleshov et al., 2018)
+
+        .. code-block:: python3
+
+            import matplotlib.pyplot as plt
+            plt.plot(p_pred, p_empirical)
+
+        Or, even more simply, just use :meth:`~calibration_curve_plot`.
+
+
+        See also
+        --------
+
+        * :meth:`~calibration_curve_plot`
+        * :meth:`~expected_calibration_error`
+
+
+        References
+        ----------
+
+        - Volodymyr Kuleshov, Nathan Fenner, and Stefano Ermon.
+          `Accurate Uncertainties for Deep Learning Using Calibrated Regression
+          <https://arxiv.org/abs/1807.00263>`_, 2018.
+
+        """
+        pred_prc = self.predictive_prc(x, y, n=n, batch_size=batch_size)
+        p = np.linspace(0, 1, resolution + 2)[1:-1]
+        p_hat = np.array([np.mean(pred_prc < tp) for tp in p])
+        return p, p_hat
+
+    def calibration_curve_plot(
+        self, x, y, n=1000, resolution=100, batch_size=None, **kwargs
+    ):
+        r"""Plot the regression calibration curve.
+
+        See :meth:`~calibration_curve` for more info about the regression
+        calibration curve.
+
+        Parameters
+        ----------
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
+            Independent variable values of the dataset to evaluate (aka the
+            "features").  Or a |DataGenerator| for both x and y.
+        y : |ndarray| or |DataFrame| or |Series|
+            Dependent variable values of the dataset to evaluate (aka the
+            "target").
+        n : int
+            Number of samples to draw from the model for computing the
+            predictive percentile.  Default = 1000
+        resolution : int
+            Number of confidence levels to evaluate at.  This corresponds to
+            the :math:`m` parameter in section 3.5 of (Kuleshov et al., 2018).
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
+        **kwargs
+            Additional keyword arguments are passed to :func:`.plot_dist`
+
+
+        See also
+        --------
+
+        * :meth:`~calibration_curve`
+        * :meth:`~expected_calibration_error`
+
+        """
+        p, p_hat = self.calibration_curve(
+            x, y, n=n, resolution=resolution, batch_size=batch_size
+        )
+        plt.plot(p, p_hat, **kwargs)
+        plt.xlabel("Predicted cumulative probability")
+        plt.ylabel("Empirical cumulative probability")
+
+    def expected_calibration_error(
+        self, x, y, n=1000, resolution=100, batch_size=None
+    ):
+        r"""Compute the expected calibration error
+
+        The expected regression calibration error is the error between a
+        model's regression calibration curve and the ideal calibration curve -
+        i.e., what the curve would be if the model were perfectly calibrated
+        (Kuleshov et al., 2018).  First, a vector :math:`p` of :math:`m`
+        confidence levels are chosen, which correspond to the predicted
+        cumulative probabilities:
+
+        .. math::
+
+            0 \leq p_1 \leq p_2 \leq \ldots \leq p_m \leq 1
+
+        Then, a vector of empirical frequencies :math:`\hat{p}` at each of the
+        predicted frequencies is computed by using validation data:
+
+        .. math::
+
+            \hat{p}_j =
+                \frac{1}{N} \sum_{i=1}^N [ P_M(x_i \leq y_i) \leq p_j ]
+
+        where :math:`N` is the number of validation datapoints, :math:`P_M(x_i
+        \leq y_i)` is the model's predicted cumulative probability of datapoint
+        :math:`i`, and :math:`\sum_i [ a_i \leq b_i ]` is just the count of
+        elements of :math:`a` which are less than corresponding elements in
+        :math:`b`.
+
+        To compute the expected calibration error (ECE), we take the mean
+        squared error between the empirical and predicted frequencies,
+
+        .. math::
+
+            ECE = \frac{1}{m} \sum_{j=1}^m (p_j - \hat{p}_j)^2
+
+        Note that this is the *expected* calibration error (the average of the
+        calibration errors), not the *raw* calibration error (the sum of the
+        calibration errors), as was presented in (Kuleshov et al., 2018).
+
+
+        Parameters
+        ----------
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
+            Independent variable values of the dataset to evaluate (aka the
+            "features").  Or a |DataGenerator| for both x and y.
+        y : |ndarray| or |DataFrame| or |Series|
+            Dependent variable values of the dataset to evaluate (aka the
+            "target").
+        n : int
+            Number of samples to draw from the model for computing the
+            predictive percentile.  Default = 1000
+        resolution : int
+            Number of confidence levels to evaluate at.  This corresponds to
+            the :math:`m` parameter in section 3.5 of (Kuleshov et al., 2018).
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
+
+
+        Returns
+        -------
+        float
+            The expected calibration error
+
+
+        Example
+        -------
+
+        Supposing we have some training data (``x_train`` and ``y_train``) and
+        validation data (``x_val`` and ``y_val``), and have already fit a model
+        to the training data,
+
+        .. code-block:: python3
+
+            model = # some ProbFlow model...
+            model.fit(x_train, y_train)
+
+        Then we can compute the expected calibration error using
+        :meth:`~expected_calibration_error`:
+
+        .. code-block:: pycon
+
+            >>> model.expected_calibration_error(x_val, y_val)
+            0.123
+
+
+        See also
+        --------
+
+        * :meth:`~calibration_curve`
+        * :meth:`~calibration_curve_plot`
+
+
+        References
+        ----------
+
+        - Volodymyr Kuleshov, Nathan Fenner, and Stefano Ermon.
+          `Accurate Uncertainties for Deep Learning Using Calibrated Regression
+          <https://arxiv.org/abs/1807.00263>`_, 2018.
+
+        """
+        p, p_hat = self.calibration_curve(
+            x, y, n=n, resolution=resolution, batch_size=batch_size
+        )
+        return np.mean(np.square(p - p_hat))
