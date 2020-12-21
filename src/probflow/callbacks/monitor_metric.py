@@ -58,7 +58,14 @@ class MonitorMetric(Callback):
                 )
             )
 
-    def plot(self):
-        plt.plot(self.epochs, self.metrics)
+    def plot(self, **kwargs):
+        """Plot the metric being monitored as a function of epoch
+
+        Parameters
+        ----------
+        **kwargs
+            Additional keyword arguments are passed to plt.plot
+        """
+        plt.plot(self.epochs, self.metrics, **kwargs)
         plt.xlabel("Epoch")
         plt.ylabel(self.metric_name)

@@ -45,7 +45,14 @@ class MonitorELBO(Callback):
                 )
             )
 
-    def plot(self):
-        plt.plot(self.epochs, self.elbos)
+    def plot(self, **kwargs):
+        """Plot the ELBO as a function of epoch
+
+        Parameters
+        ----------
+        **kwargs
+            Additional keyword arguments are passed to plt.plot
+        """
+        plt.plot(self.epochs, self.elbos, **kwargs)
         plt.xlabel("Epoch")
         plt.ylabel("ELBO")
