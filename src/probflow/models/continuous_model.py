@@ -70,9 +70,9 @@ class ContinuousModel(Model):
 
     """
 
-    def _intervals(self, fn, x, side, ci=0.95, n=1000):
+    def _intervals(self, fn, x, side, ci=0.95, n=1000, batch_size=None):
         """Compute intervals on some type of sample"""
-        samples = fn(x, n=n)
+        samples = fn(x, n=n, batch_size=batch_size)
         if side == "lower":
             return np.percentile(samples, 100 * (1.0 - ci), axis=0)
         elif side == "upper":
@@ -82,7 +82,9 @@ class ContinuousModel(Model):
             prcs = np.percentile(samples, [lb, 100.0 - lb], axis=0)
             return prcs[0, ...], prcs[1, ...]
 
-    def predictive_interval(self, x, ci=0.95, side="both", n=1000):
+    def predictive_interval(
+        self, x, ci=0.95, side="both", n=1000, batch_size=None
+    ):
         """Compute confidence intervals on the model's estimate of the target
         given ``x``, including all sources of uncertainty.
 
@@ -110,6 +112,9 @@ class ContinuousModel(Model):
             Number of samples from the posterior predictive distribution to
             take to compute the confidence intervals.
             Default = 1000
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
         Returns
         -------
@@ -120,9 +125,13 @@ class ContinuousModel(Model):
             Upper bounds of the ``ci`` confidence intervals on the predictions
             for samples in ``x``.  Doesn't return this if ``side='lower'``.
         """
-        return self._intervals(self.predictive_sample, x, side, ci=ci, n=n)
+        return self._intervals(
+            self.predictive_sample, x, side, ci=ci, n=n, batch_size=batch_size
+        )
 
-    def aleatoric_interval(self, x, ci=0.95, side="both", n=1000):
+    def aleatoric_interval(
+        self, x, ci=0.95, side="both", n=1000, batch_size=None
+    ):
         """Compute confidence intervals on the model's estimate of the target
         given ``x``, including only aleatoric uncertainty (uncertainty due to
         noise).
@@ -149,6 +158,9 @@ class ContinuousModel(Model):
             Number of samples from the aleatoric predictive distribution to
             take to compute the confidence intervals.
             Default = 1000
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
         Returns
         -------
@@ -159,9 +171,13 @@ class ContinuousModel(Model):
             Upper bounds of the ``ci`` confidence intervals on the predictions
             for samples in ``x``.  Doesn't return this if ``side='lower'``.
         """
-        return self._intervals(self.aleatoric_sample, x, side, ci=ci, n=n)
+        return self._intervals(
+            self.aleatoric_sample, x, side, ci=ci, n=n, batch_size=batch_size
+        )
 
-    def epistemic_interval(self, x, ci=0.95, side="both", n=1000):
+    def epistemic_interval(
+        self, x, ci=0.95, side="both", n=1000, batch_size=None
+    ):
         """Compute confidence intervals on the model's estimate of the target
         given ``x``, including only epistemic uncertainty (uncertainty due to
         uncertainty as to the model's parameter values).
@@ -188,6 +204,9 @@ class ContinuousModel(Model):
             Number of samples from the epistemic predictive distribution to
             take to compute the confidence intervals.
             Default = 1000
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
         Returns
         -------
@@ -198,9 +217,13 @@ class ContinuousModel(Model):
             Upper bounds of the ``ci`` confidence intervals on the predictions
             for samples in ``x``.  Doesn't return this if ``side='lower'``.
         """
-        return self._intervals(self.epistemic_sample, x, side, ci=ci, n=n)
+        return self._intervals(
+            self.epistemic_sample, x, side, ci=ci, n=n, batch_size=batch_size
+        )
 
-    def pred_dist_plot(self, x, n=10000, cols=1, individually=False, **kwargs):
+    def pred_dist_plot(
+        self, x, n=10000, cols=1, individually=False, batch_size=None, **kwargs
+    ):
         """Plot posterior predictive distribution from the model given ``x``.
 
         TODO: Docs...
@@ -220,6 +243,9 @@ class ContinuousModel(Model):
         individually : bool
             If ``True``, plot one subplot per datapoint in ``x``, otherwise
             plot all the predictive distributions on the same plot.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
         **kwargs
             Additional keyword arguments are passed to :func:`.plot_dist`
 
@@ -231,7 +257,7 @@ class ContinuousModel(Model):
         """
 
         # Sample from the predictive distribution
-        samples = self.predictive_sample(x, n=n)
+        samples = self.predictive_sample(x, n=n, batch_size=batch_size)
 
         # Independent variable must be scalar
         Ns = samples.shape[0]
@@ -263,7 +289,7 @@ class ContinuousModel(Model):
             y_true = [d for _, d in make_generator(x, y, test=True)]
             return np.concatenate(to_numpy(y_true), axis=0)
 
-    def predictive_prc(self, x, y=None, n=1000):
+    def predictive_prc(self, x, y=None, n=1000, batch_size=None):
         """Compute the percentile of each observation along the posterior
         predictive distribution.
 
@@ -280,6 +306,9 @@ class ContinuousModel(Model):
         n : int
             Number of samples to draw from the model given ``x``.
             Default = 1000
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
         Returns
         -------
@@ -291,7 +320,7 @@ class ContinuousModel(Model):
             raise TypeError("need both x and y to compute predictive prc")
 
         # Sample from the predictive distribution
-        samples = self.predictive_sample(x, n=n)
+        samples = self.predictive_sample(x, n=n, batch_size=batch_size)
 
         # Independent variable must be scalar
         if samples.ndim > 2 and any(e > 1 for e in samples.shape[2:]):
@@ -314,7 +343,9 @@ class ContinuousModel(Model):
         # Return percentiles
         return prcs.reshape([N, 1])
 
-    def pred_dist_covered(self, x, y=None, n: int = 1000, ci: float = 0.95):
+    def pred_dist_covered(
+        self, x, y=None, n: int = 1000, ci: float = 0.95, batch_size=None
+    ):
         """Compute whether each observation was covered by a given confidence
         interval.
 
@@ -333,6 +364,9 @@ class ContinuousModel(Model):
             Default = 1000
         ci : float between 0 and 1
             Confidence interval to use.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
         Returns
         -------
@@ -346,14 +380,14 @@ class ContinuousModel(Model):
             raise ValueError("ci must be between 0 and 1")
 
         # Compute the predictive percentile of each observation
-        pred_prcs = self.predictive_prc(x, y=y, n=n)
+        pred_prcs = self.predictive_prc(x, y=y, n=n, batch_size=batch_size)
 
         # Determine what samples fall in the inner ci proportion
         lb = (1.0 - ci) / 2.0
         ub = 1.0 - lb
         return (pred_prcs >= lb) & (pred_prcs < ub)
 
-    def pred_dist_coverage(self, x, y=None, n=1000, ci=0.95):
+    def pred_dist_coverage(self, x, y=None, n=1000, ci=0.95, batch_size=None):
         """Compute what percent of samples are covered by a given confidence
         interval.
 
@@ -372,6 +406,9 @@ class ContinuousModel(Model):
             Default = 1000
         ci : float between 0 and 1
             Confidence interval to use.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
 
         Returns
@@ -380,7 +417,9 @@ class ContinuousModel(Model):
             Proportion of the samples which were covered by the predictive
             distribution's confidence interval.
         """
-        return self.pred_dist_covered(x, y=y, n=n, ci=ci).mean()
+        return self.pred_dist_covered(
+            x, y=y, n=n, ci=ci, batch_size=batch_size
+        ).mean()
 
     def coverage_by(
         self,
@@ -392,6 +431,7 @@ class ContinuousModel(Model):
         bins: int = 30,
         plot: bool = True,
         ideal_line_kwargs: dict = {},
+        batch_size=None,
         **kwargs
     ):
         """Compute and plot the coverage of a given confidence interval
@@ -420,6 +460,9 @@ class ContinuousModel(Model):
         ideal_line_kwargs : dict
             Dict of args to pass to matplotlib.pyplot.plot for ideal coverage
             line.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
         **kwargs
             Additional keyword arguments are passed to plot_by
 
@@ -433,7 +476,9 @@ class ContinuousModel(Model):
         """
 
         # Compute whether each sample was covered by the predictive interval
-        covered = self.pred_dist_covered(x, y=y, n=n, ci=ci)
+        covered = self.pred_dist_covered(
+            x, y=y, n=n, ci=ci, batch_size=batch_size
+        )
 
         # Plot coverage proportion as a fn of x_by cols of x
         xo, co = plot_by(x_by, 100 * covered, label="Actual", **kwargs)
@@ -452,7 +497,7 @@ class ContinuousModel(Model):
 
         return xo, co
 
-    def r_squared(self, x, y=None, n=1000):
+    def r_squared(self, x, y=None, n=1000, batch_size=None):
         """Compute the Bayesian R-squared distribution (Gelman et al., 2018).
 
         TODO: more info
@@ -469,6 +514,9 @@ class ContinuousModel(Model):
         n : int
             Number of posterior draws to use for computing the r-squared
             distribution.  Default = `1000`.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
 
         Returns
@@ -495,14 +543,16 @@ class ContinuousModel(Model):
         y_true = self._get_y(x, y)
 
         # Predict y with samples from the posterior distribution
-        y_pred = self.epistemic_sample(x, n=n)
+        y_pred = self.epistemic_sample(x, n=n, batch_size=batch_size)
 
         # Compute Bayesian R^2
         v_fit = np.var(y_pred, axis=1)
         v_res = np.var(y_pred - np.expand_dims(y_true, 0), axis=1)
         return v_fit / (v_fit + v_res)
 
-    def r_squared_plot(self, x, y=None, n=1000, style="hist", **kwargs):
+    def r_squared_plot(
+        self, x, y=None, n=1000, style="hist", batch_size=None, **kwargs
+    ):
         """Plot the Bayesian R-squared distribution.
 
         See :meth:`~r_squared` for more info on the Bayesian R-squared metric.
@@ -518,6 +568,9 @@ class ContinuousModel(Model):
         n : int
             Number of posterior draws to use for computing the r-squared
             distribution.  Default = `1000`.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
         **kwargs
             Additional keyword arguments are passed to :func:`.plot_dist`
 
@@ -527,11 +580,11 @@ class ContinuousModel(Model):
         TODO
 
         """
-        r2 = self.r_squared(x, y, n=n)
+        r2 = self.r_squared(x, y, n=n, batch_size=batch_size)
         plot_dist(r2, style=style, **kwargs)
         plt.xlabel("Bayesian R squared")
 
-    def residuals(self, x, y=None):
+    def residuals(self, x, y=None, batch_size=None):
         """Compute the residuals of the model's predictions.
 
         TODO: docs...
@@ -544,8 +597,9 @@ class ContinuousModel(Model):
         y : |ndarray| or |DataFrame| or |Series|
             Dependent variable values of the dataset to evaluate (aka the
             "target").
-        **kwargs
-            Additional keyword arguments are passed to :func:`.plot_dist`
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
         Returns
         -------
@@ -559,10 +613,10 @@ class ContinuousModel(Model):
 
         """
         y_true = self._get_y(x, y)
-        y_pred = self.predict(x)
+        y_pred = self.predict(x, batch_size=batch_size)
         return y_true - y_pred
 
-    def residuals_plot(self, x, y=None, **kwargs):
+    def residuals_plot(self, x, y=None, batch_size=None, **kwargs):
         """Plot the distribution of residuals of the model's predictions.
 
         TODO: docs...
@@ -575,6 +629,9 @@ class ContinuousModel(Model):
         y : |ndarray| or |DataFrame| or |Series|
             Dependent variable values of the dataset to evaluate (aka the
             "target").
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
         **kwargs
             Additional keyword arguments are passed to :func:`.plot_dist`
 
@@ -584,6 +641,6 @@ class ContinuousModel(Model):
         TODO
 
         """
-        res = self.residuals(x, y)
+        res = self.residuals(x, y, batch_size=batch_size)
         plot_dist(res, **kwargs)
         plt.xlabel("Residual (True - Predicted)")

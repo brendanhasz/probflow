@@ -57,7 +57,7 @@ class CategoricalModel(Model):
 
     """
 
-    def pred_dist_plot(self, x, n=10000, cols=1, **kwargs):
+    def pred_dist_plot(self, x, n=10000, cols=1, batch_size=None, **kwargs):
         """Plot posterior predictive distribution from the model given ``x``.
 
         TODO: Docs...
@@ -74,13 +74,16 @@ class CategoricalModel(Model):
         cols : int
             Divide the subplots into a grid with this many columns (if
             ``individually=True``.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
         **kwargs
             Additional keyword arguments are passed to
             :func:`.plot_categorical_dist`
         """
 
         # Sample from the predictive distribution
-        samples = self.predictive_sample(x, n=n)
+        samples = self.predictive_sample(x, n=n, batch_size=batch_size)
 
         # Independent variable must be scalar
         Ns = samples.shape[0]
@@ -100,8 +103,10 @@ class CategoricalModel(Model):
             plt.xlabel("Datapoint " + str(i))
         plt.tight_layout()
 
-    def calibration_curve(self, x, y=None, split_by=None, bins=10, plot=True):
-        """Plot and return calibration curve.
+    def calibration_curve(
+        self, x, y=None, split_by=None, bins=10, plot=True, batch_size=None
+    ):
+        """Plot and return the categorical calibration curve.
 
         Plots and returns the calibration curve (estimated
         probability of outcome vs the true probability of that
@@ -125,6 +130,9 @@ class CategoricalModel(Model):
             `bins` is the vector of bin edges.
         plot : bool
             Whether to plot the curve
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
         #TODO: split by continuous cols as well? Then will need to define bins or edges too
 

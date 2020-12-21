@@ -361,17 +361,19 @@ class Model(Module):
         else:
             self._kl_weight = w
 
-    def _sample(self, x, func, ed=None, axis=1):
+    def _sample(self, x, func, ed=None, axis=1, batch_size=None):
         """Sample from the model"""
         samples = []
-        for x_data, y_data in make_generator(x, test=True):
+        for x_data, y_data in make_generator(
+            x, test=True, batch_size=batch_size
+        ):
             if x_data is None:
                 samples += [func(self())]
             else:
                 samples += [func(self(O.expand_dims(x_data, ed)))]
         return np.concatenate(to_numpy(samples), axis=axis)
 
-    def predictive_sample(self, x=None, n=1000):
+    def predictive_sample(self, x=None, n=1000, batch_size=None):
         """Draw samples from the posterior predictive distribution given x
 
         TODO: Docs...
@@ -384,6 +386,9 @@ class Model(Module):
             "features").
         n : int
             Number of samples to draw from the model per datapoint.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
 
         Returns
@@ -393,9 +398,11 @@ class Model(Module):
             (num_samples, x.shape[0], ...)
         """
         with Sampling(n=n, flipout=False):
-            return self._sample(x, lambda x: x.sample(), ed=0)
+            return self._sample(
+                x, lambda x: x.sample(), ed=0, batch_size=batch_size
+            )
 
-    def aleatoric_sample(self, x=None, n=1000):
+    def aleatoric_sample(self, x=None, n=1000, batch_size=None):
         """Draw samples of the model's estimate given x, including only
         aleatoric uncertainty (uncertainty due to noise)
 
@@ -409,6 +416,9 @@ class Model(Module):
             "features").
         n : int
             Number of samples to draw from the model per datapoint.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
 
         Returns
@@ -417,9 +427,9 @@ class Model(Module):
             Samples from the predicted mean distribution.  Size
             (num_samples,x.shape[0],...)
         """
-        return self._sample(x, lambda x: x.sample(n=n))
+        return self._sample(x, lambda x: x.sample(n=n), batch_size=batch_size)
 
-    def epistemic_sample(self, x=None, n=1000):
+    def epistemic_sample(self, x=None, n=1000, batch_size=None):
         """Draw samples of the model's estimate given x, including only
         epistemic uncertainty (uncertainty due to uncertainty as to the
         model's parameter values)
@@ -434,6 +444,9 @@ class Model(Module):
             "features").
         n : int
             Number of samples to draw from the model per datapoint.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
 
         Returns
@@ -443,9 +456,11 @@ class Model(Module):
             (num_samples, x.shape[0], ...)
         """
         with Sampling(n=n, flipout=False):
-            return self._sample(x, lambda x: x.mean(), ed=0)
+            return self._sample(
+                x, lambda x: x.mean(), ed=0, batch_size=batch_size
+            )
 
-    def predict(self, x=None, method="mean"):
+    def predict(self, x=None, method="mean", batch_size=None):
         """Predict dependent variable using the model
 
         TODO... using maximum a posteriori param estimates etc
@@ -460,6 +475,9 @@ class Model(Module):
             Method to use for prediction.  If ``'mean'``, uses the mean of the
             predicted target distribution as the prediction.  If ``'mode'``,
             uses the mode of the distribution.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
 
         Returns
@@ -475,13 +493,17 @@ class Model(Module):
 
         """
         if method == "mean":
-            return self._sample(x, lambda x: x.mean(), axis=0)
+            return self._sample(
+                x, lambda x: x.mean(), axis=0, batch_size=batch_size
+            )
         elif method == "mode":
-            return self._sample(x, lambda x: x.mode(), axis=0)
+            return self._sample(
+                x, lambda x: x.mode(), axis=0, batch_size=batch_size
+            )
         else:
             raise ValueError("unknown method " + str(method))
 
-    def metric(self, metric, x, y=None):
+    def metric(self, metric, x, y=None, batch_size=None):
         """Compute a metric of model performance
 
         TODO: docs
@@ -525,6 +547,9 @@ class Model(Module):
         y : |ndarray| or |DataFrame| or |Series| or Tensor
             Dependent variable values of the dataset to evaluate (aka the
             "target").
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
         Returns
         -------
@@ -534,7 +559,9 @@ class Model(Module):
         # Get true values and predictions
         y_true = []
         y_pred = []
-        for x_data, y_data in make_generator(x, y, test=True):
+        for x_data, y_data in make_generator(
+            x, y, test=True, batch_size=batch_size
+        ):
             y_true += [y_data]
             y_pred += [self(x_data).mean()]
         y_true = np.concatenate(to_numpy(y_true), axis=0)
@@ -726,7 +753,13 @@ class Model(Module):
         self._param_plot(lambda x: x.prior_plot(**kwargs), params, cols)
 
     def log_prob(
-        self, x, y=None, individually=True, distribution=False, n=1000
+        self,
+        x,
+        y=None,
+        individually=True,
+        distribution=False,
+        n=1000,
+        batch_size=None,
     ):
         """Compute the log probability of `y` given the model
 
@@ -756,6 +789,9 @@ class Model(Module):
         n : int
             Number of samples to draw for each distribution if
             ``distribution=True``.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
         Returns
         -------
@@ -770,7 +806,9 @@ class Model(Module):
                 probs = []
                 for i in range(n):
                     t_probs = []
-                    for x_data, y_data in make_generator(x, y):
+                    for x_data, y_data in make_generator(
+                        x, y, batch_size=batch_size
+                    ):
                         if x_data is None:
                             t_probs += [self().log_prob(y_data)]
                         else:
@@ -781,7 +819,7 @@ class Model(Module):
         # Use MAP estimates
         else:
             probs = []
-            for x_data, y_data in make_generator(x, y):
+            for x_data, y_data in make_generator(x, y, batch_size=batch_size):
                 if x_data is None:
                     probs += [self().log_prob(y_data)]
                 else:
@@ -823,6 +861,9 @@ class Model(Module):
         n : int
             Number of samples to draw for each distribution if
             ``distribution=True``.
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
 
         Returns
         -------
