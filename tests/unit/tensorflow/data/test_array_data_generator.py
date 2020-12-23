@@ -1,12 +1,8 @@
-"""Tests the probflow.data module"""
-
-
 import numpy as np
 import pandas as pd
 import pytest
 
-import probflow as pf
-from probflow.data import *
+from probflow.data import ArrayDataGenerator
 
 
 def test_ArrayDataGenerator():
@@ -123,35 +119,3 @@ def test_ArrayDataGenerator():
     x2, y2 = dg[0]
     assert np.all(x1.values == x2.values)
     assert np.all(y1.values == y2.values)
-
-    dg = ArrayDataGenerator(y, x, batch_size=5)
-    assert dg.n_samples == 100
-    assert dg.batch_size == 5
-    assert dg.shuffle is False
-    assert len(dg) == 20
-    x1, y1 = dg[0]
-    assert isinstance(y1, pd.DataFrame)
-    assert isinstance(x1, pd.Series)
-    assert y1.shape[0] == 5
-    assert y1.shape[1] == 3
-    assert x1.shape[0] == 5
-    x2, y2 = dg[0]
-    assert np.all(x1.values == x2.values)
-    assert np.all(y1.values == y2.values)
-
-
-def test_DataGenerator_workers():
-    """Tests probflow.data.DataGenerator w/ multiple worker processes"""
-
-    # Data
-    x = np.random.randn(100, 3).astype("float32")
-    w = np.random.randn(3, 1).astype("float32")
-    y = x @ w
-
-    # Fit a model with 1 worker
-    model = pf.LinearRegression(3)
-    model.fit(x, y, batch_size=10, epochs=10, num_workers=1)
-
-    # Fit a model with 4 workers
-    model = pf.LinearRegression(3)
-    model.fit(x, y, batch_size=10, epochs=10, num_workers=4)

@@ -8,7 +8,7 @@ class MonitorParameter(Callback):
 
     """
 
-    def __init__(self, x, y=None, params=None):
+    def __init__(self, params):
 
         # Store metrics and epochs
         self.params = params
