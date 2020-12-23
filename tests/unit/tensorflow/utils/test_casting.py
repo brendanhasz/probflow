@@ -15,7 +15,7 @@ def test_to_numpy():
     assert o.shape[1] == 2
 
     x = tf.random.normal([5, 2])
-    o = casting.to_tensor(x)
+    o = casting.to_numpy(x)
     assert isinstance(o, np.ndarray)
     assert o.ndim == 2
     assert o.shape[0] == 5
