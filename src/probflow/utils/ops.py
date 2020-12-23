@@ -409,7 +409,7 @@ def log_cholesky_transform(x):
     """
 
     if get_backend() == "pytorch":
-        import pytorch
+        import torch
 
         N = torch.numel(x) * (torch.numel(x) + 1) / 2
         E = torch.zeros((N, N))
@@ -423,7 +423,5 @@ def log_cholesky_transform(x):
         import tensorflow_probability as tfp
 
         E = tfp.math.fill_triangular(x)
-        E = tf.linalg.set_diag(
-            E, tf.exp(tf.linalg.tensor_diag_part(E))
-        )
+        E = tf.linalg.set_diag(E, tf.exp(tf.linalg.tensor_diag_part(E)))
         return E @ tf.transpose(E)
