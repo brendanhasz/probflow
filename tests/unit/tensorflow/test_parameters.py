@@ -324,6 +324,19 @@ def test_Parameter_posterior_ci():
     assert ub.shape[1] == 4
 
 
+def test_Parameter_float_initializer():
+    """Tests a 2D Parameter with a float initializer"""
+
+    # Create 1D parameter
+    param = Parameter(
+        shape=[5, 4], name="lala2", initializer={"loc": 1.0, "scale": 2.0}
+    )
+
+    # all should have been initialized to 1
+    vals = param()
+    assert np.all(vals == 1.0)
+
+
 def test_ScaleParameter():
     """Tests probflow.parameters.ScaleParameter"""
 

@@ -126,10 +126,12 @@ class Parameter(BaseParameter):
 
             # Int or float initializations = start whole array at that value
             if isinstance(init, (int, float)):
-                init = lambda s: O.full(s, init)
+                initial_value = O.full(shape, init)
+            else:  # TODO: should also support numpy arrays + backend tensors
+                initial_value = init(shape)
 
             # Create the variables
-            self.untransformed_variables[var] = O.new_variable(init(shape))
+            self.untransformed_variables[var] = O.new_variable(initial_value)
 
     @property
     def n_parameters(self):
