@@ -7,8 +7,8 @@ def get_TorchDeterministic():
 
     import torch
     from torch.distributions import constraints
-    from torch.distributions.utils import broadcast_all
     from torch.distributions.kl import register_kl
+    from torch.distributions.utils import broadcast_all
 
     class TorchDeterministic(torch.distributions.distribution.Distribution):
         """Deterministic distribution for PyTorch"""
@@ -77,7 +77,9 @@ def get_TorchDeterministic():
         def entropy(self):
             return torch.log(torch.zeros([1]))
 
-    @register_kl(TorchDeterministic, torch.distributions.distribution.Distribution)
+    @register_kl(
+        TorchDeterministic, torch.distributions.distribution.Distribution
+    )
     def kl_deterministic_continuous(p, q):
         return -q.log_prob(p.mean)
 

@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 import torch
 
-import probflow as pf
 from probflow.distributions import Cauchy
 
 tod = torch.distributions

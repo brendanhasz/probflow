@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 import torch
 
-from probflow.utils.torch_distributions import get_TorchDeterministic
 from probflow.distributions import Deterministic
+from probflow.utils.torch_distributions import get_TorchDeterministic
 
 tod = torch.distributions
 

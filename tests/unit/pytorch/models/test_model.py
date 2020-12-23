@@ -3,7 +3,7 @@ import pytest
 import torch
 
 from probflow.data import ArrayDataGenerator
-from probflow.distributions import Normal, Gamma
+from probflow.distributions import Gamma, Normal
 from probflow.models import Model
 from probflow.modules import Dense, Module
 from probflow.parameters import (
@@ -339,7 +339,9 @@ def test_Model_nonprobabilistic():
     class MyModel(Model):
         def __init__(self):
             self.net = Dense(1, 1, probabilistic=False)
-            self.std = DeterministicParameter(transform=lambda x: torch.nn.Softplus()(x))
+            self.std = DeterministicParameter(
+                transform=lambda x: torch.nn.Softplus()(x)
+            )
 
         def __call__(self, x):
             x = to_tensor(x)
@@ -768,4 +770,7 @@ def test_Model_nesting():
     assert samples.shape[2] == 1
 
     # kl loss should be greater for outer model
-    assert my_model.kl_loss().detach().numpy() > my_model.module.kl_loss().detach().numpy()
+    assert (
+        my_model.kl_loss().detach().numpy()
+        > my_model.module.kl_loss().detach().numpy()
+    )

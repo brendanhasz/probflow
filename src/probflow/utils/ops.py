@@ -64,7 +64,6 @@ __all__ = [
 from probflow.utils.base import BaseDistribution
 from probflow.utils.casting import make_input_tensor, to_tensor
 from probflow.utils.settings import get_backend, get_datatype
-from probflow.utils.torch_distributions import get_TorchDeterministic
 
 
 def kl_divergence(P, Q):
