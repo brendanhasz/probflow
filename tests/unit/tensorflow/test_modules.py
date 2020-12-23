@@ -244,6 +244,28 @@ def test_Dense():
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 1
 
+    # With the probabilistic kwarg
+    dense = Dense(5, 3, probabilistic=False)
+    with Sampling():
+        samples1 = dense(x)
+        samples2 = dense(x)
+    assert np.all(samples1.numpy() == samples2.numpy())
+    assert samples1.ndim == 2
+    assert samples1.shape[0] == 4
+    assert samples1.shape[1] == 3
+
+    # With the weight and bias kwargs
+    weight_kwargs = {"transform": tf.exp}
+    bias_kwargs = {"transform": tf.math.softplus}
+    dense = Dense(5, 2, weight_kwargs=weight_kwargs, bias_kwargs=bias_kwargs)
+    with Sampling():
+        samples1 = dense(x)
+        samples2 = dense(x)
+    assert np.all(samples1.numpy() != samples2.numpy())
+    assert samples1.ndim == 2
+    assert samples1.shape[0] == 4
+    assert samples1.shape[1] == 2
+
 
 def test_DenseNetwork():
     """Tests probflow.modules.DenseNetwork"""
@@ -309,6 +331,16 @@ def test_DenseNetwork():
         samples1 = dense_net(x)
         samples2 = dense_net(x)
     assert np.all(samples1.numpy() != samples2.numpy())
+    assert samples1.ndim == 2
+    assert samples1.shape[0] == 7
+    assert samples1.shape[1] == 2
+
+    # With probabilistic = False
+    dense_net = DenseNetwork([5, 4, 3, 2], probabilistic=False)
+    with Sampling():
+        samples1 = dense_net(x)
+        samples2 = dense_net(x)
+    assert np.all(samples1.numpy() == samples2.numpy())
     assert samples1.ndim == 2
     assert samples1.shape[0] == 7
     assert samples1.shape[1] == 2
@@ -442,6 +474,9 @@ def test_Embedding():
     assert emb.parameters[0].name == "Embedding_0"
     assert emb.parameters[0].shape == [10, 5]
 
+    # Embeddings should be DeterministicParameters by default
+    assert all(isinstance(e, DeterministicParameter) for e in emb.embeddings)
+
     # Test MAP outputs are the same
     x = tf.random.uniform([20, 1], minval=0, maxval=9, dtype=tf.dtypes.int32)
     samples1 = emb(x)
@@ -485,3 +520,17 @@ def test_Embedding():
     assert samples1.ndim == 2
     assert samples1.shape[0] == 20
     assert samples1.shape[1] == 9
+
+    # With probabilistic = True, samples should be different
+    emb = Embedding(10, 5, probabilistic=True)
+    x = tf.random.uniform([20, 1], minval=0, maxval=9, dtype=tf.dtypes.int32)
+    with Sampling():
+        samples1 = emb(x)
+        samples2 = emb(x)
+    assert np.all(samples1.numpy() != samples2.numpy())
+    assert samples1.ndim == 2
+    assert samples1.shape[0] == 20
+    assert samples1.shape[1] == 5
+    assert all(
+        not isinstance(e, DeterministicParameter) for e in emb.embeddings
+    )

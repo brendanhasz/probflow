@@ -1,16 +1,13 @@
-"""Tests the probflow.parameters module when backend = tensorflow"""
+"""Tests the probflow.parameters module when backend = pytorch"""
 
 
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
+import torch
 
 from probflow.parameters import *
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import Sampling
-
-tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
@@ -29,7 +26,7 @@ def test_Parameter_scalar():
     assert isinstance(param.untransformed_variables, dict)
     assert all(isinstance(p, str) for p in param.untransformed_variables)
     assert all(
-        isinstance(p, tf.Variable)
+        isinstance(p, torch.nn.Parameter)
         for _, p in param.untransformed_variables.items()
     )
 
@@ -40,28 +37,26 @@ def test_Parameter_scalar():
         Parameter(shape=[20, 0, 1])
 
     # trainable_variables should be a property returning list of vars
-    assert all(isinstance(v, tf.Variable) for v in param.trainable_variables)
+    assert all(
+        isinstance(v, torch.nn.Parameter) for v in param.trainable_variables
+    )
 
     # variables should be a property returning dict of transformed vars
     assert isinstance(param.variables, dict)
     assert all(isinstance(v, str) for v in param.variables)
 
     # loc should be variable, while scale should have been transformed->tensor
-    assert isinstance(param.variables["loc"], tf.Variable)
-    assert isinstance(param.variables["scale"], tf.Tensor)
-
-    # posterior should be a distribution object
-    assert isinstance(param.posterior, BaseDistribution)
-    assert isinstance(param.posterior(), tfd.Normal)
+    assert isinstance(param.variables["loc"], torch.nn.Parameter)
+    assert isinstance(param.variables["scale"], torch.Tensor)
 
     # __call__ should return the MAP estimate by default
     sample1 = param()
     sample2 = param()
     assert sample1.ndim == 1
     assert sample2.ndim == 1
-    assert sample1.shape[0] == 1
-    assert sample2.shape[0] == 1
-    assert sample1.numpy() == sample2.numpy()
+    assert list(sample1.size())[0] == 1
+    assert list(sample2.size())[0] == 1
+    assert sample1.detach().numpy() == sample2.detach().numpy()
 
     # within a Sampling statement, should randomly sample from the dist
     with Sampling():
@@ -69,9 +64,9 @@ def test_Parameter_scalar():
         sample2 = param()
     assert sample1.ndim == 1
     assert sample2.ndim == 1
-    assert sample1.shape[0] == 1
-    assert sample2.shape[0] == 1
-    assert sample1.numpy() != sample2.numpy()
+    assert list(sample1.size())[0] == 1
+    assert list(sample2.size())[0] == 1
+    assert sample1.detach().numpy() != sample2.detach().numpy()
 
     # sampling statement should effect N samples
     with Sampling(n=10):
@@ -79,15 +74,15 @@ def test_Parameter_scalar():
         sample2 = param()
     assert sample1.ndim == 2
     assert sample2.ndim == 2
-    assert sample1.shape[0] == 10
-    assert sample1.shape[1] == 1
-    assert sample2.shape[0] == 10
-    assert sample2.shape[1] == 1
-    assert np.all(sample1.numpy() != sample2.numpy())
+    assert list(sample1.size())[0] == 10
+    assert list(sample1.size())[1] == 1
+    assert list(sample2.size())[0] == 10
+    assert list(sample2.size())[1] == 1
+    assert np.all(sample1.detach().numpy() != sample2.detach().numpy())
 
     # kl_loss should return sum of kl divergences
     kl_loss = param.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert isinstance(kl_loss, torch.Tensor)
     assert kl_loss.ndim == 0
 
     # prior_sample should be 1D
@@ -106,9 +101,9 @@ def test_Parameter_no_prior():
 
     # kl_loss should return 0
     kl_loss = param.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert isinstance(kl_loss, torch.Tensor)
     assert kl_loss.ndim == 0
-    assert kl_loss.numpy() == 0.0
+    assert kl_loss.detach().numpy() == 0.0
 
     # prior_sample should return nans with prior=None
     prior_sample = param.prior_sample()
@@ -129,7 +124,7 @@ def test_Parameter_1D():
 
     # kl_loss should still be scalar
     kl_loss = param.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert isinstance(kl_loss, torch.Tensor)
     assert kl_loss.ndim == 0
 
     # posterior_mean should return mean
@@ -186,7 +181,7 @@ def test_Parameter_2D():
 
     # kl_loss should still be scalar
     kl_loss = param.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert isinstance(kl_loss, torch.Tensor)
     assert kl_loss.ndim == 0
 
     # posterior_mean should return mean
@@ -244,39 +239,32 @@ def test_Parameter_slicing():
     param = Parameter(shape=[2, 3, 4, 5])
 
     # Should be able to slice!
-    sl = param[0].numpy()
+    sl = param[0].detach().numpy()
     assert sl.ndim == 4
     assert sl.shape[0] == 1
     assert sl.shape[1] == 3
     assert sl.shape[2] == 4
     assert sl.shape[3] == 5
 
-    sl = param[:, :, :, :2].numpy()
+    sl = param[:, :, :, :2].detach().numpy()
     assert sl.ndim == 4
     assert sl.shape[0] == 2
     assert sl.shape[1] == 3
     assert sl.shape[2] == 4
     assert sl.shape[3] == 2
 
-    sl = param[1, ..., :2].numpy()
+    sl = param[1, ..., :2].detach().numpy()
     assert sl.ndim == 4
     assert sl.shape[0] == 1
     assert sl.shape[1] == 3
     assert sl.shape[2] == 4
     assert sl.shape[3] == 2
 
-    sl = param[...].numpy()
+    sl = param[...].detach().numpy()
     assert sl.ndim == 4
     assert sl.shape[0] == 2
     assert sl.shape[1] == 3
     assert sl.shape[2] == 4
-    assert sl.shape[3] == 5
-
-    sl = param[tf.constant([0]), :, ::2, :].numpy()
-    assert sl.ndim == 4
-    assert sl.shape[0] == 1
-    assert sl.shape[1] == 3
-    assert sl.shape[2] == 2
     assert sl.shape[3] == 5
 
 
@@ -333,7 +321,7 @@ def test_Parameter_float_initializer():
     )
 
     # all should have been initialized to 1
-    vals = param()
+    vals = param().detach().numpy()
     assert np.all(vals == 1.0)
 
 
@@ -480,7 +468,7 @@ def test_PositiveParameter():
     # Create the parameter
     param = PositiveParameter()
 
-    # All samples should be between 0 and 1
+    # All samples should be positive
     samples = param.posterior_sample(n=100)
     assert samples.ndim == 2
     assert samples.shape[0] == 100
@@ -547,7 +535,7 @@ def test_MultivariateNormalParameter():
 
     # kl_loss should still be scalar
     kl_loss = param.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert isinstance(kl_loss, torch.Tensor)
     assert kl_loss.ndim == 0
 
     # posterior_mean should return mean
@@ -592,17 +580,17 @@ def test_MultivariateNormalParameter():
 
     # test slicing
     s = param[:-2]
-    assert isinstance(s, tf.Tensor)
+    assert isinstance(s, torch.Tensor)
     assert s.ndim == 2
-    assert s.shape[0] == 2
-    assert s.shape[1] == 1
+    assert list(s.size())[0] == 2
+    assert list(s.size())[1] == 1
     s = param[1]
-    assert isinstance(s, tf.Tensor)
+    assert isinstance(s, torch.Tensor)
     assert s.ndim == 2
-    assert s.shape[0] == 1
-    assert s.shape[1] == 1
+    assert list(s.size())[0] == 1
+    assert list(s.size())[1] == 1
     s = param[-1]
-    assert isinstance(s, tf.Tensor)
+    assert isinstance(s, torch.Tensor)
     assert s.ndim == 2
-    assert s.shape[0] == 1
-    assert s.shape[1] == 1
+    assert list(s.size())[0] == 1
+    assert list(s.size())[1] == 1

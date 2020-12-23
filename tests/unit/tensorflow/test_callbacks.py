@@ -111,6 +111,11 @@ def test_Callback(plot):
     if plot:
         plt.show()
 
+    # Test plotting vs time, and passing kwargs to plt.plot
+    mm.plot(x="time", label="model1")
+    if plot:
+        plt.show()
+
     # MontiorMetric with custom metric function
     x_val = np.random.randn(100).astype("float32")
     y_val = -x_val + 1
@@ -142,6 +147,11 @@ def test_Callback(plot):
     assert isinstance(me.elbos, list)
     assert len(me.elbos) == 10
     me.plot()
+    if plot:
+        plt.show()
+
+    # Test plotting vs time, and passing kwargs to plt.plot
+    me.plot(x="time", label="model2")
     if plot:
         plt.show()
 

@@ -42,7 +42,14 @@ class LearningRateScheduler(Callback):
         self.epochs += [self.current_epoch]
         self.learning_rate += [self.current_lr]
 
-    def plot(self):
-        plt.plot(self.epochs, self.learning_rate)
+    def plot(self, **kwargs):
+        """Plot the learning rate as a function of epoch
+
+        Parameters
+        ----------
+        **kwargs
+            Additional keyword arguments are passed to plt.plot
+        """
+        plt.plot(self.epochs, self.learning_rate, **kwargs)
         plt.xlabel("Epoch")
         plt.ylabel("Learning Rate")

@@ -42,7 +42,14 @@ class KLWeightScheduler(Callback):
         self.epochs += [self.current_epoch]
         self.kl_weights += [self.current_w]
 
-    def plot(self):
-        plt.plot(self.epochs, self.kl_weights)
+    def plot(self, **kwargs):
+        """Plot the KL weight as a function of epoch
+
+        Parameters
+        ----------
+        **kwargs
+            Additional keyword arguments are passed to plt.plot
+        """
+        plt.plot(self.epochs, self.kl_weights, **kwargs)
         plt.xlabel("Epoch")
         plt.ylabel("KL Loss Weight")

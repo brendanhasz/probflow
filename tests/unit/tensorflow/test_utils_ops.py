@@ -127,6 +127,41 @@ def test_zeros():
     assert np.all(zeros.numpy() == 0.0)
 
 
+def test_full():
+    """Tests full"""
+
+    # Scalar
+    twos = ops.full([1], 2.0)
+    assert isinstance(twos, tf.Tensor)
+    assert twos.ndim == 1
+    assert twos.shape[0] == 1
+    assert twos.numpy() == 2.0
+
+    # 1D
+    twos = ops.full([5], 2)
+    assert isinstance(twos, tf.Tensor)
+    assert twos.ndim == 1
+    assert twos.shape[0] == 5
+    assert all(twos.numpy() == 2.0)
+
+    # 2D
+    twos = ops.full([5, 4], 2.0)
+    assert isinstance(twos, tf.Tensor)
+    assert twos.ndim == 2
+    assert twos.shape[0] == 5
+    assert twos.shape[1] == 4
+    assert np.all(twos.numpy() == 2.0)
+
+    # 3D
+    twos = ops.full([5, 4, 3], 2)
+    assert isinstance(twos, tf.Tensor)
+    assert twos.ndim == 3
+    assert twos.shape[0] == 5
+    assert twos.shape[1] == 4
+    assert twos.shape[2] == 3
+    assert np.all(twos.numpy() == 2.0)
+
+
 def test_eye():
     """Tests eye"""
 
