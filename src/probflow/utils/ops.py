@@ -91,14 +91,9 @@ def kl_divergence(P, Q):
 
     # Compute KL divergence with the backend
     if get_backend() == "pytorch":
-        # isinstance wasn't working here :vomiting_face:
-        if str(type(P)) == str(get_TorchDeterministic()):
-            # KL divergence is the negative log probability for deterministic
-            # "distributions" w.r.t. other continuous distributions
-            return -Q.log_prob(P.mean)
-        else:
-            import torch
-            return torch.distributions.kl.kl_divergence(P, Q)
+        import torch
+
+        return torch.distributions.kl.kl_divergence(P, Q)
     else:
         import tensorflow_probability as tfp
 
