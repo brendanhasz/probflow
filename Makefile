@@ -1,5 +1,5 @@
 
-.PHONY: init-tensorflow init-pytorch test-tensorflow test-pytorch format docs package push-package clean
+.PHONY: init-tensorflow init-pytorch test-tensorflow test-pytorch format docs bump-minor bump-patch package push-package clean
 
 init-tensorflow:
 	python3 -m venv venv; \

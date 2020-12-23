@@ -411,7 +411,7 @@ def log_cholesky_transform(x):
     if get_backend() == "pytorch":
         import torch
 
-        N = torch.numel(x) * (torch.numel(x) + 1) / 2
+        N = int(torch.numel(x) * (torch.numel(x) + 1) / 2)
         E = torch.zeros((N, N))
         tril_ix = torch.tril_indices(row=N, col=N, offset=0)
         E[..., tril_ix[0], tril_ix[1]] = x
