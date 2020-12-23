@@ -139,5 +139,4 @@ class CategoricalModel(Model):
         TODO: Docs...
 
         """
-        pass
         # TODO

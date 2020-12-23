@@ -21,6 +21,7 @@ test-pytorch:
 
 format:
 	. venv/bin/activate; \
+        autoflake -r --in-place --remove-all-unused-imports --ignore-init-module-imports src/probflow tests; \
         isort src/probflow tests; \
 	black src/probflow tests; \
 	flake8 src/probflow tests
