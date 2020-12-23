@@ -4,12 +4,9 @@ import pytest
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-import probflow.utils.ops as O
-from probflow.data import ArrayDataGenerator, make_generator
-from probflow.distributions import Bernoulli, Normal, Poisson
+from probflow.distributions import Normal, Poisson
 from probflow.models import DiscreteModel
 from probflow.parameters import Parameter
-from probflow.utils.settings import Sampling
 
 tfd = tfp.distributions
 

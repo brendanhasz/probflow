@@ -41,6 +41,7 @@ setup(
             "torch >= 1.5.0",
         ],
         "dev": [
+            "autoflake >= 1.4",
             "black >= 19.10b0",
             "bumpversion",
             "flake8 >= 3.8.3",

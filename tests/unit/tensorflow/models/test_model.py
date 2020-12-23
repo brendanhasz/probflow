@@ -1,12 +1,10 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-import probflow.utils.ops as O
-from probflow.data import ArrayDataGenerator, make_generator
-from probflow.distributions import Bernoulli, Normal, Poisson
+from probflow.data import ArrayDataGenerator
+from probflow.distributions import Normal
 from probflow.models import Model
 from probflow.modules import Dense, Module
 from probflow.parameters import (
@@ -14,7 +12,6 @@ from probflow.parameters import (
     Parameter,
     ScaleParameter,
 )
-from probflow.utils.settings import Sampling
 
 tfd = tfp.distributions
 

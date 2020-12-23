@@ -1,8 +1,3 @@
-"""Fixtures for unit tests w/ tensorflow backend."""
-
-import pytest
-import tensorflow as tf
-
 import probflow as pf
 
 

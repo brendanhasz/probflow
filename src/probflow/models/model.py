@@ -895,5 +895,4 @@ class Model(Module):
         model would have to add to it the observation dist
 
         """
-        pass
         # TODO

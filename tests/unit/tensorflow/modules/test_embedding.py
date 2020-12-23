@@ -3,9 +3,8 @@ import pytest
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-import probflow.utils.ops as O
 from probflow.modules import Embedding
-from probflow.parameters import DeterministicParameter, Parameter
+from probflow.parameters import DeterministicParameter
 from probflow.utils.settings import Sampling
 
 tfd = tfp.distributions
