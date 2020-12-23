@@ -49,20 +49,6 @@ class MultivariateNormalParameter(Parameter):
         name="MultivariateNormalParameter",
     ):
 
-        # Transformation for scale parameters
-        def log_cholesky_transform(x):
-            if get_backend() == "pytorch":
-                raise NotImplementedError
-            else:
-                import tensorflow as tf
-                import tensorflow_probability as tfp
-
-                E = tfp.math.fill_triangular(x)
-                E = tf.linalg.set_diag(
-                    E, tf.exp(tf.linalg.tensor_diag_part(E))
-                )
-                return E @ tf.transpose(E)
-
         # Prior
         if prior is None:
             prior = MultivariateNormal(O.zeros([d]), O.eye(d))
@@ -78,7 +64,7 @@ class MultivariateNormalParameter(Parameter):
             "loc": lambda x: xavier([d]),
             "cov": lambda x: xavier([int(d * (d + 1) / 2)]),
         }
-        var_transform = {"loc": None, "cov": log_cholesky_transform}
+        var_transform = {"loc": None, "cov": O.log_cholesky_transform}
 
         super().__init__(
             posterior=MultivariateNormal,

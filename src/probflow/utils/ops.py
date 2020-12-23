@@ -25,6 +25,7 @@ The utils.ops module contains operations which run using the current backend.
 * :func:`.additive_logistic_transform`
 * :func:`.insert_col_of`
 * :func:`.new_variable`
+* :func:`.log_cholesky_transform`
 
 ----------
 
@@ -56,11 +57,12 @@ __all__ = [
     "additive_logistic_transform",
     "insert_col_of",
     "new_variable",
+    "log_cholesky_transform",
 ]
 
 
 from probflow.utils.base import BaseDistribution
-from probflow.utils.casting import make_input_tensor
+from probflow.utils.casting import make_input_tensor, to_tensor
 from probflow.utils.settings import get_backend, get_datatype
 
 
@@ -325,7 +327,7 @@ def gather(vals, inds, axis=0):
     if get_backend() == "pytorch":
         import torch
 
-        return torch.index_select(vals, axis, inds)
+        return torch.index_select(vals, axis, to_tensor(inds))
     else:
         import tensorflow as tf
 
@@ -388,3 +390,40 @@ def new_variable(initial_values):
         import tensorflow as tf
 
         return tf.Variable(initial_values)
+
+
+def log_cholesky_transform(x):
+    r"""Perform the log cholesky transform on a vector of values.
+
+    This turns a vector of :math:`\frac{N(N+1)}{2}` unconstrained values into a
+    valid :math:`N \times N` covariance matrix.
+
+
+    References
+    ----------
+
+    - Jose C. Pinheiro & Douglas M. Bates.  `Unconstrained Parameterizations
+      for Variance-Covariance Matrices
+      <https://dx.doi.org/10.1007/BF00140873>`_ *Statistics and Computing*,
+      1996.
+    """
+
+    if get_backend() == "pytorch":
+        import pytorch
+
+        N = torch.numel(x) * (torch.numel(x) + 1) / 2
+        E = torch.zeros((N, N))
+        tril_ix = torch.tril_indices(row=N, col=N, offset=0)
+        E[..., tril_ix[0], tril_ix[1]] = x
+        diag_ix = torch.diag_indices(N)
+        E[..., diag_ix[0], diag_ix[1]] = torch.exp(torch.diagonal(E))
+        return E @ torch.transpose(E, -1, -2)
+    else:
+        import tensorflow as tf
+        import tensorflow_probability as tfp
+
+        E = tfp.math.fill_triangular(x)
+        E = tf.linalg.set_diag(
+            E, tf.exp(tf.linalg.tensor_diag_part(E))
+        )
+        return E @ tf.transpose(E)
