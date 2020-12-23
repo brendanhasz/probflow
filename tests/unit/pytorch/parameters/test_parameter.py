@@ -1,17 +1,12 @@
-"""Tests the probflow.parameters module when backend = pytorch"""
-
-
 import numpy as np
 import pytest
 import torch
 
-from probflow.parameters import *
+from probflow.parameters import Parameter
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import Sampling
 
-
-def is_close(a, b, tol=1e-3):
-    return np.abs(a - b) < tol
+tod = torch.distributions
 
 
 def test_Parameter_scalar():
@@ -37,9 +32,7 @@ def test_Parameter_scalar():
         Parameter(shape=[20, 0, 1])
 
     # trainable_variables should be a property returning list of vars
-    assert all(
-        isinstance(v, torch.nn.Parameter) for v in param.trainable_variables
-    )
+    assert all(isinstance(v, torch.nn.Parameter) for v in param.trainable_variables)
 
     # variables should be a property returning dict of transformed vars
     assert isinstance(param.variables, dict)
@@ -49,13 +42,17 @@ def test_Parameter_scalar():
     assert isinstance(param.variables["loc"], torch.nn.Parameter)
     assert isinstance(param.variables["scale"], torch.Tensor)
 
+    # posterior should be a distribution object
+    assert isinstance(param.posterior, BaseDistribution)
+    assert isinstance(param.posterior(), tod.normal.Normal)
+
     # __call__ should return the MAP estimate by default
     sample1 = param()
     sample2 = param()
     assert sample1.ndim == 1
     assert sample2.ndim == 1
-    assert list(sample1.size())[0] == 1
-    assert list(sample2.size())[0] == 1
+    assert sample1.shape[0] == 1
+    assert sample2.shape[0] == 1
     assert sample1.detach().numpy() == sample2.detach().numpy()
 
     # within a Sampling statement, should randomly sample from the dist
@@ -64,8 +61,8 @@ def test_Parameter_scalar():
         sample2 = param()
     assert sample1.ndim == 1
     assert sample2.ndim == 1
-    assert list(sample1.size())[0] == 1
-    assert list(sample2.size())[0] == 1
+    assert sample1.shape[0] == 1
+    assert sample2.shape[0] == 1
     assert sample1.detach().numpy() != sample2.detach().numpy()
 
     # sampling statement should effect N samples
@@ -74,10 +71,10 @@ def test_Parameter_scalar():
         sample2 = param()
     assert sample1.ndim == 2
     assert sample2.ndim == 2
-    assert list(sample1.size())[0] == 10
-    assert list(sample1.size())[1] == 1
-    assert list(sample2.size())[0] == 10
-    assert list(sample2.size())[1] == 1
+    assert sample1.shape[0] == 10
+    assert sample1.shape[1] == 1
+    assert sample2.shape[0] == 10
+    assert sample2.shape[1] == 1
     assert np.all(sample1.detach().numpy() != sample2.detach().numpy())
 
     # kl_loss should return sum of kl divergences
@@ -267,6 +264,13 @@ def test_Parameter_slicing():
     assert sl.shape[2] == 4
     assert sl.shape[3] == 5
 
+    sl = param[torch.tensor([0]), :, ::2, :].detach().numpy()
+    assert sl.ndim == 4
+    assert sl.shape[0] == 1
+    assert sl.shape[1] == 3
+    assert sl.shape[2] == 2
+    assert sl.shape[3] == 5
+
 
 def test_Parameter_posterior_ci():
     """Tests probflow.parameters.Parameter.posterior_ci"""
@@ -323,274 +327,3 @@ def test_Parameter_float_initializer():
     # all should have been initialized to 1
     vals = param().detach().numpy()
     assert np.all(vals == 1.0)
-
-
-def test_ScaleParameter():
-    """Tests probflow.parameters.ScaleParameter"""
-
-    # Create the parameter
-    param = ScaleParameter()
-
-    # All samples should be > 0
-    assert np.all(param.posterior_sample(n=1000) > 0)
-
-    # 1D ScaleParameter
-    param = ScaleParameter(shape=5)
-    samples = param.posterior_sample(n=10)
-    assert samples.ndim == 2
-    assert samples.shape[0] == 10
-    assert samples.shape[1] == 5
-    assert np.all(samples > 0)
-
-    # 2D ScaleParameter
-    param = ScaleParameter(shape=[5, 4])
-    samples = param.posterior_sample(n=10)
-    assert samples.ndim == 3
-    assert samples.shape[0] == 10
-    assert samples.shape[1] == 5
-    assert samples.shape[2] == 4
-    assert np.all(samples > 0)
-
-
-def test_CategoricalParameter():
-    """Tests probflow.parameters.CategoricalParameter"""
-
-    # Should error with incorrect params
-    with pytest.raises(TypeError):
-        param = CategoricalParameter(k="a")
-    with pytest.raises(ValueError):
-        param = CategoricalParameter(k=1)
-
-    # Create the parameter
-    param = CategoricalParameter(k=3)
-
-    # All samples should be 0, 1, or 2
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 1
-    assert samples.shape[0] == 100
-    assert all(s in [0, 1, 2] for s in samples.tolist())
-
-    # 1D parameter
-    param = CategoricalParameter(k=3, shape=5)
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 2
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 5
-    assert all(s in [0, 1, 2] for s in samples.flatten().tolist())
-
-    # 2D parameter
-    param = CategoricalParameter(k=3, shape=[5, 4])
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 3
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 5
-    assert samples.shape[2] == 4
-    assert all(s in [0, 1, 2] for s in samples.flatten().tolist())
-
-
-def test_DirichletParameter():
-    """Tests probflow.parameters.DirichletParameter"""
-
-    # Should error with incorrect params
-    with pytest.raises(TypeError):
-        param = DirichletParameter(k="a")
-    with pytest.raises(ValueError):
-        param = DirichletParameter(k=1)
-
-    # Create the parameter
-    param = DirichletParameter(k=3)
-
-    # All samples should be between 0 and 1
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 2
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 3
-    assert all(s > 0 and s < 1 for s in samples.flatten().tolist())
-
-    # 1D parameter
-    param = DirichletParameter(k=3, shape=5)
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 3
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 5
-    assert samples.shape[2] == 3
-    assert all(s > 0 and s < 1 for s in samples.flatten().tolist())
-
-    # 2D parameter
-    param = DirichletParameter(k=3, shape=[5, 4])
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 4
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 5
-    assert samples.shape[2] == 4
-    assert samples.shape[3] == 3
-    assert all(s > 0 and s < 1 for s in samples.flatten().tolist())
-
-
-def test_BoundedParameter():
-    """Tests probflow.parameters.BoundedParameter"""
-
-    # Should error with incorrect params
-    with pytest.raises(ValueError):
-        param = BoundedParameter(min=1.0, max=0.0)
-
-    # Create the parameter
-    param = BoundedParameter()
-
-    # All samples should be between 0 and 1
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 2
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 1
-    assert all(s > 0 and s < 1 for s in samples.flatten().tolist())
-
-    # 1D parameter
-    param = BoundedParameter(shape=5)
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 2
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 5
-    assert all(s > 0 and s < 1 for s in samples.flatten().tolist())
-
-    # 2D parameter
-    param = BoundedParameter(shape=[5, 4])
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 3
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 5
-    assert samples.shape[2] == 4
-    assert all(s > 0 and s < 1 for s in samples.flatten().tolist())
-
-
-def test_PositiveParameter():
-    """Tests probflow.parameters.PositiveParameter"""
-
-    # Create the parameter
-    param = PositiveParameter()
-
-    # All samples should be positive
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 2
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 1
-    assert all(s > 0 for s in samples.flatten().tolist())
-
-    # 1D parameter
-    param = PositiveParameter(shape=5)
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 2
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 5
-    assert all(s > 0 for s in samples.flatten().tolist())
-
-    # 2D parameter
-    param = PositiveParameter(shape=[5, 4])
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 3
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 5
-    assert samples.shape[2] == 4
-    assert all(s > 0 for s in samples.flatten().tolist())
-
-
-def test_DeterministicParameter():
-    """Tests probflow.parameters.DeterministicParameter"""
-
-    # Create the parameter
-    param = DeterministicParameter()
-
-    # All samples should be the same
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 2
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 1
-    assert all(s == samples[0] for s in samples.flatten().tolist())
-
-    # 1D parameter
-    param = DeterministicParameter(shape=5)
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 2
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 5
-    for i in range(5):
-        assert np.all(samples[:, i] == samples[0, i])
-
-    # 2D parameter
-    param = DeterministicParameter(shape=[5, 4])
-    samples = param.posterior_sample(n=100)
-    assert samples.ndim == 3
-    assert samples.shape[0] == 100
-    assert samples.shape[1] == 5
-    assert samples.shape[2] == 4
-    for i in range(5):
-        for j in range(4):
-            assert np.all(samples[:, i, j] == samples[0, i, j])
-
-
-def test_MultivariateNormalParameter():
-    """Tests probflow.parameters.MultivariateNormalParameter"""
-
-    # Create the parameter
-    param = MultivariateNormalParameter(4)
-
-    # kl_loss should still be scalar
-    kl_loss = param.kl_loss()
-    assert isinstance(kl_loss, torch.Tensor)
-    assert kl_loss.ndim == 0
-
-    # posterior_mean should return mean
-    sample1 = param.posterior_mean()
-    sample2 = param.posterior_mean()
-    assert sample1.ndim == 2
-    assert sample2.ndim == 2
-    assert sample1.shape[0] == 4
-    assert sample2.shape[0] == 4
-    assert sample1.shape[1] == 1
-    assert sample2.shape[1] == 1
-    assert np.all(sample1 == sample2)
-
-    # posterior_sample should return samples
-    sample1 = param.posterior_sample()
-    sample2 = param.posterior_sample()
-    assert sample1.ndim == 2
-    assert sample2.ndim == 2
-    assert sample1.shape[0] == 4
-    assert sample2.shape[0] == 4
-    assert np.all(sample1 != sample2)
-
-    # posterior_sample should be able to return multiple samples
-    sample1 = param.posterior_sample(10)
-    sample2 = param.posterior_sample(10)
-    assert sample1.ndim == 3
-    assert sample2.ndim == 3
-    assert sample1.shape[0] == 10
-    assert sample1.shape[1] == 4
-    assert sample2.shape[0] == 10
-    assert sample2.shape[1] == 4
-    assert np.all(sample1 != sample2)
-
-    # prior_sample should be d-dimensional
-    prior_sample = param.prior_sample()
-    assert prior_sample.ndim == 2
-    assert prior_sample.shape[0] == 4
-    prior_sample = param.prior_sample(n=7)
-    assert prior_sample.ndim == 3
-    assert prior_sample.shape[0] == 7
-    assert prior_sample.shape[1] == 4
-
-    # test slicing
-    s = param[:-2]
-    assert isinstance(s, torch.Tensor)
-    assert s.ndim == 2
-    assert list(s.size())[0] == 2
-    assert list(s.size())[1] == 1
-    s = param[1]
-    assert isinstance(s, torch.Tensor)
-    assert s.ndim == 2
-    assert list(s.size())[0] == 1
-    assert list(s.size())[1] == 1
-    s = param[-1]
-    assert isinstance(s, torch.Tensor)
-    assert s.ndim == 2
-    assert list(s.size())[0] == 1
-    assert list(s.size())[1] == 1
