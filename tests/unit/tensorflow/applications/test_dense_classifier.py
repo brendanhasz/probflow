@@ -1,13 +1,6 @@
 import numpy as np
-import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
-from probflow import applications as apps
-from probflow.distributions import Normal
-from probflow.models import ContinuousModel, Model
-
-tfd = tfp.distributions
+from probflow.applications import DenseClassifier
 
 
 def test_DenseClassifier():
@@ -20,7 +13,7 @@ def test_DenseClassifier():
     y = np.round(1.0 / (1.0 + np.exp(-y))).astype("float32")
 
     # Create the model
-    model = apps.DenseClassifier([5, 20, 15, 2])
+    model = DenseClassifier([5, 20, 15, 2])
 
     # Fit the model
     model.fit(x, y, batch_size=10, epochs=3)
@@ -40,7 +33,7 @@ def test_MultinomialDenseClassifier():
     y = np.argmax(y, axis=1).astype("int32")
 
     # Create the model
-    model = apps.DenseClassifier([5, 20, 15, 3])
+    model = DenseClassifier([5, 20, 15, 3])
 
     # Fit the model
     model.fit(x, y, batch_size=10, epochs=3)

@@ -1,13 +1,6 @@
 import numpy as np
-import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
-from probflow import applications as apps
-from probflow.distributions import Normal
-from probflow.models import ContinuousModel, Model
-
-tfd = tfp.distributions
+from probflow.applications import DenseRegression
 
 
 def test_DenseRegression():
@@ -19,7 +12,7 @@ def test_DenseRegression():
     y = x @ w + 1
 
     # Create the model
-    model = apps.DenseRegression([5, 20, 15, 1])
+    model = DenseRegression([5, 20, 15, 1])
 
     # Fit the model
     model.fit(x, y, batch_size=10, epochs=3)
@@ -53,7 +46,7 @@ def test_DenseRegression_heteroscedastic():
     y = y + np.exp(y) * np.random.randn(100, 1).astype("float32")
 
     # Create the model
-    model = apps.DenseRegression([5, 20, 15, 1], heteroscedastic=True)
+    model = DenseRegression([5, 20, 15, 1], heteroscedastic=True)
 
     # Fit the model
     model.fit(x, y, batch_size=10, epochs=3)
@@ -89,7 +82,7 @@ def test_DenseRegression_multivariate():
     y = x @ w + 0.1 * np.random.randn(N, Do).astype("float32")
 
     # Create the model
-    model = apps.DenseRegression([Di, 16, Do])
+    model = DenseRegression([Di, 16, Do])
 
     # Fit the model
     model.fit(x, y, batch_size=128, epochs=3)

@@ -1,4 +1,3 @@
-import probflow.utils.ops as O
 from probflow.parameters import DeterministicParameter, Parameter
 from probflow.utils.settings import get_backend, get_flipout
 

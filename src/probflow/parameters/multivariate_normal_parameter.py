@@ -1,7 +1,6 @@
 import probflow.utils.ops as O
 from probflow.distributions import MultivariateNormal
 from probflow.utils.initializers import xavier
-from probflow.utils.settings import get_backend
 
 from .parameter import Parameter
 

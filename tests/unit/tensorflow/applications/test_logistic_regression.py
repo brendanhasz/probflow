@@ -1,13 +1,6 @@
 import numpy as np
-import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
-from probflow import applications as apps
-from probflow.distributions import Normal
-from probflow.models import ContinuousModel, Model
-
-tfd = tfp.distributions
+from probflow.applications import LogisticRegression
 
 
 def test_LogisticRegression():
@@ -20,7 +13,7 @@ def test_LogisticRegression():
     y = np.round(1.0 / (1.0 + np.exp(-y))).astype("int32")
 
     # Create the model
-    model = apps.LogisticRegression(5)
+    model = LogisticRegression(5)
 
     # Fit the model
     model.fit(x, y, batch_size=10, epochs=3)
@@ -40,7 +33,7 @@ def test_MultinomialLogisticRegression():
     y = np.argmax(y, axis=1).astype("int32")
 
     # Create the model
-    model = apps.LogisticRegression(d=5, k=3)
+    model = LogisticRegression(d=5, k=3)
 
     # Fit the model
     model.fit(x, y, batch_size=10, epochs=3)

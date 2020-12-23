@@ -1,7 +1,6 @@
 import numpy as np
 
 import probflow as pf
-from probflow.data import *
 
 
 def test_DataGenerator_workers():

@@ -1,13 +1,6 @@
 import numpy as np
-import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
-from probflow import applications as apps
-from probflow.distributions import Normal
-from probflow.models import ContinuousModel, Model
-
-tfd = tfp.distributions
+from probflow.applications import LinearRegression
 
 
 def test_LinearRegression():
@@ -19,7 +12,7 @@ def test_LinearRegression():
     y = x @ w + 1
 
     # Create the model
-    model = apps.LinearRegression(5)
+    model = LinearRegression(5)
 
     # Fit the model
     model.fit(x, y, batch_size=10, epochs=3)
@@ -53,7 +46,7 @@ def test_LinearRegression_heteroscedastic():
     y = y + np.exp(y) * np.random.randn(100, 1).astype("float32")
 
     # Create the model
-    model = apps.LinearRegression(5, heteroscedastic=True)
+    model = LinearRegression(5, heteroscedastic=True)
 
     # Fit the model
     model.fit(x, y, batch_size=10, epochs=3)
@@ -89,7 +82,7 @@ def test_LinearRegression_multivariate():
     y = x @ w + 0.1 * np.random.randn(N, Do).astype("float32")
 
     # Create the model
-    model = apps.LinearRegression(Di, d_o=Do)
+    model = LinearRegression(Di, d_o=Do)
 
     # Fit the model
     model.fit(x, y, batch_size=128, epochs=3)

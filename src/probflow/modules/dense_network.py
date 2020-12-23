@@ -1,4 +1,4 @@
-from typing import Callable, List, Union
+from typing import Callable, List
 
 import probflow.utils.ops as O
 

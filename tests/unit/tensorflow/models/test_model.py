@@ -8,8 +8,12 @@ import probflow.utils.ops as O
 from probflow.data import ArrayDataGenerator, make_generator
 from probflow.distributions import Bernoulli, Normal, Poisson
 from probflow.models import Model
-from probflow.modules import *
-from probflow.parameters import *
+from probflow.modules import Dense, Module
+from probflow.parameters import (
+    DeterministicParameter,
+    Parameter,
+    ScaleParameter,
+)
 from probflow.utils.settings import Sampling
 
 tfd = tfp.distributions

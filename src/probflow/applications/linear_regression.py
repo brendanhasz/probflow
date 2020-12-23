@@ -1,5 +1,3 @@
-from typing import Callable, List, Union
-
 import probflow.utils.ops as O
 from probflow.distributions import Normal
 from probflow.models import ContinuousModel

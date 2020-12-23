@@ -1,13 +1,6 @@
 import numpy as np
-import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
-from probflow import applications as apps
-from probflow.distributions import Normal
-from probflow.models import ContinuousModel, Model
-
-tfd = tfp.distributions
+from probflow.applications import PoissonRegression
 
 
 def test_PoissonRegression():
@@ -20,7 +13,7 @@ def test_PoissonRegression():
     y = np.random.poisson(lam=np.exp(y)).astype("float32")
 
     # Create the model
-    model = apps.PoissonRegression(5)
+    model = PoissonRegression(5)
 
     # Fit the model
     model.fit(x, y, batch_size=10, epochs=3)

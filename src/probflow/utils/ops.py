@@ -253,8 +253,6 @@ def abs(val):
 def square(val):
     """Power of 2"""
     if get_backend() == "pytorch":
-        import torch
-
         return val ** 2
     else:
         import tensorflow as tf

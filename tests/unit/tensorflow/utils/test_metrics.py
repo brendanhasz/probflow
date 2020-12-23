@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 import tensorflow as tf
 
-from probflow.distributions import *
+from probflow.distributions import Bernoulli, Normal
 from probflow.utils import casting, metrics
 
 
