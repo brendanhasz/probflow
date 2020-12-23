@@ -158,11 +158,20 @@ And a multi-layer Bayesian neural net can be made easily using ProbFlow's ready-
     model = pf.DenseRegression([x.shape[1], 128, 64, 1])
     model.fit(x, y)
 
-Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like
-`generalized linear models <http://probflow.readthedocs.io/en/latest/example_glm.html>`_,
-`deep time-to-event models <http://probflow.readthedocs.io/en/latest/example_time_to_event.html>`_,
-`neural matrix factorization <http://probflow.readthedocs.io/en/latest/example_nmf.html>`_ models, and
-`Gaussian mixture models <http://probflow.readthedocs.io/en/latest/example_gmm.html>`_.  Take a look at the `examples <http://probflow.readthedocs.io/en/latest/examples.html>`_ and the `user guide <http://probflow.readthedocs.io/en/latest/user_guide.html>`_ for more!
+Using parameters and distributions as simple building blocks, ProbFlow allows
+for the painless creation of more complicated Bayesian models like `generalized
+linear models <http://probflow.readthedocs.io/en/latest/example_glm.html>`_,
+`deep time-to-event models
+<http://probflow.readthedocs.io/en/latest/example_time_to_event.html>`_,
+`neural matrix factorization
+<http://probflow.readthedocs.io/en/latest/example_nmf.html>`_ models, and
+`Gaussian mixture models
+<http://probflow.readthedocs.io/en/latest/example_gmm.html>`_.  You can even
+mix `probabilistic and non-probabilistic models
+<http://probflow.readthedocs.io/en/latest/neural_linear.html>`_!  Take a look
+at the `examples <http://probflow.readthedocs.io/en/latest/examples.html>`_ and
+the `user guide <http://probflow.readthedocs.io/en/latest/user_guide.html>`_
+for more!
 
 
 Installation
