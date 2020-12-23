@@ -535,7 +535,7 @@ def test_MultivariateNormalParameter():
 
     # kl_loss should still be scalar
     kl_loss = param.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert isinstance(kl_loss, torch.Tensor)
     assert kl_loss.ndim == 0
 
     # posterior_mean should return mean

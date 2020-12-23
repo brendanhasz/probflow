@@ -409,14 +409,14 @@ def log_cholesky_transform(x):
     """
 
     if get_backend() == "pytorch":
+        import numpy as np
         import torch
 
-        N = int(torch.numel(x) * (torch.numel(x) + 1) / 2)
+        N = int((np.sqrt(1 + 8 * torch.numel(x)) - 1) / 2)
         E = torch.zeros((N, N))
         tril_ix = torch.tril_indices(row=N, col=N, offset=0)
         E[..., tril_ix[0], tril_ix[1]] = x
-        diag_ix = torch.diag_indices(N)
-        E[..., diag_ix[0], diag_ix[1]] = torch.exp(torch.diagonal(E))
+        E[..., range(N), range(N)] = torch.exp(torch.diagonal(E))
         return E @ torch.transpose(E, -1, -2)
     else:
         import tensorflow as tf
