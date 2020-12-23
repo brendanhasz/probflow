@@ -64,6 +64,7 @@ __all__ = [
 from probflow.utils.base import BaseDistribution
 from probflow.utils.casting import make_input_tensor, to_tensor
 from probflow.utils.settings import get_backend, get_datatype
+from probflow.utils.torch_distributions import get_TorchDeterministic
 
 
 def kl_divergence(P, Q):
@@ -90,9 +91,14 @@ def kl_divergence(P, Q):
 
     # Compute KL divergence with the backend
     if get_backend() == "pytorch":
-        import torch
-
-        return torch.distributions.kl.kl_divergence(P, Q)
+        # isinstance wasn't working here :vomiting_face:
+        if str(type(P)) == str(get_TorchDeterministic()):
+            # KL divergence is the negative log probability for deterministic
+            # "distributions" w.r.t. other continuous distributions
+            return -Q.log_prob(P.mean)
+        else:
+            import torch
+            return torch.distributions.kl.kl_divergence(P, Q)
     else:
         import tensorflow_probability as tfp
 

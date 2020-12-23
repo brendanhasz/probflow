@@ -1,17 +1,17 @@
-"""Tests the probflow.models module when backend = pytorch"""
-
-
 import numpy as np
 import pytest
 import torch
 
-import probflow.utils.ops as O
 from probflow.data import ArrayDataGenerator
-from probflow.distributions import Normal
-from probflow.models import *
-from probflow.modules import *
-from probflow.parameters import *
-from probflow.utils.settings import Sampling
+from probflow.distributions import Normal, Gamma
+from probflow.models import Model
+from probflow.modules import Dense, Module
+from probflow.parameters import (
+    DeterministicParameter,
+    Parameter,
+    ScaleParameter,
+)
+from probflow.utils.casting import to_tensor
 
 
 def is_close(a, b, tol=1e-3):
@@ -28,7 +28,7 @@ def test_Model_0D():
             self.std = ScaleParameter(name="Std")
 
         def __call__(self, x):
-            x = torch.tensor(x)
+            x = to_tensor(x)
             return Normal(x * self.weight() + self.bias(), self.std())
 
     # Instantiate the model
@@ -53,6 +53,15 @@ def test_Model_0D():
     # but error w/ wrong type
     with pytest.raises(TypeError):
         my_model.set_learning_rate("asdf")
+
+    # Should be able to set learning rate
+    assert my_model._kl_weight == 1.0
+    my_model.set_kl_weight(2.0)
+    assert my_model._kl_weight == 2.0
+
+    # but error w/ wrong type
+    with pytest.raises(TypeError):
+        my_model.set_kl_weight("asdf")
 
     # predictive samples
     samples = my_model.predictive_sample(x[:30], n=50)
@@ -82,6 +91,15 @@ def test_Model_0D():
     assert samples.shape[0] == 30
     with pytest.raises(ValueError):
         samples = my_model.predict(x[:30], method="asdf")
+
+    # predict using the mode instead of the mean (same for normal dists)
+    # TODO: mode not working yet for pytorch...
+    """
+    samples = my_model.predict(x[:30], method="mode")
+    assert isinstance(samples, np.ndarray)
+    assert samples.ndim == 1
+    assert samples.shape[0] == 30
+    """
 
     # metric
     metric = my_model.metric("mae", x[:30], y[:30])
@@ -278,16 +296,62 @@ def test_Model_force_eager():
             self.std = ScaleParameter(name="Std")
 
         def __call__(self, x):
-            x = torch.tensor(x)
+            x = to_tensor(x)
             return Normal(x * self.weight() + self.bias(), self.std())
 
     # Instantiate the model
     my_model = MyModel()
 
-    # Fit it with tracing off
+    # Fit the model
     x = np.random.randn(100).astype("float32")
     y = -x + 1
     my_model.fit(x, y, batch_size=50, epochs=2, eager=True)
+
+
+def test_Model_force_no_flipout():
+    """Tests fitting probflow.model.Model forcing flipout=False"""
+
+    class MyModel(Model):
+        def __init__(self):
+            self.weight = Parameter(name="Weight")
+            self.bias = Parameter(name="Bias")
+            self.std = ScaleParameter(name="Std")
+
+        def __call__(self, x):
+            x = to_tensor(x)
+            return Normal(x * self.weight() + self.bias(), self.std())
+
+    # Instantiate the model
+    my_model = MyModel()
+
+    # Fit the model
+    x = np.random.randn(100).astype("float32")
+    y = -x + 1
+    my_model.fit(x, y, batch_size=50, epochs=2, flipout=False)
+
+
+def test_Model_nonprobabilistic():
+    """Tests fitting probflow.model.Model with a non-probabilistic dense layer.
+    Shouldn't use flipout in this case (default is to use it), will error if it
+    does.
+    """
+
+    class MyModel(Model):
+        def __init__(self):
+            self.net = Dense(1, 1, probabilistic=False)
+            self.std = DeterministicParameter(transform=lambda x: torch.nn.Softplus()(x))
+
+        def __call__(self, x):
+            x = to_tensor(x)
+            return Normal(self.net(x), self.std())
+
+    # Instantiate the model
+    my_model = MyModel()
+
+    # Fit the model
+    x = np.random.randn(100, 1).astype("float32")
+    y = -x + 1
+    my_model.fit(x, y, batch_size=50, epochs=2)
 
 
 def test_Model_with_dataframe():
@@ -303,7 +367,8 @@ def test_Model_with_dataframe():
             self.std = ScaleParameter([1, 1], name="Std")
 
         def __call__(self, x):
-            x = torch.tensor(x[self.cols].values)
+            x = x[self.cols].values
+            x = to_tensor(x)
             return Normal(x @ self.weight() + self.bias(), self.std())
 
     # Data
@@ -337,7 +402,7 @@ def test_Model_ArrayDataGenerators():
             self.std = ScaleParameter(name="Std")
 
         def __call__(self, x):
-            x = torch.tensor(x)
+            x = to_tensor(x)
             return Normal(x * self.weight() + self.bias(), self.std())
 
     # Instantiate the model
@@ -396,7 +461,7 @@ def test_Model_1D():
             self.std = ScaleParameter([1, 1], name="Std")
 
         def __call__(self, x):
-            x = torch.tensor(x)
+            x = to_tensor(x)
             return Normal(x @ self.weight() + self.bias(), self.std())
 
     # Instantiate the model
@@ -632,7 +697,7 @@ def test_generative_Model():
     assert samples.shape[1] == 1
 
     # log_prob
-    y = np.random.randn(10, 1).astype("float32")
+    y = np.random.randn(10, 1)
     probs = model.log_prob(y)
     assert isinstance(probs, np.ndarray)
     assert probs.ndim == 2
@@ -667,19 +732,17 @@ def test_Model_nesting():
             self.bias = Parameter([1, 1], name="Bias")
 
         def __call__(self, x):
+            x = to_tensor(x)
             return x @ self.weight() + self.bias()
 
     class MyModel(Model):
         def __init__(self):
             self.module = MyModule()
             self.std = ScaleParameter(
-                [1, 1],
-                name="Std",
-                prior=torch.distributions.gamma.Gamma(1.0, 1.0),
+                [1, 1], name="Std", prior=Gamma(1.0, 1.0)
             )
 
         def __call__(self, x):
-            x = torch.tensor(x)
             return Normal(self.module(x), self.std())
 
     # Instantiate the model
@@ -705,25 +768,4 @@ def test_Model_nesting():
     assert samples.shape[2] == 1
 
     # kl loss should be greater for outer model
-    assert (
-        my_model.kl_loss().detach().numpy()
-        > my_model.module.kl_loss().detach().numpy()
-    )
-
-
-def test_ContinuousModel():
-    """Tests probflow.models.ContinuousModel"""
-    pass
-    # TODO
-
-
-def test_DiscreteModel():
-    """Tests probflow.models.DiscreteModel"""
-    pass
-    # TODO
-
-
-def test_CategoricalModel():
-    """Tests probflow.models.CategoricalModel"""
-    pass
-    # TODO
+    assert my_model.kl_loss().detach().numpy() > my_model.module.kl_loss().detach().numpy()
