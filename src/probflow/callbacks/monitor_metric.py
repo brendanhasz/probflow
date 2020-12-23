@@ -81,7 +81,7 @@ class MonitorMetric(Callback):
         """
         if x == "time":
             plt.plot(self.wall_times, self.metrics, **kwargs)
-            plt.xlabel("Time")
+            plt.xlabel("Time (s)")
         else:
             plt.plot(self.epochs, self.metrics, **kwargs)
             plt.xlabel("Epoch")

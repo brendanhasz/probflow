@@ -706,9 +706,10 @@ class ContinuousModel(Model):
 
         where :math:`N` is the number of validation datapoints, :math:`P_M(x_i
         \leq y_i)` is the model's predicted cumulative probability of datapoint
-        :math:`i`, and :math:`\sum_i [ a_i \leq b_i ]` is just the count of
-        elements of :math:`a` which are less than corresponding elements in
-        :math:`b`.
+        :math:`i` (i.e., the percentile along the model's predicted probability
+        distribution at which the true value of :math:`y_i` falls), and
+        :math:`\sum_i [ a_i \leq b_i ]` is just the count of elements of
+        :math:`a` which are less than corresponding elements in :math:`b`.
 
         The calibration curve then plots :math:`p` against :math:`\hat{p}`.
 
@@ -857,12 +858,13 @@ class ContinuousModel(Model):
 
         where :math:`N` is the number of validation datapoints, :math:`P_M(x_i
         \leq y_i)` is the model's predicted cumulative probability of datapoint
-        :math:`i`, and :math:`\sum_i [ a_i \leq b_i ]` is just the count of
-        elements of :math:`a` which are less than corresponding elements in
-        :math:`b`.
+        :math:`i` (i.e., the percentile along the model's predicted probability
+        distribution at which the true value of :math:`y_i` falls), and
+        :math:`\sum_i [ a_i \leq b_i ]` is just the count of elements of
+        :math:`a` which are less than corresponding elements in :math:`b`.
 
-        To compute the expected calibration error (ECE), we take the mean
-        squared error between the empirical and predicted frequencies,
+        Then the expected calibration error (ECE) is just the mean squared
+        error between the empirical and predicted frequencies,
 
         .. math::
 

@@ -66,7 +66,7 @@ class MonitorELBO(Callback):
         """
         if x == "time":
             plt.plot(self.wall_times, self.elbos, **kwargs)
-            plt.xlabel("Time")
+            plt.xlabel("Time (s)")
         else:
             plt.plot(self.epochs, self.elbos, **kwargs)
             plt.xlabel("Epoch")
