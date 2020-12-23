@@ -37,7 +37,9 @@ def test_Parameter_scalar():
         Parameter(shape=[20, 0, 1])
 
     # trainable_variables should be a property returning list of vars
-    assert all(isinstance(v, torch.nn.Parameter) for v in param.trainable_variables)
+    assert all(
+        isinstance(v, torch.nn.Parameter) for v in param.trainable_variables
+    )
 
     # variables should be a property returning dict of transformed vars
     assert isinstance(param.variables, dict)
