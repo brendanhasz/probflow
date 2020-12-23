@@ -6,6 +6,7 @@ The utils.ops module contains operations which run using the current backend.
 * :func:`.squeeze`
 * :func:`.ones`
 * :func:`.zeros`
+* :func:`.full`
 * :func:`.eye`
 * :func:`.sum`
 * :func:`.prod`
@@ -23,6 +24,7 @@ The utils.ops module contains operations which run using the current backend.
 * :func:`.cat`
 * :func:`.additive_logistic_transform`
 * :func:`.insert_col_of`
+* :func:`.new_variable`
 
 ----------
 
@@ -35,6 +37,7 @@ __all__ = [
     "squeeze",
     "ones",
     "zeros",
+    "full",
     "eye",
     "sum",
     "prod",
@@ -52,12 +55,13 @@ __all__ = [
     "cat",
     "additive_logistic_transform",
     "insert_col_of",
+    "new_variable",
 ]
 
 
 from probflow.utils.base import BaseDistribution
 from probflow.utils.casting import make_input_tensor
-from probflow.utils.settings import get_backend
+from probflow.utils.settings import get_backend, get_datatype
 
 
 def kl_divergence(P, Q):
@@ -126,11 +130,11 @@ def ones(shape):
     if get_backend() == "pytorch":
         import torch
 
-        return torch.ones(shape)
+        return torch.ones(shape, dtype=get_datatype())
     else:
         import tensorflow as tf
 
-        return tf.ones(shape)
+        return tf.ones(shape, dtype=get_datatype())
 
 
 def zeros(shape):
@@ -138,11 +142,23 @@ def zeros(shape):
     if get_backend() == "pytorch":
         import torch
 
-        return torch.zeros(shape)
+        return torch.zeros(shape, dtype=get_datatype())
     else:
         import tensorflow as tf
 
-        return tf.zeros(shape)
+        return tf.zeros(shape, dtype=get_datatype())
+
+
+def full(shape, value):
+    """Tensor full of some value."""
+    if get_backend() == "pytorch":
+        import torch
+
+        return torch.full(shape, value, dtype=get_datatype())
+    else:
+        import tensorflow as tf
+
+        return tf.cast(tf.fill(shape, value), dtype=get_datatype())
 
 
 def eye(dims):
@@ -154,7 +170,7 @@ def eye(dims):
     else:
         import tensorflow as tf
 
-        return tf.eye(dims)
+        return tf.eye(dims, dtype=get_datatype())
 
 
 def sum(val, axis=-1):
@@ -350,9 +366,25 @@ def insert_col_of(vals, val):
         import torch
 
         shape = [s for s in vals.shape[:-1]] + [1]
-        return torch.cat([val * torch.ones(shape), vals], dim=-1)
+        return torch.cat(
+            [val * torch.ones(shape, dtype=get_datatype()), vals], dim=-1
+        )
     else:
         import tensorflow as tf
 
         shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
-        return tf.concat([val * tf.ones(shape), vals], axis=-1)
+        return tf.concat(
+            [val * tf.ones(shape, dtype=get_datatype()), vals], axis=-1
+        )
+
+
+def new_variable(initial_values):
+    """Get a new variable with the current backend, and initialize it"""
+    if get_backend() == "pytorch":
+        import torch
+
+        return torch.nn.Parameter(initial_values)
+    else:
+        import tensorflow as tf
+
+        return tf.Variable(initial_values)
