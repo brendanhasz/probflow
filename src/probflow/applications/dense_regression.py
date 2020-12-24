@@ -25,6 +25,11 @@ class DenseRegression(ContinuousModel):
         Whether to model a change in noise as a function of :math:`\mathbf{x}`
         (if ``heteroscedastic=True``), or not (if ``heteroscedastic=False``,
         the default).
+    activation : callable
+        Activation function to apply to the outputs of each layer.
+        Note that the activation function will not be applied to the outputs
+        of the final layer.
+        Default = :math:`\max ( 0, x )`
     kwargs
         Additional keyword arguments are passed to :class:`.DenseNetwork`
 

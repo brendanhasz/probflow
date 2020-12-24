@@ -19,7 +19,7 @@ object) is to use the :meth:`save <probflow.modules.Module.save>` method:
     model.save('my_model.pfm')
 
     # Or, use pf.save, which does the same thing
-    # pf.save(model, 'my_model')
+    # pf.save(model, 'my_model.pfm')
 
 Then the file can be loaded with :func:`pf.load <probflow.utils.io.load>`
 
@@ -37,8 +37,8 @@ haha).  You could just as easily use ``.pkl``, or ``.dat`` or whatever.
     Currently, you can only load a ProbFlow model or module file using the
     exact same version of Python as was used to save it.  This is because
     ProbFlow uses `cloudpickle <http://github.com/cloudpipe/cloudpickle>`_ to
-    serialize objects.  Fancier storage might be supported in the future but
-    don't hold your breath!
+    serialize objects.  Fancier/better storage might be supported in the 
+    future, but don't hold your breath!
 
 
 Serializing a model to a JSON-safe string
@@ -63,7 +63,7 @@ this:
     import json
     json.dumps({"model": model.dumps()})
 
-Then the file can be loaded back from the string with
+Then the model can be loaded back from the string with
 :func:`pf.loads <probflow.utils.io.loads>`
 
 .. code-block:: python3

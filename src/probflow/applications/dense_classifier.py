@@ -19,6 +19,11 @@ class DenseClassifier(CategoricalModel):
         The first element should be the dimensionality of the independent
         variable (number of features), and the last element should be the
         number of classes of the target.
+    activation : callable
+        Activation function to apply to the outputs of each layer.
+        Note that the activation function will not be applied to the outputs
+        of the final layer.
+        Default = :math:`\max ( 0, x )`
     kwargs
         Additional keyword arguments are passed to :class:`.DenseNetwork`
 
