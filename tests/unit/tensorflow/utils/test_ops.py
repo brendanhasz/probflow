@@ -158,6 +158,104 @@ def test_full():
     assert np.all(twos.numpy() == 2.0)
 
 
+def test_randn():
+    """Tests randn"""
+
+    # Scalar
+    x = ops.randn([1])
+    assert isinstance(x, tf.Tensor)
+    assert x.ndim == 1
+    assert x.shape[0] == 1
+    assert x.numpy() > -15
+    assert x.numpy() < 15
+
+    # 1D
+    x = ops.randn([5])
+    assert isinstance(x, tf.Tensor)
+    assert x.ndim == 1
+    assert x.shape[0] == 5
+    assert np.unique(x.numpy()).shape[0] == 5
+
+    # 2D
+    x = ops.randn([5, 4])
+    assert isinstance(x, tf.Tensor)
+    assert x.ndim == 2
+    assert x.shape[0] == 5
+    assert x.shape[1] == 4
+    assert np.unique(x.numpy()).shape[0] == 5 * 4
+
+    # 3D
+    x = ops.randn([5, 4, 3])
+    assert isinstance(x, tf.Tensor)
+    assert x.ndim == 3
+    assert x.shape[0] == 5
+    assert x.shape[1] == 4
+    assert x.shape[2] == 3
+    assert np.unique(x.numpy()).shape[0] == 5 * 4 * 3
+
+
+def test_rand_rademacher():
+    """Tests rand_rademacher"""
+
+    # Scalar
+    x = ops.rand_rademacher([1])
+    assert isinstance(x, tf.Tensor)
+    assert x.ndim == 1
+    assert x.shape[0] == 1
+    assert x.numpy() == -1 or x.numpy() == 1
+
+    # 1D
+    x = ops.rand_rademacher([5])
+    assert isinstance(x, tf.Tensor)
+    assert x.ndim == 1
+    assert x.shape[0] == 5
+    assert np.all((x.numpy() == -1) | (x.numpy() == 1))
+
+    # 2D
+    x = ops.rand_rademacher([5, 4])
+    assert isinstance(x, tf.Tensor)
+    assert x.ndim == 2
+    assert x.shape[0] == 5
+    assert x.shape[1] == 4
+    assert np.all((x.numpy() == -1) | (x.numpy() == 1))
+
+    # 3D
+    x = ops.rand_rademacher([5, 4, 3])
+    assert isinstance(x, tf.Tensor)
+    assert x.ndim == 3
+    assert x.shape[0] == 5
+    assert x.shape[1] == 4
+    assert x.shape[2] == 3
+    assert np.all((x.numpy() == -1) | (x.numpy() == 1))
+
+
+def test_shape():
+    """Tests shape"""
+
+    # Scalar
+    x = ops.shape(tf.random.normal([1]))
+    assert isinstance(x, list)
+    assert x[0] == 1
+
+    # 1D
+    x = ops.shape(tf.random.normal([5]))
+    assert isinstance(x, list)
+    assert x[0] == 5
+
+    # 2D
+    x = ops.shape(tf.random.normal([5, 4]))
+    assert isinstance(x, list)
+    assert x[0] == 5
+    assert x[1] == 4
+
+    # 3D
+    x = ops.shape(tf.random.normal([5, 4, 3]))
+    assert isinstance(x, list)
+    assert x[0] == 5
+    assert x[1] == 4
+    assert x[2] == 3
+
+
 def test_eye():
     """Tests eye"""
 

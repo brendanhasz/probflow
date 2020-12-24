@@ -141,7 +141,7 @@ class Model(Module):
 
                 def elbo_loss(self, *args):
                     self._probflow_model.reset_kl_loss()
-                    with Sampling(n=1, flipout=False):
+                    with Sampling(n=1, flipout=flipout):
                         if len(args) == 1:
                             elbo_loss = self._probflow_model.elbo_loss(
                                 None, args[0], n

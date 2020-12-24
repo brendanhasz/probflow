@@ -7,6 +7,9 @@ The utils.ops module contains operations which run using the current backend.
 * :func:`.ones`
 * :func:`.zeros`
 * :func:`.full`
+* :func:`.randn`
+* :func:`.rand_rademacher`
+* :func:`.shape`
 * :func:`.eye`
 * :func:`.sum`
 * :func:`.prod`
@@ -39,6 +42,9 @@ __all__ = [
     "ones",
     "zeros",
     "full",
+    "randn",
+    "rand_rademacher",
+    "shape",
     "eye",
     "sum",
     "prod",
@@ -161,6 +167,41 @@ def full(shape, value):
         import tensorflow as tf
 
         return tf.cast(tf.fill(shape, value), dtype=get_datatype())
+
+
+def randn(shape):
+    """Tensor full of random values drawn from a standard normal."""
+    if get_backend() == "pytorch":
+        import torch
+
+        return torch.randn(shape, dtype=get_datatype())
+    else:
+        import tensorflow as tf
+
+        return tf.random.normal(shape, dtype=get_datatype())
+
+
+def rand_rademacher(shape):
+    """Tensor full of random 0s or 1s (i.e. drawn from a Rademacher dist)."""
+    if get_backend() == "pytorch":
+        import torch
+
+        return 2 * torch.randint(0, 1, shape, dtype=get_datatype()) - 1
+    else:
+        import tensorflow_probability as tfp
+
+        try:  # for newer versions of tfp
+            return tfp.random.rademacher(shape)
+        except AttributeError:  # for older versions of tfp
+            return tfp.python.math.random_rademacher(shape)
+
+
+def shape(x):
+    """Get a list of integers representing this tensor's shape"""
+    if get_backend() == "pytorch":
+        return [s for s in x.shape]
+    else:
+        return [s for s in x.shape]
 
 
 def eye(dims):
