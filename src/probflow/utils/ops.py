@@ -190,10 +190,10 @@ def rand_rademacher(shape):
     else:
         import tensorflow_probability as tfp
 
-        try:  # for older versions of tfp
-            return tfp.python.math.random_rademacher(shape)
-        except AttributeError:  # for newer versions of tfp
+        try:  # for older versions of tfp, fall back on older version
             return tfp.random.rademacher(shape)
+        except AttributeError:  # pragma: no cover
+            return tfp.python.math.random_rademacher(shape)
 
 
 def shape(x):
