@@ -78,10 +78,26 @@ class Model(Module):
             log_likelihoods = self(x_data).log_prob(y_data)
         return O.sum(log_likelihoods, axis=None)
 
-    def elbo_loss(self, x_data, y_data, n):
-        """Compute the negative ELBO, scaled to a single sample"""
+    def elbo_loss(self, x_data, y_data, n: int, n_mc: int):
+        """Compute the negative ELBO, scaled to a single sample.
+
+        Parameters
+        ----------
+        x_data
+            The independent variable values (or None if this is a generative
+            model)
+        y_data
+            The dependent variable values
+        n : int
+            Total number of datapoints in the dataset
+        n_mc : int
+            Number of MC samples we're taking from the posteriors
+        """
         nb = y_data.shape[0]  # number of samples in this batch
-        log_loss = self.log_likelihood(x_data, y_data) / nb
+        if n_mc > 1:  # first dim is num MC samples if n_mc > 1
+            x_data = None if x_data is None else O.expand_dims(x_data, 0)
+            y_data = O.expand_dims(y_data, 0)
+        log_loss = self.log_likelihood(x_data, y_data) / nb / n_mc
         kl_loss = self.kl_loss() / n + self.kl_loss_batch() / nb
         return self._kl_weight * kl_loss - log_loss
 
@@ -89,16 +105,16 @@ class Model(Module):
         """Get the current ELBO on training data"""
         return self._current_elbo
 
-    def _train_step_tensorflow(self, n, flipout=False, eager=False):
+    def _train_step_tensorflow(self, n, flipout=False, eager=False, n_mc=1):
         """Get the training step function for TensorFlow"""
 
         import tensorflow as tf
 
         def train_fn(x_data, y_data):
             self.reset_kl_loss()
-            with Sampling(n=1, flipout=flipout):
+            with Sampling(n=n_mc, flipout=flipout):
                 with tf.GradientTape() as tape:
-                    elbo_loss = self.elbo_loss(x_data, y_data, n)
+                    elbo_loss = self.elbo_loss(x_data, y_data, n, n_mc)
                 variables = self.trainable_variables
                 gradients = tape.gradient(elbo_loss, variables)
                 self._optimizer.apply_gradients(zip(gradients, variables))
@@ -109,7 +125,7 @@ class Model(Module):
         else:
             return tf.function(train_fn)
 
-    def _train_step_pytorch(self, n, flipout=False, eager=False):
+    def _train_step_pytorch(self, n, flipout=False, eager=False, n_mc=1):
         """Get the training step function for PyTorch"""
 
         import torch
@@ -118,9 +134,9 @@ class Model(Module):
 
             def train_fn(x_data, y_data):
                 self.reset_kl_loss()
-                with Sampling(n=1, flipout=flipout):
+                with Sampling(n=n_mc, flipout=flipout):
                     self._optimizer.zero_grad()
-                    elbo_loss = self.elbo_loss(x_data, y_data, n)
+                    elbo_loss = self.elbo_loss(x_data, y_data, n, n_mc)
                     elbo_loss.backward()
                     self._optimizer.step()
                 return elbo_loss
@@ -141,14 +157,14 @@ class Model(Module):
 
                 def elbo_loss(self, *args):
                     self._probflow_model.reset_kl_loss()
-                    with Sampling(n=1, flipout=flipout):
+                    with Sampling(n=n_mc, flipout=flipout):
                         if len(args) == 1:
                             elbo_loss = self._probflow_model.elbo_loss(
-                                None, args[0], n
+                                None, args[0], n, n_mc
                             )
                         else:
                             elbo_loss = self._probflow_model.elbo_loss(
-                                args[0], args[1], n
+                                args[0], args[1], n, n_mc
                             )
                     return elbo_loss
 
@@ -213,6 +229,7 @@ class Model(Module):
         num_workers: int = None,
         callbacks: List[BaseCallback] = [],
         eager: bool = False,
+        n_mc: int = 1,
     ):
         r"""Fit the model to data
 
@@ -268,6 +285,12 @@ class Model(Module):
             (for TensorFlow) or tracing (for PyTorch) to optimize the model
             fitting.  Note that even if eager=True, you can still use eager
             execution when using the model after it is fit.  Default = False
+        n_mc : int
+            Number of monte carlo samples to take from the variational
+            posteriors per minibatch.  The default is to just take one per
+            batch.  Using a smaller number of MC samples is faster, but using a
+            greater number of MC samples will decrease the variance of the
+            gradients, leading to more stable parameter optimization.
 
 
         Example
@@ -317,11 +340,11 @@ class Model(Module):
         # Create a function to perform one training step
         if get_backend() == "pytorch":
             self._train_fn = self._train_step_pytorch(
-                self._data.n_samples, flipout, eager=eager
+                self._data.n_samples, flipout, eager=eager, n_mc=n_mc
             )
         else:
             self._train_fn = self._train_step_tensorflow(
-                self._data.n_samples, flipout, eager=eager
+                self._data.n_samples, flipout, eager=eager, n_mc=n_mc
             )
 
         # Assign model param to callbacks
