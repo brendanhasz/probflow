@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
@@ -229,15 +227,6 @@ def test_rand_rademacher():
     assert x.shape[1] == 4
     assert x.shape[2] == 3
     assert np.all((x.numpy() == -1) | (x.numpy() == 1))
-
-    # should still work for older versions of tfp
-    with patch("tfp.random.rademacher", side_effect=AttributeError("nopers!")):
-        x = ops.rand_rademacher([5, 4, 3])
-        assert isinstance(x, tf.Tensor)
-        assert x.ndim == 3
-        assert x.shape[0] == 5
-        assert x.shape[1] == 4
-        assert x.shape[2] == 3
 
 
 def test_shape():
