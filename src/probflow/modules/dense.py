@@ -1,7 +1,8 @@
+import probflow.utils.ops as O
+from probflow.modules.module import Module
 from probflow.parameters import DeterministicParameter, Parameter
-from probflow.utils.settings import get_backend, get_flipout
-
-from .module import Module
+from probflow.utils.casting import to_tensor
+from probflow.utils.settings import get_flipout
 
 
 class Dense(Module):
@@ -70,34 +71,26 @@ class Dense(Module):
     def __call__(self, x):
         """Perform the forward pass"""
 
+        x = to_tensor(x)
+
         # Using the Flipout estimator
         if get_flipout() and self.flipout and self.probabilistic:
 
-            # With PyTorch
-            if get_backend() == "pytorch":
-                raise NotImplementedError
+            # Flipout-estimated weight samples
+            s = O.rand_rademacher(O.shape(x))
+            r = O.rand_rademacher([O.shape(x)[0], self.d_out])
+            norm_samples = O.randn([self.d_in, self.d_out])
+            w_samples = self.weights.variables["scale"] * norm_samples
+            w_noise = r * ((x * s) @ w_samples)
+            w_outputs = x @ self.weights.variables["loc"] + w_noise
 
-            # With Tensorflow
-            else:
+            # Flipout-estimated bias samples
+            r = O.rand_rademacher([O.shape(x)[0], self.d_out])
+            norm_samples = O.randn([self.d_out])
+            b_samples = self.bias.variables["scale"] * norm_samples
+            b_outputs = self.bias.variables["loc"] + r * b_samples
 
-                import tensorflow as tf
-                import tensorflow_probability as tfp
-
-                # Flipout-estimated weight samples
-                s = tfp.python.math.random_rademacher(tf.shape(x))
-                r = tfp.python.math.random_rademacher([x.shape[0], self.d_out])
-                norm_samples = tf.random.normal([self.d_in, self.d_out])
-                w_samples = self.weights.variables["scale"] * norm_samples
-                w_noise = r * ((x * s) @ w_samples)
-                w_outputs = x @ self.weights.variables["loc"] + w_noise
-
-                # Flipout-estimated bias samples
-                r = tfp.python.math.random_rademacher([x.shape[0], self.d_out])
-                norm_samples = tf.random.normal([self.d_out])
-                b_samples = self.bias.variables["scale"] * norm_samples
-                b_outputs = self.bias.variables["loc"] + r * b_samples
-
-                return w_outputs + b_outputs
+            return w_outputs + b_outputs
 
         # Without Flipout
         else:

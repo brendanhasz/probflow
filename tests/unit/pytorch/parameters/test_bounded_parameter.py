@@ -18,7 +18,7 @@ def test_BoundedParameter():
     assert samples.ndim == 2
     assert samples.shape[0] == 100
     assert samples.shape[1] == 1
-    assert all(s > 0 and s < 1 for s in samples.flatten().tolist())
+    assert all(s >= 0 and s <= 1 for s in samples.flatten().tolist())
 
     # 1D parameter
     param = BoundedParameter(shape=5)
@@ -26,7 +26,7 @@ def test_BoundedParameter():
     assert samples.ndim == 2
     assert samples.shape[0] == 100
     assert samples.shape[1] == 5
-    assert all(s > 0 and s < 1 for s in samples.flatten().tolist())
+    assert all(s >= 0 and s <= 1 for s in samples.flatten().tolist())
 
     # 2D parameter
     param = BoundedParameter(shape=[5, 4])
@@ -35,4 +35,4 @@ def test_BoundedParameter():
     assert samples.shape[0] == 100
     assert samples.shape[1] == 5
     assert samples.shape[2] == 4
-    assert all(s > 0 and s < 1 for s in samples.flatten().tolist())
+    assert all(s >= 0 and s <= 1 for s in samples.flatten().tolist())

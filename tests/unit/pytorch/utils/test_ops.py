@@ -1,6 +1,3 @@
-"""Tests the probflow.utils.ops module when backend = pytorch"""
-
-
 import numpy as np
 import torch
 
@@ -147,6 +144,104 @@ def test_zeros():
     assert zeros.shape[1] == 4
     assert zeros.shape[2] == 3
     assert np.all(zeros.numpy() == 0.0)
+
+
+def test_randn():
+    """Tests randn"""
+
+    # Scalar
+    x = ops.randn([1])
+    assert isinstance(x, torch.Tensor)
+    assert x.ndim == 1
+    assert x.shape[0] == 1
+    assert x.detach().numpy() > -15
+    assert x.detach().numpy() < 15
+
+    # 1D
+    x = ops.randn([5])
+    assert isinstance(x, torch.Tensor)
+    assert x.ndim == 1
+    assert x.shape[0] == 5
+    assert np.unique(x.detach().numpy()).shape[0] == 5
+
+    # 2D
+    x = ops.randn([5, 4])
+    assert isinstance(x, torch.Tensor)
+    assert x.ndim == 2
+    assert x.shape[0] == 5
+    assert x.shape[1] == 4
+    assert np.unique(x.detach().numpy()).shape[0] == 5 * 4
+
+    # 3D
+    x = ops.randn([5, 4, 3])
+    assert isinstance(x, torch.Tensor)
+    assert x.ndim == 3
+    assert x.shape[0] == 5
+    assert x.shape[1] == 4
+    assert x.shape[2] == 3
+    assert np.unique(x.detach().numpy()).shape[0] == 5 * 4 * 3
+
+
+def test_rand_rademacher():
+    """Tests rand_rademacher"""
+
+    # Scalar
+    x = ops.rand_rademacher([1])
+    assert isinstance(x, torch.Tensor)
+    assert x.ndim == 1
+    assert x.shape[0] == 1
+    assert x.detach().numpy() == -1 or x.detach().numpy() == 1
+
+    # 1D
+    x = ops.rand_rademacher([5])
+    assert isinstance(x, torch.Tensor)
+    assert x.ndim == 1
+    assert x.shape[0] == 5
+    assert np.all((x.detach().numpy() == -1) | (x.detach().numpy() == 1))
+
+    # 2D
+    x = ops.rand_rademacher([5, 4])
+    assert isinstance(x, torch.Tensor)
+    assert x.ndim == 2
+    assert x.shape[0] == 5
+    assert x.shape[1] == 4
+    assert np.all((x.detach().numpy() == -1) | (x.detach().numpy() == 1))
+
+    # 3D
+    x = ops.rand_rademacher([5, 4, 3])
+    assert isinstance(x, torch.Tensor)
+    assert x.ndim == 3
+    assert x.shape[0] == 5
+    assert x.shape[1] == 4
+    assert x.shape[2] == 3
+    assert np.all((x.detach().numpy() == -1) | (x.detach().numpy() == 1))
+
+
+def test_shape():
+    """Tests shape"""
+
+    # Scalar
+    x = ops.shape(torch.randn([1]))
+    assert isinstance(x, list)
+    assert x[0] == 1
+
+    # 1D
+    x = ops.shape(torch.randn([5]))
+    assert isinstance(x, list)
+    assert x[0] == 5
+
+    # 2D
+    x = ops.shape(torch.randn([5, 4]))
+    assert isinstance(x, list)
+    assert x[0] == 5
+    assert x[1] == 4
+
+    # 3D
+    x = ops.shape(torch.randn([5, 4, 3]))
+    assert isinstance(x, list)
+    assert x[0] == 5
+    assert x[1] == 4
+    assert x[2] == 3
 
 
 def test_eye():
