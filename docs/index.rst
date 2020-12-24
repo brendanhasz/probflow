@@ -238,7 +238,14 @@ And a multi-layer Bayesian neural net can be made easily using ProbFlow's ready-
     model = pf.DenseRegression([x.shape[1], 128, 64, 1])
     model.fit(x, y)
 
-Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like :doc:`generalized linear models <examples/glm>`, :doc:`deep time-to-event models <examples/time_to_event>`, :doc:`neural matrix factorization <examples/nmf>` models, and :doc:`Gaussian mixture models <examples/gmm>`.  Take a look at the :doc:`examples/examples` and the :doc:`user_guide/user_guide` for more!
+Using parameters and distributions as simple building blocks, ProbFlow allows
+for the painless creation of more complicated Bayesian models like
+:doc:`generalized linear models <examples/glm>`, :doc:`deep time-to-event
+models <examples/time_to_event>`, :doc:`neural matrix factorization
+<examples/nmf>` models, and :doc:`Gaussian mixture models <examples/gmm>`.  You
+can even :doc:`mix probabilistic and non-probabilistic models
+<examples/neural_linear>`!  Take a look at the :doc:`examples/examples` and the
+:doc:`user_guide/user_guide` for more!
 
 
 Installation

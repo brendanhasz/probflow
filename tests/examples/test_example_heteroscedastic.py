@@ -1,9 +1,7 @@
 """Tests example robust heteroscedastic regression"""
 
 
-import matplotlib.pyplot as plt
 import numpy as np
-import pytest
 import tensorflow as tf
 import tensorflow_probability as tfp
 

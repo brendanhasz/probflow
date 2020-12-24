@@ -1,10 +1,7 @@
-from typing import Callable, Dict, List, Type, Union
+from typing import List, Union
 
 import probflow.utils.ops as O
-from probflow.distributions import Deterministic, Normal
-from probflow.parameters import Parameter
-from probflow.utils.base import BaseDistribution
-from probflow.utils.initializers import xavier
+from probflow.parameters import DeterministicParameter, Parameter
 
 from .module import Module
 
@@ -19,14 +16,15 @@ class Embedding(Module):
     embedding dimensionality is M, a matrix of NxM free parameters is created
     and optimized to minimize the loss.
 
-    The embeddings can be non-probabilistic (each integer corresponds to a
-    single point in M-dimensional space, the default), or probabilistic (each
-    integer corresponds to a M-dimensional multivariate distribution).
-
     By default, a :class:`.Deterministic` distribution is used for the
     embedding variables' posterior distributions, with :class:`.Normal`
     ``(0, 1)`` priors.  This corresponds to normal non-probabilistic embedding
     with L2 regularization.
+
+    The embeddings can be non-probabilistic (each integer corresponds to a
+    single point in M-dimensional space, the default), or probabilistic (each
+    integer corresponds to a M-dimensional multivariate distribution).  Set the
+    `probabilistic` kwarg to True to use probabilistic embeddings.
 
 
     Parameters
@@ -47,9 +45,17 @@ class Embedding(Module):
         posterior distribution.  Keys correspond to variable names (arguments
         to the distribution), and values contain functions to initialize those
         variables given ``shape`` as the single argument.
+    probabilistic : bool
+        Whether variational posteriors for the weights and biases should be
+        probabilistic.  If False (the default), will use
+        :class:`.Deterministic` distributions for the variational posteriors.
+        If True, will use :class:`.Normal` distributions.
     name : str
         Name for this layer.
         Default = 'Embeddings'
+    kwargs
+        Additional keyword arguments are passed to the :class:`.Parameter`
+        constructor which creates the embedding variables.
 
 
     Examples
@@ -74,10 +80,9 @@ class Embedding(Module):
         self,
         k: Union[int, List[int]],
         d: Union[int, List[int]],
-        posterior: Type[BaseDistribution] = Deterministic,
-        prior: BaseDistribution = Normal(0, 1),
-        initializer: Dict[str, Callable] = {"loc": xavier},
+        probabilistic: bool = False,
         name: str = "Embedding",
+        **kwargs
     ):
 
         # Convert to list if not already
@@ -94,14 +99,16 @@ class Embedding(Module):
         if any(e < 1 for e in d):
             raise ValueError("d must be >0")
 
+        # Override posterior and initializer for probabilistic embedding
+        if probabilistic:
+            ParameterClass = Parameter
+        else:
+            ParameterClass = DeterministicParameter
+
         # Create the parameters
         self.embeddings = [
-            Parameter(
-                shape=[k[i], d[i]],
-                posterior=posterior,
-                prior=prior,
-                initializer=initializer,
-                name=name + "_" + str(i),
+            ParameterClass(
+                shape=[k[i], d[i]], name=name + "_" + str(i), **kwargs
             )
             for i in range(len(d))
         ]

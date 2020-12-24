@@ -1,5 +1,5 @@
 
-.PHONY: init-tensorflow init-pytorch test-tensorflow test-pytorch format docs package push-package clean
+.PHONY: init-tensorflow init-pytorch test-tensorflow test-pytorch format docs bump-minor bump-patch package push-package clean
 
 init-tensorflow:
 	python3 -m venv venv; \
@@ -21,6 +21,7 @@ test-pytorch:
 
 format:
 	. venv/bin/activate; \
+        autoflake -r --in-place --remove-all-unused-imports --ignore-init-module-imports src/probflow tests; \
         isort src/probflow tests; \
 	black src/probflow tests; \
 	flake8 src/probflow tests

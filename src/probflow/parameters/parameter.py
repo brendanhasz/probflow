@@ -9,7 +9,7 @@ from probflow.utils.base import BaseDistribution, BaseParameter
 from probflow.utils.casting import to_numpy
 from probflow.utils.initializers import scale_xavier, xavier
 from probflow.utils.plotting import plot_dist
-from probflow.utils.settings import Sampling, get_backend, get_samples
+from probflow.utils.settings import Sampling, get_samples
 
 
 class Parameter(BaseParameter):
@@ -53,11 +53,13 @@ class Parameter(BaseParameter):
         ``posterior``=:class:`.Gamma`` and
         ``transform = lambda x: tf.reciprocal(x)``
         Default is to use no transform.
-    initializer : Dict[str, callable]
+    initializer : Dict[str, callable] or Dict[str, int] or Dict[str, float]
         Initializer functions to use for each variable of the variational
         posterior distribution.  Keys correspond to variable names (arguments
         to the distribution), and values contain functions to initialize those
-        variables given ``shape`` as the single argument.
+        variables given ``shape`` as the single argument.  Or, keys can be
+        a float or an int, in which case all elements will be initialized to
+        that value.
     var_transform : Dict[str, callable]
         Transform to apply to each variable of the variational posterior.
         For example to transform the standard deviation parameter from
@@ -121,16 +123,15 @@ class Parameter(BaseParameter):
         # Create variables for the variational distribution
         self.untransformed_variables = dict()
         for var, init in initializer.items():
-            if get_backend() == "pytorch":
-                import torch
 
-                self.untransformed_variables[var] = torch.nn.Parameter(
-                    init(shape)
-                )
-            else:
-                import tensorflow as tf
+            # Int or float initializations = start whole array at that value
+            if isinstance(init, (int, float)):
+                initial_value = O.full(shape, init)
+            else:  # TODO: should also support numpy arrays + backend tensors
+                initial_value = init(shape)
 
-                self.untransformed_variables[var] = tf.Variable(init(shape))
+            # Create the variables
+            self.untransformed_variables[var] = O.new_variable(initial_value)
 
     @property
     def n_parameters(self):

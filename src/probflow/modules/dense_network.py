@@ -1,4 +1,4 @@
-from typing import Callable, List, Union
+from typing import Callable, List
 
 import probflow.utils.ops as O
 
@@ -22,6 +22,13 @@ class DenseNetwork(Module):
         Note that the activation function will not be applied to the outputs
         of the final layer.
         Default = :math:`\max ( 0, x )`
+    probabilistic : bool
+        Whether variational posteriors for the weights and biases should be
+        probabilistic.  If True (the default), will use Normal distributions
+        for the variational posteriors.  If False, will use Deterministic
+        distributions.
+    kwargs
+        Additional parameters are passed to :class:`.Dense` for each layer.
 
     Attributes
     ----------
@@ -36,13 +43,15 @@ class DenseNetwork(Module):
         d: List[int],
         activation: Callable = O.relu,
         name: str = "DenseNetwork",
+        **kwargs
     ):
         self.activations = [activation for i in range(len(d) - 2)]
         self.activations += [lambda x: x]
         self.name = name
         names = [name + "_Dense" + str(i) for i in range(len(d) - 1)]
         self.layers = [
-            Dense(d[i], d[i + 1], name=names[i]) for i in range(len(d) - 1)
+            Dense(d[i], d[i + 1], name=names[i], **kwargs)
+            for i in range(len(d) - 1)
         ]
 
     def __call__(self, x):

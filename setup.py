@@ -5,7 +5,7 @@ with open("README.rst", "r") as f:
 
 setup(
     name="probflow",
-    version="2.0.0",
+    version="2.1.2",
     author="Brendan Hasz",
     author_email="winsto99@gmail.com",
     description="A Python package for building Bayesian models with TensorFlow or PyTorch",
@@ -26,21 +26,22 @@ setup(
         "matplotlib >= 3.1.0",
         "numpy >= 1.17.0",
         "pandas >= 0.25.0",
-        "cloudpickle == 1.4.1",
+        "cloudpickle >= 1.3",
     ],
     extras_require={
         "tensorflow": [
-            "tensorflow == 2.2.0",
-            "tensorflow-probability == 0.10.0",
+            "tensorflow >= 2.2.0",
+            "tensorflow-probability >= 0.10.0",
         ],
         "tensorflow_gpu": [
-            "tensorflow-gpu == 2.2.0",
-            "tensorflow-probability == 0.10.0",
+            "tensorflow-gpu >= 2.2.0",
+            "tensorflow-probability >= 0.10.0",
         ],
         "pytorch": [
             "torch >= 1.5.0",
         ],
         "dev": [
+            "autoflake >= 1.4",
             "black >= 19.10b0",
             "bumpversion",
             "flake8 >= 3.8.3",
@@ -55,8 +56,8 @@ setup(
             "wheel >= 0.34.2",
         ],
         "docs": [
-            "tensorflow == 2.2.0",
-            "tensorflow-probability == 0.10.0",
+            "tensorflow >= 2.2.0",
+            "tensorflow-probability >= 0.10.0",
             "sphinx-tabs >= 1.1.13",
         ],
     },

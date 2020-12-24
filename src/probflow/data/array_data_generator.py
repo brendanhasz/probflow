@@ -84,7 +84,7 @@ class ArrayDataGenerator(DataGenerator):
             self._n_samples = x.shape[0]
 
         # Batch size
-        if batch_size is None or y.shape[0] < batch_size:
+        if batch_size is None or self._n_samples < batch_size:
             self._batch_size = self._n_samples
         else:
             self._batch_size = batch_size

@@ -10,7 +10,6 @@ TODO: more info...
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.colors import to_rgba
 
 COLORS = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 

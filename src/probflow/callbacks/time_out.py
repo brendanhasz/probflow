@@ -32,12 +32,15 @@ class TimeOut(Callback):
         self.start_time = None
         self.verbose = verbose
 
-    def on_epoch_end(self):
-        """Stop training if time limit has been passed"""
+    def on_epoch_start(self):
+        """Record start time at the beginning of the first epoch"""
         if self.start_time is None:
             self.start_time = time.time()
+
+    def on_epoch_end(self):
+        """Stop training if time limit has been passed"""
         dt = time.time() - self.start_time
         if self.time_limit < dt:
             self.model.stop_training()
             if self.verbose:
-                print("TimeOut after " + str(dt) + "s")
+                print(f"TimeOut callback ended training after {dt} s")

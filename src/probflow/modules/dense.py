@@ -1,8 +1,8 @@
 import probflow.utils.ops as O
-from probflow.parameters import Parameter
-from probflow.utils.settings import get_backend, get_flipout
-
-from .module import Module
+from probflow.modules.module import Module
+from probflow.parameters import DeterministicParameter, Parameter
+from probflow.utils.casting import to_tensor
+from probflow.utils.settings import get_flipout
 
 
 class Dense(Module):
@@ -16,55 +16,81 @@ class Dense(Module):
         Number of input dimensions.
     d_out : int
         Number of output dimensions (number of "units").
+    probabilistic : bool
+        Whether variational posteriors for the weights and biases should be
+        probabilistic.  If True (the default), will use Normal distributions
+        for the variational posteriors.  If False, will use Deterministic
+        distributions.
+    flipout: bool
+        Whether to use the flipout estimator for this layer.  Default is True.
+        Usually, when the global flipout setting is set to True, will use
+        flipout during training but not during inference.  If this kwarg is set
+        to False, will not use flipout even during training.
+    weight_kwargs : dict
+        Additional kwargs to pass to the Parameter constructor for the weight
+        parameters.  Default is an empty dict.
+    bias_kwargs : dict
+        Additional kwargs to pass to the Parameter constructor for the bias
+        parameters.  Default is an empty dict.
     name : str
         Name of this layer
     """
 
-    def __init__(self, d_in: int, d_out: int = 1, name: str = "Dense"):
+    def __init__(
+        self,
+        d_in: int,
+        d_out: int = 1,
+        probabilistic: bool = True,
+        flipout: bool = True,
+        weight_kwargs: dict = {},
+        bias_kwargs: dict = {},
+        name: str = "Dense",
+    ):
 
-        # Check types
+        # Check values
         if d_in < 1:
             raise ValueError("d_in must be >0")
         if d_out < 1:
             raise ValueError("d_out must be >0")
 
+        # Determine what parameter class to use
+        ParameterClass = Parameter if probabilistic else DeterministicParameter
+
         # Create the parameters
+        self.probabilistic = probabilistic
+        self.flipout = flipout
         self.d_in = d_in
         self.d_out = d_out
-        self.weights = Parameter(shape=[d_in, d_out], name=name + "_weights")
-        self.bias = Parameter(shape=[1, d_out], name=name + "_bias")
+        self.weights = ParameterClass(
+            shape=[d_in, d_out], name=name + "_weights", **weight_kwargs
+        )
+        self.bias = ParameterClass(
+            shape=[1, d_out], name=name + "_bias", **bias_kwargs
+        )
 
     def __call__(self, x):
         """Perform the forward pass"""
 
+        x = to_tensor(x)
+
         # Using the Flipout estimator
-        if get_flipout():
+        if get_flipout() and self.flipout and self.probabilistic:
 
-            # With PyTorch
-            if get_backend() == "pytorch":
-                raise NotImplementedError
+            # Flipout-estimated weight samples
+            s = O.rand_rademacher(O.shape(x))
+            r = O.rand_rademacher([O.shape(x)[0], self.d_out])
+            norm_samples = O.randn([self.d_in, self.d_out])
+            w_samples = self.weights.variables["scale"] * norm_samples
+            w_noise = r * ((x * s) @ w_samples)
+            w_outputs = x @ self.weights.variables["loc"] + w_noise
 
-            # With Tensorflow
-            else:
+            # Flipout-estimated bias samples
+            r = O.rand_rademacher([O.shape(x)[0], self.d_out])
+            norm_samples = O.randn([self.d_out])
+            b_samples = self.bias.variables["scale"] * norm_samples
+            b_outputs = self.bias.variables["loc"] + r * b_samples
 
-                import tensorflow as tf
-                import tensorflow_probability as tfp
-
-                # Flipout-estimated weight samples
-                s = tfp.python.math.random_rademacher(tf.shape(x))
-                r = tfp.python.math.random_rademacher([x.shape[0], self.d_out])
-                norm_samples = tf.random.normal([self.d_in, self.d_out])
-                w_samples = self.weights.variables["scale"] * norm_samples
-                w_noise = r * ((x * s) @ w_samples)
-                w_outputs = x @ self.weights.variables["loc"] + w_noise
-
-                # Flipout-estimated bias samples
-                r = tfp.python.math.random_rademacher([x.shape[0], self.d_out])
-                norm_samples = tf.random.normal([self.d_out])
-                b_samples = self.bias.variables["scale"] * norm_samples
-                b_outputs = self.bias.variables["loc"] + r * b_samples
-
-                return w_outputs + b_outputs
+            return w_outputs + b_outputs
 
         # Without Flipout
         else:

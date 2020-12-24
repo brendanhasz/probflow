@@ -134,8 +134,8 @@ Can be built and fit with ProbFlow in only a few lines:
             self.std  = pf.DenseNetwork(head_units)
 
         def __call__(self, x):
-            x = tf.nn.relu(self.core(x))
-            return pf.Normal(self.mean(x), tf.exp(self.std(x)))
+            z = tf.nn.relu(self.core(x))
+            return pf.Normal(self.mean(z), tf.exp(self.std(z)))
 
     # Create the model
     model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
@@ -158,11 +158,20 @@ And a multi-layer Bayesian neural net can be made easily using ProbFlow's ready-
     model = pf.DenseRegression([x.shape[1], 128, 64, 1])
     model.fit(x, y)
 
-Using parameters and distributions as simple building blocks, ProbFlow allows for the painless creation of more complicated Bayesian models like
-`generalized linear models <http://probflow.readthedocs.io/en/latest/examples/glm.html>`_,
-`deep time-to-event models <http://probflow.readthedocs.io/en/latest/examples/time_to_event.html>`_,
-`neural matrix factorization <http://probflow.readthedocs.io/en/latest/examples/nmf.html>`_ models, and
-`Gaussian mixture models <http://probflow.readthedocs.io/en/latest/examples/gmm.html>`_.  Take a look at the `examples <http://probflow.readthedocs.io/en/latest/examples/examples.html>`_ and the `user guide <http://probflow.readthedocs.io/en/latest/user_guide/user_guide.html>`_ for more!
+Using parameters and distributions as simple building blocks, ProbFlow allows
+for the painless creation of more complicated Bayesian models like `generalized
+linear models <http://probflow.readthedocs.io/en/latest/examples/glm.html>`_,
+`deep time-to-event models
+<http://probflow.readthedocs.io/en/latest/examples/time_to_event.html>`_,
+`neural matrix factorization
+<http://probflow.readthedocs.io/en/latest/examples/nmf.html>`_ models, and
+`Gaussian mixture models
+<http://probflow.readthedocs.io/en/latest/examples/gmm.html>`_.  You can even
+mix `probabilistic and non-probabilistic models
+<http://probflow.readthedocs.io/en/latest/examples/neural_linear.html>`_!  Take 
+a look at the `examples <http://probflow.readthedocs.io/en/latest/examples/examples.html>`_
+and the `user guide <http://probflow.readthedocs.io/en/latest/user_guide/user_guide.html>`_
+for more!
 
 
 Installation
