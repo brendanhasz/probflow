@@ -192,8 +192,8 @@ Can be built and fit with ProbFlow in only a few lines:
                     self.std  = pf.DenseNetwork(head_units)
 
                 def __call__(self, x):
-                    x = tf.nn.relu(self.core(x))
-                    return pf.Normal(self.mean(x), tf.exp(self.std(x)))
+                    z = tf.nn.relu(self.core(x))
+                    return pf.Normal(self.mean(z), tf.exp(self.std(z)))
 
             # Create the model
             model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
@@ -211,11 +211,11 @@ Can be built and fit with ProbFlow in only a few lines:
                     self.core = pf.DenseNetwork(units)
                     self.mean = pf.DenseNetwork(head_units)
                     self.std  = pf.DenseNetwork(head_units)
-                    self.activation_fn = torch.nn.ReLU()
 
                 def __call__(self, x):
-                    x = self.activation_fn(self.core(x))
-                    return pf.Normal(self.mean(x), torch.exp(self.std(x)))
+                    x = torch.tensor(x)
+                    z = torch.nn.ReLU()(self.core(x))
+                    return pf.Normal(self.mean(z), torch.exp(self.std(z)))
 
             # Create the model
             model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
