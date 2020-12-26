@@ -24,6 +24,8 @@ def test_Mixture():
         dist = Mixture(Normal([1, 2], [1, 2]), logits="lala")
     with pytest.raises(TypeError):
         dist = Mixture(Normal([1, 2], [1, 2]), probs="lala")
+    with pytest.raises(TypeError):
+        dist = Mixture("lala", probs=tf.random.normal([5, 3]))
 
     # Create the distribution
     weights = tf.random.normal([5, 3])
@@ -46,7 +48,6 @@ def test_Mixture():
     assert samples.shape[1] == 5
 
     # Test methods
-
     dist = Mixture(Normal([-1.0, 1.0], [1e-3, 1e-3]), [0.5, 0.5])
     probs = dist.prob([-1.0, 1.0])
     assert is_close(probs[0] / probs[1], 1.0)
