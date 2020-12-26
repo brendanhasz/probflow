@@ -5,7 +5,7 @@ with open("README.rst", "r") as f:
 
 setup(
     name="probflow",
-    version="2.1.2",
+    version="2.1.3",
     author="Brendan Hasz",
     author_email="winsto99@gmail.com",
     description="A Python package for building Bayesian models with TensorFlow or PyTorch",
