@@ -1,13 +1,10 @@
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
+import torch
 
 from probflow.modules import DenseNetwork
 from probflow.parameters import Parameter
 from probflow.utils.settings import Sampling
-
-tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
@@ -27,10 +24,10 @@ def test_DenseNetwork():
     dense_net = DenseNetwork([5, 4, 3, 2])
 
     # Test MAP outputs are same
-    x = tf.random.normal([7, 5])
+    x = torch.randn([7, 5])
     samples1 = dense_net(x)
     samples2 = dense_net(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(samples1.detach().numpy() == samples2.detach().numpy())
     assert samples1.ndim == 2
     assert samples1.shape[0] == 7
     assert samples1.shape[1] == 2
@@ -39,7 +36,7 @@ def test_DenseNetwork():
     with Sampling():
         samples1 = dense_net(x)
         samples2 = dense_net(x)
-    assert np.all(samples1.numpy() != samples2.numpy())
+    assert np.all(samples1.detach().numpy() != samples2.detach().numpy())
     assert samples1.ndim == 2
     assert samples1.shape[0] == 7
     assert samples1.shape[1] == 2
@@ -70,14 +67,14 @@ def test_DenseNetwork():
 
     # kl_loss should return sum of KL losses
     kl_loss = dense_net.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert isinstance(kl_loss, torch.Tensor)
     assert kl_loss.ndim == 0
 
     # test Flipout
     with Sampling(flipout=True):
         samples1 = dense_net(x)
         samples2 = dense_net(x)
-    assert np.all(samples1.numpy() != samples2.numpy())
+    assert np.all(samples1.detach().numpy() != samples2.detach().numpy())
     assert samples1.ndim == 2
     assert samples1.shape[0] == 7
     assert samples1.shape[1] == 2
@@ -87,7 +84,7 @@ def test_DenseNetwork():
     with Sampling():
         samples1 = dense_net(x)
         samples2 = dense_net(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(samples1.detach().numpy() == samples2.detach().numpy())
     assert samples1.ndim == 2
     assert samples1.shape[0] == 7
     assert samples1.shape[1] == 2

@@ -127,6 +127,12 @@ class BatchNormalization(Module):
         name="BatchNormalization",
     ):
 
+        # Add the batch dimension
+        if isinstance(shape, int):
+            shape = [1, shape]
+        else:
+            shape = [1] + shape
+
         # Create the parameters
         self.weight = Parameter(
             shape=shape,
@@ -145,6 +151,6 @@ class BatchNormalization(Module):
 
     def __call__(self, x):
         """Perform the forward pass"""
-        mean = O.mean(x, axis=0)
-        std = O.std(x, axis=0)
+        mean = O.mean(x, axis=-2, keepdims=True)
+        std = O.std(x, axis=-2, keepdims=True)
         return self.weight() * (x - mean) / std + self.bias()

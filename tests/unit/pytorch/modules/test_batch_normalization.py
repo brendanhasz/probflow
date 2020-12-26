@@ -1,12 +1,9 @@
 import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
+import torch
 
 from probflow.modules import BatchNormalization, Dense, Sequential
 from probflow.parameters import Parameter
 from probflow.utils.settings import Sampling
-
-tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
@@ -20,10 +17,10 @@ def test_BatchNormalization():
     bn = BatchNormalization(5)
 
     # Test MAP outputs are the same
-    x = tf.random.normal([4, 5])
+    x = torch.randn([4, 5])
     samples1 = bn(x)
     samples2 = bn(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(samples1.detach().numpy() == samples2.detach().numpy())
     assert samples1.ndim == 2
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 5
@@ -32,7 +29,7 @@ def test_BatchNormalization():
     with Sampling():
         samples1 = bn(x)
         samples2 = bn(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(samples1.detach().numpy() == samples2.detach().numpy())
     assert samples1.ndim == 2
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 5
@@ -50,7 +47,7 @@ def test_BatchNormalization():
 
     # kl_loss should return sum of KL losses
     kl_loss = bn.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert isinstance(kl_loss, torch.Tensor)
     assert kl_loss.ndim == 0
 
     # Test it works w/ dense layer and sequential
@@ -58,15 +55,15 @@ def test_BatchNormalization():
         [
             Dense(5, 10),
             BatchNormalization(10),
-            tf.nn.relu,
+            torch.nn.ReLU(),
             Dense(10, 3),
             BatchNormalization(3),
-            tf.nn.relu,
+            torch.nn.ReLU(),
             Dense(3, 1),
         ]
     )
     assert len(seq.parameters) == 10
-    out = seq(tf.random.normal([6, 5]))
+    out = seq(torch.randn([6, 5]))
     assert out.ndim == 2
     assert out.shape[0] == 6
     assert out.shape[1] == 1
@@ -79,10 +76,10 @@ def test_BatchNormalization_2d():
     bn = BatchNormalization([4, 3])
 
     # Test MAP outputs are the same
-    x = tf.random.normal([5, 4, 3])
+    x = torch.randn([5, 4, 3])
     samples1 = bn(x)
     samples2 = bn(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(samples1.detach().numpy() == samples2.detach().numpy())
     assert samples1.ndim == 3
     assert samples1.shape[0] == 5
     assert samples1.shape[1] == 4

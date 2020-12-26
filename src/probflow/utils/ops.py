@@ -216,7 +216,7 @@ def eye(dims):
         return tf.eye(dims, dtype=get_datatype())
 
 
-def sum(val, axis=-1):
+def sum(val, axis=-1, keepdims=False):
     """The sum."""
     if get_backend() == "pytorch":
         import torch
@@ -224,47 +224,47 @@ def sum(val, axis=-1):
         if axis is None:
             return torch.sum(val)
         else:
-            return torch.sum(val, axis)
+            return torch.sum(val, axis, keepdim=keepdims)
     else:
         import tensorflow as tf
 
-        return tf.reduce_sum(val, axis=axis)
+        return tf.reduce_sum(val, axis=axis, keepdims=keepdims)
 
 
-def prod(val, axis=-1):
+def prod(val, axis=-1, keepdims=False):
     """The product."""
     if get_backend() == "pytorch":
         import torch
 
-        return torch.prod(val, dim=axis)
+        return torch.prod(val, dim=axis, keepdim=keepdims)
     else:
         import tensorflow as tf
 
-        return tf.reduce_prod(val, axis=axis)
+        return tf.reduce_prod(val, axis=axis, keepdims=keepdims)
 
 
-def mean(val, axis=-1):
+def mean(val, axis=-1, keepdims=False):
     """The mean."""
     if get_backend() == "pytorch":
         import torch
 
-        return torch.mean(val, dim=axis)
+        return torch.mean(val, dim=axis, keepdim=keepdims)
     else:
         import tensorflow as tf
 
-        return tf.reduce_mean(val, axis=axis)
+        return tf.reduce_mean(val, axis=axis, keepdims=keepdims)
 
 
-def std(val, axis=-1):
+def std(val, axis=-1, keepdims=False):
     """The uncorrected sample standard deviation."""
     if get_backend() == "pytorch":
         import torch
 
-        return torch.std(val, dim=axis)
+        return torch.std(val, dim=axis, keepdim=keepdims)
     else:
         import tensorflow as tf
 
-        return tf.math.reduce_std(val, axis=axis)
+        return tf.math.reduce_std(val, axis=axis, keepdims=keepdims)
 
 
 def round(val):

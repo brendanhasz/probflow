@@ -104,7 +104,6 @@ def test_ArrayDataGenerator():
     y = x @ w + b
     x = pd.DataFrame(x)
     y = pd.Series(y[:, 0])
-
     dg = ArrayDataGenerator(x, y, batch_size=5)
     assert dg.n_samples == 100
     assert dg.batch_size == 5
@@ -116,6 +115,24 @@ def test_ArrayDataGenerator():
     assert x1.shape[0] == 5
     assert x1.shape[1] == 3
     assert y1.shape[0] == 5
+    x2, y2 = dg[0]
+    assert np.all(x1.values == x2.values)
+    assert np.all(y1.values == y2.values)
+
+    # should even handle when y = pandas dataframes and x = series
+    x = pd.Series(np.random.randn(100))
+    y = pd.DataFrame(np.random.randn(100, 3))
+    dg = ArrayDataGenerator(x, y, batch_size=5)
+    assert dg.n_samples == 100
+    assert dg.batch_size == 5
+    assert dg.shuffle is False
+    assert len(dg) == 20
+    x1, y1 = dg[0]
+    assert isinstance(x1, pd.Series)
+    assert isinstance(y1, pd.DataFrame)
+    assert x1.shape[0] == 5
+    assert y1.shape[0] == 5
+    assert y1.shape[1] == 3
     x2, y2 = dg[0]
     assert np.all(x1.values == x2.values)
     assert np.all(y1.values == y2.values)
