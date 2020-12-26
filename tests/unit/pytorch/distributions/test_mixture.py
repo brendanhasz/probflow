@@ -17,11 +17,17 @@ def test_Mixture():
     with pytest.raises(ValueError):
         dist = Mixture(Normal(torch.tensor([1, 2]), torch.tensor([1, 2])))
     with pytest.raises(TypeError):
-        dist = Mixture(Normal(torch.tensor([1, 2]), torch.tensor([1, 2])), "lala")
+        dist = Mixture(
+            Normal(torch.tensor([1, 2]), torch.tensor([1, 2])), "lala"
+        )
     with pytest.raises(TypeError):
-        dist = Mixture(Normal(torch.tensor([1, 2]), torch.tensor([1, 2])), logits="lala")
+        dist = Mixture(
+            Normal(torch.tensor([1, 2]), torch.tensor([1, 2])), logits="lala"
+        )
     with pytest.raises(TypeError):
-        dist = Mixture(Normal(torch.tensor([1, 2]), torch.tensor([1, 2])), probs="lala")
+        dist = Mixture(
+            Normal(torch.tensor([1, 2]), torch.tensor([1, 2])), probs="lala"
+        )
     with pytest.raises(TypeError):
         dist = Mixture("lala", probs=torch.randn([5, 3]))
 
@@ -46,7 +52,10 @@ def test_Mixture():
     assert samples.shape[1] == 5
 
     # Test methods
-    dist = Mixture(Normal(torch.tensor([-1.0, 1.0]), torch.tensor([1e-3, 1e-3])), torch.tensor([0.5, 0.5]))
+    dist = Mixture(
+        Normal(torch.tensor([-1.0, 1.0]), torch.tensor([1e-3, 1e-3])),
+        torch.tensor([0.5, 0.5]),
+    )
     probs = dist.prob(torch.tensor([-1.0, 1.0]))
     assert is_close(probs[0] / probs[1], 1.0)
 
