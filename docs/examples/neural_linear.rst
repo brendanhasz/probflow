@@ -10,6 +10,9 @@ Neural Linear Model |Colab Badge|
 
     .. code-block:: python3
 
+        import probflow as pf
+        import probflow.utils.ops as O
+
         class NeuralLinear(pf.ContinuousModel):
 
             def __init__(self, dims):
@@ -18,8 +21,8 @@ Neural Linear Model |Colab Badge|
                 self.std = pf.Dense(dims[-1], 1)
 
             def __call__(self, x):
-                h = tf.nn.relu(self.net(x))
-                return pf.Normal(self.loc(h), tf.math.softplus(self.std(h)))
+                h = O.relu(self.net(x))
+                return pf.Normal(self.loc(h), O.softplus(self.std(h)))
 
         model = NeuralLinear([x.shape[1], 256, 128, 64, 32])
         model.fit(x, y)
@@ -44,6 +47,14 @@ the closed-form solution to the Bayesian linear regression regressing the last
 hidden layer's activations onto the target variable.  Here we'll just use
 variational inference to train the neural network and Bayesian regression
 together end-to-end.
+
+But first!  Some imports:
+
+.. code-block:: python3
+
+    import probflow as pf
+    import probflow.utils.ops as O
+    import matplotlib.pyplot as plt
 
 
 Load data
@@ -99,8 +110,8 @@ the noise error to allow for heteroscedasticity).
             self.std = pf.Dense(dims[-1], 1)  # probabilistic=True by default
 
         def __call__(self, x):
-            h = tf.nn.relu(self.net(x))
-            return pf.Normal(self.loc(h), tf.math.softplus(self.std(h)))
+            h = O.relu(self.net(x))
+            return pf.Normal(self.loc(h), O.softplus(self.std(h)))
 
 However, one thing that really helps is to define what initialization we want
 for the head of the network which predicts the standard deviation.  You don't
@@ -145,8 +156,8 @@ And then we can re-define our neural linear model using that initialization
             self.std = pf.Dense(dims[-1], 1, **std_kwargs)
 
         def __call__(self, x):
-            h = tf.nn.relu(self.net(x))
-            return pf.Normal(self.loc(h), tf.math.softplus(self.std(h)))
+            h = O.relu(self.net(x))
+            return pf.Normal(self.loc(h), O.softplus(self.std(h)))
 
 Then we can instantiate the model.  We'll use a fully-connected sequential
 architecture, where the first hidden layer has 128 units, the second has 64,
@@ -199,8 +210,8 @@ initializing the :class:`.DenseNetwork`.
             self.std = pf.Dense(dims[-1], 1, **std_kwargs)
 
         def __call__(self, x):
-            h = tf.nn.relu(self.net(x))
-            return pf.Normal(self.loc(h), tf.math.softplus(self.std(h)))
+            h = O.relu(self.net(x))
+            return pf.Normal(self.loc(h), O.softplus(self.std(h)))
 
 And we'll initialize it using the exact same architecture:
 
