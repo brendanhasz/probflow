@@ -774,3 +774,281 @@ def test_Model_nesting():
         my_model.kl_loss().detach().numpy()
         > my_model.module.kl_loss().detach().numpy()
     )
+
+
+def test_Model_multiple_mc_0d_eager():
+    """Fit probflow.model.Model w/ n_mc>1 to 0d data in eager mode"""
+
+    class MyModel(Model):
+        def __init__(self):
+            self.weight = Parameter(name="Weight")
+            self.bias = Parameter(name="Bias")
+            self.std = ScaleParameter(name="Std")
+
+        def __call__(self, x):
+            w = self.weight()
+            b = self.bias()
+            s = self.std()
+            m = x * w + b
+
+            # check shapes are as expected
+            if self._is_training:
+                assert x.ndim == 2
+                assert x.shape[0] == 1
+                assert x.shape[1] == 50
+                assert w.shape[0] == 5
+                assert w.shape[1] == 1
+                assert b.shape[0] == 5
+                assert b.shape[1] == 1
+                assert s.shape[0] == 5
+                assert s.shape[1] == 1
+                assert m.shape[0] == 5
+                assert m.shape[1] == 50
+            else:  # predicting
+                assert x.ndim == 1
+                assert x.shape[0] == 11
+                assert w.shape[0] == 1
+                assert b.shape[0] == 1
+                assert s.shape[0] == 1
+                assert m.shape[0] == 11
+
+            return Normal(m, s)
+
+    # Instantiate the model
+    model = MyModel()
+
+    # Fit the model
+    x = np.random.randn(100).astype("float32")
+    y = -x + 1
+    model.fit(x, y, batch_size=50, epochs=2, n_mc=5, eager=True)
+
+    # Check predictions
+    p = model.predict(x[:11])
+    assert isinstance(p, np.ndarray)
+    assert p.ndim == 1
+    assert p.shape[0] == 11
+
+
+def test_Model_multiple_mc_0d_noneager():
+    """Fit probflow.model.Model w/ n_mc>1 to 0d data in non-eager mode"""
+
+    class MyModel(Model):
+        def __init__(self):
+            self.weight = Parameter(name="Weight")
+            self.bias = Parameter(name="Bias")
+            self.std = ScaleParameter(name="Std")
+
+        def __call__(self, x):
+            # can't check shapes b/c tracing it ignores this code
+            # so just check that it works
+            return Normal(x * self.weight() + self.bias(), self.std())
+
+    # Instantiate the model
+    model = MyModel()
+
+    # Fit the model
+    x = np.random.randn(100).astype("float32")
+    y = -x + 1
+    model.fit(x, y, batch_size=50, epochs=2, n_mc=5, eager=False)
+
+    # Check predictions
+    p = model.predict(x[:11])
+    assert isinstance(p, np.ndarray)
+    assert p.ndim == 1
+    assert p.shape[0] == 11
+
+
+def test_Model_multiple_mc_1d_eager():
+    """Fit probflow.model.Model w/ n_mc>1 to vector data in eager mode"""
+
+    class MyModel(Model):
+        def __init__(self, d_in):
+            self.weight = Parameter([d_in, 1], name="Weight")
+            self.bias = Parameter([1, 1], name="Bias")
+            self.std = ScaleParameter([1, 1], name="Std")
+
+        def __call__(self, x):
+            w = self.weight()
+            b = self.bias()
+            s = self.std()
+            m = x @ w + b
+
+            # check shapes are as expected
+            if self._is_training:
+                assert x.ndim == 3
+                assert x.shape[0] == 1
+                assert x.shape[1] == 50
+                assert x.shape[2] == 3
+                assert w.shape[0] == 5
+                assert w.shape[1] == 3
+                assert w.shape[2] == 1
+                assert b.shape[0] == 5
+                assert b.shape[1] == 1
+                assert b.shape[2] == 1
+                assert s.shape[0] == 5
+                assert s.shape[1] == 1
+                assert s.shape[2] == 1
+                assert m.shape[0] == 5
+                assert m.shape[1] == 50
+                assert m.shape[2] == 1
+            else:  # predicting
+                assert x.ndim == 2
+                assert x.shape[0] == 11
+                assert x.shape[1] == 3
+                assert w.shape[0] == 3
+                assert w.shape[1] == 1
+                assert b.shape[0] == 1
+                assert b.shape[1] == 1
+                assert s.shape[0] == 1
+                assert s.shape[1] == 1
+                assert m.shape[0] == 11
+                assert m.shape[1] == 1
+
+            return Normal(m, s)
+
+    # Instantiate the model
+    model = MyModel(3)
+
+    # Fit the model
+    x = np.random.randn(100, 3).astype("float32")
+    w = np.random.randn(3, 1).astype("float32")
+    y = x @ w + 1
+    model.fit(x, y, batch_size=50, epochs=2, n_mc=5, eager=True)
+
+    # Check predictions
+    p = model.predict(x[:11, :])
+    assert isinstance(p, np.ndarray)
+    assert p.ndim == 2
+    assert p.shape[0] == 11
+    assert p.shape[1] == 1
+
+
+def test_Model_multiple_mc_1d_noneager():
+    """Fit probflow.model.Model w/ n_mc>1 to vector data in non-eager mode"""
+
+    class MyModel(Model):
+        def __init__(self, d_in):
+            self.weight = Parameter([d_in, 1], name="Weight")
+            self.bias = Parameter([1, 1], name="Bias")
+            self.std = ScaleParameter([1, 1], name="Std")
+
+        def __call__(self, x):
+            w = self.weight()
+            b = self.bias()
+            s = self.std()
+            m = x @ w + b
+            return Normal(m, s)
+
+    # Instantiate the model
+    model = MyModel(3)
+
+    # Fit the model
+    x = np.random.randn(100, 3).astype("float32")
+    w = np.random.randn(3, 1).astype("float32")
+    y = x @ w + 1
+    model.fit(x, y, batch_size=50, epochs=2, n_mc=5, eager=False)
+
+    # Check predictions
+    p = model.predict(x[:11, :])
+    assert isinstance(p, np.ndarray)
+    assert p.ndim == 2
+    assert p.shape[0] == 11
+    assert p.shape[1] == 1
+
+
+def test_Model_multiple_mc_2d_eager():
+    """Fit probflow.model.Model w/ n_mc>1 to multivar output in eager mode"""
+
+    class MyModel(Model):
+        def __init__(self, d_in, d_out):
+            self.weight = Parameter([d_in, d_out], name="Weight")
+            self.bias = Parameter([1, d_out], name="Bias")
+            self.std = ScaleParameter([1, d_out], name="Std")
+
+        def __call__(self, x):
+            w = self.weight()
+            b = self.bias()
+            s = self.std()
+            m = x @ w + b
+
+            # check shapes are as expected
+            if self._is_training:
+                assert x.ndim == 3
+                assert x.shape[0] == 1
+                assert x.shape[1] == 50
+                assert x.shape[2] == 4
+                assert w.shape[0] == 5
+                assert w.shape[1] == 4
+                assert w.shape[2] == 3
+                assert b.shape[0] == 5
+                assert b.shape[1] == 1
+                assert b.shape[2] == 3
+                assert s.shape[0] == 5
+                assert s.shape[1] == 1
+                assert s.shape[2] == 3
+                assert m.shape[0] == 5
+                assert m.shape[1] == 50
+                assert m.shape[2] == 3
+            else:  # predicting
+                assert x.ndim == 2
+                assert x.shape[0] == 11
+                assert x.shape[1] == 4
+                assert w.shape[0] == 4
+                assert w.shape[1] == 3
+                assert b.shape[0] == 1
+                assert b.shape[1] == 3
+                assert s.shape[0] == 1
+                assert s.shape[1] == 3
+                assert m.shape[0] == 11
+                assert m.shape[1] == 3
+
+            return Normal(m, s)
+
+    # Instantiate the model
+    model = MyModel(4, 3)
+
+    # Fit the model
+    x = np.random.randn(100, 4).astype("float32")
+    w = np.random.randn(4, 3).astype("float32")
+    y = x @ w + 1
+    model.fit(x, y, batch_size=50, epochs=2, n_mc=5, eager=True)
+
+    # Check predictions
+    p = model.predict(x[:11, :])
+    assert isinstance(p, np.ndarray)
+    assert p.ndim == 2
+    assert p.shape[0] == 11
+    assert p.shape[1] == 3
+
+
+def test_Model_multiple_mc_2d_noneager():
+    """Fit probflow.model.Model w/ n_mc>1 to multivar output w noneager mode"""
+
+    class MyModel(Model):
+        def __init__(self, d_in, d_out):
+            self.weight = Parameter([d_in, d_out], name="Weight")
+            self.bias = Parameter([1, d_out], name="Bias")
+            self.std = ScaleParameter([1, d_out], name="Std")
+
+        def __call__(self, x):
+            w = self.weight()
+            b = self.bias()
+            s = self.std()
+            m = x @ w + b
+            return Normal(m, s)
+
+    # Instantiate the model
+    model = MyModel(4, 3)
+
+    # Fit the model
+    x = np.random.randn(100, 4).astype("float32")
+    w = np.random.randn(4, 3).astype("float32")
+    y = x @ w + 1
+    model.fit(x, y, batch_size=50, epochs=2, n_mc=5, eager=False)
+
+    # Check predictions
+    p = model.predict(x[:11, :])
+    assert isinstance(p, np.ndarray)
+    assert p.ndim == 2
+    assert p.shape[0] == 11
+    assert p.shape[1] == 3
