@@ -2,13 +2,21 @@ import probflow.utils.ops as O
 from probflow.modules.module import Module
 from probflow.parameters import DeterministicParameter, Parameter
 from probflow.utils.casting import to_tensor
-from probflow.utils.settings import get_flipout
+from probflow.utils.settings import get_flipout, get_samples
 
 
 class Dense(Module):
     """Dense neural network layer.
 
     TODO
+
+    .. admonition:: Will not use flipout when n_mc>1
+
+        Note that this module uses the flipout estimator by default, but will
+        not use the flipout estimator when we are taking multiple monte carlo
+        samples per batch (when `n_mc` > 1).  See :meth:`.Model.fit` for more
+        info on setting the value of `n_mc`.
+
 
     Parameters
     ----------
@@ -74,7 +82,13 @@ class Dense(Module):
         x = to_tensor(x)
 
         # Using the Flipout estimator
-        if get_flipout() and self.flipout and self.probabilistic:
+        if (
+            get_flipout()
+            and self.flipout
+            and self.probabilistic
+            and get_samples() is not None
+            and get_samples() == 1
+        ):
 
             # Flipout-estimated weight samples
             s = O.rand_rademacher(O.shape(x))

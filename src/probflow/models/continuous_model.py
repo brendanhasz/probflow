@@ -291,7 +291,7 @@ class ContinuousModel(Model):
         N = samples.shape[1]
         if samples.ndim > 2 and any(e > 1 for e in samples.shape[2:]):
             raise NotImplementedError(
-                "only scalar dependent variables are " "supported"
+                "only scalar dependent variables are supported"
             )
         else:
             samples = samples.reshape([Ns, N])
@@ -364,7 +364,7 @@ class ContinuousModel(Model):
         # Independent variable must be scalar
         if samples.ndim > 2 and any(e > 1 for e in samples.shape[2:]):
             raise NotImplementedError(
-                "only scalar dependent variables are " "supported"
+                "only scalar dependent variables are supported"
             )
 
         # Reshape

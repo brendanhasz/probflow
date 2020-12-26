@@ -250,3 +250,35 @@ def test_ContinuousModel(plot):
     )
     assert isinstance(ece, float)
     assert ece >= 0
+
+
+def test_ContinuousModel_multivariate():
+    """Tests probflow.models.ContinuousModel w/ multivariate target"""
+
+    class MyModel(ContinuousModel):
+        def __init__(self):
+            self.weight = Parameter([5, 3], name="Weight")
+            self.bias = Parameter([1, 3], name="Bias")
+            self.std = ScaleParameter([1, 3], name="Std")
+
+        def __call__(self, x):
+            return Normal(x @ self.weight() + self.bias(), self.std())
+
+    # Instantiate the model
+    model = MyModel()
+
+    # Data
+    x = np.random.randn(100, 5).astype("float32")
+    w = np.random.randn(5, 3).astype("float32")
+    y = x @ w + 1
+
+    # Fit the model
+    model.fit(x, y, batch_size=50, epochs=2, lr=0.01)
+
+    # pred_dist_plot should not work with nonscalar output
+    with pytest.raises(NotImplementedError):
+        model.pred_dist_plot(x[:10, :], n=10)
+
+    # predictive_prc should not work with nonscalar output
+    with pytest.raises(NotImplementedError):
+        model.predictive_prc(x[:10, :], y[:10, :], n=10)
