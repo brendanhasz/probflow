@@ -11,7 +11,7 @@ def test_LearningRateScheduler(plot):
     my_model, x, y = get_model_and_data()
 
     # Test LearningRateScheduler
-    lrs = LearningRateScheduler(lambda x: 1e-2 / x)
+    lrs = LearningRateScheduler(lambda x: 1e-2 / x, verbose=True)
     my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[lrs])
     assert isinstance(lrs.current_epoch, int)
     assert lrs.current_epoch == 10

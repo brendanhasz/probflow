@@ -11,15 +11,19 @@ class KLWeightScheduler(Callback):
     fn : callable
         Function which takes the current epoch as an argument and returns a
         kl weight, a float between 0 and 1
+    verbose : bool
+        Whether to print the KL weight each epoch (if True) or not (if False).
+        Default = False
 
 
     Examples
     --------
 
-    TODO
+    See the user guide section on :ref:`Changing the KL weight over training`.
+
     """
 
-    def __init__(self, fn):
+    def __init__(self, fn, verbose=False):
 
         # Check type
         if not callable(fn):
@@ -29,6 +33,7 @@ class KLWeightScheduler(Callback):
 
         # Store function
         self.fn = fn
+        self.verbose = verbose
         self.current_epoch = 0
         self.current_w = 0
         self.epochs = []
@@ -41,6 +46,8 @@ class KLWeightScheduler(Callback):
         self.model.set_kl_weight(self.current_w)
         self.epochs += [self.current_epoch]
         self.kl_weights += [self.current_w]
+        if self.verbose:
+            print(f"Epoch {self.current_epoch} - KL weight {self.current_w}")
 
     def plot(self, **kwargs):
         """Plot the KL weight as a function of epoch

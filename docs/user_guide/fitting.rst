@@ -16,9 +16,9 @@ Using multiple MC samples per batch
 -----------------------------------
 
 By default, ProbFlow uses only one Monte Carlo sample from the variational
-posteriors per batch.  However, you can use more by passing the `n_mc` keyword
-argument to :meth:`.Model.fit`.  For example, to use 10 MC samples during
-training:
+posteriors per batch.  However, you can use more by passing the ``n_mc``
+keyword argument to :meth:`.Model.fit`.  For example, to use 10 MC samples
+during training:
 
 .. code-block:: python3
 
@@ -31,7 +31,7 @@ optimization will be much more stable because the variance of the gradients
 will be less.
 
 Note that :class:`.Dense` modules, which use the flipout estimator by default,
-will not use flipout when `n_mc` > 1.
+will not use flipout when ``n_mc`` > 1.
 
 
 Backend graph optimization during fitting

@@ -351,8 +351,12 @@ class Model(Module):
         for c in callbacks:
             c.model = self
 
-        # Fit the model!
+        # Run callbacks at start of training
         self._is_training = True
+        for c in callbacks:
+            c.on_train_start()
+
+        # Fit the model!
         for i in range(int(epochs)):
 
             # Stop training early?

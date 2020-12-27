@@ -6,12 +6,15 @@ from .callback import Callback
 class TimeOut(Callback):
     """Stop training after a certain amount of time
 
-    TODO
 
     Parameters
     ----------
     time_limit : float or int
         Number of seconds after which to stop training
+    verbose : bool
+        Whether to print that we stopped training early (if True) or not (if
+        False).  Default = False
+
 
     Example
     -------

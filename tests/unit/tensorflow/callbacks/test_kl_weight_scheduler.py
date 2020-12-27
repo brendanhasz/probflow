@@ -17,7 +17,7 @@ def test_KLWeightScheduler(plot):
         kls = KLWeightScheduler(lambda x: "lala")
 
     # Test KLWeightScheduler
-    kls = KLWeightScheduler(lambda x: x / 100.0)
+    kls = KLWeightScheduler(lambda x: x / 100.0, verbose=True)
     my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[kls])
     assert isinstance(kls.current_epoch, int)
     assert kls.current_epoch == 10
