@@ -2,7 +2,12 @@ import numpy as np
 import pytest
 from get_model_and_data import get_model_and_data
 
-from probflow.callbacks import EarlyStopping, MonitorParameter
+from probflow.callbacks import (
+    EarlyStopping,
+    MonitorELBO,
+    MonitorMetric,
+    MonitorParameter,
+)
 
 
 def test_EarlyStopping():
@@ -43,3 +48,25 @@ def test_multiple_callbacks():
     assert isinstance(mp.epochs, list)
     assert len(mp.epochs) == 7
     assert isinstance(mp.parameter_values, list)
+
+
+def test_EarlyStopping_given_MonitorMetric():
+
+    # Get a model and data
+    my_model, x, y = get_model_and_data()
+
+    # Test EarlyStopping
+    mm = MonitorMetric("mae", x[:5], y[:5])
+    es = EarlyStopping(mm, patience=5)
+    my_model.fit(x, y, batch_size=5, epochs=3, callbacks=[mm, es])
+
+
+def test_EarlyStopping_given_MonitorELBO():
+
+    # Get a model and data
+    my_model, x, y = get_model_and_data()
+
+    # Test EarlyStopping
+    me = MonitorELBO()
+    es = EarlyStopping(me, patience=5)
+    my_model.fit(x, y, batch_size=5, epochs=3, callbacks=[me, es])
