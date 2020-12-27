@@ -41,7 +41,9 @@ function of epoch:
 
     monitor_mae.plot()
 
-TODO: example image of the plot
+.. image:: img/callbacks/mae1.svg
+   :width: 70 %
+   :align: center
 
 Or as a function of walltime:
 
@@ -49,12 +51,12 @@ Or as a function of walltime:
 
     monitor_mae.plot(x="time")
 
-TODO: example image of the plot
+.. image:: img/callbacks/mae2.svg
+   :width: 70 %
+   :align: center
 
 Additional keyword arguments to :meth:`.MonitorMetric.plot` are passed to
 ``matplotlib.pyplot.plt``, so you can also specify labels, line styles, etc.
-See the :doc:`/examples/neural_linear` example for a full example which uses
-the :class:`.MonitorMetric` callback.
 
 
 Monitoring the loss
@@ -84,7 +86,9 @@ a function of epoch:
 
     monitor_elbo.plot()
 
-TODO: example image of the plot
+.. image:: img/callbacks/elbo1.svg
+   :width: 70 %
+   :align: center
 
 Or as a function of walltime:
 
@@ -92,7 +96,10 @@ Or as a function of walltime:
 
     monitor_elbo.plot(x="time")
 
-TODO: example image of the plot
+.. image:: img/callbacks/elbo2.svg
+   :width: 70 %
+   :align: center
+
 
 
 Ending training when a metric stops improving
@@ -223,16 +230,16 @@ computes the learning rate as a function of epoch:
 .. code-block:: python3
 
     def learning_rate_fn(epoch):
-        return np.linspace(1e-3, 1e-4, 100)[epoch]
+        return np.linspace(1e-3, 1e-4, 100)[epoch-1]
 
-Then, define a :class:`LearningRateScheduler` callback which takes that
+Then, define a :class:`.LearningRateScheduler` callback which takes that
 function, and use it to schedule the learning rate during training:
 
 .. code-block:: python3
 
     lr_scheduler = pf.LearningRateScheduler(learning_rate_fn)
 
-    model.fit(x_train, y_train, callbacks=[lr_scheduler])
+    model.fit(x_train, y_train, epochs=100, callbacks=[lr_scheduler])
 
 You can plot the learning rate as a function of epoch:
 
@@ -240,21 +247,26 @@ You can plot the learning rate as a function of epoch:
 
     lr_scheduler.plot()
 
-TODO: show the example plot
+.. image:: img/callbacks/lr1.svg
+   :width: 70 %
+   :align: center
 
 Or, to use a cyclical annealing learning rate:
 
 .. code-block:: python3
 
     lr_scheduler = pf.LearningRateScheduler(
-        lambda e: 0.1 * (1+np.cos(x/7)) * (1-0.01*x)
+        lambda e: 0.1 * (1+np.cos(e/7)) * (1-0.01*e)
     )
 
-    model.fit(x_train, y_train, callbacks=[lr_scheduler])
+    model.fit(x_train, y_train, epochs=100, callbacks=[lr_scheduler])
 
     lr_scheduler.plot()
 
-TODO: show the example plot
+.. image:: img/callbacks/lr2.svg
+   :width: 70 %
+   :align: center
+
 
 
 Changing the KL weight over training
@@ -276,26 +288,33 @@ epochs, and then keep at 1 for the last 50 epochs,
 
 .. code-block:: python3
 
-    kl_scheduler = pf.KLWeightScheduler(lambda e: min(1, e/50))
+    kl_scheduler = pf.KLWeightScheduler(lambda e: min(1.0, e/50.0))
 
-    model.fit(x_train, y_train, callbacks=[kl_scheduler])
+    model.fit(x_train, y_train, epochs=100, callbacks=[kl_scheduler])
 
     kl_scheduler.plot()
 
-TODO: show the example plot
+.. image:: img/callbacks/kl1.svg
+   :width: 70 %
+   :align: center
+
 
 Or, to use a cyclical annealing schedule like that used in `Fu et al., 2019
 <https://arxiv.org/abs/1903.10145>`_,
 
 .. code-block:: python3
 
-    kl_scheduler = pf.KLWeightScheduler(lambda e: min(1, e%20/10))
+    kl_scheduler = pf.KLWeightScheduler(lambda e: min(1.0, e%20/10.0))
 
-    model.fit(x_train, y_train, callbacks=[kl_scheduler])
+    model.fit(x_train, y_train, epochs=100, callbacks=[kl_scheduler])
 
     kl_scheduler.plot()
 
-TODO: show the example plot
+.. image:: img/callbacks/kl2.svg
+   :width: 70 %
+   :align: center
+
+
 
 
 Monitoring the value of parameter(s)
@@ -340,7 +359,9 @@ And we can plot the weight over the course of training using the callback's
 
     monitor_weight.plot()
 
-TODO: show the example plot
+.. image:: img/callbacks/param1.svg
+   :width: 70 %
+   :align: center
 
 You can also monitor multiple parameters by passing a list to
 :class:`.MonitorParameter`:
@@ -355,22 +376,26 @@ You can also monitor multiple parameters by passing a list to
     monitor_params.plot("weight", label="weight")
     monitor_params.plot("bias", label="bias")
     plt.legend()
+    plt.ylabel("Parameter mean")
     plt.show()
 
-TODO: show the example plot
+.. image:: img/callbacks/param2.svg
+   :width: 70 %
+   :align: center
 
 
 Rolling your own callback
 -------------------------
 
 It's pretty easy to make your own callback too!  Just create a class which
-inherits from :class:`.Callback`, and implement any of four methods:
+inherits from :class:`.Callback`, and implement any of its methods which you'd
+like to use:
 
-* `__init__` - setup
-* `on_train_start` - gets called once at the beginning of training
-* `on_epoch_start` - gets called at the beginning each epoch
-* `on_epoch_end` - gets called at the end each epoch
-* `on_train_end` - gets called once at the end of training
+* ``__init__`` - setup
+* ``on_train_start`` - gets called once at the beginning of training
+* ``on_epoch_start`` - gets called at the beginning each epoch
+* ``on_epoch_end`` - gets called at the end each epoch
+* ``on_train_end`` - gets called once at the end of training
 
 For example, to implement a callback which records the time it takes to run
 each epoch,
