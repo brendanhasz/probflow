@@ -168,7 +168,7 @@ linear models <http://probflow.readthedocs.io/en/latest/examples/glm.html>`_,
 `Gaussian mixture models
 <http://probflow.readthedocs.io/en/latest/examples/gmm.html>`_.  You can even
 mix `probabilistic and non-probabilistic models
-<http://probflow.readthedocs.io/en/latest/examples/neural_linear.html>`_!  Take 
+<http://probflow.readthedocs.io/en/latest/examples/neural_linear.html>`_!  Take
 a look at the `examples <http://probflow.readthedocs.io/en/latest/examples/examples.html>`_
 and the `user guide <http://probflow.readthedocs.io/en/latest/user_guide/user_guide.html>`_
 for more!
@@ -177,19 +177,28 @@ for more!
 Installation
 ------------
 
-To install ProbFlow for the CPU version of TensorFlow,
+If you already have your desired backend installed (i.e. Tensorflow/TFP or
+PyToorch), then you can just do:
+
+.. code-block:: bash
+
+    pip install probflow
+
+Or, to install both ProbFlow and the CPU version of TensorFlow + TensorFlow
+Probability,
 
 .. code-block:: bash
 
     pip install probflow[tensorflow]
 
-Or, to install ProbFlow for the GPU version of TensorFlow,
+Or, install ProbFlow and the GPU version of TensorFlow + TensorFlow
+Probability,
 
 .. code-block:: bash
 
     pip install probflow[tensorflow_gpu]
 
-Or, to install ProbFlow for PyTorch,
+Or, to install ProbFlow and PyTorch,
 
 .. code-block:: bash
 

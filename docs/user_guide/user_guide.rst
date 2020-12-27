@@ -36,5 +36,7 @@ The user guide contains more detailed information about using ProbFlow, includin
 - How to :doc:`inspect <inspecting>` a model's structure and the values of its parameters,
 - How to use ProbFlow's :doc:`applications`,
 - How to perform actions mid-training with :doc:`callbacks`,
-- How to load data on-the-fly with :doc:`datagenerators`, and
+- How to load data on-the-fly with :doc:`datagenerators`,
+- How to :doc:`save and load models <saving_and_loading>`,
+- How to :doc:`choose your backend and default datatype <backend>`, and
 - :doc:`math` about how ProbFlow fits Bayesian models.

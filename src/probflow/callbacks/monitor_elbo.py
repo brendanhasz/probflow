@@ -9,20 +9,19 @@ from .callback import Callback
 class MonitorELBO(Callback):
     """Monitor the ELBO on the training data
 
-    TODO: docs
+
+    Parameters
+    ----------
+    verbose : bool
+        Whether to print the average ELBO at the end of every training epoch
+        (if True) or not (if False).  Default = False
+
 
     Example
     -------
 
-    To record the evidence lower bound (ELBO) for each batch of training data
-    over the course of training, we can create a :class:`.MonitorELBO`
-    callback:
+    See the user guide section on :ref:`monitoring-the-loss`.
 
-    .. code-block:: python3
-
-        monitor_elbo = MonitorELBO()
-
-        model.fit(x_train, y_train, callbacks=[monitor_elbo])
     """
 
     def __init__(self, verbose=False):

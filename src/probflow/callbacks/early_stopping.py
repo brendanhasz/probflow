@@ -8,7 +8,6 @@ from .monitor_metric import MonitorMetric
 class EarlyStopping(Callback):
     """Stop training early when some metric stops decreasing
 
-    TODO
 
     Parameters
     ----------
@@ -33,64 +32,7 @@ class EarlyStopping(Callback):
     Example
     -------
 
-    To stop training when the mean absolute error stops improving, we can
-    create a :class:`.EarlyStopping` callback which monitors the current value
-    of the MAE via a :class:`.MonitorMetric` callback:
-
-    .. code-block:: python3
-
-        import probflow as pf
-
-        model = ...  # your ProbFlow model
-        x_train, y_train= ...  # your training data
-        x_val, y_val = ...  # your validation data
-
-        monitor_mae = pf.MonitorMetric('mae', x_val, y_val)
-        early_stopping = pf.EarlyStopping(monitor_mae)
-
-        model.fit(x_train, y_train, callbacks=[monitor_mae, early_stopping])
-
-    Often it's a good idea to have some patience before stopping early - i.e.
-    allow the metric being monitored to *not* improve for a few epochs.  This
-    gives the optimizer some time to get through any points on the loss surface
-    at which it may temporarily get stuck.  For example, to only stop training
-    after the metric has not improved for 5 consecutive epochs, use the
-    ``patience`` keyword argument:
-
-    .. code-block:: python3
-
-        monitor_mae = MonitorMetric('mae', x_val, y_val)
-        early_stopping = EarlyStopping(monitor_mae, patience=5)
-
-        model.fit(x_train, y_train, callbacks=[monitor_mae, early_stopping])
-
-    Instead of a predictive metric, you can stop training when the loss
-    function (the evidence lower bound, "ELBO") stops improving.  To do that,
-    create a :class:`.EarlyStopping` callback which monitors the current value
-    of the ELBO via a :class:`.MonitorELBO` callback:
-
-    .. code-block:: python3
-
-        monitor_elbo = MonitorELBO()
-        early_stopping = EarlyStopping(monitor_mae)
-
-        model.fit(x_train, y_train, callbacks=[monitor_elbo, early_stopping])
-
-    You can also have :class:`.EarlyStopping` depend on any arbitrary function.
-    For example, to manually compute, say the symmetric mean absolute
-    percentage error (SMAPE) and stop training when it stops improving,
-
-    .. code-block:: python3
-
-        def smape():
-            y_pred = model.predict(x_val)
-            return np.mean(
-                2 *np.abs(y_pred - y_val) / (np.abs(y_pred) + np.abs(y_val))
-            )
-
-        early_stopping = EarlyStopping(smape)
-
-        model.fit(x_train, y_train, callbacks=[early_stopping])
+    See the user guide section on :ref:`user-guide-early-stopping`.
 
     """
 

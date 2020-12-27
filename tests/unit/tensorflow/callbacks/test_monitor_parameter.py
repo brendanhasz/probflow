@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from get_model_and_data import get_model_and_data
 
@@ -20,3 +21,20 @@ def test_MonitorParameter(plot):
     assert len(mp.epochs) == 10
     assert isinstance(mp.parameter_values, list)
     assert len(mp.parameter_values) == 10
+
+    # Test plotting
+    mp.plot()
+    if plot:
+        plt.show()
+
+    # Test MonitorParameter with a list of parameters
+    mp = MonitorParameter(["Weight", "Bias"])
+    my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[mp])
+    plt.figure()
+    plt.subplot(2, 1, 1)
+    mp.plot("Weight")
+    plt.subplot(2, 1, 2)
+    mp.plot("Bias")
+    plt.legend()
+    if plot:
+        plt.show()

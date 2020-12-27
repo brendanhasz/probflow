@@ -12,20 +12,27 @@ from .callback import Callback
 class MonitorMetric(Callback):
     """Monitor some metric on validation data
 
-    TODO: docs
+
+    Parameters
+    ----------
+    metric : str
+        Name of the metric to evaluate.  See :meth:`.Model.metric` for a list
+        of available metrics.
+    x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
+        Independent variable values of the validation dataset to evaluate (aka
+        the "features").  Or a |DataGenerator| to generate both x and y.
+    y : |ndarray| or |DataFrame| or |Series| or Tensor
+        Dependent variable values of the validation dataset to evaluate (aka
+        the "target").
+    verbose : bool
+        Whether to print the average ELBO at the end of every training epoch
+        (if True) or not (if False).  Default = False
+
 
     Example
     -------
 
-    To record the mean absolute error of a model over the course of training,
-    we can create a :class:`.MonitorMetric` callback:
-
-    .. code-block:: python3
-
-        #x_val and y_val are numpy arrays w/ validation data
-        monitor_mae = MonitorMetric('mse', x_val, y_val)
-
-        model.fit(x_train, y_train, callbacks=[monitor_mae])
+    See the user guide section on :ref:`monitoring-a-metric`.
     """
 
     def __init__(self, metric, x, y=None, verbose=False):

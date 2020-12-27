@@ -251,7 +251,14 @@ can even :doc:`mix probabilistic and non-probabilistic models
 Installation
 ------------
 
-To install ProbFlow and a specific backend,
+If you already have your desired backend installed (i.e. Tensorflow/TFP or
+PyToorch), then you can just do:
+
+.. code-block:: bash
+
+    pip install probflow
+
+Or, to install both ProbFlow and a specific backend,
 
 .. tabs::
 
@@ -272,13 +279,6 @@ To install ProbFlow and a specific backend,
         .. code-block:: bash
 
             pip install probflow[pytorch]
-
-
-Or, to install just ProbFlow (and use it with whatever backend you already have installed),
-
-.. code-block:: bash
-
-    pip install probflow
 
 
 Support

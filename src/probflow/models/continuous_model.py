@@ -921,6 +921,14 @@ class ContinuousModel(Model):
         (``msce``, ``rmsce``, ``mace``, or ``ma``) as the first argument to
         this function (or a list of them to compute multiple).
 
+        See `Kuleshov et al., 2018 <https://arxiv.org/abs/1807.00263>`_, `Chung
+        et al., 2020 <https://arxiv.org/abs/2011.09588>`_ and the user guide
+        page on :doc:`/user_guide/evaluating` for discussions of evaluating
+        uncertainty estimates using calibration metrics, among other metrics.
+        Note that calibration is generally less important than accuracy, but
+        more important than other metrics like :meth:`~sharpness` and any
+        :meth:`dispersion_metric`.
+
 
         Parameters
         ----------
@@ -1035,11 +1043,10 @@ class ContinuousModel(Model):
             SHA = \sqrt{\frac{1}{N} \sum_{i=1}^N \text{Var}(\hat{Y}_i)}
 
         See `Tran et al., 2020 <https://arxiv.org/abs/1912.10066>`_  and the
-        user guide page on :doc:`Evaluating Model Performance` for discussions
-        of evaluating uncertainty estimates using sharpness, among other
-        metrics.  Note that the sharpness should generally be one of the later
-        things you consider - accuracy and calibration usually being more
-        important.
+        user guide page on :doc:`/user_guide/evaluating` for discussions of
+        evaluating uncertainty estimates using sharpness, among other metrics.
+        Note that the sharpness should generally be one of the later things you
+        consider - accuracy and calibration usually being more important.
 
 
         Parameters
@@ -1134,11 +1141,11 @@ class ContinuousModel(Model):
             QCD = \frac{Q_3 - Q_1}{Q_3 + Q_1}
 
         See `Tran et al., 2020 <https://arxiv.org/abs/1912.10066>`_  and the
-        user guide page on :doc:`Evaluating Model Performance` for discussions
-        of evaluating uncertainty estimates using dispersion metrics, among
-        other metrics.  Note that dispersion metrics should generally be one of
-        the last things you consider - accuracy, calibration, and sharpness
-        usually being more important.
+        user guide page on :doc:`/user_guide/evaluating` for discussions of
+        evaluating uncertainty estimates using dispersion metrics, among other
+        metrics.  Note that dispersion metrics should generally be one of the
+        last things you consider - accuracy, calibration, and sharpness usually
+        being more important.
 
 
         Parameters
