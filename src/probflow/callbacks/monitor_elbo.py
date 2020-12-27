@@ -20,7 +20,7 @@ class MonitorELBO(Callback):
     Example
     -------
 
-    See the user guide section on :ref:`Monitoring the loss`.
+    See the user guide section on :ref:`monitoring-the-loss`.
 
     """
 

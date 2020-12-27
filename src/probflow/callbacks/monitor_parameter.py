@@ -16,7 +16,7 @@ class MonitorParameter(Callback):
     Examples
     --------
 
-    See the user guide section on :ref:`Monitoring the value of parameter(s)`.
+    See the user guide section on :ref:`user-guide-monitor-parameter`.
 
     """
 

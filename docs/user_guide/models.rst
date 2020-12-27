@@ -43,7 +43,7 @@ Manually computing the log likelihood
 The default loss function uses a log likelihood which is simply the log
 probability of the observed data according to the observation distribution (the
 distribution which was returned by the ``__call__`` method of the model,
-:ref:`see above <Specifying the observation distribution>`).
+:ref:`see above <specifying-the-observation-distribution>`).
 
 However, you can override this default by re-defining the
 :meth:`.Model.log_likelihood` method if you need more flexibility in how you're

@@ -32,8 +32,7 @@ class MonitorMetric(Callback):
     Example
     -------
 
-    See the user guide section on :ref:`Monitoring a metric`.
-
+    See the user guide section on :ref:`monitoring-a-metric`.
     """
 
     def __init__(self, metric, x, y=None, verbose=False):

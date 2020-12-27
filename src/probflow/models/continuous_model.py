@@ -1141,7 +1141,7 @@ class ContinuousModel(Model):
             QCD = \frac{Q_3 - Q_1}{Q_3 + Q_1}
 
         See `Tran et al., 2020 <https://arxiv.org/abs/1912.10066>`_  and the
-        user guide page on :doc:`user_guide/evaluating` for discussions of
+        user guide page on :doc:`/user_guide/evaluating` for discussions of
         evaluating uncertainty estimates using dispersion metrics, among other
         metrics.  Note that dispersion metrics should generally be one of the
         last things you consider - accuracy, calibration, and sharpness usually

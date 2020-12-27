@@ -19,7 +19,7 @@ class LearningRateScheduler(Callback):
     Examples
     --------
 
-    See the user guide section on :ref:`Change the learning rate over
+    See the user guide section on :ref:`user-guide-lr-scheduler`.
     training`.
 
     """

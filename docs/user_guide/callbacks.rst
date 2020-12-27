@@ -1,3 +1,5 @@
+.. _user_guide_callbacks:
+
 Callbacks
 =========
 
@@ -7,8 +9,10 @@ Callbacks can be used to perform actions during the training process.  Usually
 this involves running a function at the beginning or end of each epoch, or at
 the start or end of training.  There are several different callbacks that come
 built-in to probflow, but you can pretty easily :ref:`create your own as well
-<Rolling your own callback>`!
+<rolling-own-callback>`!
 
+
+.. _monitoring-a-metric:
 
 Monitoring a metric
 -------------------
@@ -59,6 +63,8 @@ Additional keyword arguments to :meth:`.MonitorMetric.plot` are passed to
 ``matplotlib.pyplot.plt``, so you can also specify labels, line styles, etc.
 
 
+.. _monitoring-the-loss:
+
 Monitoring the loss
 -------------------
 
@@ -101,6 +107,7 @@ Or as a function of walltime:
    :align: center
 
 
+.. _user-guide-early-stopping:
 
 Ending training when a metric stops improving
 ---------------------------------------------
@@ -113,8 +120,8 @@ a problem for Bayesian neural nets than it is for normal ones).
 
 The :class:`.EarlyStopping` method can be used to stop training early when some
 metric has stopped improving.  You can either use it in combination with
-:class:`.MonitorMetric` (:ref:`see above <Monitoring a metric>`),
-:class:`.MonitorELBO` (also :ref:`see above <Monitoring the loss>`), or with
+:class:`.MonitorMetric` (:ref:`see above <monitoring-a-metric>`),
+:class:`.MonitorELBO` (also :ref:`see above <monitoring-the-loss>`), or with
 any arbitrary function you define.  You can also perform early stopping with
 some patience - i.e., don't immediately stop training if your metric is worse
 than it was on the previous epoch, but only stop training when it has failed to
@@ -210,6 +217,7 @@ For example, to stop training after one hour
 
     model.fit(x_train, y_train, callbacks=[time_out])
 
+.. _user-guide-lr-scheduler:
 
 Changing the learning rate over training
 ----------------------------------------
@@ -268,6 +276,7 @@ Or, to use a cyclical annealing learning rate:
    :align: center
 
 
+.. _user-guide-kl-scheduler:
 
 Changing the KL weight over training
 ------------------------------------
@@ -315,7 +324,7 @@ Or, to use a cyclical annealing schedule like that used in `Fu et al., 2019
    :align: center
 
 
-
+.. _user-guide-monitor-parameter:
 
 Monitoring the value of parameter(s)
 ------------------------------------
@@ -383,6 +392,8 @@ You can also monitor multiple parameters by passing a list to
    :width: 70 %
    :align: center
 
+
+.. _rolling-own-callback:
 
 Rolling your own callback
 -------------------------

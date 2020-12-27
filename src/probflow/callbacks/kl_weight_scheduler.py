@@ -19,7 +19,7 @@ class KLWeightScheduler(Callback):
     Examples
     --------
 
-    See the user guide section on :ref:`Changing the KL weight over training`.
+    See the user guide section on :ref:`user-guide-kl-scheduler`.
 
     """
 

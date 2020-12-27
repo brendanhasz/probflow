@@ -4,7 +4,7 @@ from probflow.utils.base import BaseCallback
 class Callback(BaseCallback):
     """Base class for all callbacks.
 
-    See the user guide section on :ref:`Rolling your own callback`.
+    See the user guide section on :ref:`user_guide_callbacks`.
 
     """
 

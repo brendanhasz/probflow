@@ -32,8 +32,7 @@ class EarlyStopping(Callback):
     Example
     -------
 
-    See the user guide section on :ref:`Ending training when a metric stops
-    improving`.
+    See the user guide section on :ref:`user-guide-early-stopping`.
 
     """
 
