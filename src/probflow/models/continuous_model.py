@@ -471,7 +471,7 @@ class ContinuousModel(Model):
         plot: bool = True,
         ideal_line_kwargs: dict = {},
         batch_size=None,
-        **kwargs
+        **kwargs,
     ):
         r"""Compute and plot the coverage of a given confidence interval
         of the posterior predictive distribution as a function of specified
@@ -832,17 +832,32 @@ class ContinuousModel(Model):
         plt.xlabel("Predicted cumulative probability")
         plt.ylabel("Empirical cumulative probability")
 
-    def expected_calibration_error(
-        self, x, y, n=1000, resolution=100, batch_size=None
-    ):
-        r"""Compute the expected calibration error
+    def _calibration_metric(self, metric: str, p, p_hat):
+        if metric == "msce":
+            return np.mean(np.square(p - p_hat))
+        elif metric == "rmsce":
+            return np.sqrt(np.mean(np.square(p - p_hat)))
+        elif metric == "mace":
+            return np.mean(np.abs(p - p_hat))
+        elif metric == "ma":
+            p0 = np.concatenate([[0.0], p, [1.0]])
+            p0_hat = np.concatenate([[0.0], p_hat, [1.0]])
+            return np.trapz(np.abs(p0 - p0_hat), p0)
+        else:
+            raise ValueError(f"Unknown metric {metric}")
 
-        The expected regression calibration error is the error between a
-        model's regression calibration curve and the ideal calibration curve -
-        i.e., what the curve would be if the model were perfectly calibrated
-        (Kuleshov et al., 2018).  First, a vector :math:`p` of :math:`m`
-        confidence levels are chosen, which correspond to the predicted
-        cumulative probabilities:
+    def calibration_metric(
+        self, metric, x, y=None, n=1000, resolution=100, batch_size=None
+    ):
+        r"""Compute one or more of several calibration metrics
+
+        Regression calibration metrics measure the error between a model's
+        regression calibration curve and the ideal calibration curve - i.e.,
+        what the curve would be if the model were perfectly calibrated (see
+        `Kuleshov et al., 2018 <https://arxiv.org/abs/1807.00263>`_ and `Chung
+        et al., 2020 <https://arxiv.org/abs/2011.09588>`_).  First, a vector
+        :math:`p` of :math:`m` confidence levels are chosen, which correspond
+        to the predicted cumulative probabilities:
 
         .. math::
 
@@ -863,20 +878,52 @@ class ContinuousModel(Model):
         :math:`\sum_i [ a_i \leq b_i ]` is just the count of elements of
         :math:`a` which are less than corresponding elements in :math:`b`.
 
-        Then the expected calibration error (ECE) is just the mean squared
-        error between the empirical and predicted frequencies,
+        Various metrics can be computed from these curves to measure how
+        accurately the regression model captures uncertainty:
+
+        The **mean squared calibration error (MSCE)** is the mean squared error
+        between the empirical and predicted frequencies,
 
         .. math::
 
-            ECE = \frac{1}{m} \sum_{j=1}^m (p_j - \hat{p}_j)^2
+            MSCE = \frac{1}{m} \sum_{j=1}^m (p_j - \hat{p}_j)^2
 
-        Note that this is the *expected* calibration error (the average of the
-        calibration errors), not the *raw* calibration error (the sum of the
-        calibration errors), as was presented in (Kuleshov et al., 2018).
+        The **root mean squared calibration error (RMSCE)** is just the square
+        root of the MSCE:
+
+        .. math::
+
+            RMSCE = \sqrt{\frac{1}{m} \sum_{j=1}^m (p_j - \hat{p}_j)^2}
+
+        The **mean absolute calibration error (MACE)** is the mean of the
+        absolute differences between the empirical and predicted frequencies:
+
+        .. math::
+
+            MACE = \frac{1}{m} \sum_{j=1}^m | p_j - \hat{p}_j |
+
+        And the **miscalibration area (MA)** is the area between the
+        calibration curve and the ideal calibration curve (the identity line
+        from (0, 0) to (1, 1):
+
+        .. math::
+
+            MA = \int_0^1 p_x - \hat{p}_x dx
+
+        Note that MA is equal to MACE as the number of bins (set by the
+        ``resolution`` keyword argument) goes to infinity.
+
+        To choose which metric to compute, pass the name of the metric
+        (``msce``, ``rmsce``, ``mace``, or ``ma``) as the first argument to
+        this function (or a list of them to compute multiple).
 
 
         Parameters
         ----------
+        metric : str {'msce', 'rmsce', 'mace', or 'ma'} or List[str]
+            Which metric(s) to compute (see above for the definition of each
+            metric).  To compute multiple metrics, pass a list of the metric
+            names you'd like to compute.
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| for both x and y.
@@ -896,8 +943,10 @@ class ContinuousModel(Model):
 
         Returns
         -------
-        float
-            The expected calibration error
+        float or Dict[str, float]
+            The requested calibration metric.  If a list of metric names was
+            passed, will return a dict whose keys are the metrics, and whose
+            values are the corresponding values.
 
 
         Example
@@ -912,13 +961,29 @@ class ContinuousModel(Model):
             model = # some ProbFlow model...
             model.fit(x_train, y_train)
 
-        Then we can compute the expected calibration error using
-        :meth:`~expected_calibration_error`:
+        Then we can compute different calibration metrics using
+        :meth:`~expected_calibration_error`.  For example, to compute the mean
+        squared calibration error (MSCE):
 
         .. code-block:: pycon
 
-            >>> model.expected_calibration_error(x_val, y_val)
+            >>> model.calibration_metric("msce", x_val, y_val)
             0.123
+
+        Or, to compute the mean absolute calibration error (MACE):
+
+        .. code-block:: pycon
+
+            >>> model.calibration_metric("mace", x_val, y_val)
+            0.211
+
+        To compute multiple metrics at the same time, pass a list of metric
+        names:
+
+        .. code-block:: pycon
+
+            >>> model.calibration_metric(["msce", "mace"], x_val, y_val)
+            {"msce": 0.123, "mace": 0.211}
 
 
         See also
@@ -934,9 +999,15 @@ class ContinuousModel(Model):
         - Volodymyr Kuleshov, Nathan Fenner, and Stefano Ermon.
           `Accurate Uncertainties for Deep Learning Using Calibrated Regression
           <https://arxiv.org/abs/1807.00263>`_, 2018.
+        - Youngseog Chung, Willie Neiswanger, Ian Char, Jeff Schneider.
+          `Beyond Pinball Loss: Quantile Methods for Calibrated Uncertainty
+          Quantification <https://arxiv.org/abs/2011.09588>`_, 2020.
 
         """
         p, p_hat = self.calibration_curve(
             x, y, n=n, resolution=resolution, batch_size=batch_size
         )
-        return np.mean(np.square(p - p_hat))
+        if isinstance(metric, list):
+            return {m: self._calibration_metric(m, p, p_hat) for m in metric}
+        else:
+            return self._calibration_metric(metric, p, p_hat)

@@ -222,26 +222,71 @@ def test_ContinuousModel(plot):
     assert np.all(p_hat >= 0)
     assert np.all(p_hat <= 1)
 
-    # calibration curve
+    # calibration curve plot
     model.calibration_curve_plot(x, y, resolution=11)
     if plot:
         plt.title("should be calibration curve")
         plt.show()
 
-    # calibration curve (with batching)
+    # calibration curve plot (with batching)
     model.calibration_curve_plot(x, y, resolution=11, batch_size=25)
     if plot:
         plt.title("should be calibration curve (with batching)")
         plt.show()
 
-    # expected calibration error
-    ece = model.expected_calibration_error(x[:90, :], y[:90, :], resolution=11)
-    assert isinstance(ece, float)
-    assert ece >= 0
-
-    # expected calibration error
-    ece = model.expected_calibration_error(
-        x[:90, :], y[:90, :], resolution=11, batch_size=30
+    # calibration metrics: msce
+    msce = model.calibration_metric(
+        "msce", x[:90, :], y[:90, :], resolution=11
     )
-    assert isinstance(ece, float)
-    assert ece >= 0
+    assert isinstance(msce, float)
+    assert msce >= 0
+    assert msce <= 1
+
+    # calibration metrics: rmsce
+    rmsce = model.calibration_metric(
+        "rmsce", x[:90, :], y[:90, :], resolution=11
+    )
+    assert isinstance(rmsce, float)
+    assert rmsce >= 0
+    assert rmsce <= 1
+
+    # calibration metrics: mace
+    mace = model.calibration_metric(
+        "mace", x[:90, :], y[:90, :], resolution=11
+    )
+    assert isinstance(mace, float)
+    assert mace >= 0
+    assert mace <= 1
+
+    # calibration metrics: ma
+    ma = model.calibration_metric("ma", x[:90, :], y[:90, :], resolution=11)
+    assert isinstance(ma, float)
+    assert ma >= 0
+    assert ma <= 1
+
+    # should raise value error on invalid metric name
+    with pytest.raises(ValueError):
+        ma = model.calibration_metric(
+            "lala", x[:90, :], y[:90, :], resolution=11
+        )
+
+    # calibration metrics: list of em
+    metrics = model.calibration_metric(
+        ["mace", "ma"], x[:90, :], y[:90, :], resolution=11
+    )
+    assert isinstance(metrics, dict)
+    assert len(metrics) == 2
+    assert "mace" in metrics
+    assert "ma" in metrics
+    assert metrics["mace"] >= 0
+    assert metrics["mace"] <= 1
+    assert metrics["ma"] >= 0
+    assert metrics["ma"] <= 1
+
+    # calibration metric with batching
+    msce = model.calibration_metric(
+        "msce", x[:90, :], y[:90, :], resolution=11, batch_size=30
+    )
+    assert isinstance(msce, float)
+    assert msce >= 0
+    assert msce <= 1

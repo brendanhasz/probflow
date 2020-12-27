@@ -270,8 +270,9 @@ Uncertainty calibration
 But is the neural linear model - a mostly non-Bayesian network - at all
 well-calibrated in terms of its uncertainty estimates?  We can measure the
 calibration of the model (how accurate its uncertainty estimates are) using
-calibration curves and the expected calibration error for regression (`Kuleshov
-et al., 2018 <https://arxiv.org/abs/1807.00263>`_).
+calibration curves and the mean squared calibration error for regression (see
+`Kuleshov et al., 2018 <https://arxiv.org/abs/1807.00263>`_ and `Chung et al.,
+2020 <https://arxiv.org/abs/2011.09588>`_).
 
 Essentially, the calibration curve plots the proportion of samples which our
 model predicts to have less than or equal to some cumulative probability,
@@ -283,15 +284,15 @@ percentile.  If the model is perfectly calibrated, these values will match, and
 we'll end up with a calibration curve which goes along the identity line from
 (0, 0) to (1, 1).
 
-Then, the expected calibration error is just a metric of how far our model's
-calibration deviates from the ideal calibration curve (i.e., what the
+Then, the mean squared calibration error is just a metric of how far our
+model's calibration deviates from the ideal calibration curve (i.e., what the
 calibration curve would be if the model were perfectly calibrated - the
 identity line).  Check out the docs for
-:meth:`.ContinuousModel.expected_calibration_error` for a more formal
-definition.
+:meth:`.ContinuousModel.calibration_metric` for a more formal definition (and
+for other calibration metrics we could have used).
 
 ProbFlow's :class:`.ContinuousModel` class has methods to compute both the
-calibration curve and the expected calibration error.  So, all we need to do to
+calibration curve and various calibration metrics.  So, all we need to do to
 view the calibration curve is:
 
 .. code-block:: python3
@@ -311,19 +312,19 @@ view the calibration curve is:
    :align: center
 
 Note that for :meth:`.ContinuousModel.calibration_curve_plot` above (and for
-:meth:`.ContinuousModel.expected_calibration_error` below) we're using the
+:meth:`.ContinuousModel.calibration_metric` below) we're using the
 ``batch_size`` keyword argument to perform the computation in batches.
 Otherwise, if we tried to run the calculation using all ~600,000 samples in the
 validation data as one single ginormous batch, we'd run out of memory!
 
-To view the expected calibration error, we can just use
-:meth:`.ContinuousModel.expected_calibration_error` (lower is better):
+To view the mean squared calibration error (MSCE), we can just use
+:meth:`.ContinuousModel.calibration_metric` (lower is better):
 
 .. code-block:: pycon
 
-    >>> nlm_model.expected_calibration_error(x_val, y_val, batch_size=10000)
+    >>> nlm_model.calibration_metric("msce", x_val, y_val, batch_size=10000)
     0.00307
-    >>> bnn_model.expected_calibration_error(x_val, y_val, batch_size=10000)
+    >>> bnn_model.calibration_metric("msce", x_val, y_val, batch_size=10000)
     0.00412
 
 Both the neural linear model and the fully Bayesian network have pretty good
@@ -343,8 +344,8 @@ References
 
 * Jasper Snoek, Oren Rippel, Kevin Swersky, Ryan Kiros, Nadathur Satish,
   Narayanan Sundaram, Md. Mostofa Ali Patwary, Prabhat, Ryan P. Adams.
-  `Scalable Bayesian Optimization Using Deep Neural
-  Networks <https://arxiv.org/abs/1502.05700>`_, 2015
+  `Scalable Bayesian Optimization Using Deep Neural Networks
+  <https://arxiv.org/abs/1502.05700>`_, 2015
 * Carlos Riquelme, George Tucker, and Jasper Snoek.
   `Deep Bayesian Bandits Showdown <https://arxiv.org/abs/1802.09127>`_, 2018
 * Sebastian W. Ober and Carl Edward Rasmussen.
@@ -356,4 +357,6 @@ References
 * Weilin Zhou and Frederic Precioso.
   `Adaptive Bayesian Linear Regression for Automated Machine Learning
   <https://arxiv.org/abs/1904.00577>`_, 2019
-
+* Youngseog Chung, Willie Neiswanger, Ian Char, Jeff Schneider.
+  `Beyond Pinball Loss: Quantile Methods for Calibrated Uncertainty
+  Quantification <https://arxiv.org/abs/2011.09588>`_, 2020
