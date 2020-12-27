@@ -292,9 +292,47 @@ def test_ContinuousModel(plot):
     msce = model.calibration_metric(
         "msce", x[:90, :], y[:90, :], resolution=11, batch_size=30
     )
-    assert isinstance(msce, float)
+    assert isinstance(msce, (float, np.floating))
     assert msce >= 0
     assert msce <= 1
+
+    # sharpness
+    sha = model.sharpness(x[:90, :])
+    assert isinstance(sha, (float, np.floating))
+    assert rmsce >= 0
+
+    # sharpness w/ batching
+    sha = model.sharpness(x[:90, :], batch_size=30)
+    assert isinstance(sha, (float, np.floating))
+    assert rmsce >= 0
+
+    # dispersion metric: cv
+    dm = model.dispersion_metric("cv", x[:90, :])
+    assert isinstance(dm, (float, np.floating))
+    assert dm >= 0
+
+    # dispersion metric: qcd
+    dm = model.dispersion_metric("qcd", x[:90, :])
+    assert isinstance(dm, (float, np.floating))
+    assert dm >= 0
+
+    # dispersion metric w/ batching
+    dm = model.dispersion_metric("cv", x[:90, :], batch_size=30)
+    assert isinstance(dm, (float, np.floating))
+    assert dm >= 0
+
+    # should raise value error on invalid metric name
+    with pytest.raises(ValueError):
+        dm = model.dispersion_metric("lala", x[:90, :])
+
+    # dispersion metrics: list of em
+    metrics = model.dispersion_metric(["cv", "qcd"], x[:90, :])
+    assert isinstance(metrics, dict)
+    assert len(metrics) == 2
+    assert "cv" in metrics
+    assert "qcd" in metrics
+    assert metrics["cv"] >= 0
+    assert metrics["qcd"] >= 0
 
 
 def test_ContinuousModel_multivariate():

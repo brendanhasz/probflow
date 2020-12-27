@@ -64,6 +64,8 @@ class ContinuousModel(Model):
     and adds the following continuous-model-specific methods:
 
     * :meth:`~predictive_interval`
+    * :meth:`~aleatoric_interval`
+    * :meth:`~epistemic_interval`
     * :meth:`~pred_dist_plot`
     * :meth:`~predictive_prc`
     * :meth:`~pred_dist_covered`
@@ -75,7 +77,9 @@ class ContinuousModel(Model):
     * :meth:`~residuals_plot`
     * :meth:`~calibration_curve`
     * :meth:`~calibration_curve_plot`
-    * :meth:`~expected_calibration_error`
+    * :meth:`~calibration_metric`
+    * :meth:`~sharpness`
+    * :meth:`~coefficient_of_variation`
 
 
     Example
@@ -844,7 +848,7 @@ class ContinuousModel(Model):
             p0_hat = np.concatenate([[0.0], p_hat, [1.0]])
             return np.trapz(np.abs(p0 - p0_hat), p0)
         else:
-            raise ValueError(f"Unknown metric {metric}")
+            raise ValueError(f"Unknown calibration metric {metric}")
 
     def calibration_metric(
         self, metric, x, y=None, n=1000, resolution=100, batch_size=None
@@ -923,7 +927,13 @@ class ContinuousModel(Model):
         metric : str {'msce', 'rmsce', 'mace', or 'ma'} or List[str]
             Which metric(s) to compute (see above for the definition of each
             metric).  To compute multiple metrics, pass a list of the metric
-            names you'd like to compute.
+            names you'd like to compute.  Available metrics are:
+
+            * ``msce``: mean squared calibration error
+            * ``rmsce``: root mean squared calibration error
+            * ``mace``: mean absolute calibration error
+            * ``ma``: miscalibration area
+
         x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
             Independent variable values of the dataset to evaluate (aka the
             "features").  Or a |DataGenerator| for both x and y.
@@ -946,7 +956,7 @@ class ContinuousModel(Model):
         float or Dict[str, float]
             The requested calibration metric.  If a list of metric names was
             passed, will return a dict whose keys are the metrics, and whose
-            values are the corresponding values.
+            values are the corresponding metric values.
 
 
         Example
@@ -991,6 +1001,8 @@ class ContinuousModel(Model):
 
         * :meth:`~calibration_curve`
         * :meth:`~calibration_curve_plot`
+        * :meth:`~sharpness`
+        * :meth:`~dispersion_metric`
 
 
         References
@@ -1011,3 +1023,192 @@ class ContinuousModel(Model):
             return {m: self._calibration_metric(m, p, p_hat) for m in metric}
         else:
             return self._calibration_metric(metric, p, p_hat)
+
+    def sharpness(self, x, n=1000, batch_size=None):
+        r"""Compute the sharpness of the model's uncertainty estimates
+
+        The "sharpness" of a model's uncertainty estimates is the root mean of
+        the estimated variances:
+
+        .. math::
+
+            SHA = \sqrt{\frac{1}{N} \sum_{i=1}^N \text{Var}(\hat{Y}_i)}
+
+        See `Tran et al., 2020 <https://arxiv.org/abs/1912.10066>`_  and the
+        user guide page on :doc:`Evaluating Model Performance` for discussions
+        of evaluating uncertainty estimates using sharpness, among other
+        metrics.  Note that the sharpness should generally be one of the later
+        things you consider - accuracy and calibration usually being more
+        important.
+
+
+        Parameters
+        ----------
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
+            Independent variable values of the dataset to evaluate (aka the
+            "features").  Or a |DataGenerator| for both x and y.
+        n : int
+            Number of samples to draw from the model.  Default = 1000
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
+
+
+        Returns
+        -------
+        float
+            The sharpness of the model's uncertainty estimates
+
+
+        Example
+        -------
+
+        Supposing we have some training data (``x_train`` and ``y_train``) and
+        validation data (``x_val`` and ``y_val``), and have already fit a model
+        to the training data,
+
+        .. code-block:: python3
+
+            model = # some ProbFlow model...
+            model.fit(x_train, y_train)
+
+        Then we can compute the sharpness of our model's predictions with:
+
+        .. code-block:: pycon
+
+            >>> model.sharpness(x_val)
+            0.173
+
+
+        See also
+        --------
+
+        * :meth:`~calibration_metric`
+        * :meth:`~dispersion_metric`
+
+
+        References
+        ----------
+
+        - Kevin Tran, Willie Neiswanger, Junwoong Yoon, Qingyang Zhang, Eric
+          Xing, Zachary W. Ulissi.  `Methods for comparing uncertainty
+          quantifications for material property predictions
+          <https://arxiv.org/abs/1912.10066>`_, 2020.
+
+        """
+        samples = self.predictive_sample(x, n=n, batch_size=batch_size)
+        return np.sqrt(np.mean(np.var(samples, axis=0)))
+
+    def _dispersion_metric(self, metric, samples):
+        stds = np.std(samples, axis=0)
+        if metric in ["cv", "cov", "coefficient_of_variation"]:
+            return np.std(stds) / np.mean(stds)
+        elif metric in ["qcd", "qcod", "quartile_coefficient_of_dispersion"]:
+            q1 = np.percentile(stds, 25)
+            q3 = np.percentile(stds, 75)
+            return (q3 - q1) / (q3 + q1)
+        else:
+            raise ValueError(f"Unknown dispersion metric {metric}")
+
+    def dispersion_metric(self, metric, x, n=1000, batch_size=None):
+        r"""Compute one or more of several calibration metrics
+
+        Dispersion metrics measure how much a model's uncertainty estimates
+        vary.  There are several different dispersion metrics:
+
+        The **coefficient of variation** (:math:`C_v`) is the ratio of the
+        standard deviation to the mean (of the model's uncertainty standard
+        deviations):
+
+        .. math::
+
+            C_v =
+
+        The **quartile coefficient of dispersion** (:math:`QCD`) is less
+        sensitive to outliers, as it simply measures the difference between the
+        first and third quartile (of the model's uncertainty standard
+        deviations) to their sum:
+
+        .. math::
+
+            QCD = \frac{Q_3 - Q_1}{Q_3 + Q_1}
+
+        See `Tran et al., 2020 <https://arxiv.org/abs/1912.10066>`_  and the
+        user guide page on :doc:`Evaluating Model Performance` for discussions
+        of evaluating uncertainty estimates using dispersion metrics, among
+        other metrics.  Note that dispersion metrics should generally be one of
+        the last things you consider - accuracy, calibration, and sharpness
+        usually being more important.
+
+
+        Parameters
+        ----------
+        metric : str {'cv' or 'qcd'} or List[str]
+            Dispersion metric to compute.  Or,
+        x : |ndarray| or |DataFrame| or |Series| or |DataGenerator|
+            Independent variable values of the dataset to evaluate (aka the
+            "features").  Or a |DataGenerator| for both x and y.
+        n : int
+            Number of samples to draw from the model.  Default = 1000
+        batch_size : None or int
+            Compute using batches of this many datapoints.  Default is `None`
+            (i.e., do not use batching).
+
+
+        Returns
+        -------
+        float or Dict[str, float]
+            The requested dispersion metric.  If a list of metric names was
+            passed, will return a dict whose keys are the metrics, and whose
+            values are the corresponding metric values.
+
+
+        Example
+        -------
+
+        Supposing we have some training data (``x_train`` and ``y_train``) and
+        validation data (``x_val`` and ``y_val``), and have already fit a model
+        to the training data,
+
+        .. code-block:: python3
+
+            model = # some ProbFlow model...
+            model.fit(x_train, y_train)
+
+        Then we can compute the coefficient of variation of our model's
+        predictions with:
+
+        .. code-block:: pycon
+
+            >>> model.dispersion_metric('cv', x_val)
+            0.732
+
+        Or the quartile coefficient of dispersion with:
+
+        .. code-block:: pycon
+
+            >>> model.dispersion_metric('qcd', x_val)
+            0.625
+
+
+        See also
+        --------
+
+        * :meth:`~calibration_metric`
+        * :meth:`~sharpness`
+
+
+        References
+        ----------
+
+        - Kevin Tran, Willie Neiswanger, Junwoong Yoon, Qingyang Zhang, Eric
+          Xing, Zachary W. Ulissi.  `Methods for comparing uncertainty
+          quantifications for material property predictions
+          <https://arxiv.org/abs/1912.10066>`_, 2020.
+
+        """
+        samples = self.predictive_sample(x, n=n, batch_size=batch_size)
+        if isinstance(metric, list):
+            return {m: self._dispersion_metric(m, samples) for m in metric}
+        else:
+            return self._dispersion_metric(metric, samples)
