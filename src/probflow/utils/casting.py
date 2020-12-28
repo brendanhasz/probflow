@@ -66,6 +66,7 @@ def to_default_dtype(x):
         return x.type(get_datatype())
     else:
         import tensorflow as tf
+
         return tf.cast(x, get_datatype())
 
 

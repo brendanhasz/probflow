@@ -4,7 +4,7 @@ import numpy as np
 
 import probflow.utils.ops as O
 from probflow.distributions import Normal
-from probflow.utils.casting import to_tensor, to_default_dtype
+from probflow.utils.casting import to_default_dtype, to_tensor
 
 from .parameter import Parameter
 
