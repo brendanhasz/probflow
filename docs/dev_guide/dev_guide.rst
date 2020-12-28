@@ -50,7 +50,7 @@ The above command creates a new virtual environment called ``venv``, activates
 that virtual environment, installs the requirements (including tensorflow or
 pytorch), dev requirements, and the ProbFlow package in editable mode from your
 version of the source code - see the ``Makefile`` for the commands it's
-running), run:
+running).
 
 
 Tests

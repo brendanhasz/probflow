@@ -464,3 +464,30 @@ def log_cholesky_transform(x):
         E = tfp.math.fill_triangular(x)
         E = tf.linalg.set_diag(E, tf.exp(tf.linalg.tensor_diag_part(E)))
         return E @ tf.transpose(E)
+
+
+def transpose(x):
+    """Transpose a matrix or batch of matrices"""
+    if get_backend() == "pytorch":
+        import torch
+
+        return torch.transpose(x, -1, -2)
+    else:
+        import tensorflow as tf
+
+        perm = list(range(x.ndim))
+        perm[-1] = x.ndim - 2
+        perm[-2] = x.ndim - 1
+        return tf.transpose(x, perm=perm)
+
+
+def reshape(x, new_shape):
+    """Reshape a tensor"""
+    if get_backend() == "pytorch":
+        import torch
+
+        return torch.reshape(x, tuple(new_shape))
+    else:
+        import tensorflow as tf
+
+        return tf.reshape(x, new_shape)

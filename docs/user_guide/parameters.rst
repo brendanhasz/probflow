@@ -640,3 +640,45 @@ distribution:
 .. image:: img/parameters/mvn_2.svg
    :width: 70 %
    :align: center
+
+
+Centered Parameter
+^^^^^^^^^^^^^^^^^^
+
+The :class:`.CenteredParameter` gets a vector or matrix of parameters which are
+constrained to have a mean of 0.  This can be useful for making a model
+identifiable (e.g. when using as the weights of a multi-logit regression), or
+to induce hard centering on hierarchical parameters.
+
+To create a length-5 parameter vector which always returns samples that have a
+mean of 0:
+
+.. code-block:: python3
+
+    >>> param = pf.CenteredParameter([5, 1])
+    >>> np.mean(param.posterior_mean())
+    0.0
+    >>> np.mean(param.posterior_sample())
+    0.0
+    >>> np.mean(param.posterior_sample(3), axis=1)
+    [0.0, 0.0, 0.0]
+
+To create a parameter matrix where the means of each column are always 0 (but
+the mean of all elements in the matrix is not necessarily 0), set the
+``center_by`` keyword argument to ``'column'``:
+
+.. code-block:: python3
+
+    >>> param = pf.CenteredParameter([5, 3], center_by="column")
+    >>> np.mean(param.posterior_sample(), axis=0)
+    [0.0, 0.0, 0.0]
+
+To create a parameter matrix where the means of each row are always 0 (but the
+mean of all elements in the matrix is not necessarily 0), set the ``center_by``
+keyword argument to ``'row'``:
+
+.. code-block:: python3
+
+    >>> param = pf.CenteredParameter([5, 3], center_by="row")
+    >>> np.mean(param.posterior_sample(), axis=1)
+    [0.0, 0.0, 0.0, 0.0, 0.0]
