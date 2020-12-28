@@ -41,6 +41,7 @@ See the :doc:`user guide <../user_guide/parameters>` for more information on Par
 __all__ = [
     "BoundedParameter",
     "CategoricalParameter",
+    "CenteredParameter",
     "DeterministicParameter",
     "DirichletParameter",
     "MultivariateNormalParameter",
@@ -52,6 +53,7 @@ __all__ = [
 
 from .bounded_parameter import BoundedParameter
 from .categorical_parameter import CategoricalParameter
+from .centered_parameter import CenteredParameter
 from .deterministic_parameter import DeterministicParameter
 from .dirichlet_parameter import DirichletParameter
 from .multivariate_normal_parameter import MultivariateNormalParameter

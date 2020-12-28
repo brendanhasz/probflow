@@ -132,7 +132,7 @@ Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
     model.pred_dist_plot(x_test, ci=0.95)
 
-.. image:: img/pred_dist.svg
+.. image:: img/pred_dist_light.svg
    :width: 90 %
    :align: center
 
@@ -149,7 +149,7 @@ Inspect the posterior distributions of your fit model's parameters, with 95% con
 
     model.posterior_plot(ci=0.95)
 
-.. image:: img/posteriors.svg
+.. image:: img/posteriors_light.svg
    :width: 90 %
    :align: center
 
@@ -166,13 +166,13 @@ and diagnose *where* your model is having problems capturing uncertainty:
 
     model.coverage_by(ci=0.95)
 
-.. image:: img/coverage.svg
+.. image:: img/coverage_light.svg
    :width: 90 %
    :align: center
 
 ProbFlow also provides more complex modules, such as those required for building :doc:`Bayesian neural networks <examples/fully_connected>`.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, even a somewhat complex multi-layer Bayesian neural network like this:
 
-.. image:: img/dual_headed_net.svg
+.. image:: img/dual_headed_net_light.svg
    :width: 99 %
    :align: center
 
