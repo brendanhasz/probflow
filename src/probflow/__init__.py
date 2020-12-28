@@ -9,4 +9,4 @@ from probflow.utils.base import *
 from probflow.utils.io import *
 from probflow.utils.settings import *
 
-__version__ = "2.3.0"
+__version__ = "2.4.0"
