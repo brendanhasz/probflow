@@ -4,7 +4,7 @@ import numpy as np
 
 import probflow.utils.ops as O
 from probflow.distributions import Normal
-from probflow.utils.casting import to_tensor
+from probflow.utils.casting import to_tensor, to_default_dtype
 
 from .parameter import Parameter
 
@@ -119,7 +119,7 @@ class CenteredParameter(Parameter):
         A[-1, :] = -1.0
         A[-1, -1] = 0.0
         Q, _ = np.linalg.qr(A)
-        self._A_qr = to_tensor(Q[:, :-1])
+        self._A_qr = to_default_dtype(to_tensor(Q[:, :-1]))
 
         # Transform function
         def A_qr_transform(u):

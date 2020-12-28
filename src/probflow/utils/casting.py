@@ -4,6 +4,7 @@ betweeen Tensors and numpy arrays.
 
 * :func:`.to_numpy`
 * :func:`.to_tensor`
+* :func:`.to_default_dtype`
 * :func:`.make_input_tensor`
 
 ----------
@@ -14,6 +15,7 @@ betweeen Tensors and numpy arrays.
 __all__ = [
     "to_numpy",
     "to_tensor",
+    "to_default_dtype",
     "make_input_tensor",
 ]
 
@@ -54,9 +56,17 @@ def to_tensor(x):
         if isinstance(x, torch.Tensor):
             return x
         else:
-            return torch.tensor(x, dtype=get_datatype())
+            return torch.tensor(x)
     else:
         return x  # TensorFlow auto-converts numpy arrays to tensors
+
+
+def to_default_dtype(x):
+    if get_backend() == "pytorch":
+        return x.type(get_datatype())
+    else:
+        import tensorflow as tf
+        return tf.cast(x, get_datatype())
 
 
 def make_input_tensor(fn):
