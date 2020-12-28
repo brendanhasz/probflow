@@ -252,7 +252,7 @@ Installation
 ------------
 
 If you already have your desired backend installed (i.e. Tensorflow/TFP or
-PyToorch), then you can just do:
+PyTorch), then you can just do:
 
 .. code-block:: bash
 
