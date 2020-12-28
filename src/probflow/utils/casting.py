@@ -21,7 +21,7 @@ __all__ = [
 import numpy as np
 import pandas as pd
 
-from probflow.utils.settings import get_backend
+from probflow.utils.settings import get_backend, get_datatype
 
 
 def to_numpy(x):
@@ -54,7 +54,7 @@ def to_tensor(x):
         if isinstance(x, torch.Tensor):
             return x
         else:
-            return torch.tensor(x)
+            return torch.tensor(x, dtype=get_datatype())
     else:
         return x  # TensorFlow auto-converts numpy arrays to tensors
 

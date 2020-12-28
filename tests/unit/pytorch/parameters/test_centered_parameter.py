@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+import torch
 
 from probflow.distributions import Bernoulli
 from probflow.models import Model
@@ -226,7 +227,7 @@ def test_CenteredParameter_fit():
             self.w = CenteredParameter([di, do], center_by="column")
 
         def __call__(self, x):
-            return Bernoulli(x @ self.w())
+            return Bernoulli(torch.tensor(x) @ self.w())
 
     N = 128
     Di = 5
