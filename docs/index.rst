@@ -66,8 +66,11 @@ For example, a simple Bayesian linear regression
 
     y \sim \text{Normal}(w x + b, \sigma)
 
-can be built by creating a ProbFlow |Model|:
-
+can be built by creating a ProbFlow Model.  This is just a class which inherits
+:class:`.Model` (or :class:`.ContinuousModel` or :class:`.CategoricalModel` 
+depending on the target type).  The ``__init__`` method sets up the parameters,
+and the ``__call__`` method performs a forward pass of the model, returning the
+predicted probability distribution of the target:
 
 .. tabs::
 
