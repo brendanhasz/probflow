@@ -110,7 +110,7 @@ class Model(Module):
 
         import tensorflow as tf
 
-        def train_fn(x_data, y_data):
+        def train_fn(x_data: tf.Tensor, y_data: tf.Tensor):
             self.reset_kl_loss()
             with Sampling(n=n_mc, flipout=flipout):
                 with tf.GradientTape() as tape:
@@ -123,7 +123,7 @@ class Model(Module):
         if eager:
             return train_fn
         else:
-            return tf.function(train_fn)
+            return tf.function(experimental_compile=True)(train_fn)
 
     def _train_step_pytorch(self, n, flipout=False, eager=False, n_mc=1):
         """Get the training step function for PyTorch"""
