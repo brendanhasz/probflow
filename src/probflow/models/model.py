@@ -320,13 +320,10 @@ class Model(Module):
             if get_backend() == "pytorch":
                 import torch
 
-                self._optimizer = torch.optim.LambdaLR(
-                    torch.optim.Adam(
-                        self.trainable_variables,
-                        lr=self._learning_rate,
-                        **optimizer_kwargs
-                    ),
-                    lr_lambda=lambda: self._learning_rate,
+                self._optimizer = torch.optim.Adam(
+                    self.trainable_variables,
+                    lr=self._learning_rate,
+                    **optimizer_kwargs
                 )
             else:
                 import tensorflow as tf
