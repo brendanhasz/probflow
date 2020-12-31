@@ -70,7 +70,6 @@ variational distributions while inside the context manager.
 
 import uuid
 
-
 __all__ = [
     "get_backend",
     "set_backend",

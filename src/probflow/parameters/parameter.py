@@ -9,7 +9,11 @@ from probflow.utils.base import BaseDistribution, BaseParameter
 from probflow.utils.casting import to_numpy
 from probflow.utils.initializers import scale_xavier, xavier
 from probflow.utils.plotting import plot_dist
-from probflow.utils.settings import Sampling, get_samples, get_static_sampling_uuid
+from probflow.utils.settings import (
+    Sampling,
+    get_samples,
+    get_static_sampling_uuid,
+)
 
 
 def cache_static_samples(fn):
