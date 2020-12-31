@@ -22,6 +22,8 @@ def test_LearningRateScheduler(plot):
     assert isinstance(lrs.learning_rate, list)
     assert len(lrs.learning_rate) == 10
     assert my_model._learning_rate == 1e-3
+    for g in my_model._optimizer.param_groups:
+        assert g["lr"] == 1e-3  # check optmizer is actually updating
     lrs.plot()
     if plot:
         plt.show()
