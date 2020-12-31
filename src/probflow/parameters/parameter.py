@@ -9,7 +9,26 @@ from probflow.utils.base import BaseDistribution, BaseParameter
 from probflow.utils.casting import to_numpy
 from probflow.utils.initializers import scale_xavier, xavier
 from probflow.utils.plotting import plot_dist
-from probflow.utils.settings import Sampling, get_samples
+from probflow.utils.settings import Sampling, get_samples, get_static_sampling_uuid
+
+
+def cache_static_samples(fn):
+    """Decorator to return static samples if they are currently cached"""
+
+    def wrapped_fn(param):
+        ss_uuid = get_static_sampling_uuid()
+        if ss_uuid is None:
+            return fn(param)
+        else:
+            if ss_uuid == param._static_samples_uuid:
+                return param._static_samples_tensor
+            else:
+                samples = fn(param)
+                param._static_samples_tensor = O.copy_tensor(samples)
+                param._static_samples_uuid = ss_uuid
+                return samples
+
+    return wrapped_fn
 
 
 class Parameter(BaseParameter):
@@ -116,6 +135,7 @@ class Parameter(BaseParameter):
         self.transform = transform if transform else lambda x: x
         self.initializer = initializer
         self.name = name
+        self._static_samples_uuid = None
         self.var_transform = {
             n: (f if f else lambda x: x) for (n, f) in var_transform.items()
         }
@@ -168,6 +188,7 @@ class Parameter(BaseParameter):
         """This Parameter's variational posterior distribution"""
         return self.posterior_fn(**self.variables)
 
+    @cache_static_samples
     def __call__(self):
         """Return a sample from or the MAP estimate of this parameter.
 
