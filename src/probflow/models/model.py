@@ -393,6 +393,9 @@ class Model(Module):
             raise TypeError("lr must be a float")
         else:
             self._learning_rate = lr
+        if get_backend() == "pytorch":
+            for g in self._optimizer.param_groups:
+                g["lr"] = self._learning_rate
 
     def set_kl_weight(self, w):
         """Set the weight of the KL term's contribution to the ELBO loss"""
