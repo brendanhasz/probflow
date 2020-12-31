@@ -209,7 +209,7 @@ def eye(dims):
     if get_backend() == "pytorch":
         import torch
 
-        return torch.eye(dims)
+        return torch.eye(dims, dtype=get_datatype())
     else:
         import tensorflow as tf
 
@@ -391,13 +391,19 @@ def additive_logistic_transform(vals):
         import torch
 
         ones_shape = [s for s in vals.shape[:-1]] + [1]
-        exp_vals = torch.cat([torch.exp(vals), torch.ones(ones_shape)], dim=-1)
+        exp_vals = torch.cat(
+            [torch.exp(vals), torch.ones(ones_shape, dtype=get_datatype())],
+            dim=-1,
+        )
         return exp_vals / torch.sum(exp_vals, dim=-1, keepdim=True)
     else:
         import tensorflow as tf
 
         ones_shape = tf.concat([vals.shape[:-1], [1]], axis=-1)
-        exp_vals = tf.concat([tf.exp(vals), tf.ones(ones_shape)], axis=-1)
+        exp_vals = tf.concat(
+            [tf.exp(vals), tf.ones(ones_shape, dtype=get_datatype())],
+            axis=-1,
+        )
         return exp_vals / tf.reduce_sum(exp_vals, axis=-1, keepdims=True)
 
 
@@ -452,7 +458,7 @@ def log_cholesky_transform(x):
         import torch
 
         N = int((np.sqrt(1 + 8 * torch.numel(x)) - 1) / 2)
-        E = torch.zeros((N, N))
+        E = torch.zeros((N, N), dtype=get_datatype())
         tril_ix = torch.tril_indices(row=N, col=N, offset=0)
         E[..., tril_ix[0], tril_ix[1]] = x
         E[..., range(N), range(N)] = torch.exp(torch.diagonal(E))
