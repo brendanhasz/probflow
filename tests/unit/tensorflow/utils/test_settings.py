@@ -74,7 +74,7 @@ def test_samples():
 def test_flipout():
     """Tests setting and getting the flipout setting"""
 
-    # Default should be None
+    # Default should be False
     assert settings.get_flipout() is False
 
     # Should be able to change to True or False
@@ -90,6 +90,29 @@ def test_flipout():
         settings.set_flipout(1)
     with pytest.raises(TypeError):
         settings.set_flipout("lalala")
+
+
+def test_flipout():
+    """Tests setting and getting the static sampling uuid"""
+
+    # Default should be None
+    assert settings.get_static_sampling_uuid() is None
+
+    # Should be able to change to True or False
+    the_uuid = uuid.uuid4()
+    settings.set_static_sampling_uuid(the_uuid)
+    assert settings.get_static_sampling_uuid() is not None
+    assert settings.get_static_sampling_uuid() == the_uuid
+    settings.set_static_sampling_uuid(None)
+    assert settings.get_static_sampling_uuid() is None
+
+    # But only None or uuid
+    with pytest.raises(TypeError):
+        settings.set_static_sampling_uuid(3.14)
+    with pytest.raises(TypeError):
+        settings.set_static_sampling_uuid(1)
+    with pytest.raises(TypeError):
+        settings.set_static_sampling_uuid("lalala")
 
 
 def test_sampling():
