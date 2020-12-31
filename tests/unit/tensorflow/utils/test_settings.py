@@ -92,7 +92,7 @@ def test_flipout():
         settings.set_flipout("lalala")
 
 
-def test_flipout():
+def test_static_sampling_uuid():
     """Tests setting and getting the static sampling uuid"""
 
     # Default should be None
