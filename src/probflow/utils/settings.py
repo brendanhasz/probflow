@@ -68,6 +68,9 @@ variational distributions while inside the context manager.
 """
 
 
+import uuid
+
+
 __all__ = [
     "get_backend",
     "set_backend",
@@ -247,10 +250,10 @@ def get_static_sampling_uuid():
 
 def set_static_sampling_uuid(uuid_value):
     """Set the current static sampling UUID"""
-    if isinstance(uuid_value, uuid.UUID):
+    if uuid_value is None or isinstance(uuid_value, uuid.UUID):
         __SETTINGS__._STATIC_SAMPLING_UUID = uuid_value
     else:
-        raise TypeError("must be a uuid")
+        raise TypeError("must be a uuid or None")
 
 
 class Sampling:

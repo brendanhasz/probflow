@@ -69,7 +69,7 @@ def test_Module():
     assert np.all(sample1.numpy() == sample2.numpy())
 
     # outputs should be different when sampling is on
-    with Sampling():
+    with Sampling(n=1):
         sample1 = the_module(x)
         sample2 = the_module(x)
     assert np.all(sample1.numpy() != sample2.numpy())

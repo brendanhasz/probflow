@@ -48,7 +48,7 @@ def test_Embedding():
     assert samples1.shape[1] == 5
 
     # Samples should actually be the same b/c using deterministic posterior
-    with Sampling():
+    with Sampling(n=1):
         samples1 = emb(x)
         samples2 = emb(x)
     assert np.all(samples1.numpy() == samples2.numpy())
@@ -85,7 +85,7 @@ def test_Embedding():
     # With probabilistic = True, samples should be different
     emb = Embedding(10, 5, probabilistic=True)
     x = tf.random.uniform([20, 1], minval=0, maxval=9, dtype=tf.dtypes.int32)
-    with Sampling():
+    with Sampling(n=1):
         samples1 = emb(x)
         samples2 = emb(x)
     assert np.all(samples1.numpy() != samples2.numpy())

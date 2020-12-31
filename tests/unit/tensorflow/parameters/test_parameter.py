@@ -61,7 +61,7 @@ def test_Parameter_scalar():
     assert sample1.numpy() == sample2.numpy()
 
     # within a Sampling statement, should randomly sample from the dist
-    with Sampling():
+    with Sampling(n=1):
         sample1 = param()
         sample2 = param()
     assert sample1.ndim == 1
