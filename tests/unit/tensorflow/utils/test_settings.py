@@ -1,5 +1,6 @@
 """Tests the probflow.utils.settings module"""
 
+import uuid
 
 import pytest
 import tensorflow as tf
@@ -73,7 +74,7 @@ def test_samples():
 def test_flipout():
     """Tests setting and getting the flipout setting"""
 
-    # Default should be None
+    # Default should be False
     assert settings.get_flipout() is False
 
     # Should be able to change to True or False
@@ -91,6 +92,29 @@ def test_flipout():
         settings.set_flipout("lalala")
 
 
+def test_static_sampling_uuid():
+    """Tests setting and getting the static sampling uuid"""
+
+    # Default should be None
+    assert settings.get_static_sampling_uuid() is None
+
+    # Should be able to change to True or False
+    the_uuid = uuid.uuid4()
+    settings.set_static_sampling_uuid(the_uuid)
+    assert settings.get_static_sampling_uuid() is not None
+    assert settings.get_static_sampling_uuid() == the_uuid
+    settings.set_static_sampling_uuid(None)
+    assert settings.get_static_sampling_uuid() is None
+
+    # But only None or uuid
+    with pytest.raises(TypeError):
+        settings.set_static_sampling_uuid(3.14)
+    with pytest.raises(TypeError):
+        settings.set_static_sampling_uuid(1)
+    with pytest.raises(TypeError):
+        settings.set_static_sampling_uuid("lalala")
+
+
 def test_sampling():
     """Tests the Sampling context manager"""
 
@@ -98,23 +122,58 @@ def test_sampling():
     assert settings.get_backend() == "tensorflow"
     assert settings.get_samples() is None
     assert settings.get_flipout() is False
+    assert settings.get_static_sampling_uuid() is None
 
-    # Default should be samples=1 and flipout=False
+    # Default should be Not to change anything
     with settings.Sampling():
-        assert settings.get_samples() == 1
+        assert settings.get_backend() == "tensorflow"
+        assert settings.get_samples() is None
         assert settings.get_flipout() is False
+        assert settings.get_static_sampling_uuid() is None
+
+    # Should be able to set samples and flipout via kwargs
+    with settings.Sampling(n=100, flipout=True):
+        assert settings.get_backend() == "tensorflow"
+        assert settings.get_samples() == 100
+        assert settings.get_flipout() is True
+        assert settings.get_static_sampling_uuid() is None
 
     # Should return to defaults after sampling
     assert settings.get_backend() == "tensorflow"
     assert settings.get_samples() is None
     assert settings.get_flipout() is False
+    assert settings.get_static_sampling_uuid() is None
 
-    # Should be able to set samples and flipout via kwargs
-    with settings.Sampling(n=100, flipout=True):
-        assert settings.get_samples() == 100
-        assert settings.get_flipout() is True
+    # Should be able to set static sampling uuid
+    with settings.Sampling(static=True):
+        assert settings.get_backend() == "tensorflow"
+        assert settings.get_samples() is None
+        assert settings.get_flipout() is False
+        assert settings.get_static_sampling_uuid() is not None
+        assert isinstance(settings.get_static_sampling_uuid(), uuid.UUID)
 
-    # Again should return to defaults after __exit__
+    # Should return to defaults after sampling
     assert settings.get_backend() == "tensorflow"
     assert settings.get_samples() is None
     assert settings.get_flipout() is False
+    assert settings.get_static_sampling_uuid() is None
+
+    # Should be able to nest sampling context managers
+    with settings.Sampling(static=True):
+        assert settings.get_backend() == "tensorflow"
+        assert settings.get_samples() is None
+        assert settings.get_flipout() is False
+        assert settings.get_static_sampling_uuid() is not None
+        assert isinstance(settings.get_static_sampling_uuid(), uuid.UUID)
+        with settings.Sampling(n=100, flipout=True):
+            assert settings.get_backend() == "tensorflow"
+            assert settings.get_samples() == 100
+            assert settings.get_flipout() is True
+            assert settings.get_static_sampling_uuid() is not None
+            assert isinstance(settings.get_static_sampling_uuid(), uuid.UUID)
+
+    # Should return to defaults after sampling
+    assert settings.get_backend() == "tensorflow"
+    assert settings.get_samples() is None
+    assert settings.get_flipout() is False
+    assert settings.get_static_sampling_uuid() is None

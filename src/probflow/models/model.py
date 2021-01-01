@@ -845,7 +845,7 @@ class Model(Module):
 
         # Get a distribution of samples
         if distribution:
-            with Sampling():
+            with Sampling(n=1, flipout=False):
                 probs = []
                 for i in range(n):
                     t_probs = []

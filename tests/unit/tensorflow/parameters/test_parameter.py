@@ -61,7 +61,7 @@ def test_Parameter_scalar():
     assert sample1.numpy() == sample2.numpy()
 
     # within a Sampling statement, should randomly sample from the dist
-    with Sampling():
+    with Sampling(n=1):
         sample1 = param()
         sample2 = param()
     assert sample1.ndim == 1
@@ -81,6 +81,62 @@ def test_Parameter_scalar():
     assert sample2.shape[0] == 10
     assert sample2.shape[1] == 1
     assert np.all(sample1.numpy() != sample2.numpy())
+
+    # sampling statement should allow static samples
+    sample1 = param()
+    with Sampling(static=True):
+        with Sampling(n=1):
+            sample2 = param()
+            sample3 = param()
+    with Sampling(static=True):
+        with Sampling(n=1):
+            sample4 = param()
+            sample5 = param()
+    assert sample1.ndim == 1
+    assert sample2.ndim == 1
+    assert sample3.ndim == 1
+    assert sample4.ndim == 1
+    assert sample5.ndim == 1
+    assert sample1.shape[0] == 1
+    assert sample2.shape[0] == 1
+    assert sample3.shape[0] == 1
+    assert sample4.shape[0] == 1
+    assert sample5.shape[0] == 1
+    assert sample1.numpy() != sample2.numpy()
+    assert sample1.numpy() != sample3.numpy()
+    assert sample2.numpy() == sample3.numpy()
+    assert sample1.numpy() != sample4.numpy()
+    assert sample1.numpy() != sample5.numpy()
+    assert sample4.numpy() == sample5.numpy()
+    assert sample2.numpy() != sample4.numpy()
+
+    # sampling statement should allow static samples (and work w/ n>1)
+    with Sampling(static=True):
+        with Sampling(n=5):
+            sample1 = param()
+            sample2 = param()
+    with Sampling(static=True):
+        with Sampling(n=5):
+            sample3 = param()
+            sample4 = param()
+    assert sample1.ndim == 2
+    assert sample2.ndim == 2
+    assert sample3.ndim == 2
+    assert sample4.ndim == 2
+    assert sample1.shape[0] == 5
+    assert sample1.shape[1] == 1
+    assert sample2.shape[0] == 5
+    assert sample2.shape[1] == 1
+    assert sample3.shape[0] == 5
+    assert sample3.shape[1] == 1
+    assert sample4.shape[0] == 5
+    assert sample4.shape[1] == 1
+    assert np.all(sample1.numpy() == sample2.numpy())
+    assert np.all(sample1.numpy() != sample3.numpy())
+    assert np.all(sample1.numpy() != sample4.numpy())
+    assert np.all(sample2.numpy() != sample3.numpy())
+    assert np.all(sample2.numpy() != sample4.numpy())
+    assert np.all(sample3.numpy() == sample4.numpy())
 
     # kl_loss should return sum of kl divergences
     kl_loss = param.kl_loss()

@@ -29,6 +29,7 @@ The utils.ops module contains operations which run using the current backend.
 * :func:`.insert_col_of`
 * :func:`.new_variable`
 * :func:`.log_cholesky_transform`
+* :func:`.copy_tensor`
 
 ----------
 
@@ -64,6 +65,7 @@ __all__ = [
     "insert_col_of",
     "new_variable",
     "log_cholesky_transform",
+    "copy_tensor",
 ]
 
 
@@ -497,3 +499,15 @@ def reshape(x, new_shape):
         import tensorflow as tf
 
         return tf.reshape(x, new_shape)
+
+
+def copy_tensor(x):
+    """Copy a tensor, detaching it from the gradient/backend/etc/etc"""
+    if get_backend() == "pytorch":
+        pass
+
+        return x.detach().clone()
+    else:
+        import tensorflow as tf
+
+        return tf.identity(x)

@@ -45,6 +45,17 @@ Whether to use `Flipout <https://arxiv.org/abs/1803.04386>`_ where possible.
 * :func:`.set_flipout`
 
 
+Static posterior sampling
+-------------------------
+
+Whether or not to use static posterior sampling (i.e., take a random sample
+from the posterior, but take the same random sample on repeated calls), and
+control the UUID of the current static sampling regime.
+
+* :func:`.get_static_sampling_uuid`
+* :func:`.set_static_sampling_uuid`
+
+
 Sampling context manager
 ------------------------
 
@@ -57,6 +68,8 @@ variational distributions while inside the context manager.
 """
 
 
+import uuid
+
 __all__ = [
     "get_backend",
     "set_backend",
@@ -66,6 +79,8 @@ __all__ = [
     "set_samples",
     "get_flipout",
     "set_flipout",
+    "get_static_sampling_uuid",
+    "set_static_sampling_uuid",
     "Sampling",
 ]
 
@@ -82,8 +97,10 @@ class _Settings:
         If |None|, will use MAP estimates.
     _FLIPOUT : bool
         Whether to use flipout where possible
-    _DATATYPE : tf.dtype or ???
+    _DATATYPE : tf.dtype or torch.dtype
         Default datatype to use for tensors
+    _STATIC_SAMPLING_UUID : None or uuid.UUID
+        UUID of the current static sampling regime
     """
 
     def __init__(self):
@@ -91,6 +108,7 @@ class _Settings:
         self._SAMPLES = None
         self._FLIPOUT = False
         self._DATATYPE = None
+        self._STATIC_SAMPLING_UUID = None
 
 
 # Global ProbFlow settings
@@ -224,6 +242,19 @@ def set_flipout(flipout):
         raise TypeError("flipout must be True or False")
 
 
+def get_static_sampling_uuid():
+    """Get the current static sampling UUID"""
+    return __SETTINGS__._STATIC_SAMPLING_UUID
+
+
+def set_static_sampling_uuid(uuid_value):
+    """Set the current static sampling UUID"""
+    if uuid_value is None or isinstance(uuid_value, uuid.UUID):
+        __SETTINGS__._STATIC_SAMPLING_UUID = uuid_value
+    else:
+        raise TypeError("must be a uuid or None")
+
+
 class Sampling:
     """Use sampling while within this context manager.
 
@@ -282,18 +313,44 @@ class Sampling:
          [ 3.5294306]
          [ 1.6596333]]
 
+    To use static samples - that is, to always return the same samples while in
+    the same context manager - use the sampling context manager with the
+    ``static`` keyword argument set to ``True``:
+
+    .. code-block:: pycon
+
+        >>> with pf.Sampling(static=True):
+        >>>     param()
+        [ 0.10457394]
+        >>>     param()  # repeated samples yield the same value
+        [ 0.10457394]
+        >>> with pf.Sampling(static=True):
+        >>>     param()  # under a new context manager they yield new samples
+        [-2.641631]
+        >>>     param()  # but remain the same while under the same context
+        [-2.641631]
+
     """
 
-    def __init__(self, n=1, flipout=False):
+    def __init__(self, n=None, flipout=None, static=None):
         self._n = n
         self._flipout = flipout
+        self._static = static
 
     def __enter__(self):
         """Begin sampling."""
-        set_samples(self._n)
-        set_flipout(self._flipout)
+        if self._n is not None:
+            set_samples(self._n)
+        if self._flipout is not None:
+            set_flipout(self._flipout)
+        if self._static is not None:
+            set_static_sampling_uuid(uuid.uuid4())
 
     def __exit__(self, _type, _val, _tb):
         """End sampling and reset sampling settings to defaults"""
-        set_samples(None)
-        set_flipout(False)
+        if self._n is not None:
+            set_samples(None)
+        if self._flipout is not None:
+            set_flipout(False)
+        if self._static is not None:
+            set_static_sampling_uuid(None)

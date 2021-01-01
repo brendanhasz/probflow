@@ -33,7 +33,7 @@ def test_DenseNetwork():
     assert samples1.shape[1] == 2
 
     # Test samples are different
-    with Sampling():
+    with Sampling(n=1):
         samples1 = dense_net(x)
         samples2 = dense_net(x)
     assert np.all(samples1.detach().numpy() != samples2.detach().numpy())
@@ -71,7 +71,7 @@ def test_DenseNetwork():
     assert kl_loss.ndim == 0
 
     # test Flipout
-    with Sampling(flipout=True):
+    with Sampling(n=1, flipout=True):
         samples1 = dense_net(x)
         samples2 = dense_net(x)
     assert np.all(samples1.detach().numpy() != samples2.detach().numpy())
@@ -81,7 +81,7 @@ def test_DenseNetwork():
 
     # With probabilistic = False
     dense_net = DenseNetwork([5, 4, 3, 2], probabilistic=False)
-    with Sampling():
+    with Sampling(n=1):
         samples1 = dense_net(x)
         samples2 = dense_net(x)
     assert np.all(samples1.detach().numpy() == samples2.detach().numpy())
@@ -93,7 +93,7 @@ def test_DenseNetwork():
     dense_net = DenseNetwork(
         [5, 4, 3, 2], batch_norm=True, batch_norm_loc="after"
     )
-    with Sampling():
+    with Sampling(n=1):
         samples1 = dense_net(x)
     assert samples1.ndim == 2
     assert samples1.shape[0] == 7
@@ -103,7 +103,7 @@ def test_DenseNetwork():
     dense_net = DenseNetwork(
         [5, 4, 3, 2], batch_norm=True, batch_norm_loc="before"
     )
-    with Sampling():
+    with Sampling(n=1):
         samples1 = dense_net(x)
     assert samples1.ndim == 2
     assert samples1.shape[0] == 7

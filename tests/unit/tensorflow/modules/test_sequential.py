@@ -35,7 +35,7 @@ def test_Sequential():
     assert samples1.shape[1] == 1
 
     # Test samples are different
-    with Sampling():
+    with Sampling(n=1):
         samples1 = seq(x)
         samples2 = seq(x)
     assert np.all(samples1.numpy() != samples2.numpy())

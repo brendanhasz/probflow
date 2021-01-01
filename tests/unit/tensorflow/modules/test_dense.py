@@ -36,7 +36,7 @@ def test_Dense():
     assert samples1.shape[1] == 1
 
     # Test samples are different
-    with Sampling():
+    with Sampling(n=1):
         samples1 = dense(x)
         samples2 = dense(x)
     assert np.all(samples1.numpy() != samples2.numpy())
@@ -63,7 +63,7 @@ def test_Dense():
     assert kl_loss.ndim == 0
 
     # test Flipout
-    with Sampling(flipout=True):
+    with Sampling(n=1, flipout=True):
         samples1 = dense(x)
         samples2 = dense(x)
     assert np.all(samples1.numpy() != samples2.numpy())
@@ -73,7 +73,7 @@ def test_Dense():
 
     # With the probabilistic kwarg
     dense = Dense(5, 3, probabilistic=False)
-    with Sampling():
+    with Sampling(n=1):
         samples1 = dense(x)
         samples2 = dense(x)
     assert np.all(samples1.numpy() == samples2.numpy())
@@ -85,7 +85,7 @@ def test_Dense():
     weight_kwargs = {"transform": tf.exp}
     bias_kwargs = {"transform": tf.math.softplus}
     dense = Dense(5, 2, weight_kwargs=weight_kwargs, bias_kwargs=bias_kwargs)
-    with Sampling():
+    with Sampling(n=1):
         samples1 = dense(x)
         samples2 = dense(x)
     assert np.all(samples1.numpy() != samples2.numpy())
