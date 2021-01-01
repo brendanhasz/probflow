@@ -1052,3 +1052,43 @@ def test_Model_multiple_mc_2d_noneager():
     assert p.ndim == 2
     assert p.shape[0] == 11
     assert p.shape[1] == 3
+
+
+def test_Model_bayesian_updating():
+    """Tests doing Bayesian updates on a Model"""
+
+    class MyModel(Model):
+        def __init__(self):
+            initializer = {"loc": 0, "scale": 0.01}
+            self.weight = Parameter(name="Weight", initializer=initializer)
+            self.bias = Parameter(name="Bias", initializer=initializer)
+
+        def __call__(self, x):
+            return Normal(x * self.weight() + self.bias(), 0.1)
+
+    # Instantiate the model
+    my_model = MyModel()
+
+    # Fit the model to data with a positive bias + slope
+    x = np.random.randn(128).astype("float32")
+    y = x + 1
+    my_model.fit(x, y, batch_size=128, epochs=10, n_mc=10, eager=True)
+
+    # Parameter estimates should now be >0
+    assert my_model.weight.posterior_mean() > 0
+    assert my_model.bias.posterior_mean() > 0
+
+    # Store param estimate values
+    weight_loc = my_model.weight.posterior_mean()
+    bias_loc = my_model.bias.posterior_mean()
+
+    # Do Bayesian updating
+    my_model.bayesian_update()
+
+    # Now fit to new data with negative bias and slope
+    y = -x - 1
+    my_model.fit(x, y, batch_size=128, epochs=10, n_mc=10, eager=True)
+
+    # Estimates should now be less than they were
+    assert weight_loc > my_model.weight.posterior_mean()
+    assert bias_loc > my_model.bias.posterior_mean()
