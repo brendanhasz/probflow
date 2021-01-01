@@ -221,6 +221,12 @@ class Parameter(BaseParameter):
                 O.kl_divergence(self.posterior, self.prior), axis=None
             )
 
+    def bayesian_update(self):
+        """Update priors to match current posterior"""
+        self.prior = self.posterior_fn(
+            **{k: O.copy_tensor(v) for k, v in self.variables.items()
+        )
+
     def posterior_mean(self):
         """Get the mean of the posterior distribution(s).
 

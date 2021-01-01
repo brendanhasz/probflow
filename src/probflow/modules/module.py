@@ -71,6 +71,13 @@ class Module(BaseModule):
         |Module| and its sub-Modules."""
         return sum([p.kl_loss() for p in self.parameters])
 
+    def bayesian_update(self):
+        """Perform a Bayesian update of all |Parameters| in this module.  Sets
+        the prior to the current variational posterior for all parameters.
+        """
+        for p in self.parameters:
+            p.bayesian_update()
+
     def kl_loss_batch(self):
         """Compute the sum of additional Kullback-Leibler divergences due to
         data in this batch"""
