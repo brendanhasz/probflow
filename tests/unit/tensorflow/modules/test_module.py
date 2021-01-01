@@ -75,11 +75,19 @@ def test_Module():
     assert np.all(sample1.numpy() != sample2.numpy())
 
     # bayesian_update should update all params in the module
-    assert tf.reduce_all(the_module.p1.prior.loc != the_module.p1.posterior.loc).numpy()
-    assert tf.reduce_all(the_module.p2.prior.scale != the_module.p2.posterior.scale).numpy()
+    assert tf.reduce_all(
+        the_module.p1.prior.loc != the_module.p1.posterior.loc
+    ).numpy()
+    assert tf.reduce_all(
+        the_module.p2.prior.scale != the_module.p2.posterior.scale
+    ).numpy()
     the_module.bayesian_update()
-    assert tf.reduce_all(the_module.p1.prior.loc == the_module.p1.posterior.loc).numpy()
-    assert tf.reduce_all(the_module.p2.prior.scale == the_module.p2.posterior.scale).numpy()
+    assert tf.reduce_all(
+        the_module.p1.prior.loc == the_module.p1.posterior.loc
+    ).numpy()
+    assert tf.reduce_all(
+        the_module.p2.prior.scale == the_module.p2.posterior.scale
+    ).numpy()
 
 
 def test_Module_nesting():
@@ -292,20 +300,24 @@ def test_Module_lists_and_dicts_nesting():
     assert kl_loss.ndim == 0
 
     # parent module's loss should be greater than child module's
-    assert the_module.kl_loss().numpy() > the_module.a_list[2].kl_loss().numpy()
-    assert the_module.kl_loss().numpy() > the_module.a_dict["c"].kl_loss().numpy()
+    assert (
+        the_module.kl_loss().numpy() > the_module.a_list[2].kl_loss().numpy()
+    )
+    assert (
+        the_module.kl_loss().numpy() > the_module.a_dict["c"].kl_loss().numpy()
+    )
 
     # Loss should be the sum of all parameter losses w/i the module
     assert is_close(
         the_module.kl_loss().numpy(),
         (
-            the_module.a_list[0].kl_loss().numpy() +
-            the_module.a_list[1].kl_loss().numpy() +
-            the_module.a_list[2].p1.kl_loss().numpy() +
-            the_module.a_list[2].p2.kl_loss().numpy() +
-            the_module.a_dict["a"].kl_loss().numpy() +
-            the_module.a_dict["b"].kl_loss().numpy() +
-            the_module.a_dict["c"].p1.kl_loss().numpy() +
-            the_module.a_dict["c"].p2.kl_loss().numpy()
-        )
+            the_module.a_list[0].kl_loss().numpy()
+            + the_module.a_list[1].kl_loss().numpy()
+            + the_module.a_list[2].p1.kl_loss().numpy()
+            + the_module.a_list[2].p2.kl_loss().numpy()
+            + the_module.a_dict["a"].kl_loss().numpy()
+            + the_module.a_dict["b"].kl_loss().numpy()
+            + the_module.a_dict["c"].p1.kl_loss().numpy()
+            + the_module.a_dict["c"].p2.kl_loss().numpy()
+        ),
     )
