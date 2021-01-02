@@ -37,7 +37,7 @@ the standard deviation parameter predicts the standard deviation:
             return pf.Normal(mean, std)  # returns predicted observation distribution
 
 
-.. _model_bayesian_updating
+.. _model_bayesian_updating:
 
 Bayesian updating
 -----------------

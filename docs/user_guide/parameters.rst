@@ -444,7 +444,8 @@ from the prior):
    :width: 70 %
    :align: center
 
-We can perform a Bayesian update by using the `bayesian_update` method:
+We can perform a Bayesian update by using the :meth:`.Model.bayesian_update`
+method:
 
 .. code-block:: python3
 
@@ -465,7 +466,7 @@ parameters individually.  Usually, you'll fit a model to some data, then call
 :meth:`.Model.bayesian_update` on that model (which updates all the parameters
 in the model), then fit the model to more, new, data, etc.  See the user guide
 entry for :ref:`performing a Bayesian update on a model
-<model_bayesian_updating>`_.
+<model_bayesian_updating>`.
 
 
 Specialized Parameters
