@@ -504,8 +504,6 @@ def reshape(x, new_shape):
 def copy_tensor(x):
     """Copy a tensor, detaching it from the gradient/backend/etc/etc"""
     if get_backend() == "pytorch":
-        pass
-
         return x.detach().clone()
     else:
         import tensorflow as tf
