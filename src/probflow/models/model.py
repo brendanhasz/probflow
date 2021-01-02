@@ -18,11 +18,17 @@ class Model(Module):
 
     TODO
 
+    Methods
+    -------
+
     This class inherits several methods and properties from :class:`.Module`:
 
     * :attr:`~parameters`
     * :attr:`~modules`
     * :attr:`~trainable_variables`
+    * :attr:`~n_parameters`
+    * :attr:`~n_variables`
+    * :meth:`~bayesian_update`
     * :meth:`~kl_loss`
     * :meth:`~kl_loss_batch`
     * :meth:`~reset_kl_loss`
@@ -59,7 +65,7 @@ class Model(Module):
     Example
     -------
 
-    TODO: example of creating a model via inheritance
+    See the user guide section on :doc:`/user_guide/models`.
 
     """
 

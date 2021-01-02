@@ -245,9 +245,38 @@ or the variational posterior's mean (used during prediction, drawing aleatoric
 samples, and computing the residuals).  See
 :doc:`creating a model <models>` for more info.
 
-You can also index a parameter to take a slice of a sample from the
-parameter's variational posterior distribution.  This will even work with
-vectors of indexes as slices, for example:
+
+.. _parameter_slicing:
+
+Sampling from the variational posterior via slicing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can also index a parameter to take a slice of a sample from the parameter's
+variational posterior distribution.  For example, if you have a parameter
+matrix,
+
+.. code-block:: python3
+
+    param = pf.Parameter(shape=[5, 3])
+
+Then slicing it will yield samples from the variational posteriors.  That is,
+doing ``param[<some_slice>]`` is equivalent to doing ``param()[<some_slice>]``.
+For example,
+
+.. code-block:: pycon
+
+    >>> assert param[:, :] == param()
+    True
+    >>> param[0, :]  # -> shape (3,)
+    [1.23, 4.56, 7.89]
+    >>> param[:, 1]  # -> shape (5,)
+    [1.2, 3.4, 5.6, 7.8, 9.0]
+    >>> param[:2, :]  # -> shape (2,3)
+    [[1.2, 3.4, 5.6, 7.8, 9.0],
+     [1.2, 3.4, 5.6, 7.8, 9.0]]
+
+
+This will even work with vectors of indexes as slices, for example:
 
 .. code-block:: python3
 

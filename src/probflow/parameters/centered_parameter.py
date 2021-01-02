@@ -40,7 +40,7 @@ class CenteredParameter(Parameter):
 
     .. math::
 
-        \mathbf{v} = \mathbf{Q}_{1:K,1:K-1} \mathbf{u}
+        \mathbf{v} = \mathbf{Q}_{1:K, 1:K-1} \mathbf{u}
 
     The prior on the untransformed variables is
 
@@ -57,7 +57,7 @@ class CenteredParameter(Parameter):
     .. admonition::  Prior is fixed!
 
         Note that the prior on the parameters is fixed at
-        :math:`\text{Normal}(0, 1).  This is because the true prior is being
+        :math:`\text{Normal}(0, 1)`.  This is because the true prior is being
         placed on the untransformed parameters (see above).
 
 
