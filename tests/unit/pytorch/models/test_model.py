@@ -1078,9 +1078,9 @@ def test_Model_bayesian_updating():
     assert my_model.weight.posterior_mean() > 0
     assert my_model.bias.posterior_mean() > 0
 
-    # Store param estimate values
-    weight_loc = my_model.weight.posterior_mean()
-    bias_loc = my_model.bias.posterior_mean()
+    # Store param estimate values (cast to float otherwise it stores reference)
+    weight_loc = float(my_model.weight.posterior_mean())
+    bias_loc = float(my_model.bias.posterior_mean())
 
     # Do Bayesian updating
     my_model.bayesian_update()
