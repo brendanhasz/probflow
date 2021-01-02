@@ -404,6 +404,71 @@ And you can plot the prior distribution using the
    :align: center
 
 
+Bayesian updating
+^^^^^^^^^^^^^^^^^
+
+Bayesian updating consists of updating a Parameter's prior to match its
+posterior distribution, after having observed some data.  This is, after all,
+the main point of Bayesian inference!  Because ProbFlow uses variational
+inference, both these distributions have an analytical form (i.e.  they're both
+known probability distributions with known parameters - not a set of MCMC
+samples or something), and so we can literally just set the prior
+distribution's variables to be equal to the current posterior distribution's
+variables!
+
+To perform a Bayesian update on a Parameter, just use the
+:meth:`.Parameter.bayesian_update` method.  For example, suppose we have some
+parameter which has some prior distribution:
+
+.. code-block:: python3
+
+    initializer={"loc": 2, "scale": -1}
+
+    param = pf.Parameter(initializer=initializer)
+    param.prior_plot()
+
+.. image:: img/parameters/bayesian_update_1.svg
+   :width: 70 %
+   :align: center
+
+The posterior distribution differs from the prior (in this example, simply
+because of its initialization, but in practice this will be because we've fit
+the model to some data and thus the likelihood has pulled the posterior away
+from the prior):
+
+.. code-block:: python3
+
+    param.posterior_plot()
+
+.. image:: img/parameters/bayesian_update_2.svg
+   :width: 70 %
+   :align: center
+
+We can perform a Bayesian update by using the :meth:`.Model.bayesian_update`
+method:
+
+.. code-block:: python3
+
+    param.bayesian_update()
+
+Now, the prior has been udpated to match the current posterior:
+
+.. code-block:: python3
+
+    param.prior_plot()
+
+.. image:: img/parameters/bayesian_update_3.svg
+   :width: 70 %
+   :align: center
+
+However in practice, you probably won't need to perform Bayesian updates of
+parameters individually.  Usually, you'll fit a model to some data, then call
+:meth:`.Model.bayesian_update` on that model (which updates all the parameters
+in the model), then fit the model to more, new, data, etc.  See the user guide
+entry for :ref:`performing a Bayesian update on a model
+<model_bayesian_updating>`.
+
+
 Specialized Parameters
 ----------------------
 
