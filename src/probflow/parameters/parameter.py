@@ -224,7 +224,10 @@ class Parameter(BaseParameter):
     def bayesian_update(self):
         """Update priors to match current posterior"""
         self.prior = self.posterior_fn(
-            **{k: self.var_transform[k](O.copy_tensor(v)) for k, v in self.untransformed_variables.items()}
+            **{
+                k: self.var_transform[k](O.copy_tensor(v))
+                for k, v in self.untransformed_variables.items()
+            }
         )
 
     def posterior_mean(self):
