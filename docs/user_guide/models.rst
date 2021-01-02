@@ -37,6 +37,51 @@ the standard deviation parameter predicts the standard deviation:
             return pf.Normal(mean, std)  # returns predicted observation distribution
 
 
+.. _model_bayesian_updating
+
+Bayesian updating
+-----------------
+
+Bayesian updating consists of updating a model's parameters' priors to match
+their posterior distributions, after having observed some data.  This is, after
+all, the main point of Bayesian inference! Because ProbFlow uses variational
+inference, both parameters' posteriors and priors have an analytical form (i.e.
+they're both known probability distributions with known parameters - not a set
+of MCMC samples or something), and so we can literally just set parameters'
+prior distribution variables to be equal to the current posterior distribution
+variables!
+
+To perform a Bayesian update of all parameters in a model, use the
+:meth:`.Model.bayesian_update` method.
+
+.. code-block:: python3
+
+    model = # your ProbFlow model
+    model.bayesian_updating()
+
+This can be used for incremental model updates when we get more data, but don't
+want to have to retrain the model from scratch on all the historical data.  For
+example,
+
+.. code-block:: python3
+
+    # x, y = training data
+    model.fit(x, y)
+
+    # Perform the Bayesian updating!
+    model.bayesian_updating()
+
+    # x_new, y_new = new data
+    model.fit(x_new, y_new)
+    model.bayesian_update()
+
+    # x_new2, y_new2 = even more new data
+    model.fit(x_new2, y_new2)
+    model.bayesian_update()
+
+    # etc
+
+
 Manually computing the log likelihood
 -------------------------------------
 
