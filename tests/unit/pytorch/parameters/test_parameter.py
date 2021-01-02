@@ -147,6 +147,15 @@ def test_Parameter_scalar():
     assert prior_sample.ndim == 1
     assert prior_sample.shape[0] == 7
 
+    # prior and posterior shouldn't be the same (post was randomly initialized)
+    assert (param.prior.loc != param.posterior.loc).all()
+    assert (param.prior.scale != param.posterior.scale).all()
+
+    # but they should be the same after running bayesian_update
+    param.bayesian_update()
+    assert (param.prior.loc == param.posterior.loc).all()
+    assert (param.prior.scale == param.posterior.scale).all()
+
 
 def test_Parameter_no_prior():
     """Tests a parameter with no prior"""

@@ -150,6 +150,15 @@ def test_Parameter_scalar():
     assert prior_sample.ndim == 1
     assert prior_sample.shape[0] == 7
 
+    # prior and posterior shouldn't be the same (post was randomly initialized)
+    assert tf.reduce_all(param.prior.loc != param.posterior.loc).numpy()
+    assert tf.reduce_all(param.prior.scale != param.posterior.scale).numpy()
+
+    # but they should be the same after running bayesian_update
+    param.bayesian_update()
+    assert tf.reduce_all(param.prior.loc == param.posterior.loc).numpy()
+    assert tf.reduce_all(param.prior.scale == param.posterior.scale).numpy()
+
 
 def test_Parameter_no_prior():
     """Tests a parameter with no prior"""

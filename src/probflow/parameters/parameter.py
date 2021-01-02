@@ -92,19 +92,6 @@ class Parameter(BaseParameter):
     name : str
         Name of the parameter(s).
         Default = ``'Parameter'``
-
-
-    Examples
-    --------
-
-    TODO: creating variables
-
-    TODO: creating variable w/ beta posterior
-
-    TODO: plotting posterior dist
-
-    TODO: using __getitem__
-
     """
 
     def __init__(
@@ -196,8 +183,6 @@ class Parameter(BaseParameter):
     def __call__(self):
         """Return a sample from or the MAP estimate of this parameter.
 
-        TODO
-
         Returns
         -------
         sample : Tensor
@@ -221,11 +206,17 @@ class Parameter(BaseParameter):
                 O.kl_divergence(self.posterior, self.prior), axis=None
             )
 
-    def posterior_mean(self):
-        """Get the mean of the posterior distribution(s).
+    def bayesian_update(self):
+        """Update priors to match the current posterior"""
+        self.prior = self.posterior_fn(
+            **{
+                k: self.var_transform[k](O.copy_tensor(v))
+                for k, v in self.untransformed_variables.items()
+            }
+        )
 
-        TODO
-        """
+    def posterior_mean(self):
+        """Get the mean of the posterior distribution(s)"""
         return to_numpy(self())
 
     def posterior_sample(self, n: int = 1):
@@ -239,7 +230,10 @@ class Parameter(BaseParameter):
 
         Returns
         -------
-        TODO
+        |ndarray|
+            Samples from the parameter's posterior distribution.  If ``n>1`` of
+            size ``(n, self.prior.shape)``.  If ``n==1``, of size
+            ``(self.prior.shape)``.
         """
         if n < 1:
             raise ValueError("n must be positive")
@@ -249,19 +243,17 @@ class Parameter(BaseParameter):
     def prior_sample(self, n: int = 1):
         """Sample from the prior distribution.
 
-
         Parameters
         ----------
         n : int > 0
             Number of samples to draw from the prior distribution.
             Default = 1
 
-
         Returns
         -------
         |ndarray|
             Samples from the parameter prior distribution.  If ``n>1`` of size
-            ``(num_samples, self.prior.shape)``.  If ``n==1``, of size
+            ``(n, self.prior.shape)``.  If ``n==1``, of size
             ``(self.prior.shape)``.
         """
         if self.prior is None:
@@ -278,19 +270,17 @@ class Parameter(BaseParameter):
         ----------
         ci : float
             Confidence interval for which to compute the upper and lower
-            bounds.  Must be between 0 and 1.
-            Default = 0.95
+            bounds.  Must be between 0 and 1.  Default = 0.95
         n : int
             Number of samples to draw from the posterior distributions for
-            computing the confidence intervals
-            Default = 10,000
+            computing the confidence intervals.  Default = 10,000
 
         Returns
         -------
         lb : float or |ndarray|
-            Lower bound of the confidence interval
+            Lower bound(s) of the confidence interval(s)
         ub : float or |ndarray|
-            Upper bound of the confidence interval
+            Upper bound(s) of the confidence interval(s)
         """
 
         # Check values
@@ -442,7 +432,13 @@ class Parameter(BaseParameter):
             return O.gather(val, key, axis=axis)
 
     def __getitem__(self, key):
-        """Get a slice of a sample from the parameter"""
+        """Get a slice of a sample from the parameter
+
+        Example
+        -------
+
+        See the user guide section on :ref:`parameter_slicing`
+        """
         x = self()
         if isinstance(key, tuple):
             iA = 0

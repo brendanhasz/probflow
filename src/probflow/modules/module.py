@@ -65,6 +65,13 @@ class Module(BaseModule):
         """Get the number of underlying variables in this module"""
         return sum([p.n_variables for p in self.parameters])
 
+    def bayesian_update(self):
+        """Perform a Bayesian update of all |Parameters| in this module.  Sets
+        the prior to the current variational posterior for all parameters.
+        """
+        for p in self.parameters:
+            p.bayesian_update()
+
     def kl_loss(self):
         """Compute the sum of the Kullback-Leibler divergences between
         priors and their variational posteriors for all |Parameters| in this
@@ -99,29 +106,5 @@ class Module(BaseModule):
         ----------
         filename : str
             Filename for file to which to save this object
-
-        Example
-        -------
-
-        .. code-block:: python3
-
-            import numpy as np
-            import probflow as pf
-
-            N = 1024
-            D = 7
-            x = np.random.randn(N, D).astype('float32')
-            w = np.random.randn(D, 1).astype('float32')
-            y = x@w + np.random.randn(N, 1).astype('float32')
-
-            model = pf.LinearRegression(7)
-            model.fit(x, y)
-
-            # Save the model to file
-            model.save("my_model.pfm")
-
-            # Load it back in
-            model2 = pf.load("my_model.pfm")
-
         """
         dump(self, filename)
