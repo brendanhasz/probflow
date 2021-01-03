@@ -134,11 +134,12 @@ distribution which uses a |tfp.Distribution| or a |torch.Distribution| just
 create a class which inherits from :class:`.BaseDistribution`, and implements
 the following methods:
 
-- ``__init__``
-- ``__call__``
+- ``__init__``: should store references to the tensor(s) to be used as the 
+  distribution's parameters
+- ``__call__``: should return a backend distribution object (a
+  |tfp.Distribution| or a |torch.Distribution| )
 
-Where the call method returns a backend distribution object (a
-|tfp.Distribution| or a |torch.Distribution| ):
+For example,
 
 .. code-block:: python3
 
@@ -159,11 +160,14 @@ Or, to implement a probability distribution completely from scratch, create a
 class which inherits from :class:`.BaseDistribution` and implements the
 following methods:
 
-- ``__init__``
-- ``log_prob``
-- ``mean``
-- ``mode``
-- ``sample``
+- ``__init__(*args)``: should store references to the tensor(s) to be used as
+  the distribution's parameters
+- ``log_prob(x)``: should return the log probability of some data (``x``) 
+  along this distribution
+- ``mean()``: the mean of the distribution
+- ``mode()``: the mode of the distribution
+- ``sample(n=1)``: should return ``n`` sample(s) from the distribution
+- (and you do **not** need to implement ``__call__`` in this case)
 
 For example, to manually implement a Normal distribution:
 
@@ -172,20 +176,20 @@ For example, to manually implement a Normal distribution:
     class NormalDistribution(pf.BaseDistribution):
 
         def __init__(self, mean, std):
-            self.mean = mean
-            self.std = std
+            self.mean_tensor = mean
+            self.std_tensor = std
 
         def log_prob(self, x):
             return (
-                -0.5*tf.math.square((x-self.mean)/self.std)
+                -0.5*tf.math.square((x-self.mean_tensor)/self.std_tensor)
                 - tf.log(self.std*2.506628274631)
             )
 
         def mean(self):
-            return self.mean
+            return self.mean_tensor
 
         def mode(self):
-            return self.mean
+            return self.mean_tensor
 
         def sample(self, n=1):
-            return tf.random.normal(shape=n, mean=self.mean, stddev=self.std)
+            return tf.random.normal(shape=n, mean=self.mean_tensor, stddev=self.std_tensor)
