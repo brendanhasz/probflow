@@ -756,7 +756,7 @@ class Model(Module):
             param_list = self.parameters
         else:
             param_list = [p for p in self.parameters if p.name in params]
-        rows = np.ceil(len(param_list) / cols)
+        rows = int(np.ceil(len(param_list) / cols))
         for iP in range(len(param_list)):
             plt.subplot(rows, cols, iP + 1)
             func(param_list[iP])
