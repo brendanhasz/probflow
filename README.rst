@@ -191,7 +191,7 @@ Probability,
 
     pip install probflow[tensorflow]
 
-Or, install ProbFlow and the GPU version of TensorFlow + TensorFlow
+Or, to install ProbFlow and the GPU version of TensorFlow + TensorFlow
 Probability,
 
 .. code-block:: bash
