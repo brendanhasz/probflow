@@ -184,11 +184,11 @@ def randn(shape):
 
 
 def rand_rademacher(shape):
-    """Tensor full of random 0s or 1s (i.e. drawn from a Rademacher dist)."""
+    """Tensor full of random -1s or 1s (i.e. drawn from a Rademacher dist)."""
     if get_backend() == "pytorch":
         import torch
 
-        return 2 * torch.randint(0, 1, shape, dtype=get_datatype()) - 1
+        return 2 * torch.randint(0, 2, shape, dtype=get_datatype()) - 1
     else:
         import tensorflow_probability as tfp
 
