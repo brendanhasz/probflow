@@ -46,8 +46,8 @@ You can see which is the current default datatype with:
 
    pf.get_datatype()
 
-And you can set the default datatype like this.  For example, to instead use
-double precision with the TensorFlow backend:
+And you can set the default datatype with ``pf.set_datatype``.  For example,
+to instead use double precision with the TensorFlow backend:
 
 .. code-block:: python3
 

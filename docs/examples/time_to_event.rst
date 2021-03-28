@@ -532,3 +532,12 @@ TODO: fit it to some `data <https://console.cloud.google.com/marketplace/details
 * `WTTE-RNN - Less hacky churn prediction <https://ragulpr.github.io/2016/12/22/WTTE-RNN-Hackless-churn-modeling>`_ by Egil Martinsson
 * `Modeling Censored Time-to-Event Data Using Pyro <https://eng.uber.com/modeling-censored-time-to-event-data-using-pyro>`_
 * `Survival analysis <https://en.wikipedia.org/wiki/Survival_analysis>`_
+
+
+**References**
+
+* David Faraggi and Richard Simon, `“A neural network model for survival data” <https://doi.org/10.1002/sim.4780140108>`_ *Statistics in Medicine*, vol. 14(1):73–82, 1995.
+* Anny Xiang, Pablo Lapuerta, Alex Ryutov, Jonathan Buckley, and Stanley Azen, `“Comparison of the performance of neural network methods and cox regression for censored survival data” <https://doi.org/10.1016/S0167-9473(99)00098-5>`_ *Computational Statistics & Data Analysis, 34(2):243–257, 2000.
+* Jared L. Katzman, Uri Shaham, Alexander Cloninger, Jonathan Bates, Tingting Jiang, and Yuval Kluger, `“Deepsurv: personalized treatment recommender system using a cox proportional hazards deep neural network” <https://doi.org/10.1186/s12874-018-0482-1>`_ *BMC medical research methodology*, 18(1):24, 2018.
+* Changhee Lee, Jinsung Yoon, and Mihaela van der Schaar, `“Dynamic-deephit: A deep learning approach for dynamic survival analysis with competing risks based on longitudinal data” <https://doi.org/10.1109/TBME.2019.2909027>`_ *IEEE Transactions on Biomedical Engineering*, 67(1):122-133, 2020.
+* Chirag Nagpal, Xinyu Li, and Artur Dubrawski, `"Deep Survival Machines: Fully Parametric Survival Regression and Representation Learning for Censored Data with Competing Risks" <https://arxiv.org/abs/2003.01176>`_, *arXiv preprint*, 2020.

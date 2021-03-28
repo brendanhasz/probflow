@@ -132,7 +132,7 @@ function):
 .. code-block:: python3
 
     import tensorflow as tf
-    param = pf.Parameter(transform=lambda x: tf.nn.softplus(x))
+    param = pf.Parameter(transform=tf.nn.softplus)
     param.posterior_plot()
 
 .. image:: img/parameters/transform_2.svg

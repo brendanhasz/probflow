@@ -13,8 +13,14 @@ class Mixture(BaseDistribution):
 
     Parameters
     ----------
-    concentration : |ndarray|, or Tensor
-        Concentration parameter of the Dirichlet distribution (:math:`\alpha`).
+    distributions : |Distribution|
+        Distributions to mix.
+    logits : |Tensor|
+        Logit probabilities of the mixture weights.  Either this or
+        `probs` must be specified.
+    probs : |Tensor|
+        Raw probabilities of the mixture weights.  Either this or
+        `probs` must be specified.  Must sum to 1 along the last axis.
     """
 
     def __init__(self, distributions, logits=None, probs=None):
