@@ -41,8 +41,9 @@ def test_InverseGamma():
     assert samples.ndim == 1
     samples = dist.sample(10)
     assert isinstance(samples, torch.Tensor)
-    assert samples.ndim == 1
+    assert samples.ndim == 2
     assert samples.shape[0] == 10
+    assert samples.shape[1] == 1
 
     # Should be able to set params
     dist = InverseGamma(3, 2)
