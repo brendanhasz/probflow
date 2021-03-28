@@ -78,7 +78,7 @@ Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
     model.pred_dist_plot(x_test, ci=0.95)
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/pred_dist.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/pred_dist_light.svg?sanitize=true
    :width: 90 %
    :align: center
 
@@ -95,7 +95,7 @@ Inspect the posterior distributions of your fit model's parameters, with 95% con
 
     model.posterior_plot(ci=0.95)
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/posteriors.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/posteriors_light.svg?sanitize=true
    :width: 90 %
    :align: center
 
@@ -112,13 +112,13 @@ and diagnose *where* your model is having problems capturing uncertainty:
 
     model.coverage_by(ci=0.95)
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/coverage.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/coverage_light.svg?sanitize=true
    :width: 90 %
    :align: center
 
 ProbFlow also provides more complex modules, such as those required for building Bayesian neural networks.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, even a somewhat complex multi-layer Bayesian neural network like this:
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/dual_headed_net.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/dual_headed_net_light.svg?sanitize=true
    :width: 99 %
    :align: center
 
