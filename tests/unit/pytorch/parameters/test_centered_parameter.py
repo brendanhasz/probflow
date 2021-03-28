@@ -234,7 +234,8 @@ def test_CenteredParameter_fit():
     Do = 3
     x = np.random.randn(N, Di).astype("float32")
     w = np.random.randn(Di, Do).astype("float32")
-    y = x @ w + 0.1 * np.random.randn(N, Do).astype("float32")
+    y = x @ w + 0.1 * np.random.randn(N, Do)
+    y = (1 / (1 + np.exp(-y)) > np.random.rand(N, Do)).astype("float32")
 
     model = MyModel(Di, Do)
 
