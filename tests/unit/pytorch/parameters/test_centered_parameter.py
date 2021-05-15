@@ -12,7 +12,7 @@ def is_close(a, b, tol=1e-5):
 
 
 def test_CenteredParameter_all_1d():
-    """Tests probflow.parameters.CenteredParameter w/ center_by=all + 1D """
+    """Tests probflow.parameters.CenteredParameter w/ center_by=all + 1D"""
 
     # Create the parameter
     param = CenteredParameter(5)
@@ -63,7 +63,7 @@ def test_CenteredParameter_all_1d():
 
 
 def test_CenteredParameter_all_2d():
-    """Tests probflow.parameters.CenteredParameter w/ center_by=all + 2D """
+    """Tests probflow.parameters.CenteredParameter w/ center_by=all + 2D"""
 
     # Shouldn't allow >2 dims
     with pytest.raises(ValueError):
@@ -118,7 +118,7 @@ def test_CenteredParameter_all_2d():
 
 
 def test_CenteredParameter_column():
-    """Tests probflow.parameters.CenteredParameter w/ center_by=column + 2D """
+    """Tests probflow.parameters.CenteredParameter w/ center_by=column + 2D"""
 
     # Create the parameter
     param = CenteredParameter([5, 6], center_by="column")
@@ -169,7 +169,7 @@ def test_CenteredParameter_column():
 
 
 def test_CenteredParameter_row():
-    """Tests probflow.parameters.CenteredParameter w/ center_by=row + 2D """
+    """Tests probflow.parameters.CenteredParameter w/ center_by=row + 2D"""
 
     # Create the parameter
     param = CenteredParameter([5, 6], center_by="row")
