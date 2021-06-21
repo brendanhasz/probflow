@@ -132,7 +132,6 @@ keeps track of the weight and bias parameters, create a class which inherits
                     self.b = pf.Parameter([1, d_out])
 
                 def __call__(self, x):
-                    x = torch.tensor(x)
                     return x @ self.w() + self.b()
 
 
@@ -180,7 +179,6 @@ functions in between each (but no activation after the final layer).  In
                     self.activations = (Nl-1)*[torch.nn.ReLU()] + [lambda x: x]
 
                 def __call__(self, x):
-                    x = torch.tensor(x)
                     for i in range(len(self.activations)):
                         x = self.layers[i](x)
                         x = self.activations[i](x)
@@ -202,16 +200,34 @@ the  Modules above returned tensors, the ``__call__`` method of the Model below
 returns a *probability distribution*!
 
 
-.. code-block:: python3
+.. tabs::
 
-    class DenseRegression(pf.ContinuousModel):
+    .. group-tab:: TensorFlow
 
-        def __init__(self, dims):
-            self.net = DenseNetwork(dims)
-            self.s = pf.ScaleParameter([1, 1])
+        .. code-block:: python3
 
-        def __call__(self, x):
-            return pf.Normal(self.net(x), self.s())
+            class DenseRegression(pf.ContinuousModel):
+
+                def __init__(self, dims):
+                    self.net = DenseNetwork(dims)
+                    self.s = pf.ScaleParameter([1, 1])
+
+                def __call__(self, x):
+                    return pf.Normal(self.net(x), self.s())
+
+    .. group-tab:: PyTorch
+
+        .. code-block:: python3
+            
+            class DenseRegression(pf.ContinuousModel):
+
+                def __init__(self, dims):
+                    self.net = DenseNetwork(dims)
+                    self.s = pf.ScaleParameter([1, 1])
+
+                def __call__(self, x):
+                    x = torch.tensor(x)
+                    return pf.Normal(self.net(x), self.s())
 
 
 Then we can instantiate the model.  We'll create a fully-connected Bayesian
