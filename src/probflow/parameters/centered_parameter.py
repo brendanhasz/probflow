@@ -15,7 +15,7 @@ class CenteredParameter(Parameter):
     Uses a QR decomposition to transform a vector of :math:`K-1` unconstrained
     parameters into a vector of :math:`K` variables centered at zero (i.e. the
     mean of the elements in the vector is 0).  It starts with a :math:`K \times
-    K` matrix :math:`A` which has :math:`1`s along the diagonal and :math:`-1`s
+    K` matrix :math:`A` which has :math:`1` along the diagonal and :math:`-1`
     along the bottom - except for the bottom-right element which is :math:`0`:
 
     .. math::
