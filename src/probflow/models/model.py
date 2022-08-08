@@ -188,7 +188,7 @@ class Model(Module):
                     else:
                         m = PyTorchModule(self.model)
                         inputs = {"elbo_loss": args}
-                        self.fns[shape] = torch.jit.trace_module(m, inputs)
+                        self.fns[shape] = torch.jit.trace_module(m, inputs, check_trace=False)
                         return self.fns[shape]
 
                 def __call__(self, *args):
