@@ -96,7 +96,7 @@ class CategoricalModel(Model):
             samples = samples.reshape([Ns, N])
 
         # Plot the predictive distributions
-        rows = np.ceil(N / cols)
+        rows = int(np.ceil(N / cols))
         for i in range(N):
             plt.subplot(rows, cols, i + 1)
             plot_categorical_dist(samples[:, i])
