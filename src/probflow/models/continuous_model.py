@@ -302,7 +302,7 @@ class ContinuousModel(Model):
 
         # Plot the predictive distributions
         if individually:
-            rows = np.ceil(N / cols)
+            rows = int(np.ceil(N / cols))
             for i in range(N):
                 plt.subplot(rows, cols, i + 1)
                 plot_dist(samples[:, i], **kwargs)
