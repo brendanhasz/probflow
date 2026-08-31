@@ -2,51 +2,39 @@
 .PHONY: init-tensorflow init-pytorch test-tensorflow test-pytorch format docs bump-minor bump-patch package push-package clean
 
 init-tensorflow:
-	python3 -m venv venv; \
-	. venv/bin/activate; \
-	pip install -e .[dev,tensorflow]
+	uv sync --extra tensorflow
 
 init-pytorch:
-	python3 -m venv venv; \
-	. venv/bin/activate; \
-	pip install -e .[dev,pytorch]
+	uv sync --extra pytorch
 
 test-tensorflow:
-	. venv/bin/activate; \
-	pytest tests/unit/tensorflow
+	uv run pytest tests/unit/tensorflow
 
 test-pytorch:
-	. venv/bin/activate; \
-	pytest tests/unit/pytorch
+	uv run pytest tests/unit/pytorch
 
 format:
-	. venv/bin/activate; \
-        autoflake -r --in-place --remove-all-unused-imports --ignore-init-module-imports src/probflow tests; \
-        isort src/probflow tests; \
-	black src/probflow tests; \
-	flake8 src/probflow tests
+	uv run ruff check --fix src/probflow tests
+	uv run ruff format src/probflow tests
 
 docs:
-	. venv/bin/activate; \
-	sphinx-build -b html docs docs/_html
+	uv sync --extra docs
+	uv run sphinx-build -b html docs docs/_html
 
 bump-minor:
-	. venv/bin/activate; \
-	bumpversion minor
+	uv version --bump minor
 
 bump-patch:
-	. venv/bin/activate; \
-	bumpversion patch
+	uv version --bump patch
 
 package:
-	. venv/bin/activate; \
-	python setup.py sdist bdist_wheel; \
-	twine check dist/*
+	uv build
+	uvx twine check dist/*
 
 push-package:
-	. venv/bin/activate; \
-	twine upload dist/*
+	uv publish
 
 clean:
 	rm -rf .pytest_cache docs/_html build dist src/probflow.egg-info
 	find . -type d -name __pycache__ -exec rm -rf {} \+
+

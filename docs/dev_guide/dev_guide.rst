@@ -13,10 +13,10 @@ Requirements
 
 First make sure you've got the following installed:
 
+* `uv <https://docs.astral.sh/uv/>`_
 * make
 * git
 * python3
-* `virtualenv <http://docs.python.org/3/library/venv.html>`_
 
 
 Setting up a development environment
@@ -46,11 +46,10 @@ or alternatively to set up a dev environment with pytorch,
 
    make init-tensorflow
 
-The above command creates a new virtual environment called ``venv``, activates
-that virtual environment, installs the requirements (including tensorflow or
-pytorch), dev requirements, and the ProbFlow package in editable mode from your
-version of the source code - see the ``Makefile`` for the commands it's
-running).
+The above command creates a virtual environment (via ``uv``), and installs
+the requirements (including tensorflow or pytorch), dev requirements, and the
+ProbFlow package in editable mode from your version of the source code - see
+the ``Makefile`` for the commands it's running).
 
 
 Tests
@@ -75,15 +74,13 @@ using `pytest <http://docs.pytest.org>`_, so to drop into the
 
 .. code-block:: bash
 
-   . venv/bin/activate
-   pytest tests/test_you_want_to_run.py --pdb
+   uv run pytest tests/test_you_want_to_run.py --pdb
 
 
 Style
 -----
 
-To run the autoformatting (using ``isort`` and ``black``) and style checks
-(using ``flake8``), run
+To run the autoformatting and style checks (using ``ruff``), run
 
 .. code-block:: bash
 
