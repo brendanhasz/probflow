@@ -6,7 +6,9 @@ import probflow as pf
 
 
 def test_logistic_regression():
-    """Test that a logistic regression recovers the true parameters"""
+    """Test that a logistic regression recovers the true parameters."""
+
+    # NOTE: this is failing for some reason, I don't know why
 
     # Set random seed
     # np.random.seed(1234)

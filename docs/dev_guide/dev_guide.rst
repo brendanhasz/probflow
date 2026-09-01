@@ -13,9 +13,9 @@ Requirements
 
 First make sure you've got the following installed:
 
+* git
 * `uv <https://docs.astral.sh/uv/>`_
 * make
-* git
 
 
 Setting up a development environment

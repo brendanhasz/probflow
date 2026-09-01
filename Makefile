@@ -9,9 +9,6 @@ install-with-tensorflow:
 install-with-pytorch:
 	uv sync --extra pytorch --extra docs
 
-# Install with default backend of tensorflow
-install: install-with-tensorflow
-
 # Run tests with tensorflow backend
 test-tensorflow: install-with-tensorflow
 	uv run pytest tests/unit/tensorflow
@@ -20,8 +17,15 @@ test-tensorflow: install-with-tensorflow
 test-pytorch: install-with-pytorch
 	uv run pytest tests/unit/pytorch
 
-# Run tests with default backend of tensorflow
-test: test-tensorflow
+# Run statistical checks, which use tensorflow backend
+test-stats: install-with-tensorflow
+	uv run pytest tests/stats
+
+# Run all tests, including statistical checks
+test:
+	$(MAKE) test-pytorch
+	$(MAKE) test-tensorflow
+	$(MAKE) test-stats
 
 # Format code
 format:
