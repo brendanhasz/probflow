@@ -4,8 +4,9 @@
 # Required
 version: 2
 
-# Build all formats
-formats: all
+# Build HTML format only for faster builds
+formats:
+  - html
 
 build:
   os: ubuntu-22.04
@@ -15,7 +16,7 @@ build:
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
   configuration: docs/conf.py
-  fail_on_warning: false
+  fail_on_warning: true
 
 # Install the package (and its "docs" extra) from pyproject.toml
 python:
