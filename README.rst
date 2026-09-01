@@ -7,12 +7,12 @@ ProbFlow
     :target: https://pypi.org/project/probflow/
 
 .. |Build Badge| image:: https://github.com/brendanhasz/probflow/workflows/tests/badge.svg
-    :target: https://github.com/brendanhasz/probflow/actions?query=branch%3Amaster
+    :target: https://github.com/brendanhasz/probflow/actions?query=branch%3Amain
 
 .. |Docs Badge| image:: https://readthedocs.org/projects/probflow/badge/
     :target: http://probflow.readthedocs.io
 
-.. |Coverage Badge| image:: https://codecov.io/gh/brendanhasz/probflow/branch/master/graph/badge.svg
+.. |Coverage Badge| image:: https://codecov.io/gh/brendanhasz/probflow/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/brendanhasz/probflow
 
 
@@ -34,9 +34,9 @@ With ProbFlow, the core building blocks of a Bayesian model are parameters and p
 
 For example, a simple Bayesian linear regression
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/regression_equation.svg?sanitize=true
-   :width: 30 %
-   :align: center
+$$
+y \sim \text{Normal}(wx + b, \sigma)
+$$
 
 can be built by creating a ProbFlow Model.  This is just a class which inherits ``pf.Model`` (or ``pf.ContinuousModel`` or ``pf.CategoricalModel`` depending on the target type).  The ``__init__`` method sets up the parameters, and the ``__call__`` method performs a forward pass of the model, returning the predicted probability distribution of the target:
 
@@ -78,7 +78,7 @@ Compute *probabilistic* predictions for new data, with 95% confidence intervals:
 
     model.pred_dist_plot(x_test, ci=0.95)
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/pred_dist_light.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/main/docs/img/pred_dist_light.svg?sanitize=true
    :width: 90 %
    :align: center
 
@@ -95,7 +95,7 @@ Inspect the posterior distributions of your fit model's parameters, with 95% con
 
     model.posterior_plot(ci=0.95)
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/posteriors_light.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/main/docs/img/posteriors_light.svg?sanitize=true
    :width: 90 %
    :align: center
 
@@ -112,13 +112,13 @@ and diagnose *where* your model is having problems capturing uncertainty:
 
     model.coverage_by(ci=0.95)
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/coverage_light.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/main/docs/img/coverage_light.svg?sanitize=true
    :width: 90 %
    :align: center
 
 ProbFlow also provides more complex modules, such as those required for building Bayesian neural networks.  Also, you can mix ProbFlow with TensorFlow (or PyTorch!) code.  For example, even a somewhat complex multi-layer Bayesian neural network like this:
 
-.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/dual_headed_net_light.svg?sanitize=true
+.. image:: https://raw.githubusercontent.com/brendanhasz/probflow/main/docs/img/dual_headed_net_light.svg?sanitize=true
    :width: 99 %
    :align: center
 

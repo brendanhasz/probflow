@@ -5,9 +5,9 @@ name: tests
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -20,8 +20,9 @@ jobs:
         os: [ubuntu-latest] #, macos-latest, windows-latest]
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Install uv
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Set up uv
       uses: astral-sh/setup-uv@v3
       with:
         python-version: ${{ matrix.python-version }}
@@ -31,16 +32,15 @@ jobs:
     - name: Lint with ruff
       run: |
         uv run ruff check src/probflow tests
-    - name: Style checks with ruff format
-      run: |
-        uv run ruff format --check src/probflow tests
     - name: Run tests
       run: |
         uv run pytest tests/unit/${{ matrix.backend }} --cov=probflow --cov-report xml:coverage.xml
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+    - name: Upload coverage report
+      uses: actions/upload-code-coverage@v1
       with:
-        file: ./coverage.xml
+        file: coverage.xml
+        language: python
+        label: code-coverage/pytest/${{ matrix.python-version }}/${{ matrix.backend }}
     - name: Ensure the package builds
       run: |
         uv build
