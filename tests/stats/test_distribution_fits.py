@@ -54,8 +54,7 @@ def test_fit_studentt(random):
     # Generate data
     mu = np.random.randn(1).astype("float32")
     sig = np.exp(np.random.randn(1)).astype("float32")
-    df = np.array([1.0]).astype("float32")
-    x = (np.random.standard_t(df[0], N_DATAPOINTS) * sig[0] + mu[0]).astype(
+    x = (np.random.standard_t(1.0, N_DATAPOINTS) * sig[0] + mu[0]).astype(
         "float32"
     )
 
@@ -65,7 +64,7 @@ def test_fit_studentt(random):
             self.sig = pf.ScaleParameter(name="sig")
 
         def __call__(self):
-            return pf.StudentT(df, self.mu(), self.sig())
+            return pf.StudentT(1.0, self.mu(), self.sig())
 
     # Create and fit model
     model = StudenttModel()

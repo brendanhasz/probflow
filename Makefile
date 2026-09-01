@@ -1,5 +1,5 @@
 
-.PHONY: install-with-tensorflow install-with-pytorch install test-tensorflow test-pytorch test format docs bump-minor bump-patch package push-package clean
+.PHONY: install-with-tensorflow install-with-pytorch test-tensorflow test-pytorch test-stats-tensorflow test-stats-pytorch test format docs bump-minor bump-patch package push-package clean
 
 # Install with tensorflow backend
 install-with-tensorflow:
@@ -9,23 +9,24 @@ install-with-tensorflow:
 install-with-pytorch:
 	uv sync --extra pytorch --extra docs
 
-# Run tests with tensorflow backend
-test-tensorflow: install-with-tensorflow
+# Run unit tests with tensorflow backend
+test-unit-tensorflow: install-with-tensorflow
 	uv run pytest tests/unit/tensorflow
 
-# Run tests with pytorch backend
-test-pytorch: install-with-pytorch
+# Run unit tests with pytorch backend
+test-unit-pytorch: install-with-pytorch
 	uv run pytest tests/unit/pytorch
 
-# Run statistical checks, which use tensorflow backend
-test-stats: install-with-tensorflow
-	uv run pytest tests/stats
+# Run statistical checks using tensorflow backend
+test-stats-tensorflow: install-with-tensorflow
+	uv run pytest tests/stats --backend=tensorflow
+
+# Run statistical checks using pytorch backend
+test-stats-pytorch: install-with-pytorch
+	uv run pytest tests/stats --backend=pytorch
 
 # Run all tests, including statistical checks
-test:
-	$(MAKE) test-pytorch
-	$(MAKE) test-tensorflow
-	$(MAKE) test-stats
+test: test-unit-tensorflow test-stats-tensorflow test-unit-pytorch test-stats-pytorch
 
 # Format code
 format:

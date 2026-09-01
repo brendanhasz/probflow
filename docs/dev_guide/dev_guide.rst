@@ -59,21 +59,11 @@ Tests
 -----
 
 Then you can edit the source code, which is in ``src/probflow``.  The tests are
-in ``tests``.  To run the tensorflow tests, run
+in ``tests``.  To run all the tests, run
 
-.. tabs::
+.. code-block:: bash
 
-    .. group-tab:: TensorFlow
-
-         .. code-block:: bash
-
-            make test-tensorflow
-
-    .. group-tab:: PyTorch
-
-         .. code-block:: bash
-
-            make test-pytorch
+   make test
 
 If you get an error during the tests and want to debug, the tests are written
 using `pytest <http://docs.pytest.org>`_, so to drop into the

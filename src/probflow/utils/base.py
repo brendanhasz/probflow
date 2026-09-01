@@ -69,7 +69,7 @@ class BaseDistribution(ABC):
     def mode(self):
         """Compute the mode of this distribution"""
         if get_backend() == "pytorch":
-            raise NotImplementedError
+            return self().mode
         else:
             return self().mode()
 
