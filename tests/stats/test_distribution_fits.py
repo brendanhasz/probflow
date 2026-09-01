@@ -11,6 +11,7 @@ N_DATAPOINTS: int = 10000
 N_EPOCHS: int = 1000
 BATCH_SIZE: int = 1000
 
+
 def is_close(a, b, th=1e-5):
     """Check two values are close"""
     return np.abs(a - b) < th
@@ -88,7 +89,6 @@ def test_fit_cauchy(random):
     """Test fitting a cauchy distribution"""
 
     # Generate data
-    N = 1000
     mu = np.random.randn(1).astype("float32")
     sig = np.exp(np.random.randn(1)).astype("float32")
     x = tfd.Cauchy(mu, sig).sample(N_DATAPOINTS).numpy()
@@ -122,7 +122,6 @@ def test_fit_gamma(random):
     """Test fitting a gamma distribution"""
 
     # Generate data
-    N = 1000
     alpha = np.array([1.0]).astype("float32")
     beta = np.array([1.0]).astype("float32")
     x = tfd.Gamma(alpha, beta).sample(N_DATAPOINTS).numpy().astype("float32")
@@ -183,7 +182,12 @@ def test_fit_categorical(random):
 
     # Generate data
     probs = [0.3, 0.2, 0.5]
-    x = tfd.Categorical(probs=probs).sample(N_DATAPOINTS).numpy().astype("float32")
+    x = (
+        tfd.Categorical(probs=probs)
+        .sample(N_DATAPOINTS)
+        .numpy()
+        .astype("float32")
+    )
 
     class CategoricalModel(pf.Model):
         def __init__(self):
