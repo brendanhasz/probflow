@@ -70,9 +70,7 @@ class MonitorMetric(Callback):
         self.wall_times += [time.time() - self.start_time]
         if self.verbose:
             print(
-                "Epoch {} \t{}: {}".format(
-                    self.current_epoch, self.metric_name, self.current_metric
-                )
+                f"Epoch {self.current_epoch} \t{self.metric_name}: {self.current_metric}"
             )
 
     def plot(self, x="epoch", **kwargs):

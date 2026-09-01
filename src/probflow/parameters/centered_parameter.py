@@ -1,5 +1,3 @@
-from typing import List, Union
-
 import numpy as np
 
 import probflow.utils.ops as O
@@ -84,7 +82,7 @@ class CenteredParameter(Parameter):
 
     def __init__(
         self,
-        shape: Union[int, List[int]],
+        shape: int | list[int],
         center_by: str = "all",
         name="CenteredParameter",
     ):

@@ -36,12 +36,10 @@ class DataGenerator(BaseDataGenerator):
 
         # No multiprocessing
         if self.num_workers is None:
-
             return self.get_batch(index)
 
         # Multiprocessing
         else:
-
             # Start the next worker
             pid = index + self.num_workers
             if pid < len(self):

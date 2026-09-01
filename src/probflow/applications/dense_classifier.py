@@ -1,5 +1,3 @@
-from typing import List
-
 import probflow.utils.ops as O
 from probflow.distributions import Categorical
 from probflow.models import CategoricalModel
@@ -34,7 +32,7 @@ class DenseClassifier(CategoricalModel):
         class probabilities
     """
 
-    def __init__(self, d: List[int], **kwargs):
+    def __init__(self, d: list[int], **kwargs):
         d[-1] -= 1
         self.network = DenseNetwork(d, **kwargs)
 

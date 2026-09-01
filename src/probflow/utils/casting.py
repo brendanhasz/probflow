@@ -11,12 +11,11 @@ betweeen Tensors and numpy arrays.
 
 """
 
-
 __all__ = [
+    "make_input_tensor",
+    "to_default_dtype",
     "to_numpy",
     "to_tensor",
-    "to_default_dtype",
-    "make_input_tensor",
 ]
 
 

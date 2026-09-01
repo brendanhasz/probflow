@@ -1,6 +1,5 @@
 """Tests probflow.utils.initializers w/ torch backend"""
 
-
 import numpy as np
 import torch
 

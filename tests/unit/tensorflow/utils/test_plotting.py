@@ -1,6 +1,5 @@
 """Tests probflow.utils.plotting module and methods which use it"""
 
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
@@ -23,11 +22,11 @@ def test_approx_kde(plot):
 def is_color(color_value) -> bool:
     """Check if a value is a valid color."""
     if isinstance(color_value, str):
-        return (
-            color_value[0] == "#" and len(color_value) == 7
-        )
+        return color_value[0] == "#" and len(color_value) == 7
     elif isinstance(color_value, tuple):
-        return all(isinstance(c, float) for c in color_value) and all(0.0 <= c <= 1.0 for c in color_value)
+        return all(isinstance(c, float) for c in color_value) and all(
+            0.0 <= c <= 1.0 for c in color_value
+        )
     return False
 
 

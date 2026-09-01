@@ -1,5 +1,3 @@
-from typing import List, Union
-
 import probflow.utils.ops as O
 from probflow.parameters import DeterministicParameter, Parameter
 
@@ -78,11 +76,11 @@ class Embedding(Module):
 
     def __init__(
         self,
-        k: Union[int, List[int]],
-        d: Union[int, List[int]],
+        k: int | list[int],
+        d: int | list[int],
         probabilistic: bool = False,
         name: str = "Embedding",
-        **kwargs
+        **kwargs,
     ):
 
         # Convert to list if not already

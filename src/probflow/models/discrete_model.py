@@ -99,7 +99,7 @@ class DiscreteModel(ContinuousModel):
         N = samples.shape[1]
         if samples.ndim > 2 and any(e > 1 for e in samples.shape[2:]):
             raise NotImplementedError(
-                "only discrete dependent variables are " "supported"
+                "only discrete dependent variables are supported"
             )
         else:
             samples = samples.reshape([Ns, N])

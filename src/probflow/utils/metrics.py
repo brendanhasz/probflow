@@ -13,18 +13,17 @@ Evaluation metrics
 
 """
 
-
 __all__ = [
     "accuracy",
-    "mean_squared_error",
-    "sum_squared_error",
-    "mean_absolute_error",
-    "r_squared",
-    "true_positive_rate",
-    "true_negative_rate",
-    "precision",
     "f1_score",
     "get_metric_fn",
+    "mean_absolute_error",
+    "mean_squared_error",
+    "precision",
+    "r_squared",
+    "sum_squared_error",
+    "true_negative_rate",
+    "true_positive_rate",
 ]
 
 

@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Type, Union
+from collections.abc import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -96,15 +96,15 @@ class Parameter(BaseParameter):
 
     def __init__(
         self,
-        shape: Union[int, List[int]] = 1,
-        posterior: Type[BaseDistribution] = Normal,
+        shape: int | list[int] = 1,
+        posterior: type[BaseDistribution] = Normal,
         prior: BaseDistribution = Normal(0, 1),
-        transform: Callable = None,
-        initializer: Dict[str, Callable] = {
+        transform: Callable | None = None,
+        initializer: dict[str, Callable] = {
             "loc": xavier,
             "scale": scale_xavier,
         },
-        var_transform: Dict[str, Callable] = {
+        var_transform: dict[str, Callable] = {
             "loc": None,
             "scale": O.softplus,
         },
@@ -132,9 +132,8 @@ class Parameter(BaseParameter):
         }
 
         # Create variables for the variational distribution
-        self.untransformed_variables = dict()
+        self.untransformed_variables: dict[str, O.Tensor] = {}
         for var, init in initializer.items():
-
             # Int or float initializations = start whole array at that value
             if isinstance(init, (int, float)):
                 initial_value = O.full(shape, init)
@@ -300,12 +299,12 @@ class Parameter(BaseParameter):
         self,
         n: int = 10000,
         style: str = "fill",
-        bins: Union[int, list, np.ndarray] = 20,
+        bins: int | list | np.ndarray = 20,
         ci: float = 0.0,
         bw: float = 0.075,
         alpha: float = 0.4,
         color=None,
-        **kwargs
+        **kwargs,
     ):
         """Plot distribution of samples from the posterior distribution.
 
@@ -353,7 +352,7 @@ class Parameter(BaseParameter):
             bw=bw,
             alpha=alpha,
             color=color,
-            **kwargs
+            **kwargs,
         )
 
         # Label with parameter name
@@ -363,7 +362,7 @@ class Parameter(BaseParameter):
         self,
         n: int = 10000,
         style: str = "fill",
-        bins: Union[int, list, np.ndarray] = 20,
+        bins: int | list | np.ndarray = 20,
         ci: float = 0.0,
         bw: float = 0.075,
         alpha: float = 0.4,

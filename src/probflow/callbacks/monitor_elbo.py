@@ -46,11 +46,7 @@ class MonitorELBO(Callback):
         self.epochs += [self.current_epoch]
         self.wall_times += [time.time() - self.start_time]
         if self.verbose:
-            print(
-                "Epoch {} \tELBO: {}".format(
-                    self.current_epoch, self.current_elbo
-                )
-            )
+            print(f"Epoch {self.current_epoch} \tELBO: {self.current_elbo}")
 
     def plot(self, x="epoch", **kwargs):
         """Plot the ELBO as a function of epoch

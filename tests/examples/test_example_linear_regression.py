@@ -1,6 +1,5 @@
 """Tests examples in example_linear_regression"""
 
-
 import numpy as np
 import pandas as pd
 

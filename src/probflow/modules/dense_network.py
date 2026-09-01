@@ -1,4 +1,4 @@
-from typing import Callable, List
+from collections.abc import Callable
 
 import probflow.utils.ops as O
 
@@ -53,13 +53,13 @@ class DenseNetwork(Module):
 
     def __init__(
         self,
-        d: List[int],
+        d: list[int],
         activation: Callable = O.relu,
         batch_norm: bool = False,
         batch_norm_loc: str = "after",
         name: str = "DenseNetwork",
         batch_norm_kwargs: dict = {},
-        **kwargs
+        **kwargs,
     ):
 
         self.name = name

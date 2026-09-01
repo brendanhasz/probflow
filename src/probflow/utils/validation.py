@@ -8,7 +8,6 @@ the correct type.
 
 """
 
-
 import numpy as np
 
 from probflow.utils.base import BaseParameter

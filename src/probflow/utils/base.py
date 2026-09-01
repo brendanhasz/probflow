@@ -4,13 +4,12 @@ ProbFlow’s classes.
 
 """
 
-
 __all__ = [
-    "BaseDistribution",
-    "BaseParameter",
-    "BaseModule",
-    "BaseDataGenerator",
     "BaseCallback",
+    "BaseDataGenerator",
+    "BaseDistribution",
+    "BaseModule",
+    "BaseParameter",
 ]
 
 
@@ -164,7 +163,7 @@ class BaseDataGenerator(ABC):
 
     def __len__(self):
         """Number of batches per epoch"""
-        return int(ceil(self.n_samples / self.batch_size))
+        return ceil(self.n_samples / self.batch_size)
 
     @abstractmethod
     def __getitem__(self, index):

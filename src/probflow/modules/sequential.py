@@ -1,4 +1,4 @@
-from typing import Callable, List
+from collections.abc import Callable
 
 from .module import Module
 
@@ -16,7 +16,7 @@ class Sequential(Module):
         Name of this module
     """
 
-    def __init__(self, steps: List[Callable], name: str = "Sequential"):
+    def __init__(self, steps: list[Callable], name: str = "Sequential"):
         self.steps = steps  # store the list of steps
 
     def __call__(self, x):

@@ -6,7 +6,6 @@ TODO: more info...
 
 """
 
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -153,7 +152,7 @@ def plot_dist(
                     alpha=alpha,
                 )
         elif style == "hist":
-            _, be, patches = plt.hist(
+            _, be, _ = plt.hist(
                 data[:, i], alpha=alpha, bins=bins, color=next_color, label=lab
             )
             if ci:
@@ -408,7 +407,6 @@ def plot_by(
 
     # 1 Dimensional
     if x.shape[1] == 1:
-
         # Create bins over x
         edges = np.linspace(min(x), max(x), int(bins)).flatten()
         edges[-1] += 1e-9
@@ -417,7 +415,6 @@ def plot_by(
 
         # Bootstrap estimate coverage uncertainty
         if bootstrap is not None:
-
             # Compute func for data in each bins
             boots = pd.DataFrame(index=range(1, bins))
             for iB in range(bootstrap):
@@ -452,7 +449,6 @@ def plot_by(
 
     # 2 Dimensional
     elif x.shape[1] == 2:
-
         pass
         # TODO
 

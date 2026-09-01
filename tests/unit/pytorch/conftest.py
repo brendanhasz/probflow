@@ -1,6 +1,5 @@
 """Fixtures for unit tests w/ pytorch backend."""
 
-
 import probflow as pf
 
 

@@ -1,6 +1,5 @@
 """Tests the statistical accuracy of a Logistic Regression w/ ProbFlow"""
 
-
 import numpy as np
 
 import probflow as pf

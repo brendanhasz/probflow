@@ -16,14 +16,13 @@ they store parameters, and use those parameters to perform a computation
 
 """
 
-
 __all__ = [
-    "Module",
+    "BatchNormalization",
     "Dense",
     "DenseNetwork",
-    "Sequential",
-    "BatchNormalization",
     "Embedding",
+    "Module",
+    "Sequential",
 ]
 
 

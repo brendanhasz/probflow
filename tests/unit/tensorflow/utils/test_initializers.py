@@ -1,6 +1,5 @@
 """Tests probflow.utils.initializers"""
 
-
 import numpy as np
 import tensorflow as tf
 

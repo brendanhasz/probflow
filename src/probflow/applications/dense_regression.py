@@ -1,5 +1,3 @@
-from typing import List
-
 import probflow.utils.ops as O
 from probflow.distributions import Normal
 from probflow.models import ContinuousModel
@@ -42,7 +40,7 @@ class DenseRegression(ContinuousModel):
         Standard deviation of the Normal observation distribution
     """
 
-    def __init__(self, d: List[int], heteroscedastic: bool = False, **kwargs):
+    def __init__(self, d: list[int], heteroscedastic: bool = False, **kwargs):
         self.heteroscedastic = heteroscedastic
         if heteroscedastic:
             self.d_out = d[-1]

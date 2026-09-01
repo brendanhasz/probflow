@@ -1,4 +1,4 @@
-from typing import Callable, List, Union
+from collections.abc import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -230,10 +230,10 @@ class Model(Module):
         shuffle: bool = False,
         optimizer=None,
         optimizer_kwargs: dict = {},
-        lr: float = None,
+        lr: float | None = None,
         flipout: bool = True,
-        num_workers: int = None,
-        callbacks: List[BaseCallback] = [],
+        num_workers: int | None = None,
+        callbacks: list[BaseCallback] = [],
         eager: bool = False,
         n_mc: int = 1,
     ):
@@ -329,7 +329,7 @@ class Model(Module):
                 self._optimizer = torch.optim.Adam(
                     self.trainable_variables,
                     lr=self._learning_rate,
-                    **optimizer_kwargs
+                    **optimizer_kwargs,
                 )
             else:
                 import tensorflow as tf
@@ -366,7 +366,6 @@ class Model(Module):
 
         # Fit the model!
         for i in range(int(epochs)):
-
             # Stop training early?
             if not self._is_training:
                 break
@@ -626,10 +625,10 @@ class Model(Module):
         metric_fn = get_metric_fn(metric)
         return metric_fn(y_true, y_pred)
 
-    def _param_data(self, params: Union[str, List[str], None], func: Callable):
+    def _param_data(self, params: str | list[str] | None, func: Callable):
         """Get data about parameters in the model"""
         if isinstance(params, str):
-            return [func(p) for p in self.parameters if p.name == params][0]
+            return next(func(p) for p in self.parameters if p.name == params)
         elif isinstance(params, list):
             return {
                 p.name: func(p) for p in self.parameters if p.name in params
@@ -752,10 +751,10 @@ class Model(Module):
     def _param_plot(
         self,
         func: Callable,
-        params: Union[None, List[str]] = None,
+        params: None | list[str] = None,
         cols: int = 1,
         tight_layout: bool = True,
-        **kwargs
+        **kwargs,
     ):
         """Plot parameter data"""
         if params is None:

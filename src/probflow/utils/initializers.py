@@ -10,7 +10,6 @@ Functions to initialize posterior distribution variables.
 
 """
 
-
 import numpy as np
 
 from probflow.utils.settings import get_backend, get_datatype

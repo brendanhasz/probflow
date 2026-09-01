@@ -35,7 +35,6 @@ Other
 
 """
 
-
 __all__ = [
     "Bernoulli",
     "Categorical",

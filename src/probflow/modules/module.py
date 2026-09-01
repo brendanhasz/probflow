@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 import probflow.utils.ops as O
 from probflow.utils.base import BaseModule, BaseParameter
 from probflow.utils.io import dump, dumps
@@ -25,11 +23,11 @@ class Module(BaseModule):
         else:
             return []
 
-    def _list_params(self, the_list: List):
+    def _list_params(self, the_list: list):
         """Recursively search for |Parameters| contained in a list"""
         return [p for e in the_list for p in self._params(e)]
 
-    def _dict_params(self, the_dict: Dict):
+    def _dict_params(self, the_dict: dict):
         """Recursively search for |Parameters| contained in a dict"""
         return [p for _, e in the_dict.items() for p in self._params(e)]
 

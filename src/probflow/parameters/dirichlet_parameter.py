@@ -1,5 +1,3 @@
-from typing import List, Union
-
 import probflow.utils.ops as O
 from probflow.distributions import Dirichlet
 from probflow.utils.initializers import pos_xavier
@@ -66,7 +64,7 @@ class DirichletParameter(Parameter):
     def __init__(
         self,
         k: int = 2,
-        shape: Union[int, List[int]] = [],
+        shape: int | list[int] = [],
         posterior=Dirichlet,
         prior=None,
         transform=None,

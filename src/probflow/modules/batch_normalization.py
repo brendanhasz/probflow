@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Type, Union
+from collections.abc import Callable
 
 import probflow.utils.ops as O
 from probflow.distributions import Deterministic, Normal
@@ -117,13 +117,13 @@ class BatchNormalization(Module):
 
     def __init__(
         self,
-        shape: Union[int, List[int]],
-        weight_posterior: Type[BaseDistribution] = Deterministic,
-        bias_posterior: Type[BaseDistribution] = Deterministic,
-        weight_prior: BaseDistribution = Normal(0, 1),
-        bias_prior: BaseDistribution = Normal(0, 1),
-        weight_initializer: Dict[str, Callable] = {"loc": xavier},
-        bias_initializer: Dict[str, Callable] = {"loc": xavier},
+        shape: int | list[int],
+        weight_posterior: type[BaseDistribution] = Deterministic,
+        bias_posterior: type[BaseDistribution] = Deterministic,
+        weight_prior: BaseDistribution | None = Normal(0, 1),
+        bias_prior: BaseDistribution | None = Normal(0, 1),
+        weight_initializer: dict[str, Callable] = {"loc": xavier},
+        bias_initializer: dict[str, Callable] = {"loc": xavier},
         name="BatchNormalization",
     ):
 

@@ -67,21 +67,20 @@ variational distributions while inside the context manager.
 
 """
 
-
 import uuid
 
 __all__ = [
-    "get_backend",
-    "set_backend",
-    "get_datatype",
-    "set_datatype",
-    "get_samples",
-    "set_samples",
-    "get_flipout",
-    "set_flipout",
-    "get_static_sampling_uuid",
-    "set_static_sampling_uuid",
     "Sampling",
+    "get_backend",
+    "get_datatype",
+    "get_flipout",
+    "get_samples",
+    "get_static_sampling_uuid",
+    "set_backend",
+    "set_datatype",
+    "set_flipout",
+    "set_samples",
+    "set_static_sampling_uuid",
 ]
 
 

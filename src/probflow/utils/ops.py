@@ -35,37 +35,36 @@ The utils.ops module contains operations which run using the current backend.
 
 """
 
-
 __all__ = [
-    "kl_divergence",
-    "expand_dims",
-    "squeeze",
-    "ones",
-    "zeros",
-    "full",
-    "randn",
-    "rand_rademacher",
-    "shape",
-    "eye",
-    "sum",
-    "prod",
-    "mean",
-    "std",
-    "round",
     "abs",
-    "square",
-    "sqrt",
-    "exp",
-    "relu",
-    "softplus",
-    "sigmoid",
-    "gather",
-    "cat",
     "additive_logistic_transform",
-    "insert_col_of",
-    "new_variable",
-    "log_cholesky_transform",
+    "cat",
     "copy_tensor",
+    "exp",
+    "expand_dims",
+    "eye",
+    "full",
+    "gather",
+    "insert_col_of",
+    "kl_divergence",
+    "log_cholesky_transform",
+    "mean",
+    "new_variable",
+    "ones",
+    "prod",
+    "rand_rademacher",
+    "randn",
+    "relu",
+    "round",
+    "shape",
+    "sigmoid",
+    "softplus",
+    "sqrt",
+    "square",
+    "squeeze",
+    "std",
+    "sum",
+    "zeros",
 ]
 
 
@@ -296,7 +295,7 @@ def abs(val):
 def square(val):
     """Power of 2"""
     if get_backend() == "pytorch":
-        return val ** 2
+        return val**2
     else:
         import tensorflow as tf
 

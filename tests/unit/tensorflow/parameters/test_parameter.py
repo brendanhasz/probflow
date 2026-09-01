@@ -84,14 +84,12 @@ def test_Parameter_scalar():
 
     # sampling statement should allow static samples
     sample1 = param()
-    with Sampling(static=True):
-        with Sampling(n=1):
-            sample2 = param()
-            sample3 = param()
-    with Sampling(static=True):
-        with Sampling(n=1):
-            sample4 = param()
-            sample5 = param()
+    with Sampling(static=True), Sampling(n=1):
+        sample2 = param()
+        sample3 = param()
+    with Sampling(static=True), Sampling(n=1):
+        sample4 = param()
+        sample5 = param()
     assert sample1.ndim == 1
     assert sample2.ndim == 1
     assert sample3.ndim == 1
@@ -111,14 +109,12 @@ def test_Parameter_scalar():
     assert sample2.numpy() != sample4.numpy()
 
     # sampling statement should allow static samples (and work w/ n>1)
-    with Sampling(static=True):
-        with Sampling(n=5):
-            sample1 = param()
-            sample2 = param()
-    with Sampling(static=True):
-        with Sampling(n=5):
-            sample3 = param()
-            sample4 = param()
+    with Sampling(static=True), Sampling(n=5):
+        sample1 = param()
+        sample2 = param()
+    with Sampling(static=True), Sampling(n=5):
+        sample3 = param()
+        sample4 = param()
     assert sample1.ndim == 2
     assert sample2.ndim == 2
     assert sample3.ndim == 2

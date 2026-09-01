@@ -1,6 +1,5 @@
 """Tests the statistical accuracy of a Linear Regression w/ ProbFlow"""
 
-
 import numpy as np
 import tensorflow as tf
 

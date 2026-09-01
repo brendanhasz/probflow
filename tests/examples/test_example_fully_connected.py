@@ -1,6 +1,5 @@
 """Tests examples in example_fully_connected"""
 
-
 import numpy as np
 import tensorflow as tf
 

@@ -1,6 +1,5 @@
 """Tests the statistical accuracy of fitting some distributions"""
 
-
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp

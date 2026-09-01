@@ -11,13 +11,12 @@ The applications module contains pre-built |Models|
 
 """
 
-
 __all__ = [
+    "DenseClassifier",
+    "DenseRegression",
     "LinearRegression",
     "LogisticRegression",
     "PoissonRegression",
-    "DenseRegression",
-    "DenseClassifier",
 ]
 
 

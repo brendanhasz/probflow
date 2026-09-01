@@ -68,9 +68,8 @@ class ArrayDataGenerator(DataGenerator):
             self._empty = False
 
         # Check sizes are consistent
-        if x is not None and y is not None:
-            if x.shape[0] != y.shape[0]:
-                raise ValueError("x and y must contain same number of samples")
+        if x is not None and y is not None and x.shape[0] != y.shape[0]:
+            raise ValueError("x and y must contain same number of samples")
 
         # Generative model?
         if not test and y is None:

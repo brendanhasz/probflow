@@ -29,7 +29,7 @@ def random():
         import tensorflow as tf
 
         tf.random.set_seed(12345)
-    except Exception:
+    except ModuleNotFoundError:
         import torch
 
         torch.manual_seed(12345)

@@ -89,7 +89,6 @@ class Dense(Module):
             and get_samples() is not None
             and get_samples() == 1
         ):
-
             # Flipout-estimated weight samples
             s = O.rand_rademacher(O.shape(x))
             r = O.rand_rademacher([O.shape(x)[0], self.d_out])
