@@ -45,6 +45,7 @@ jobs:
         file: coverage.xml
         language: Python
         label: code-coverage/pytest/${{ matrix.python-version }}/${{ matrix.backend }}
+        fail-on-error: false
     - name: Ensure the package builds
       run: |
         uv build
