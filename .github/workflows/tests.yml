@@ -9,18 +9,19 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+  code-quality: write
+
 jobs:
   build:
 
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-      code-quality: write
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
         backend: [tensorflow, pytorch]
-        os: [ubuntu-latest] #, macos-latest, windows-latest]
+        #os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
     - name: Checkout repository
@@ -42,7 +43,7 @@ jobs:
       uses: actions/upload-code-coverage@v1
       with:
         file: coverage.xml
-        language: python
+        language: Python
         label: code-coverage/pytest/${{ matrix.python-version }}/${{ matrix.backend }}
     - name: Ensure the package builds
       run: |
