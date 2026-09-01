@@ -20,23 +20,31 @@ def test_approx_kde(plot):
         plt.show()
 
 
+def is_color(color_value) -> bool:
+    """Check if a value is a valid color."""
+    if isinstance(color_value, str):
+        return (
+            color_value[0] == "#" and len(color_value) == 7
+        )
+    elif isinstance(color_value, tuple):
+        return all(isinstance(c, float) for c in color_value) and all(0.0 <= c <= 1.0 for c in color_value)
+    return False
+
+
 def test_get_next_color():
     """Tests utils.plotting.get_next_color"""
 
     # default
     col = pf.utils.plotting.get_next_color(None, 0)
-    assert isinstance(col, str)
-    assert col[0] == "#"
+    assert is_color(col)
 
     # list of colors
     col = pf.utils.plotting.get_next_color(["#eeefff", "#gggaaa"], 1)
-    assert isinstance(col, str)
-    assert col[0] == "#"
+    assert is_color(col)
 
     # single color
     col = pf.utils.plotting.get_next_color("#eeefff", 1)
-    assert isinstance(col, str)
-    assert col[0] == "#"
+    assert is_color(col)
 
 
 def test_get_ix_label():

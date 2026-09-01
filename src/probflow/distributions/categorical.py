@@ -79,3 +79,7 @@ class Categorical(BaseDistribution):
         if self.ndim == len(y.shape):
             y = O.squeeze(y)
         return super().log_prob(y)
+
+    def mean(self):
+        """Since this is a categorical distribution, return the mode."""
+        return super().mode()

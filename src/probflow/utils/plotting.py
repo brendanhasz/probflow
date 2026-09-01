@@ -51,9 +51,9 @@ def get_ix_label(ix, shape):
         ix -= dims[d] * prod
     dims[0] = ix
     if len(shape) == 1:
-        return str(dims[0].astype("int32"))
+        return str(int(dims[0]))
     else:
-        return str(list(dims.astype("int32")))
+        return str([int(d) for d in dims])
 
 
 def plot_dist(

@@ -55,7 +55,7 @@ class EarlyStopping(Callback):
         # Store values
         self.metric_fn = metric_fn
         self.patience = patience
-        self.best = np.Inf
+        self.best = np.inf
         self.count = 0
         self.epoch = 0
         self.verbose = verbose

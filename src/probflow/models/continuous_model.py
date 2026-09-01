@@ -302,7 +302,7 @@ class ContinuousModel(Model):
 
         # Plot the predictive distributions
         if individually:
-            rows = np.ceil(N / cols)
+            rows = int(np.ceil(N / cols))
             for i in range(N):
                 plt.subplot(rows, cols, i + 1)
                 plot_dist(samples[:, i], **kwargs)
@@ -846,7 +846,7 @@ class ContinuousModel(Model):
         elif metric == "ma":
             p0 = np.concatenate([[0.0], p, [1.0]])
             p0_hat = np.concatenate([[0.0], p_hat, [1.0]])
-            return np.trapz(np.abs(p0 - p0_hat), p0)
+            return np.trapezoid(np.abs(p0 - p0_hat), p0)
         else:
             raise ValueError(f"Unknown calibration metric {metric}")
 

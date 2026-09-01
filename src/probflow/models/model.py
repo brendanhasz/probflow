@@ -334,8 +334,10 @@ class Model(Module):
             else:
                 import tensorflow as tf
 
+                # Pass a plain float (not a closure over self) so the
+                # optimizer stays picklable/serializable after fitting
                 self._optimizer = tf.keras.optimizers.Adam(
-                    lambda: self._learning_rate, **optimizer_kwargs
+                    learning_rate=self._learning_rate, **optimizer_kwargs
                 )
 
         # Use eager if input type is dataframe or series
@@ -399,9 +401,13 @@ class Model(Module):
             raise TypeError("lr must be a float")
         else:
             self._learning_rate = lr
+        if self._optimizer is None:
+            return
         if get_backend() == "pytorch":
             for g in self._optimizer.param_groups:
                 g["lr"] = self._learning_rate
+        else:
+            self._optimizer.learning_rate.assign(self._learning_rate)
 
     def set_kl_weight(self, w):
         """Set the weight of the KL term's contribution to the ELBO loss"""

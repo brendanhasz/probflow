@@ -9,7 +9,7 @@ description = "A Python package for building Bayesian models with TensorFlow or 
 readme = { file = "README.rst", content-type = "text/x-rst" }
 license = "MIT"
 authors = [{ name = "Brendan Hasz", email = "winsto99@gmail.com" }]
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -30,10 +30,7 @@ Homepage = "https://github.com/brendanhasz/probflow"
 tensorflow = [
     "tensorflow >= 2.2.0",
     "tensorflow-probability >= 0.10.0",
-]
-tensorflow_gpu = [
-    "tensorflow-gpu >= 2.2.0",
-    "tensorflow-probability >= 0.10.0",
+    "tf_keras",
 ]
 pytorch = [
     "torch >= 1.5.0",

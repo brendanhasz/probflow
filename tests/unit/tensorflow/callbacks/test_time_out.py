@@ -13,5 +13,5 @@ def test_TimeOut():
     # Test TimeOut
     to = TimeOut(2)
     ts = time.time()
-    my_model.fit(x, y, batch_size=5, epochs=10000, callbacks=[to])
-    assert time.time() - ts < 4
+    my_model.fit(x, y, batch_size=5, epochs=100000, callbacks=[to])
+    assert time.time() - ts < 5

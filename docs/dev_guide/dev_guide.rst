@@ -16,7 +16,6 @@ First make sure you've got the following installed:
 * `uv <https://docs.astral.sh/uv/>`_
 * make
 * git
-* python3
 
 
 Setting up a development environment
@@ -34,17 +33,21 @@ you're connecting to github
    git clone git@github.com:<your_github_username>/probflow.git
    cd probflow
 
-Then, to set up a development environment with tensorflow, run
+Then, to set up a development environment with probflow and required packages installed, run
 
-.. code-block:: bash
+.. tabs::
 
-   make init-tensorflow
+    .. group-tab:: TensorFlow
 
-or alternatively to set up a dev environment with pytorch,
+         .. code-block:: bash
 
-.. code-block:: bash
+            make install-with-tensorflow
 
-   make init-tensorflow
+    .. group-tab:: PyTorch
+
+         .. code-block:: bash
+
+            make install-with-pytorch
 
 The above command creates a virtual environment (via ``uv``), and installs
 the requirements (including tensorflow or pytorch), dev requirements, and the
@@ -58,15 +61,19 @@ Tests
 Then you can edit the source code, which is in ``src/probflow``.  The tests are
 in ``tests``.  To run the tensorflow tests, run
 
-.. code-block:: bash
+.. tabs::
 
-   make test-tensorflow
+    .. group-tab:: TensorFlow
 
-and to run the PyTorch tests, run
+         .. code-block:: bash
 
-.. code-block:: bash
+            make test-tensorflow
 
-   make test-pytorch
+    .. group-tab:: PyTorch
+
+         .. code-block:: bash
+
+            make test-pytorch
 
 If you get an error during the tests and want to debug, the tests are written
 using `pytest <http://docs.pytest.org>`_, so to drop into the
