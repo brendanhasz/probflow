@@ -1,12 +1,9 @@
 """Tests the statistical accuracy of fitting some distributions"""
 
 import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 import probflow as pf
 
-tfd = tfp.distributions
 N_DATAPOINTS: int = 10000
 N_EPOCHS: int = 1000
 BATCH_SIZE: int = 1000
@@ -58,7 +55,9 @@ def test_fit_studentt(random):
     mu = np.random.randn(1).astype("float32")
     sig = np.exp(np.random.randn(1)).astype("float32")
     df = np.array([1.0]).astype("float32")
-    x = tfd.StudentT(df, mu, sig).sample(N_DATAPOINTS).numpy()
+    x = (np.random.standard_t(df[0], N_DATAPOINTS) * sig[0] + mu[0]).astype(
+        "float32"
+    )
 
     class StudenttModel(pf.Model):
         def __init__(self):
@@ -91,7 +90,9 @@ def test_fit_cauchy(random):
     # Generate data
     mu = np.random.randn(1).astype("float32")
     sig = np.exp(np.random.randn(1)).astype("float32")
-    x = tfd.Cauchy(mu, sig).sample(N_DATAPOINTS).numpy()
+    x = (np.random.standard_cauchy(N_DATAPOINTS) * sig[0] + mu[0]).astype(
+        "float32"
+    )
 
     class CauchyModel(pf.Model):
         def __init__(self):
@@ -124,7 +125,7 @@ def test_fit_gamma(random):
     # Generate data
     alpha = np.array([1.0]).astype("float32")
     beta = np.array([1.0]).astype("float32")
-    x = tfd.Gamma(alpha, beta).sample(N_DATAPOINTS).numpy().astype("float32")
+    x = np.random.gamma(alpha[0], 1 / beta[0], N_DATAPOINTS).astype("float32")
 
     class GammaModel(pf.Model):
         def __init__(self):
@@ -157,7 +158,7 @@ def test_fit_bernoulli(random):
     # Generate data
     N = 1000
     prob = 0.7
-    x = (tf.random.uniform([N]) < prob).numpy().astype("float32")
+    x = (np.random.uniform(0, 1, N) < prob).astype("float32")
 
     class BernoulliModel(pf.Model):
         def __init__(self):
@@ -182,12 +183,7 @@ def test_fit_categorical(random):
 
     # Generate data
     probs = [0.3, 0.2, 0.5]
-    x = (
-        tfd.Categorical(probs=probs)
-        .sample(N_DATAPOINTS)
-        .numpy()
-        .astype("float32")
-    )
+    x = np.random.choice(len(probs), N_DATAPOINTS, p=probs).astype("float32")
 
     class CategoricalModel(pf.Model):
         def __init__(self):
@@ -213,7 +209,7 @@ def test_fit_poisson(random):
 
     # Generate data
     rate = 10
-    x = tf.random.poisson([N_DATAPOINTS], rate).numpy()
+    x = np.random.poisson(rate, N_DATAPOINTS).astype("float32")
 
     class PoissonModel(pf.Model):
         def __init__(self):

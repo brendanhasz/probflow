@@ -1,7 +1,6 @@
-"""Tests the statistical accuracy of a Linear Regression w/ ProbFlow"""
+"""Tests the statistical accuracy of a Linear Regression w/ ProbFlow."""
 
 import numpy as np
-import tensorflow as tf
 
 import probflow as pf
 
@@ -15,7 +14,6 @@ def test_linear_regression():
 
     # Set random seed
     np.random.seed(1234)
-    tf.random.set_seed(1234)
 
     # Generate data
     D = 5

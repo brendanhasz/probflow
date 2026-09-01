@@ -1,11 +1,11 @@
 
 .PHONY: install-with-tensorflow install-with-pytorch install test-tensorflow test-pytorch test format docs bump-minor bump-patch package push-package clean
 
-# Install with default backend of tensorflow (explicit)
+# Install with tensorflow backend
 install-with-tensorflow:
 	uv sync --extra tensorflow --extra docs
 
-# Install with default backend of pytorch
+# Install with pytorch backend
 install-with-pytorch:
 	uv sync --extra pytorch --extra docs
 
