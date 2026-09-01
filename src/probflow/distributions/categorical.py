@@ -82,4 +82,9 @@ class Categorical(BaseDistribution):
 
     def mean(self):
         """Since this is a categorical distribution, return the mode."""
-        return super().mode()
+        # PyTorch mean method returns the mode
+        if get_backend() == "pytorch":
+            return super().mean()
+        # But TensorFlow returns a float value for the mean, so need to use mode instead
+        else:
+            return super().mode()

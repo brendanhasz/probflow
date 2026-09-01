@@ -28,7 +28,9 @@ def test_Poisson():
     one = torch.tensor([1.0])
     two = torch.tensor([2.0])
     three = torch.tensor([3.0])
-    ppdf = lambda x, r: np.power(r, x) * np.exp(-r) / np.math.factorial(x)
+    ppdf = lambda x, r: (
+        np.power(r, x) * np.exp(-r) / np.prod(np.arange(1, x + 1))
+    )
     assert is_close(dist.prob(zero).numpy(), ppdf(0, 3))
     assert is_close(dist.prob(one).numpy(), ppdf(1, 3))
     assert is_close(dist.prob(two).numpy(), ppdf(2, 3))

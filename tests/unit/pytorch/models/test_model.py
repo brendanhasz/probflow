@@ -1079,8 +1079,8 @@ def test_Model_bayesian_updating():
     assert my_model.bias.posterior_mean() > 0
 
     # Store param estimate values (cast to float otherwise it stores reference)
-    weight_loc = float(my_model.weight.posterior_mean())
-    bias_loc = float(my_model.bias.posterior_mean())
+    weight_loc = float(my_model.weight.posterior_mean()[0])
+    bias_loc = float(my_model.bias.posterior_mean()[0])
 
     # Do Bayesian updating
     my_model.bayesian_update()
@@ -1090,5 +1090,5 @@ def test_Model_bayesian_updating():
     my_model.fit(x, y, batch_size=128, epochs=10, n_mc=10, eager=True)
 
     # Estimates should now be less than they were
-    assert weight_loc > my_model.weight.posterior_mean()
-    assert bias_loc > my_model.bias.posterior_mean()
+    assert weight_loc > my_model.weight.posterior_mean()[0]
+    assert bias_loc > my_model.bias.posterior_mean()[0]
