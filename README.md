@@ -27,15 +27,16 @@ can be built by creating a ProbFlow Model.  This is just a class which inherits 
 import probflow as pf
 import tensorflow as tf
 
-class LinearRegression(pf.ContinuousModel):
 
+class LinearRegression(pf.ContinuousModel):
     def __init__(self):
-        self.weight = pf.Parameter(name='weight')
-        self.bias = pf.Parameter(name='bias')
-        self.std = pf.ScaleParameter(name='sigma')
+        self.weight = pf.Parameter(name="weight")
+        self.bias = pf.Parameter(name="bias")
+        self.std = pf.ScaleParameter(name="sigma")
 
     def __call__(self, x):
-        return pf.Normal(x*self.weight()+self.bias(), self.std())
+        return pf.Normal(x * self.weight() + self.bias(), self.std())
+
 
 model = LinearRegression()
 ```
@@ -101,15 +102,15 @@ Can be built and fit with ProbFlow in only a few lines:
 
 ```python
 class DensityNetwork(pf.ContinuousModel):
-
     def __init__(self, units, head_units):
         self.core = pf.DenseNetwork(units)
         self.mean = pf.DenseNetwork(head_units)
-        self.std  = pf.DenseNetwork(head_units)
+        self.std = pf.DenseNetwork(head_units)
 
     def __call__(self, x):
         z = tf.nn.relu(self.core(x))
         return pf.Normal(self.mean(z), tf.exp(self.std(z)))
+
 
 # Create the model
 model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])

@@ -45,10 +45,9 @@ docs = [
 
 [dependency-groups]
 dev = [
-    "ruff >= 0.6.0",
+    "pre-commit >= 3.0.0",
     "pytest >= 6.0.0rc1",
     "pytest-cov >= 2.7.1",
-    "mypy >= 1.5.0",
 ]
 
 [tool.hatch.build.targets.wheel]

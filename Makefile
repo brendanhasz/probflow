@@ -25,9 +25,7 @@ test:
 
 # Format, lint, and type check code
 format:
-	uv run ruff check --fix src/probflow tests
-	uv run ruff format src/probflow tests
-	uv run mypy src/probflow
+	uv run pre-commit run --all-files
 
 # Build documentation
 docs:
