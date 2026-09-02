@@ -2,6 +2,7 @@ import multiprocessing as mp
 from abc import abstractmethod
 
 from probflow.utils.base import BaseDataGenerator
+from probflow.utils.typing import TensorLike
 
 
 class DataGenerator(BaseDataGenerator):
@@ -24,14 +25,18 @@ class DataGenerator(BaseDataGenerator):
 
     """
 
-    def __init__(self, num_workers=None):
-        self.num_workers = num_workers
+    def __init__(self, num_workers: int | None = None):
+        self.num_workers: int | None = num_workers
 
     @abstractmethod
-    def get_batch(self, index):
+    def get_batch(
+        self, index: int
+    ) -> tuple[TensorLike | None, TensorLike | None]:
         """Generate one batch of data"""
 
-    def __getitem__(self, index):
+    def __getitem__(
+        self, index: int
+    ) -> tuple[TensorLike | None, TensorLike | None]:
         """Generate one batch of data"""
 
         # No multiprocessing
@@ -46,7 +51,7 @@ class DataGenerator(BaseDataGenerator):
                 self._workers[pid].start()
 
             # Return data from the multiprocessing queue
-            return self._queue.get()
+            return self._queue.get()  # type: ignore
 
     def __iter__(self):
         """Get an iterator over batches"""
@@ -74,7 +79,7 @@ class DataGenerator(BaseDataGenerator):
         # Return iterator
         return self
 
-    def __next__(self):
+    def __next__(self) -> tuple[TensorLike | None, TensorLike | None]:
         """Get the next batch"""
         self._batch += 1
         if self._batch < len(self):

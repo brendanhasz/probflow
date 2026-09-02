@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from probflow.utils.typing import TensorLike
+
 from .data_generator import DataGenerator
 
 
@@ -31,8 +33,8 @@ class ArrayDataGenerator(DataGenerator):
 
     def __init__(
         self,
-        x=None,
-        y=None,
+        x: TensorLike | DataGenerator | None = None,
+        y: TensorLike | None = None,
         batch_size: int | None = None,
         shuffle: bool = False,
         test: bool = False,
@@ -78,7 +80,7 @@ class ArrayDataGenerator(DataGenerator):
 
         # Number of samples
         if x is None:
-            self._n_samples = y.shape[0]
+            self._n_samples = y.shape[0]  # type: ignore
         else:
             self._n_samples = x.shape[0]
 
@@ -97,16 +99,18 @@ class ArrayDataGenerator(DataGenerator):
         self.on_epoch_end()
 
     @property
-    def n_samples(self):
+    def n_samples(self) -> int:
         """Number of samples in the dataset"""
         return self._n_samples
 
     @property
-    def batch_size(self):
+    def batch_size(self) -> int:
         """Number of samples to generate each minibatch"""
         return self._batch_size
 
-    def get_batch(self, index):
+    def get_batch(
+        self, index: int
+    ) -> tuple[TensorLike | None, TensorLike | None]:
         """Generate one batch of data"""
 
         # Return none if no data
