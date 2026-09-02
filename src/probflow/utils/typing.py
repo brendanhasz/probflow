@@ -7,6 +7,7 @@ import pandas as pd
 
 if TYPE_CHECKING:
     import tensorflow as tf
+    import tensorflow_probability as tfp
     import torch
 
     TensorLike: TypeAlias = (
@@ -22,5 +23,11 @@ if TYPE_CHECKING:
         | torch.Tensor
     )
 
+    BackendDistribution: TypeAlias = (
+        torch.distributions.distribution.Distribution
+        | tfp.distributions.Distribution
+    )
+
 else:
     TensorLike = Any
+    BackendDistribution = Any

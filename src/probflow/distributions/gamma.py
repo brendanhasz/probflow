@@ -1,5 +1,6 @@
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import get_backend
+from probflow.utils.typing import BackendDistribution, TensorLike
 from probflow.utils.validation import ensure_tensor_like
 
 
@@ -47,7 +48,7 @@ class Gamma(BaseDistribution):
 
     """
 
-    def __init__(self, concentration, rate):
+    def __init__(self, concentration: TensorLike, rate: TensorLike) -> None:
 
         # Check input
         ensure_tensor_like(concentration, "concentration")
@@ -57,7 +58,7 @@ class Gamma(BaseDistribution):
         self.concentration = concentration
         self.rate = rate
 
-    def __call__(self):
+    def __call__(self) -> BackendDistribution:
         """Get the distribution object from the backend"""
         if get_backend() == "pytorch":
             import torch.distributions as tod

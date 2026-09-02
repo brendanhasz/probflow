@@ -1,6 +1,8 @@
 import probflow.utils.ops as O
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import get_backend
+from probflow.utils.shape import get_ndims
+from probflow.utils.typing import BackendDistribution, TensorLike
 from probflow.utils.validation import ensure_tensor_like
 
 
@@ -37,7 +39,9 @@ class Categorical(BaseDistribution):
         Raw category probabilities (:math:`\mathbf{\theta}`)
     """
 
-    def __init__(self, logits=None, probs=None):
+    def __init__(
+        self, logits: TensorLike | None = None, probs: TensorLike | None = None
+    ) -> None:
 
         # Check input
         if logits is None and probs is None:
@@ -51,11 +55,11 @@ class Categorical(BaseDistribution):
         self.logits = logits
         self.probs = probs
         if logits is None:
-            self.ndim = len(probs.shape)
+            self.ndim = get_ndims(probs, "probs")
         else:
-            self.ndim = len(logits.shape)
+            self.ndim = get_ndims(logits, "logits")
 
-    def __call__(self):
+    def __call__(self) -> BackendDistribution:
         """Get the distribution object from the backend"""
         if get_backend() == "pytorch":
             import torch.distributions as tod
@@ -68,19 +72,19 @@ class Categorical(BaseDistribution):
 
             return tfd.Categorical(logits=self["logits"], probs=self["probs"])
 
-    def prob(self, y):
+    def prob(self, y: TensorLike) -> TensorLike:
         """Doesn't broadcast correctly when logits/probs and y are same dims"""
-        if self.ndim == len(y.shape):
+        if self.ndim == get_ndims(y):
             y = O.squeeze(y)
         return super().prob(y)
 
-    def log_prob(self, y):
+    def log_prob(self, y: TensorLike) -> TensorLike:
         """Doesn't broadcast correctly when logits/probs and y are same dims"""
-        if self.ndim == len(y.shape):
+        if self.ndim == get_ndims(y):
             y = O.squeeze(y)
         return super().log_prob(y)
 
-    def mean(self):
+    def mean(self) -> TensorLike:
         """Since this is a categorical distribution, return the mode."""
         # PyTorch mean method returns the mode
         if get_backend() == "pytorch":

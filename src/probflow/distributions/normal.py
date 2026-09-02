@@ -1,5 +1,6 @@
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import get_backend
+from probflow.utils.typing import BackendDistribution, TensorLike
 from probflow.utils.validation import ensure_tensor_like
 
 
@@ -42,7 +43,7 @@ class Normal(BaseDistribution):
         Default = 1
     """
 
-    def __init__(self, loc=0, scale=1):
+    def __init__(self, loc: TensorLike = 0, scale: TensorLike = 1) -> None:
 
         # Check input
         ensure_tensor_like(loc, "loc")
@@ -52,7 +53,7 @@ class Normal(BaseDistribution):
         self.loc = loc
         self.scale = scale
 
-    def __call__(self):
+    def __call__(self) -> BackendDistribution:
         """Get the distribution object from the backend"""
         if get_backend() == "pytorch":
             import torch.distributions as tod

@@ -1,5 +1,6 @@
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import get_backend
+from probflow.utils.typing import BackendDistribution, TensorLike
 from probflow.utils.validation import ensure_tensor_like
 
 
@@ -35,7 +36,7 @@ class Poisson(BaseDistribution):
         Rate parameter of the Poisson distribution (:math:`\lambda`).
     """
 
-    def __init__(self, rate):
+    def __init__(self, rate: TensorLike) -> None:
 
         # Check input
         ensure_tensor_like(rate, "rate")
@@ -43,7 +44,7 @@ class Poisson(BaseDistribution):
         # Store args
         self.rate = rate
 
-    def __call__(self):
+    def __call__(self) -> BackendDistribution:
         """Get the distribution object from the backend"""
         if get_backend() == "pytorch":
             import torch.distributions as tod

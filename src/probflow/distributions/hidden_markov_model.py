@@ -1,5 +1,6 @@
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import get_backend
+from probflow.utils.typing import BackendDistribution, TensorLike
 from probflow.utils.validation import ensure_tensor_like
 
 
@@ -22,7 +23,13 @@ class HiddenMarkovModel(BaseDistribution):
         Concentration parameter of the Dirichlet distribution (:math:`\alpha`).
     """
 
-    def __init__(self, initial, transition, observation, steps):
+    def __init__(
+        self,
+        initial: TensorLike,
+        transition: TensorLike,
+        observation: BaseDistribution | BackendDistribution,
+        steps: int,
+    ) -> None:
 
         # Check input
         ensure_tensor_like(initial, "initial")
@@ -44,7 +51,7 @@ class HiddenMarkovModel(BaseDistribution):
         self.transition = transition
         self.steps = steps
 
-    def __call__(self):
+    def __call__(self) -> BackendDistribution:
         """Get the distribution object from the backend"""
         if get_backend() == "pytorch":
             # import torch.distributions as tod
