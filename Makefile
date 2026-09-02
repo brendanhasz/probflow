@@ -28,17 +28,10 @@ test-stats-pytorch: install-with-pytorch
 # Run all tests, including statistical checks
 test: test-unit-tensorflow test-stats-tensorflow test-unit-pytorch test-stats-pytorch
 
-# Format code
+# Format, lint, and type check code
 format:
 	uv run ruff check --fix src/probflow tests
 	uv run ruff format src/probflow tests
-
-# Lint code
-lint:
-	uv run ruff check src/probflow tests
-
-# Type check with mypy
-type-check:
 	uv run mypy src/probflow
 
 # Build documentation

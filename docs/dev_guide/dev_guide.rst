@@ -77,7 +77,7 @@ using `pytest <http://docs.pytest.org>`_, so to drop into the
 Style
 -----
 
-To run the autoformatting and style checks (using ``ruff``), run
+To run the autoformatting, style checks (using ``ruff``), and typing checks (using ``mypy``), run
 
 .. code-block:: bash
 
