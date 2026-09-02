@@ -19,6 +19,7 @@ from typing import Any
 
 from probflow.utils.casting import to_tensor
 from probflow.utils.settings import get_backend
+from probflow.utils.typing import TensorLike
 
 
 class BaseDistribution(ABC):
@@ -135,8 +136,20 @@ class BaseModule(ABC):
         """Initialize the module (abstract method)"""
 
     @abstractmethod
-    def __call__(self):
-        """Perform forward pass (abstract method)"""
+    def __call__(self, *args, **kwargs) -> TensorLike:
+        """Perform forward pass, returning a tensor (abstract method)"""
+
+
+class BaseModel(ABC):
+    """Abstract base class for ProbFlow Models"""
+
+    @abstractmethod
+    def __init__(self, *args):
+        """Initialize the model (abstract method)"""
+
+    @abstractmethod
+    def __call__(self, *args, **kwargs) -> BaseDistribution:
+        """Perform forward pass, returning a distribution (abstract method)"""
 
 
 class BaseDataGenerator(ABC):

@@ -9,6 +9,7 @@ the correct type.
 """
 
 import numpy as np
+import pandas as pd
 
 from probflow.utils.base import BaseParameter
 from probflow.utils.settings import get_backend
@@ -18,7 +19,20 @@ def ensure_tensor_like(obj, name):
     """Determine whether an object can be cast to a Tensor"""
 
     # Check for non-backend-dependent types
-    if isinstance(obj, (int, float, np.ndarray, list)):
+    if isinstance(
+        obj,
+        (
+            int,
+            float,
+            np.ndarray,
+            pd.DataFrame,
+            pd.Series,
+        ),
+    ):
+        return
+    if isinstance(obj, list):
+        for o in obj:
+            ensure_tensor_like(o, name)
         return
 
     # Check for backend-dependent types

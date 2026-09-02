@@ -3,6 +3,7 @@ from probflow.distributions import Normal
 from probflow.models import ContinuousModel
 from probflow.parameters import Parameter, ScaleParameter
 from probflow.utils.casting import to_tensor
+from probflow.utils.typing import TensorLike
 
 
 class LinearRegression(ContinuousModel):
@@ -42,7 +43,7 @@ class LinearRegression(ContinuousModel):
             self.bias = Parameter([1, d_o], name="bias")
             self.std = ScaleParameter([1, d_o], name="std")
 
-    def __call__(self, x):
+    def __call__(self, x: TensorLike) -> Normal:
         x = to_tensor(x)
         if self.heteroscedastic:
             p = x @ self.weights() + self.bias()

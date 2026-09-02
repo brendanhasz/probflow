@@ -33,10 +33,10 @@ class ArrayDataGenerator(DataGenerator):
         self,
         x=None,
         y=None,
-        batch_size=None,
-        shuffle=False,
-        test=False,
-        num_workers=None,
+        batch_size: int | None = None,
+        shuffle: bool = False,
+        test: bool = False,
+        num_workers: int | None = None,
     ):
 
         # Set number of worker threads

@@ -3,6 +3,7 @@ from probflow.distributions import Categorical
 from probflow.models import CategoricalModel
 from probflow.parameters import Parameter
 from probflow.utils.casting import to_tensor
+from probflow.utils.typing import TensorLike
 
 
 class LogisticRegression(CategoricalModel):
@@ -31,7 +32,7 @@ class LogisticRegression(CategoricalModel):
         self.weights = Parameter([d, k - 1], name="weights")
         self.bias = Parameter([1, k - 1], name="bias")
 
-    def __call__(self, x):
+    def __call__(self, x: TensorLike) -> Categorical:
         x = to_tensor(x)
         return Categorical(
             O.insert_col_of(x @ self.weights() + self.bias(), 0)

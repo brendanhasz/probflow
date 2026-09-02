@@ -3,6 +3,7 @@ from probflow.distributions import Categorical
 from probflow.models import CategoricalModel
 from probflow.modules import DenseNetwork
 from probflow.utils.casting import to_tensor
+from probflow.utils.typing import TensorLike
 
 
 class DenseClassifier(CategoricalModel):
@@ -33,9 +34,11 @@ class DenseClassifier(CategoricalModel):
     """
 
     def __init__(self, d: list[int], **kwargs):
-        d[-1] -= 1
+        d[-1] -= (
+            1  # Use first class as "pivot" class, so only need to predict k-1 classes
+        )
         self.network = DenseNetwork(d, **kwargs)
 
-    def __call__(self, x):
+    def __call__(self, x: TensorLike) -> Categorical:
         x = to_tensor(x)
         return Categorical(O.insert_col_of(self.network(x), 0))

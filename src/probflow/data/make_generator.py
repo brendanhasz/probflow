@@ -9,12 +9,12 @@ def make_generator(
     shuffle=False,
     test=False,
     num_workers=None,
-):
+) -> DataGenerator:
     """Make input a DataGenerator if not already"""
     if isinstance(x, DataGenerator):
         return x
     else:
-        dg = ArrayDataGenerator(
+        dg: ArrayDataGenerator = ArrayDataGenerator(
             x,
             y,
             batch_size=batch_size,

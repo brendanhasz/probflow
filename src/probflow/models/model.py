@@ -8,13 +8,13 @@ import pandas as pd
 import probflow.utils.ops as O
 from probflow.data import make_generator
 from probflow.modules import Module
-from probflow.utils.base import BaseCallback
+from probflow.utils.base import BaseCallback, BaseModel
 from probflow.utils.casting import to_numpy
 from probflow.utils.metrics import get_metric_fn
 from probflow.utils.settings import Sampling, get_backend
 
 
-class Model(Module):
+class Model(BaseModel, Module):
     """Abstract base class for probflow models.
 
     TODO
@@ -61,6 +61,11 @@ class Model(Module):
     * :meth:`~prob_by`
     * :meth:`~save`
     * :meth:`~summary`
+
+    Users implementing child classes should implement the following methods:
+
+    * :meth:`~__init__`
+    * :meth:`~__call__`
 
 
     Example

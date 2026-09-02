@@ -23,9 +23,10 @@ import numpy as np
 import pandas as pd
 
 from probflow.utils.settings import get_backend, get_datatype
+from probflow.utils.typing import TensorLike
 
 
-def to_numpy(x):
+def to_numpy(x: TensorLike) -> np.ndarray:
     """Convert tensor to numpy array"""
     if isinstance(x, list):
         return [to_numpy(e) for e in x]
@@ -33,13 +34,25 @@ def to_numpy(x):
         return x
     elif isinstance(x, (pd.DataFrame, pd.Series)):
         return x.values
+    elif get_backend() == "tensorflow":
+        import tensorflow as tf
+
+        if isinstance(x, (tf.Tensor, tf.Variable)):
+            return x.numpy()
+        else:
+            return np.array(x)
     elif get_backend() == "pytorch":
-        return x.detach().numpy()
+        import torch
+
+        if isinstance(x, torch.Tensor):
+            return x.detach().numpy()
+        else:
+            return np.array(x)
     else:
-        return x.numpy()
+        return np.array(x)
 
 
-def to_tensor(x):
+def to_tensor(x: TensorLike) -> TensorLike:
     """Make x a tensor if not already"""
 
     # Get numpy data if pandas
@@ -60,9 +73,14 @@ def to_tensor(x):
         return x  # TensorFlow auto-converts numpy arrays to tensors
 
 
-def to_default_dtype(x):
+def to_default_dtype(x: TensorLike) -> TensorLike:
     if get_backend() == "pytorch":
-        return x.type(get_datatype())
+        import torch
+
+        if isinstance(x, torch.Tensor):
+            return x.to(get_datatype())
+        else:
+            return torch.tensor(x).to(get_datatype())
     else:
         import tensorflow as tf
 

@@ -4,6 +4,7 @@ from probflow.models import ContinuousModel
 from probflow.modules import DenseNetwork
 from probflow.parameters import ScaleParameter
 from probflow.utils.casting import to_tensor
+from probflow.utils.typing import TensorLike
 
 
 class DenseRegression(ContinuousModel):
@@ -41,7 +42,7 @@ class DenseRegression(ContinuousModel):
     """
 
     def __init__(self, d: list[int], heteroscedastic: bool = False, **kwargs):
-        self.heteroscedastic = heteroscedastic
+        self.heteroscedastic: bool = heteroscedastic
         if heteroscedastic:
             self.d_out = d[-1]
             d[-1] = 2 * d[-1]
@@ -50,7 +51,7 @@ class DenseRegression(ContinuousModel):
             self.network = DenseNetwork(d, **kwargs)
             self.std = ScaleParameter([1, d[-1]], name="std")
 
-    def __call__(self, x):
+    def __call__(self, x: TensorLike) -> Normal:
         x = to_tensor(x)
         if self.heteroscedastic:
             p = self.network(x)
