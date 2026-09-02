@@ -41,13 +41,13 @@ Then, to set up a development environment with probflow and required packages in
 
          .. code-block:: bash
 
-            make install-with-tensorflow
+            make install
 
     .. group-tab:: PyTorch
 
          .. code-block:: bash
 
-            make install-with-pytorch
+            make install BACKEND=pytorch
 
 The above command creates a virtual environment (via ``uv``), and installs
 the requirements (including tensorflow or pytorch), dev requirements, and the
@@ -82,6 +82,14 @@ To run the autoformatting, style checks (using ``ruff``), and typing checks (usi
 .. code-block:: bash
 
    make format
+
+
+Version bumping
+---------------
+
+To automatically bump the minor or patch version number, run ``make bump-minor`` or ``make bump-patch``.
+This will update the version number in ``pyproject.toml``.
+You can then commit that change, push it to your fork, and make a pull request.
 
 
 Documentation

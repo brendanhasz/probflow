@@ -1,32 +1,27 @@
 
 .PHONY: install-with-tensorflow install-with-pytorch test-tensorflow test-pytorch test-stats-tensorflow test-stats-pytorch test format lint type-check docs bump-minor bump-patch package push-package clean
 
-# Install with tensorflow backend
-install-with-tensorflow:
-	uv sync --extra tensorflow --extra docs
+BACKEND ?= tensorflow
+AVAILABLE_BACKENDS := tensorflow pytorch
 
-# Install with pytorch backend
-install-with-pytorch:
-	uv sync --extra pytorch --extra docs
+# Install probflow package and requirements
+install:
+	uv sync --extra $(BACKEND) --extra docs
 
-# Run unit tests with tensorflow backend
-test-unit-tensorflow: install-with-tensorflow
-	uv run pytest tests/unit/tensorflow
+# Run unit tests
+test-unit: install
+	uv run pytest tests/unit/$(BACKEND)
 
-# Run unit tests with pytorch backend
-test-unit-pytorch: install-with-pytorch
-	uv run pytest tests/unit/pytorch
+# Run statistical checks
+test-stats: install
+	uv run pytest tests/stats --backend=$(BACKEND)
 
-# Run statistical checks using tensorflow backend
-test-stats-tensorflow: install-with-tensorflow
-	uv run pytest tests/stats --backend=tensorflow
-
-# Run statistical checks using pytorch backend
-test-stats-pytorch: install-with-pytorch
-	uv run pytest tests/stats --backend=pytorch
-
-# Run all tests, including statistical checks
-test: test-unit-tensorflow test-stats-tensorflow test-unit-pytorch test-stats-pytorch
+# Run all tests, including statistical checks, for all backends
+test:
+	@for backend in $(AVAILABLE_BACKENDS); do \
+		$(MAKE) test-unit BACKEND=$$backend; \
+		$(MAKE) test-stats BACKEND=$$backend; \
+	done
 
 # Format, lint, and type check code
 format:
@@ -60,4 +55,3 @@ push-package:
 clean:
 	rm -rf .pytest_cache docs/_html build dist src/probflow.egg-info
 	find . -type d -name __pycache__ -exec rm -rf {} \+
-
