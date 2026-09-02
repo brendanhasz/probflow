@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 import matplotlib.pyplot as plt
 
 from .callback import Callback
@@ -8,7 +10,7 @@ class KLWeightScheduler(Callback):
 
     Parameters
     ----------
-    fn : callable
+    fn : Callable[[int], float]
         Function which takes the current epoch as an argument and returns a
         kl weight, a float between 0 and 1
     verbose : bool
@@ -23,21 +25,21 @@ class KLWeightScheduler(Callback):
 
     """
 
-    def __init__(self, fn, verbose=False):
+    def __init__(self, fn: Callable[[int], float], verbose: bool = False):
 
         # Check type
         if not callable(fn):
             raise TypeError("fn must be a callable")
         if not isinstance(fn(1), float):
-            raise TypeError("fn must return a float")
+            raise TypeError("fn must return a float given an epoch number")
 
         # Store function
-        self.fn = fn
-        self.verbose = verbose
-        self.current_epoch = 0
-        self.current_w = 0
-        self.epochs = []
-        self.kl_weights = []
+        self.fn: Callable[[int], float] = fn
+        self.verbose: bool = verbose
+        self.current_epoch: int = 0
+        self.current_w: float = 0
+        self.epochs: list[int] = []
+        self.kl_weights: list[float] = []
 
     def on_epoch_start(self):
         """Set the KL weight at the start of each epoch."""

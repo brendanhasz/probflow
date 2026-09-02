@@ -24,14 +24,14 @@ class MonitorELBO(Callback):
 
     """
 
-    def __init__(self, verbose=False):
-        self.current_elbo = np.nan
-        self.current_epoch = 0
-        self.elbos = []
-        self.epochs = []
-        self.verbose = verbose
-        self.start_time = None
-        self.wall_times = []
+    def __init__(self, verbose: bool = False):
+        self.current_elbo: float = np.nan
+        self.current_epoch: int = 0
+        self.elbos: list[float] = []
+        self.epochs: list[int] = []
+        self.verbose: bool = verbose
+        self.start_time: float | None = None
+        self.wall_times: list[float] = []
 
     def on_epoch_start(self):
         """Record start time at the beginning of the first epoch"""
@@ -48,7 +48,7 @@ class MonitorELBO(Callback):
         if self.verbose:
             print(f"Epoch {self.current_epoch} \tELBO: {self.current_elbo}")
 
-    def plot(self, x="epoch", **kwargs):
+    def plot(self, x: str = "epoch", **kwargs):
         """Plot the ELBO as a function of epoch
 
         Parameters

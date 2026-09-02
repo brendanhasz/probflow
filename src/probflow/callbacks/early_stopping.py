@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 import numpy as np
 
 from .callback import Callback
@@ -37,7 +39,11 @@ class EarlyStopping(Callback):
     """
 
     def __init__(
-        self, metric_fn, patience=0, verbose=True, name="EarlyStopping"
+        self,
+        metric_fn: Callable[[], float | int] | MonitorMetric | MonitorELBO,
+        patience: int = 0,
+        verbose: bool = True,
+        name: str = "EarlyStopping",
     ):
 
         # Check types

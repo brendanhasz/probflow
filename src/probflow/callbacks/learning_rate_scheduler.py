@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 import matplotlib.pyplot as plt
 
 from .callback import Callback
@@ -24,7 +26,7 @@ class LearningRateScheduler(Callback):
 
     """
 
-    def __init__(self, fn, verbose: bool = False):
+    def __init__(self, fn: Callable[[int], float], verbose: bool = False):
 
         # Check type
         if not callable(fn):
@@ -33,10 +35,10 @@ class LearningRateScheduler(Callback):
             raise TypeError("fn must return a float given an epoch number")
 
         # Store function
-        self.fn = fn
-        self.verbose = verbose
-        self.current_epoch = 0
-        self.current_lr = 0.0
+        self.fn: Callable[[int], float] = fn
+        self.verbose: bool = verbose
+        self.current_epoch: int = 0
+        self.current_lr: float = 0.0
         self.epochs: list[int] = []
         self.learning_rate: list[float] = []
 

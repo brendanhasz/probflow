@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from probflow.data import make_generator
+from probflow.data.data_generator import DataGenerator
 from probflow.utils.metrics import get_metric_fn
+from probflow.utils.typing import TensorLike
 
 from .callback import Callback
 
@@ -35,7 +37,13 @@ class MonitorMetric(Callback):
     See the user guide section on :ref:`monitoring-a-metric`.
     """
 
-    def __init__(self, metric, x, y=None, verbose=False):
+    def __init__(
+        self,
+        metric: str,
+        x: TensorLike | DataGenerator,
+        y: TensorLike | None = None,
+        verbose: bool = False,
+    ):
 
         # Store metric
         self.metric_fn = get_metric_fn(metric)
@@ -48,13 +56,13 @@ class MonitorMetric(Callback):
         self.data = make_generator(x, y)
 
         # Store metrics and epochs
-        self.current_metric = np.nan
-        self.current_epoch = 0
-        self.metrics = []
-        self.epochs = []
-        self.verbose = verbose
-        self.start_time = None
-        self.wall_times = []
+        self.current_metric: float = np.nan
+        self.current_epoch: int = 0
+        self.metrics: list[float] = []
+        self.epochs: list[int] = []
+        self.verbose: bool = verbose
+        self.start_time: float | None = None
+        self.wall_times: list[float] = []
 
     def on_epoch_start(self):
         """Record start time at the beginning of the first epoch"""
@@ -73,7 +81,7 @@ class MonitorMetric(Callback):
                 f"Epoch {self.current_epoch} \t{self.metric_name}: {self.current_metric}"
             )
 
-    def plot(self, x="epoch", **kwargs):
+    def plot(self, x: str = "epoch", **kwargs):
         """Plot the metric being monitored as a function of epoch
 
         Parameters

@@ -20,14 +20,14 @@ class MonitorParameter(Callback):
 
     """
 
-    def __init__(self, params):
+    def __init__(self, params: str | list[str] | None):
 
         # Store metrics and epochs
         self.params = params
-        self.current_params = None
-        self.current_epoch = 0
-        self.parameter_values = []
-        self.epochs = []
+        self.current_params: float | dict[str, float] | None = None
+        self.current_epoch: int = 0
+        self.parameter_values: list[float | dict[str, float]] = []
+        self.epochs: list[int] = []
 
     def on_epoch_end(self):
         """Store mean values of Parameter(s) at the end of each epoch."""

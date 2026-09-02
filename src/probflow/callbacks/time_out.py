@@ -28,12 +28,12 @@ class TimeOut(Callback):
 
     """
 
-    def __init__(self, time_limit, verbose=True):
+    def __init__(self, time_limit: float, verbose: bool = True):
 
         # Store values
-        self.time_limit = time_limit
-        self.start_time = None
-        self.verbose = verbose
+        self.time_limit: float | int = time_limit
+        self.start_time: float | None = None
+        self.verbose: bool = verbose
 
     def on_epoch_start(self):
         """Record start time at the beginning of the first epoch"""
