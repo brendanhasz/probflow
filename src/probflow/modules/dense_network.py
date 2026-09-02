@@ -83,13 +83,15 @@ class DenseNetwork(Module):
                 name + "_BatchNormalization" + str(i)
                 for i in range(len(d) - 2)
             ]
-            self.batch_norms = [
+            self.batch_norms: list[BatchNormalization | Callable] = [
                 BatchNormalization(
                     d[i + 1], name=names[i], **batch_norm_kwargs
                 )
                 for i in range(len(d) - 2)
             ]
             self.batch_norms += [lambda x: x]  # no batch norm after last layer
+        else:
+            self.batch_norms = []
 
     def __call__(self, x):
         for i in range(len(self.layers)):

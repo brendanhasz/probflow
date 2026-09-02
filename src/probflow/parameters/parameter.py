@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -104,7 +105,7 @@ class Parameter(BaseParameter):
             "loc": xavier,
             "scale": scale_xavier,
         },
-        var_transform: dict[str, Callable] = {
+        var_transform: dict[str, Callable | None] = {
             "loc": None,
             "scale": O.softplus,
         },
@@ -123,16 +124,17 @@ class Parameter(BaseParameter):
         self.shape = shape
         self.posterior_fn = posterior
         self.prior = prior
-        self.transform = transform if transform else lambda x: x
+        self.transform = transform if transform is not None else lambda x: x
         self.initializer = initializer
         self.name = name
         self._static_samples_uuid = None
         self.var_transform = {
-            n: (f if f else lambda x: x) for (n, f) in var_transform.items()
+            n: (f if f is not None else lambda x: x)
+            for (n, f) in var_transform.items()
         }
 
         # Create variables for the variational distribution
-        self.untransformed_variables: dict[str, O.Tensor] = {}
+        self.untransformed_variables: dict[str, Any] = {}
         for var, init in initializer.items():
             # Int or float initializations = start whole array at that value
             if isinstance(init, (int, float)):

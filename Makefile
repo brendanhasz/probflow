@@ -1,5 +1,5 @@
 
-.PHONY: install-with-tensorflow install-with-pytorch test-tensorflow test-pytorch test-stats-tensorflow test-stats-pytorch test format docs bump-minor bump-patch package push-package clean
+.PHONY: install-with-tensorflow install-with-pytorch test-tensorflow test-pytorch test-stats-tensorflow test-stats-pytorch test format lint type-check docs bump-minor bump-patch package push-package clean
 
 # Install with tensorflow backend
 install-with-tensorflow:
@@ -32,6 +32,14 @@ test: test-unit-tensorflow test-stats-tensorflow test-unit-pytorch test-stats-py
 format:
 	uv run ruff check --fix src/probflow tests
 	uv run ruff format src/probflow tests
+
+# Lint code
+lint:
+	uv run ruff check src/probflow tests
+
+# Type check with mypy
+type-check:
+	uv run mypy src/probflow
 
 # Build documentation
 docs:

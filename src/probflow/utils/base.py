@@ -15,6 +15,7 @@ __all__ = [
 
 from abc import ABC, abstractmethod
 from math import ceil
+from typing import Any
 
 from probflow.utils.casting import to_tensor
 from probflow.utils.settings import get_backend
@@ -182,11 +183,15 @@ class BaseCallback(ABC):
     """Abstract base class for ProbFlow Callbacks"""
 
     # Reference to the model
-    model = None
+    model: Any = None
 
     @abstractmethod
     def __init__(self, *args):
         """Initialize the callback"""
+
+    @abstractmethod
+    def on_train_start(self):
+        """Will be called at the start of training"""
 
     @abstractmethod
     def on_epoch_start(self):

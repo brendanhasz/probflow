@@ -48,6 +48,7 @@ dev = [
     "ruff >= 0.6.0",
     "pytest >= 6.0.0rc1",
     "pytest-cov >= 2.7.1",
+    "mypy >= 1.5.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -64,3 +65,19 @@ ignore = ["B006", "B008", "E203", "E501", "E731", "E741"]
 
 [tool.pytest.ini_options]
 addopts = "-p no:warnings"
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+exclude = ["tests/performance", "tests/examples"]
+
+[[tool.mypy.overrides]]
+module = [
+    "tensorflow.*",
+    "tensorflow_probability.*",
+    "torch.*",
+]
+ignore_missing_imports = true

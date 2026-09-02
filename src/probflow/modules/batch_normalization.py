@@ -133,6 +133,12 @@ class BatchNormalization(Module):
         else:
             shape = [1] + shape
 
+        # Set default priors if None
+        if weight_prior is None:
+            weight_prior = Normal(0, 1)
+        if bias_prior is None:
+            bias_prior = Normal(0, 1)
+
         # Create the parameters
         self.weight = Parameter(
             shape=shape,

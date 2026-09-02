@@ -36,9 +36,9 @@ class LearningRateScheduler(Callback):
         self.fn = fn
         self.verbose = verbose
         self.current_epoch = 0
-        self.current_lr = 0
-        self.epochs = []
-        self.learning_rate = []
+        self.current_lr = 0.0
+        self.epochs: list[int] = []
+        self.learning_rate: list[float] = []
 
     def on_epoch_start(self):
         """Set the learning rate at the start of each epoch."""

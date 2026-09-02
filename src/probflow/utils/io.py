@@ -22,7 +22,7 @@ def dumps(obj):
     training step.  Cloudpickle can't serialize it, and after de-serializing
     will just JIT re-compile if needed.
     """
-    if hasattr(obj, "_train_fn"):
+    if "_train_fn" in obj.__dict__:
         delattr(obj, "_train_fn")
     return base64.b64encode(cloudpickle.dumps(obj)).decode("utf8")
 
@@ -42,7 +42,7 @@ def dump(obj, filename):
     training step.  Cloudpickle can't serialize it, and after de-serializing
     will just JIT re-compile if needed.
     """
-    if hasattr(obj, "_train_fn"):
+    if "_train_fn" in obj.__dict__:
         delattr(obj, "_train_fn")
     with open(filename, "wb") as f:
         cloudpickle.dump(obj, f)

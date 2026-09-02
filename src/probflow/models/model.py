@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -70,11 +71,13 @@ class Model(Module):
     """
 
     # Parameters
-    _optimizer = None
-    _is_training = False
-    _learning_rate = None
-    _kl_weight = 1.0
-    _current_elbo = None
+    _optimizer: Any = None
+    _is_training: bool = False
+    _learning_rate: Any = None
+    _kl_weight: float = 1.0
+    _current_elbo: Any = None
+    _train_fn: Callable | None = None
+    _data: Any = None
 
     def log_likelihood(self, x_data, y_data):
         """Compute the sum log likelihood of the model given a batch of data"""
