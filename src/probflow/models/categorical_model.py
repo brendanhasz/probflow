@@ -59,7 +59,14 @@ class CategoricalModel(Model):
 
     """
 
-    def pred_dist_plot(self, x: TensorLike | DataGenerator, n: int = 10000, cols: int = 1, batch_size: int | None = None, **kwargs):
+    def pred_dist_plot(
+        self,
+        x: TensorLike | DataGenerator | None = None,
+        n: int = 10000,
+        cols: int = 1,
+        batch_size: int | None = None,
+        **kwargs,
+    ) -> None:
         """Plot posterior predictive distribution from the model given ``x``.
 
         TODO: Docs...
@@ -67,7 +74,7 @@ class CategoricalModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
+        x : |TensorLike| or |DataGenerator| or None
             Independent variable values of the dataset to evaluate (aka the
             "features").
         n : int

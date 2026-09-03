@@ -1,9 +1,12 @@
+from collections.abc import Callable
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 from probflow.data import DataGenerator, make_generator
 from probflow.utils.casting import to_numpy
 from probflow.utils.plotting import plot_by, plot_dist
+from probflow.utils.typing import TensorLike
 
 from .model import Model
 
@@ -89,7 +92,15 @@ class ContinuousModel(Model):
 
     """
 
-    def _intervals(self, fn, x, side, ci=0.95, n=1000, batch_size=None):
+    def _intervals(
+        self,
+        fn: Callable[..., TensorLike],
+        x: TensorLike | DataGenerator | None,
+        side: str,
+        ci: float = 0.95,
+        n: int = 1000,
+        batch_size: int | None = None,
+    ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Compute intervals on some type of sample"""
 
         # Compute in batches?
@@ -114,8 +125,13 @@ class ContinuousModel(Model):
             return prcs[0, ...], prcs[1, ...]
 
     def predictive_interval(
-        self, x, ci=0.95, side="both", n=1000, batch_size=None
-    ):
+        self,
+        x: TensorLike | DataGenerator | None,
+        ci: float = 0.95,
+        side: str = "both",
+        n: int = 1000,
+        batch_size: int | None = None,
+    ) -> tuple[np.ndarray, np.ndarray]:
         r"""Compute confidence intervals on the model's estimate of the target
         given ``x``, including all sources of uncertainty.
 
@@ -161,8 +177,13 @@ class ContinuousModel(Model):
         )
 
     def aleatoric_interval(
-        self, x, ci=0.95, side="both", n=1000, batch_size=None
-    ):
+        self,
+        x: TensorLike | DataGenerator | None,
+        ci: float = 0.95,
+        side: str = "both",
+        n: int = 1000,
+        batch_size: int | None = None,
+    ) -> tuple[np.ndarray, np.ndarray]:
         r"""Compute confidence intervals on the model's estimate of the target
         given ``x``, including only aleatoric uncertainty (uncertainty due to
         noise).
@@ -207,8 +228,13 @@ class ContinuousModel(Model):
         )
 
     def epistemic_interval(
-        self, x, ci=0.95, side="both", n=1000, batch_size=None
-    ):
+        self,
+        x: TensorLike | DataGenerator | None,
+        ci: float = 0.95,
+        side: str = "both",
+        n: int = 1000,
+        batch_size: int | None = None,
+    ) -> tuple[np.ndarray, np.ndarray]:
         r"""Compute confidence intervals on the model's estimate of the target
         given ``x``, including only epistemic uncertainty (uncertainty due to
         uncertainty as to the model's parameter values).
@@ -253,8 +279,14 @@ class ContinuousModel(Model):
         )
 
     def pred_dist_plot(
-        self, x, n=10000, cols=1, individually=False, batch_size=None, **kwargs
-    ):
+        self,
+        x: TensorLike | DataGenerator | None = None,
+        n: int = 10000,
+        cols: int = 1,
+        individually: bool = False,
+        batch_size: int | None = None,
+        **kwargs,
+    ) -> None:
         r"""Plot posterior predictive distribution from the model given ``x``.
 
         TODO: Docs...
@@ -312,15 +344,23 @@ class ContinuousModel(Model):
             plot_dist(samples, **kwargs)
             plt.xlabel("Predicted dependent variable value")
 
-    def _get_y(self, x, y):
+    def _get_y(
+        self, x: TensorLike | DataGenerator, y: TensorLike | None
+    ) -> np.ndarray:
         """Get y, even when x is a DataGenerator and y is None"""
         if y is not None:
-            return y
+            return to_numpy(y)
         else:
             y_true = [d for _, d in make_generator(x, y, test=True)]
             return np.concatenate(to_numpy(y_true), axis=0)
 
-    def predictive_prc(self, x, y=None, n=1000, batch_size=None):
+    def predictive_prc(
+        self,
+        x: TensorLike | DataGenerator,
+        y: TensorLike | None = None,
+        n: int = 1000,
+        batch_size: int | None = None,
+    ) -> np.ndarray:
         r"""Compute the percentile of each observation along the posterior
         predictive distribution.
 
@@ -387,8 +427,13 @@ class ContinuousModel(Model):
         return prcs.reshape([N, 1])
 
     def pred_dist_covered(
-        self, x, y=None, n: int = 1000, ci: float = 0.95, batch_size=None
-    ):
+        self,
+        x: TensorLike | DataGenerator,
+        y: TensorLike | None = None,
+        n: int = 1000,
+        ci: float = 0.95,
+        batch_size: int | None = None,
+    ) -> np.ndarray:
         r"""Compute whether each observation was covered by a given confidence
         interval.
 
@@ -413,7 +458,9 @@ class ContinuousModel(Model):
 
         Returns
         -------
-        TODO
+        covered : |ndarray| of bool
+            Whether each observation was covered by the predictive
+            distribution's confidence interval.
         """
 
         # Check values
@@ -430,7 +477,14 @@ class ContinuousModel(Model):
         ub = 1.0 - lb
         return (pred_prcs >= lb) & (pred_prcs < ub)
 
-    def pred_dist_coverage(self, x, y=None, n=1000, ci=0.95, batch_size=None):
+    def pred_dist_coverage(
+        self,
+        x: TensorLike | DataGenerator,
+        y: TensorLike | None = None,
+        n: int = 1000,
+        ci: float = 0.95,
+        batch_size: int | None = None,
+    ) -> float:
         r"""Compute what percent of samples are covered by a given confidence
         interval.
 
@@ -460,23 +514,25 @@ class ContinuousModel(Model):
             Proportion of the samples which were covered by the predictive
             distribution's confidence interval.
         """
-        return self.pred_dist_covered(
-            x, y=y, n=n, ci=ci, batch_size=batch_size
-        ).mean()
+        return float(
+            self.pred_dist_covered(
+                x, y=y, n=n, ci=ci, batch_size=batch_size
+            ).mean()
+        )
 
     def coverage_by(
         self,
-        x_by,
-        x,
-        y=None,
+        x_by: int | str | list[int] | list[str],
+        x: TensorLike | DataGenerator,
+        y: TensorLike | None = None,
         n: int = 1000,
         ci: float = 0.95,
         bins: int = 30,
         plot: bool = True,
         ideal_line_kwargs: dict = {},
-        batch_size=None,
+        batch_size: int | None = None,
         **kwargs,
-    ):
+    ) -> tuple[np.ndarray, np.ndarray]:
         r"""Compute and plot the coverage of a given confidence interval
         of the posterior predictive distribution as a function of specified
         independent variables.
@@ -540,7 +596,13 @@ class ContinuousModel(Model):
 
         return xo, co
 
-    def r_squared(self, x, y=None, n=1000, batch_size=None):
+    def r_squared(
+        self,
+        x: TensorLike | DataGenerator,
+        y: TensorLike | None = None,
+        n: int = 1000,
+        batch_size: int | None = None,
+    ) -> np.ndarray:
         r"""Compute the Bayesian R-squared distribution (Gelman et al., 2018).
 
         TODO: more info
@@ -594,8 +656,14 @@ class ContinuousModel(Model):
         return v_fit / (v_fit + v_res)
 
     def r_squared_plot(
-        self, x, y=None, n=1000, style="hist", batch_size=None, **kwargs
-    ):
+        self,
+        x: TensorLike | DataGenerator,
+        y: TensorLike | None = None,
+        n: int = 1000,
+        style: str = "hist",
+        batch_size: int | None = None,
+        **kwargs,
+    ) -> None:
         r"""Plot the Bayesian R-squared distribution.
 
         See :meth:`~r_squared` for more info on the Bayesian R-squared metric.
@@ -627,7 +695,12 @@ class ContinuousModel(Model):
         plot_dist(r2, style=style, **kwargs)
         plt.xlabel("Bayesian R squared")
 
-    def residuals(self, x, y=None, batch_size=None):
+    def residuals(
+        self,
+        x: TensorLike | DataGenerator,
+        y: TensorLike | None = None,
+        batch_size: int | None = None,
+    ) -> np.ndarray:
         r"""Compute the residuals of the model's predictions.
 
         TODO: docs...
@@ -659,7 +732,13 @@ class ContinuousModel(Model):
         y_pred = self.predict(x, batch_size=batch_size)
         return y_true - y_pred
 
-    def residuals_plot(self, x, y=None, batch_size=None, **kwargs):
+    def residuals_plot(
+        self,
+        x: TensorLike | DataGenerator,
+        y: TensorLike | None = None,
+        batch_size: int | None = None,
+        **kwargs,
+    ) -> None:
         r"""Plot the distribution of residuals of the model's predictions.
 
         TODO: docs...
@@ -688,7 +767,14 @@ class ContinuousModel(Model):
         plot_dist(res, **kwargs)
         plt.xlabel("Residual (True - Predicted)")
 
-    def calibration_curve(self, x, y, n=1000, resolution=100, batch_size=None):
+    def calibration_curve(
+        self,
+        x: TensorLike | DataGenerator,
+        y: TensorLike,
+        n: int = 1000,
+        resolution: int = 100,
+        batch_size: int | None = None,
+    ) -> tuple[np.ndarray, np.ndarray]:
         r"""Compute the regression calibration curve (Kuleshov et al., 2018).
 
         The regression calibration curve compares the empirical cumulative
@@ -794,8 +880,14 @@ class ContinuousModel(Model):
         return p, p_hat
 
     def calibration_curve_plot(
-        self, x, y, n=1000, resolution=100, batch_size=None, **kwargs
-    ):
+        self,
+        x: TensorLike | DataGenerator,
+        y: TensorLike,
+        n: int = 1000,
+        resolution: int = 100,
+        batch_size: int | None = None,
+        **kwargs,
+    ) -> None:
         r"""Plot the regression calibration curve.
 
         See :meth:`~calibration_curve` for more info about the regression
@@ -836,23 +928,31 @@ class ContinuousModel(Model):
         plt.xlabel("Predicted cumulative probability")
         plt.ylabel("Empirical cumulative probability")
 
-    def _calibration_metric(self, metric: str, p, p_hat):
+    def _calibration_metric(
+        self, metric: str, p: np.ndarray, p_hat: np.ndarray
+    ) -> float:
         if metric == "msce":
-            return np.mean(np.square(p - p_hat))
+            return float(np.mean(np.square(p - p_hat)))
         elif metric == "rmsce":
-            return np.sqrt(np.mean(np.square(p - p_hat)))
+            return float(np.sqrt(np.mean(np.square(p - p_hat))))
         elif metric == "mace":
-            return np.mean(np.abs(p - p_hat))
+            return float(np.mean(np.abs(p - p_hat)))
         elif metric == "ma":
             p0 = np.concatenate([[0.0], p, [1.0]])
             p0_hat = np.concatenate([[0.0], p_hat, [1.0]])
-            return np.trapezoid(np.abs(p0 - p0_hat), p0)
+            return float(np.trapezoid(np.abs(p0 - p0_hat), p0))
         else:
             raise ValueError(f"Unknown calibration metric {metric}")
 
     def calibration_metric(
-        self, metric, x, y=None, n=1000, resolution=100, batch_size=None
-    ):
+        self,
+        metric: str | list[str],
+        x: TensorLike | DataGenerator,
+        y: TensorLike | None = None,
+        n: int = 1000,
+        resolution: int = 100,
+        batch_size: int | None = None,
+    ) -> float | dict[str, float]:
         r"""Compute one or more of several calibration metrics
 
         Regression calibration metrics measure the error between a model's
@@ -1032,7 +1132,12 @@ class ContinuousModel(Model):
         else:
             return self._calibration_metric(metric, p, p_hat)
 
-    def sharpness(self, x, n=1000, batch_size=None):
+    def sharpness(
+        self,
+        x: TensorLike | DataGenerator,
+        n: int = 1000,
+        batch_size: int | None = None,
+    ) -> float:
         r"""Compute the sharpness of the model's uncertainty estimates
 
         The "sharpness" of a model's uncertainty estimates is the root mean of
@@ -1104,20 +1209,26 @@ class ContinuousModel(Model):
 
         """
         samples = self.predictive_sample(x, n=n, batch_size=batch_size)
-        return np.sqrt(np.mean(np.var(samples, axis=0)))
+        return float(np.sqrt(np.mean(np.var(samples, axis=0))))
 
-    def _dispersion_metric(self, metric, samples):
+    def _dispersion_metric(self, metric: str, samples: np.ndarray) -> float:
         stds = np.std(samples, axis=0)
         if metric in ["cv", "cov", "coefficient_of_variation"]:
-            return np.std(stds) / np.mean(stds)
+            return float(np.std(stds) / np.mean(stds))
         elif metric in ["qcd", "qcod", "quartile_coefficient_of_dispersion"]:
             q1 = np.percentile(stds, 25)
             q3 = np.percentile(stds, 75)
-            return (q3 - q1) / (q3 + q1)
+            return float((q3 - q1) / (q3 + q1))
         else:
             raise ValueError(f"Unknown dispersion metric {metric}")
 
-    def dispersion_metric(self, metric, x, n=1000, batch_size=None):
+    def dispersion_metric(
+        self,
+        metric: str | list[str],
+        x: TensorLike | DataGenerator,
+        n: int = 1000,
+        batch_size: int | None = None,
+    ) -> float | dict[str, float]:
         r"""Compute one or more of several calibration metrics
 
         Dispersion metrics measure how much a model's uncertainty estimates

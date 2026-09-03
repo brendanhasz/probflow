@@ -6,6 +6,8 @@ TODO: more info...
 
 """
 
+from collections.abc import Callable
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -56,15 +58,15 @@ def get_ix_label(ix, shape):
 
 
 def plot_dist(
-    data,
-    xlabel="",
-    style="fill",
-    bins=20,
-    ci=0.0,
-    bw=0.075,
-    alpha=0.4,
-    color=None,
-    legend=True,
+    data: np.ndarray,
+    xlabel: str = "",
+    style: str = "fill",
+    bins: int = 20,
+    ci: float = 0.0,
+    bw: float = 0.075,
+    alpha: float = 0.4,
+    color: str | list | None = None,
+    legend: bool = True,
 ):
     """Plot the distribution of samples.
 
@@ -324,7 +326,14 @@ def plot_categorical_dist(x):
 
 
 def plot_by(
-    x, data, bins=30, func="mean", plot=True, bootstrap=100, ci=0.95, **kwargs
+    x,
+    data,
+    bins=30,
+    func: str | Callable = "mean",
+    plot: bool = True,
+    bootstrap=100,
+    ci=0.95,
+    **kwargs,
 ):
     """Compute and plot some function func of data as a function of x.
 

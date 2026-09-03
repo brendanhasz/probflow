@@ -7,11 +7,14 @@ import pandas as pd
 
 import probflow.utils.ops as O
 from probflow.data import make_generator
+from probflow.data.data_generator import DataGenerator
 from probflow.modules import Module
 from probflow.utils.base import BaseCallback, BaseModel
 from probflow.utils.casting import to_numpy
 from probflow.utils.metrics import get_metric_fn
 from probflow.utils.settings import Sampling, get_backend
+from probflow.utils.shape import get_shape
+from probflow.utils.typing import ScalarLike, TensorLike
 
 
 class Model(BaseModel, Module):
@@ -80,19 +83,29 @@ class Model(BaseModel, Module):
     _is_training: bool = False
     _learning_rate: Any = None
     _kl_weight: float = 1.0
-    _current_elbo: Any = None
-    _train_fn: Callable | None = None
+    _current_elbo: ScalarLike = 0.0
+    _train_fn: Callable
     _data: Any = None
 
-    def log_likelihood(self, x_data, y_data):
+    def log_likelihood(
+        self, x_data: TensorLike | None, y_data: TensorLike | None
+    ) -> ScalarLike:
         """Compute the sum log likelihood of the model given a batch of data"""
-        if x_data is None:
+        if x_data is None and y_data is None:
+            raise ValueError("x_data and y_data cannot both be None")
+        elif x_data is None:
             log_likelihoods = self().log_prob(y_data)
         else:
             log_likelihoods = self(x_data).log_prob(y_data)
         return O.sum(log_likelihoods, axis=None)
 
-    def elbo_loss(self, x_data, y_data, n: int, n_mc: int):
+    def elbo_loss(
+        self,
+        x_data: TensorLike | None,
+        y_data: TensorLike,
+        n: int,
+        n_mc: int,
+    ) -> ScalarLike:
         """Compute the negative ELBO, scaled to a single sample.
 
         Parameters
@@ -107,7 +120,7 @@ class Model(BaseModel, Module):
         n_mc : int
             Number of MC samples we're taking from the posteriors
         """
-        nb = y_data.shape[0]  # number of samples in this batch
+        nb = get_shape(y_data)[0]  # number of samples in this batch
         if n_mc > 1:  # first dim is num MC samples if n_mc > 1
             x_data = None if x_data is None else O.expand_dims(x_data, 0)
             y_data = O.expand_dims(y_data, 0)
@@ -115,11 +128,13 @@ class Model(BaseModel, Module):
         kl_loss = self.kl_loss() / n + self.kl_loss_batch() / nb
         return self._kl_weight * kl_loss - log_loss
 
-    def get_elbo(self):
+    def get_elbo(self) -> ScalarLike:
         """Get the current ELBO on training data"""
         return self._current_elbo
 
-    def _train_step_tensorflow(self, n, flipout=False, eager=False, n_mc=1):
+    def _train_step_tensorflow(
+        self, n: int, flipout: bool = False, eager: bool = False, n_mc: int = 1
+    ):
         """Get the training step function for TensorFlow"""
 
         import tensorflow as tf
@@ -139,7 +154,9 @@ class Model(BaseModel, Module):
         else:
             return tf.function(train_fn)
 
-    def _train_step_pytorch(self, n, flipout=False, eager=False, n_mc=1):
+    def _train_step_pytorch(
+        self, n: int, flipout: bool = False, eager: bool = False, n_mc: int = 1
+    ):
         """Get the training step function for PyTorch"""
 
         import torch
@@ -223,7 +240,7 @@ class Model(BaseModel, Module):
 
             return train_fn
 
-    def train_step(self, x_data, y_data):
+    def train_step(self, x_data: TensorLike, y_data: TensorLike) -> None:
         """Perform one training step"""
         elbo = self._train_fn(x_data, y_data)
         if get_backend() == "pytorch":
@@ -233,8 +250,8 @@ class Model(BaseModel, Module):
 
     def fit(
         self,
-        x,
-        y=None,
+        x: TensorLike | DataGenerator | None = None,
+        y: TensorLike | None = None,
         batch_size: int = 128,
         epochs: int = 200,
         shuffle: bool = False,
@@ -246,7 +263,7 @@ class Model(BaseModel, Module):
         callbacks: list[BaseCallback] = [],
         eager: bool = False,
         n_mc: int = 1,
-    ):
+    ) -> None:
         r"""Fit the model to data
 
         TODO
@@ -400,11 +417,11 @@ class Model(BaseModel, Module):
         for c in callbacks:
             c.on_train_end()
 
-    def stop_training(self):
+    def stop_training(self) -> None:
         """Stop the training of the model"""
         self._is_training = False
 
-    def set_learning_rate(self, lr):
+    def set_learning_rate(self, lr: float) -> None:
         """Set the learning rate used by this model's optimizer"""
         if not isinstance(lr, float):
             raise TypeError("lr must be a float")
@@ -418,26 +435,36 @@ class Model(BaseModel, Module):
         else:
             self._optimizer.learning_rate.assign(self._learning_rate)
 
-    def set_kl_weight(self, w):
+    def set_kl_weight(self, w: float) -> None:
         """Set the weight of the KL term's contribution to the ELBO loss"""
         if not isinstance(w, float):
             raise TypeError("w must be a float")
         else:
             self._kl_weight = w
 
-    def _sample(self, x, func, ed=None, axis=1, batch_size=None):
+    def _sample(
+        self,
+        x: TensorLike | DataGenerator,
+        func: Callable,
+        ed: int | None = None,
+        axis: int = 1,
+        batch_size: int | None = None,
+    ) -> np.ndarray:
         """Sample from the model"""
         samples = []
-        for x_data, y_data in make_generator(
-            x, test=True, batch_size=batch_size
-        ):
+        for x_data, _ in make_generator(x, test=True, batch_size=batch_size):
             if x_data is None:
                 samples += [func(self())]
             else:
                 samples += [func(self(O.expand_dims(x_data, ed)))]
         return np.concatenate(to_numpy(samples), axis=axis)
 
-    def predictive_sample(self, x=None, n=1000, batch_size=None):
+    def predictive_sample(
+        self,
+        x: TensorLike | DataGenerator | None = None,
+        n: int = 1000,
+        batch_size: int | None = None,
+    ) -> np.ndarray:
         """Draw samples from the posterior predictive distribution given x
 
         TODO: Docs...
@@ -466,7 +493,12 @@ class Model(BaseModel, Module):
                 x, lambda x: x.sample(), ed=0, batch_size=batch_size
             )
 
-    def aleatoric_sample(self, x=None, n=1000, batch_size=None):
+    def aleatoric_sample(
+        self,
+        x: TensorLike | DataGenerator | None = None,
+        n: int = 1000,
+        batch_size: int | None = None,
+    ) -> np.ndarray:
         """Draw samples of the model's estimate given x, including only
         aleatoric uncertainty (uncertainty due to noise)
 
@@ -493,7 +525,12 @@ class Model(BaseModel, Module):
         """
         return self._sample(x, lambda x: x.sample(n=n), batch_size=batch_size)
 
-    def epistemic_sample(self, x=None, n=1000, batch_size=None):
+    def epistemic_sample(
+        self,
+        x: TensorLike | DataGenerator | None = None,
+        n: int = 1000,
+        batch_size: int | None = None,
+    ) -> np.ndarray:
         """Draw samples of the model's estimate given x, including only
         epistemic uncertainty (uncertainty due to uncertainty as to the
         model's parameter values)
@@ -524,7 +561,12 @@ class Model(BaseModel, Module):
                 x, lambda x: x.mean(), ed=0, batch_size=batch_size
             )
 
-    def predict(self, x=None, method="mean", batch_size=None):
+    def predict(
+        self,
+        x: TensorLike | DataGenerator | None = None,
+        method: str = "mean",
+        batch_size: int | None = None,
+    ) -> np.ndarray:
         """Predict dependent variable using the model
 
         TODO... using maximum a posteriori param estimates etc
@@ -567,7 +609,13 @@ class Model(BaseModel, Module):
         else:
             raise ValueError("unknown method " + str(method))
 
-    def metric(self, metric, x, y=None, batch_size=None):
+    def metric(
+        self,
+        metric: str | Callable,
+        x: TensorLike | DataGenerator,
+        y: TensorLike | None = None,
+        batch_size: int | None = None,
+    ) -> float:
         """Compute a metric of model performance
 
         TODO: docs
@@ -633,7 +681,7 @@ class Model(BaseModel, Module):
 
         # Compute metric between true values and predictions
         metric_fn = get_metric_fn(metric)
-        return metric_fn(y_true, y_pred)
+        return float(metric_fn(y_true, y_pred))
 
     def _param_data(self, params: str | list[str] | None, func: Callable):
         """Get data about parameters in the model"""
@@ -646,7 +694,9 @@ class Model(BaseModel, Module):
         else:
             return {p.name: func(p) for p in self.parameters}
 
-    def posterior_mean(self, params=None):
+    def posterior_mean(
+        self, params: str | list[str] | None = None
+    ) -> dict[str, np.ndarray] | np.ndarray:
         """Get the mean of the posterior distribution(s)
 
         TODO: Docs... params is a list of strings of params to plot
@@ -671,7 +721,9 @@ class Model(BaseModel, Module):
         """
         return self._param_data(params, lambda x: x.posterior_mean())
 
-    def posterior_sample(self, params=None, n=10000):
+    def posterior_sample(
+        self, params: str | list[str] | None = None, n: int = 10000
+    ) -> dict[str, np.ndarray] | np.ndarray:
         """Draw samples from parameter posteriors
 
         TODO: Docs... params is a list of strings of params to plot
@@ -698,7 +750,12 @@ class Model(BaseModel, Module):
         """
         return self._param_data(params, lambda x: x.posterior_sample(n=n))
 
-    def posterior_ci(self, params=None, ci=0.95, n=10000):
+    def posterior_ci(
+        self,
+        params: str | list[str] | None = None,
+        ci: float = 0.95,
+        n: int = 10000,
+    ) -> dict[str, tuple[float, float]] | tuple[float, float]:
         """Posterior confidence intervals
 
         TODO: Docs... params is a list of strings of params to plot
@@ -732,7 +789,9 @@ class Model(BaseModel, Module):
         """
         return self._param_data(params, lambda x: x.posterior_ci(ci=ci, n=n))
 
-    def prior_sample(self, params=None, n=10000):
+    def prior_sample(
+        self, params: str | list[str] | None = None, n: int = 10000
+    ) -> dict[str, np.ndarray] | np.ndarray:
         """Draw samples from parameter priors
 
         TODO: Docs... params is a list of strings of params to plot
@@ -740,8 +799,8 @@ class Model(BaseModel, Module):
 
         Parameters
         ----------
-        params : list
-            List of parameter names to sample.  Each element should be a str.
+        params : str or list[str] or None
+            Parameter name(s) to sample.
             Default is to sample priors of all parameters in the model.
         n : int
             Number of samples to take from each prior distribution.
@@ -765,7 +824,7 @@ class Model(BaseModel, Module):
         cols: int = 1,
         tight_layout: bool = True,
         **kwargs,
-    ):
+    ) -> None:
         """Plot parameter data"""
         if params is None:
             param_list = self.parameters
@@ -778,7 +837,9 @@ class Model(BaseModel, Module):
         if tight_layout:
             plt.tight_layout()
 
-    def posterior_plot(self, params=None, cols=1, **kwargs):
+    def posterior_plot(
+        self, params: str | list[str] | None = None, cols: int = 1, **kwargs
+    ) -> None:
         """Plot posterior distributions of the model's parameters
 
         TODO: Docs... params is a list of strings of params to plot
@@ -786,7 +847,7 @@ class Model(BaseModel, Module):
 
         Parameters
         ----------
-        params : str or list or None
+        params : str or list[str] or None
             List of names of parameters to plot.  Default is to plot the
             posterior of all parameters in the model.
         cols : int
@@ -797,7 +858,9 @@ class Model(BaseModel, Module):
         """
         self._param_plot(lambda x: x.posterior_plot(**kwargs), params, cols)
 
-    def prior_plot(self, params=None, cols=1, **kwargs):
+    def prior_plot(
+        self, params: str | list[str] | None = None, cols: int = 1, **kwargs
+    ) -> None:
         """Plot prior distributions of the model's parameters
 
         TODO: Docs... params is a list of strings of params to plot
@@ -805,7 +868,7 @@ class Model(BaseModel, Module):
 
         Parameters
         ----------
-        params : str or list or None
+        params : str or list[str] or None
             List of names of parameters to plot.  Default is to plot the
             prior of all parameters in the model.
         cols : int
@@ -818,13 +881,13 @@ class Model(BaseModel, Module):
 
     def log_prob(
         self,
-        x,
-        y=None,
-        individually=True,
-        distribution=False,
-        n=1000,
-        batch_size=None,
-    ):
+        x: TensorLike | DataGenerator | None = None,
+        y: TensorLike | None = None,
+        individually: bool = True,
+        distribution: bool = False,
+        n: int = 1000,
+        batch_size: int | None = None,
+    ) -> np.ndarray:
         """Compute the log probability of `y` given the model
 
         TODO: Docs...
@@ -896,7 +959,12 @@ class Model(BaseModel, Module):
         else:
             return np.sum(probs, axis=0)
 
-    def prob(self, x, y=None, **kwargs):
+    def prob(
+        self,
+        x: TensorLike | DataGenerator | None = None,
+        y: TensorLike | None = None,
+        **kwargs,
+    ) -> np.ndarray:
         """Compute the probability of ``y`` given the model
 
         TODO: Docs...

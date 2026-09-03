@@ -22,6 +22,9 @@ if TYPE_CHECKING:
         | tf.Variable
         | torch.Tensor
     )
+    ScalarLike: TypeAlias = (
+        int | float | np.ndarray | tf.Tensor | tf.Variable | torch.Tensor
+    )
 
     BackendDistribution: TypeAlias = (
         torch.distributions.distribution.Distribution
