@@ -33,4 +33,5 @@ if TYPE_CHECKING:
 
 else:
     TensorLike = Any
+    ScalarLike = Any
     BackendDistribution = Any
