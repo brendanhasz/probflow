@@ -14,6 +14,7 @@ __all__ = [
 
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from math import ceil
 from pathlib import Path
 from typing import Any
@@ -110,6 +111,13 @@ class BaseDistribution(ABC):
 class BaseParameter(ABC):
     """Abstract base class for ProbFlow Parameters"""
 
+    shape: list[int]
+    posterior_fn: type[BaseDistribution]
+    prior: BaseDistribution | None
+    transform: Callable
+    initializer: dict[str, Callable]
+    var_transform: dict[str, Callable]
+    untransformed_variables: dict[str, BackendVariable]
     name: str
 
     @abstractmethod

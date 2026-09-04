@@ -1,5 +1,4 @@
 from collections.abc import Callable
-from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -68,7 +67,7 @@ class Parameter(BaseParameter):
     posterior : |Distribution| class
         Probability distribution class to use to approximate the posterior.
         Default = :class:`.Normal`
-    prior : |Distribution| object
+    prior : |Distribution| object or None
         Prior probability distribution function which has been instantiated
         with parameters.
         Default = :class:`.Normal` ``(0,1)``
@@ -100,7 +99,7 @@ class Parameter(BaseParameter):
         self,
         shape: int | list[int] = 1,
         posterior: type[BaseDistribution] = Normal,
-        prior: BaseDistribution = Normal(0, 1),
+        prior: BaseDistribution | None = Normal(0, 1),
         transform: Callable | None = None,
         initializer: dict[str, Callable] = {
             "loc": xavier,
@@ -135,7 +134,7 @@ class Parameter(BaseParameter):
         }
 
         # Create variables for the variational distribution
-        self.untransformed_variables: dict[str, Any] = {}
+        self.untransformed_variables: dict[str, BackendVariable] = {}
         for var, init in initializer.items():
             # Int or float initializations = start whole array at that value
             if isinstance(init, (int, float)):

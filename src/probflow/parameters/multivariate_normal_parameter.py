@@ -1,8 +1,8 @@
 import probflow.utils.ops as O
 from probflow.distributions import MultivariateNormal
+from probflow.parameters.parameter import Parameter
+from probflow.utils.base import BaseDistribution
 from probflow.utils.initializers import xavier
-
-from .parameter import Parameter
 
 
 class MultivariateNormalParameter(Parameter):
@@ -37,15 +37,14 @@ class MultivariateNormalParameter(Parameter):
     - Jose C. Pinheiro & Douglas M. Bates.
       `Unconstrained Parameterizations for Variance-Covariance Matrices <https://dx.doi.org/10.1007/BF00140873>`_
       *Statistics and Computing*, 1996.
-
     """
 
     def __init__(
         self,
         d: int = 1,
-        prior=None,
+        prior: BaseDistribution | None = None,
         expand_dims: int = -1,
-        name="MultivariateNormalParameter",
+        name: str = "MultivariateNormalParameter",
     ):
 
         # Prior

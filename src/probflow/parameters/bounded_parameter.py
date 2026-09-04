@@ -1,8 +1,10 @@
+from collections.abc import Callable
+
 import probflow.utils.ops as O
 from probflow.distributions import Normal
+from probflow.parameters.parameter import Parameter
+from probflow.utils.base import BaseDistribution
 from probflow.utils.initializers import scale_xavier, xavier
-
-from .parameter import Parameter
 
 
 class BoundedParameter(Parameter):
@@ -58,15 +60,21 @@ class BoundedParameter(Parameter):
 
     def __init__(
         self,
-        shape=1,
-        posterior=Normal,
-        prior=Normal(0, 1),
-        transform=None,
-        initializer={"loc": xavier, "scale": scale_xavier},
-        var_transform={"loc": None, "scale": O.softplus},
+        shape: int | list[int] = 1,
+        posterior: type[BaseDistribution] = Normal,
+        prior: BaseDistribution = Normal(0, 1),
+        transform: Callable | None = None,
+        initializer: dict[str, Callable] = {
+            "loc": xavier,
+            "scale": scale_xavier,
+        },
+        var_transform: dict[str, Callable | None] = {
+            "loc": None,
+            "scale": O.softplus,
+        },
         min: float = 0.0,
         max: float = 1.0,
-        name="BoundedParameter",
+        name: str = "BoundedParameter",
     ):
 
         # Check bounds

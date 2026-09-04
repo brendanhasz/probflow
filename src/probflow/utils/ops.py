@@ -71,7 +71,11 @@ __all__ = [
 from probflow.utils.base import BaseDistribution
 from probflow.utils.casting import make_input_tensor, to_tensor
 from probflow.utils.settings import get_backend, get_datatype
-from probflow.utils.typing import BackendDistribution, ScalarLike
+from probflow.utils.typing import (
+    BackendDistribution,
+    BackendVariable,
+    ScalarLike,
+)
 
 
 def kl_divergence(
@@ -430,7 +434,7 @@ def insert_col_of(vals, val):
         )
 
 
-def new_variable(initial_values):
+def new_variable(initial_values) -> BackendVariable:
     """Get a new variable with the current backend, and initialize it"""
     if get_backend() == "pytorch":
         import torch

@@ -1,8 +1,10 @@
+from collections.abc import Callable
+
 import probflow.utils.ops as O
 from probflow.distributions import Normal
+from probflow.parameters.parameter import Parameter
+from probflow.utils.base import BaseDistribution
 from probflow.utils.initializers import scale_xavier, xavier
-
-from .parameter import Parameter
 
 
 class PositiveParameter(Parameter):
@@ -58,13 +60,19 @@ class PositiveParameter(Parameter):
 
     def __init__(
         self,
-        shape=1,
-        posterior=Normal,
-        prior=Normal(0, 1),
-        transform=O.softplus,
-        initializer={"loc": xavier, "scale": scale_xavier},
-        var_transform={"loc": None, "scale": O.softplus},
-        name="PositiveParameter",
+        shape: int | list[int] = 1,
+        posterior: type[BaseDistribution] = Normal,
+        prior: BaseDistribution = Normal(0, 1),
+        transform: Callable | None = O.softplus,
+        initializer: dict[str, Callable] = {
+            "loc": xavier,
+            "scale": scale_xavier,
+        },
+        var_transform: dict[str, Callable | None] = {
+            "loc": None,
+            "scale": O.softplus,
+        },
+        name: str = "PositiveParameter",
     ):
         super().__init__(
             shape=shape,

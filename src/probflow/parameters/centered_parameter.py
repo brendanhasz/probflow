@@ -2,9 +2,8 @@ import numpy as np
 
 import probflow.utils.ops as O
 from probflow.distributions import Normal
+from probflow.parameters.parameter import Parameter
 from probflow.utils.casting import to_default_dtype, to_tensor
-
-from .parameter import Parameter
 
 
 class CenteredParameter(Parameter):
@@ -84,7 +83,7 @@ class CenteredParameter(Parameter):
         self,
         shape: int | list[int],
         center_by: str = "all",
-        name="CenteredParameter",
+        name: str = "CenteredParameter",
     ):
 
         # Get a list representing the shape

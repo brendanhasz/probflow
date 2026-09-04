@@ -1,8 +1,10 @@
+from collections.abc import Callable
+
 import probflow.utils.ops as O
 from probflow.distributions import Categorical
+from probflow.parameters.parameter import Parameter
+from probflow.utils.base import BaseDistribution
 from probflow.utils.initializers import xavier
-
-from .parameter import Parameter
 
 
 class CategoricalParameter(Parameter):
@@ -60,12 +62,14 @@ class CategoricalParameter(Parameter):
         self,
         k: int = 2,
         shape: int | list[int] = [],
-        posterior=Categorical,
-        prior=None,
-        transform=None,
-        initializer={"probs": xavier},
-        var_transform={"probs": O.additive_logistic_transform},
-        name="CategoricalParameter",
+        posterior: type[BaseDistribution] = Categorical,
+        prior: BaseDistribution | None = None,
+        transform: Callable | None = None,
+        initializer: dict[str, Callable] = {"probs": xavier},
+        var_transform: dict[str, Callable | None] = {
+            "probs": O.additive_logistic_transform
+        },
+        name: str = "CategoricalParameter",
     ):
 
         # Check type of k
