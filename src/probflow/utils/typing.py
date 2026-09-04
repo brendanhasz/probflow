@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     )
     BackendTensor: TypeAlias = tf.Tensor | tf.Variable | torch.Tensor
     BackendVariable: TypeAlias = tf.Variable | torch.nn.Parameter
+    BackendDataType: TypeAlias = tf.dtype | torch.dtype
     BackendDistribution: TypeAlias = (
         torch.distributions.distribution.Distribution
         | tfp.distributions.Distribution
@@ -37,4 +38,5 @@ else:
     ScalarLike = Any
     BackendTensor = Any
     BackendVariable = Any
+    BackendDataType = Any
     BackendDistribution = Any

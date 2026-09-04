@@ -150,7 +150,16 @@ def test_sampling():
         assert settings.get_samples() is None
         assert settings.get_flipout() is False
         assert settings.get_static_sampling_uuid() is not None
+        s1 = settings.get_static_sampling_uuid()
+        s2 = settings.get_static_sampling_uuid()
+        assert (
+            s1 == s2
+        )  # repeated calls to get_static_sampling_uuid should be identical
         assert isinstance(settings.get_static_sampling_uuid(), uuid.UUID)
+
+    # Without sampling, there should be no static_sampling_uuid
+    with settings.Sampling(static=False):
+        assert settings.get_static_sampling_uuid() is None
 
     # Should return to defaults after sampling
     assert settings.get_backend() == "tensorflow"
