@@ -17,7 +17,7 @@ def test_MonitorMetric(plot):
     my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[mm])
     assert isinstance(mm.current_epoch, int)
     assert mm.current_epoch == 10
-    assert isinstance(mm.current_metric, np.floating)
+    assert isinstance(mm.current_metric, float)
     assert mm.current_metric > 0.0
     assert isinstance(mm.epochs, list)
     assert len(mm.epochs) == 10
@@ -40,7 +40,7 @@ def test_MonitorMetric(plot):
     my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[mm2])
     assert isinstance(mm2.current_epoch, int)
     assert mm2.current_epoch == 10
-    assert isinstance(mm2.current_metric, np.floating)
+    assert isinstance(mm2.current_metric, float)
     assert mm2.current_metric > 0.0
     assert isinstance(mm2.epochs, list)
     assert len(mm2.epochs) == 10

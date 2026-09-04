@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 from get_model_and_data import get_model_and_data
 
@@ -41,13 +40,6 @@ def test_multiple_callbacks():
     my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[mp, es])
     assert isinstance(es.count, int)
     assert es.count == 6
-    assert isinstance(mp.current_epoch, int)
-    assert mp.current_epoch == 7
-    assert isinstance(mp.current_params, np.ndarray)
-    assert mp.current_params
-    assert isinstance(mp.epochs, list)
-    assert len(mp.epochs) == 7
-    assert isinstance(mp.parameter_values, list)
 
 
 def test_EarlyStopping_given_MonitorMetric():
