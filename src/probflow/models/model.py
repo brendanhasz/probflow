@@ -134,7 +134,7 @@ class Model(BaseModel, Module):
 
     def _train_step_tensorflow(
         self, n: int, flipout: bool = False, eager: bool = False, n_mc: int = 1
-    ):
+    ) -> Any:
         """Get the training step function for TensorFlow"""
 
         import tensorflow as tf
@@ -156,7 +156,7 @@ class Model(BaseModel, Module):
 
     def _train_step_pytorch(
         self, n: int, flipout: bool = False, eager: bool = False, n_mc: int = 1
-    ):
+    ) -> Any:
         """Get the training step function for PyTorch"""
 
         import torch
@@ -180,13 +180,13 @@ class Model(BaseModel, Module):
         else:
 
             class PyTorchModule(torch.nn.Module):
-                def __init__(self, model):
+                def __init__(self, model: "Model"):
                     super(PyTorchModule, self).__init__()
                     for i, p in enumerate(model.trainable_variables):
                         setattr(self, str(i), p)
                     self._probflow_model = model
 
-                def elbo_loss(self, *args):
+                def elbo_loss(self, *args) -> Any:
                     self._probflow_model.reset_kl_loss()
                     with Sampling(n=n_mc, flipout=flipout):
                         if len(args) == 1:
@@ -206,7 +206,7 @@ class Model(BaseModel, Module):
                     self.fns = {}  # map from input shapes to traced function
                     self.model = model
 
-                def get_traced_module(self, *args):
+                def get_traced_module(self, *args) -> Any:
                     shape = "_".join(str(e.shape) for e in args)
                     if shape in self.fns:
                         return self.fns[shape]
@@ -218,7 +218,7 @@ class Model(BaseModel, Module):
                         )
                         return self.fns[shape]
 
-                def __call__(self, *args):
+                def __call__(self, *args) -> Any:
                     self.model._optimizer.zero_grad()
                     traced_module = self.get_traced_module(*args)
                     elbo_loss = traced_module.elbo_loss(*args)
@@ -255,7 +255,7 @@ class Model(BaseModel, Module):
         batch_size: int = 128,
         epochs: int = 200,
         shuffle: bool = False,
-        optimizer=None,
+        optimizer: Any = None,
         optimizer_kwargs: dict = {},
         lr: float | None = None,
         flipout: bool = True,
@@ -1018,7 +1018,7 @@ class Model(BaseModel, Module):
         """
         return np.exp(self.log_prob(x, y, **kwargs))
 
-    def summary(self):
+    def summary(self) -> None:
         """Show a summary of the model and its parameters.
 
         TODO

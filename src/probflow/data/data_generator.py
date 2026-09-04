@@ -53,7 +53,7 @@ class DataGenerator(BaseDataGenerator):
             # Return data from the multiprocessing queue
             return self._queue.get()  # type: ignore
 
-    def __iter__(self):
+    def __iter__(self) -> "DataGenerator":
         """Get an iterator over batches"""
 
         # Multiprocessing?
@@ -63,7 +63,7 @@ class DataGenerator(BaseDataGenerator):
                 queue.put(self.get_batch(index))
 
             # Create the queue and worker processes
-            self._queue = mp.Queue()
+            self._queue: mp.Queue = mp.Queue()
             self._workers = [
                 mp.Process(target=get_data, args=(i, self._queue))
                 for i in range(len(self))

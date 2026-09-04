@@ -74,7 +74,7 @@ def full_of(
 
     import probflow.utils.ops as O
 
-    def init(shape):
+    def init(shape: list[int] | tuple[int, ...]) -> BackendTensor:
         return val * O.ones(shape)
 
     return init

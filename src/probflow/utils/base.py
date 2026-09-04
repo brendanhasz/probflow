@@ -43,7 +43,7 @@ class BaseDistribution(ABC):
     def __call__(self) -> BackendDistribution:
         """Get the distribution object from the backend"""
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: str) -> Any:
         """Get a parameter, or if a probflow.Parameter, get a sample"""
         param = getattr(self, key)
         if callable(param):

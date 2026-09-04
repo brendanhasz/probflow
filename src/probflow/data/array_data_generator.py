@@ -145,7 +145,7 @@ class ArrayDataGenerator(DataGenerator):
         # Return both x and y
         return x, y
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         """Shuffle data each epoch"""
         if self.shuffle:
             self.ids = np.random.permutation(self.n_samples)

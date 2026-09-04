@@ -4,6 +4,7 @@ import probflow.utils.ops as O
 from probflow.distributions import Normal
 from probflow.parameters.parameter import Parameter
 from probflow.utils.casting import to_default_dtype, to_tensor
+from probflow.utils.typing import BackendTensor
 
 
 class CenteredParameter(Parameter):
@@ -119,7 +120,7 @@ class CenteredParameter(Parameter):
         self._A_qr = to_default_dtype(to_tensor(Q[:, :-1]))
 
         # Transform function
-        def A_qr_transform(u):
+        def A_qr_transform(u: BackendTensor) -> BackendTensor:
             if center_by == "row":
                 return O.transpose(self._A_qr @ u)
             elif center_by == "all" and shape[1] > 1:

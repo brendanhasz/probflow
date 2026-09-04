@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,10 +18,10 @@ from probflow.utils.settings import (
 from probflow.utils.typing import BackendTensor, BackendVariable, ScalarLike
 
 
-def _cache_static_samples(fn):
+def _cache_static_samples(fn: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator to return static samples if they are currently cached"""
 
-    def wrapped_fn(param):
+    def wrapped_fn(param: Any) -> Any:
         ss_uuid = get_static_sampling_uuid()
         if ss_uuid is None:
             return fn(param)
@@ -307,9 +308,9 @@ class Parameter(BaseParameter):
         ci: float = 0.0,
         bw: float = 0.075,
         alpha: float = 0.4,
-        color=None,
+        color: Any = None,
         **kwargs,
-    ):
+    ) -> None:
         """Plot distribution of samples from the posterior distribution.
 
         Parameters
@@ -370,8 +371,8 @@ class Parameter(BaseParameter):
         ci: float = 0.0,
         bw: float = 0.075,
         alpha: float = 0.4,
-        color=None,
-    ):
+        color: Any = None,
+    ) -> None:
         """Plot distribution of samples from the prior distribution.
 
         Parameters
@@ -420,7 +421,9 @@ class Parameter(BaseParameter):
         # Label with parameter name
         plt.xlabel(self.name + " prior")
 
-    def _get_one_dim(self, val, key, axis):
+    def _get_one_dim(
+        self, val: BackendTensor, key: Any, axis: int
+    ) -> BackendTensor:
         """Slice along one axis, keeping the dimensionality of the input"""
         if isinstance(key, slice):
             if any(k is not None for k in [key.start, key.stop, key.step]):
@@ -434,7 +437,7 @@ class Parameter(BaseParameter):
         else:
             return O.gather(val, key, axis=axis)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Any) -> BackendTensor:
         """Get a slice of a sample from the parameter
 
         Example
@@ -457,7 +460,7 @@ class Parameter(BaseParameter):
         else:
             return self._get_one_dim(x, key, 0)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             "<pf."
             + self.__class__.__name__

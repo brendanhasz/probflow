@@ -94,7 +94,7 @@ def to_default_dtype(x: TensorLike) -> TensorLike:
 def make_input_tensor(
     fn: Callable[Concatenate[BackendTensor, P], BackendTensor],
 ) -> Callable[Concatenate[TensorLike, P], BackendTensor]:
-    def tensor_fn(*args, **kwargs):
+    def tensor_fn(*args, **kwargs) -> BackendTensor:
         return fn(to_tensor(args[0]), *args[1:], **kwargs)
 
     return tensor_fn
