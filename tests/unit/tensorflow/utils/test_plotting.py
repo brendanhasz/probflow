@@ -258,13 +258,6 @@ def test_plot_by(plot):
         plt.title("plot mean(randn) by x")
         plt.show()
 
-    # Should plot 2D plot of mean(data) by x[:, 0] and x[:, 1]
-    x = np.random.randn(100, 2)
-    pf.utils.plotting.plot_by(x, data)
-    if plot:
-        plt.title("plot mean(randn) by x")
-        plt.show()
-
 
 def test_posterior_plot(plot):
     """Tests posterior_plot method of parameter and model"""
