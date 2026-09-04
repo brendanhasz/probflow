@@ -35,13 +35,18 @@ class TimeOut(Callback):
         self.start_time: float | None = None
         self.verbose: bool = verbose
 
-    def on_epoch_start(self):
+    def on_epoch_start(self) -> None:
         """Record start time at the beginning of the first epoch"""
         if self.start_time is None:
             self.start_time = time.time()
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         """Stop training if time limit has been passed"""
+        if self.start_time is None:
+            raise RuntimeError(
+                "TimeOut callback was not initialized properly.  "
+                "on_epoch_start() was not called before on_epoch_end()."
+            )
         dt = time.time() - self.start_time
         if self.time_limit < dt:
             self.model.stop_training()

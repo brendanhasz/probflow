@@ -42,7 +42,7 @@ class LearningRateScheduler(Callback):
         self.epochs: list[int] = []
         self.learning_rate: list[float] = []
 
-    def on_epoch_start(self):
+    def on_epoch_start(self) -> None:
         """Set the learning rate at the start of each epoch."""
         self.current_epoch += 1
         self.current_lr = self.fn(self.current_epoch)
@@ -54,7 +54,7 @@ class LearningRateScheduler(Callback):
                 f"Epoch {self.current_epoch} - learning rate {self.current_lr}"
             )
 
-    def plot(self, **kwargs):
+    def plot(self, **kwargs) -> None:
         """Plot the learning rate as a function of epoch
 
         Parameters

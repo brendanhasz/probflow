@@ -28,6 +28,7 @@ from probflow.utils.typing import (
     BackendTensor,
     BackendVariable,
     ScalarLike,
+    TensorLike,
 )
 
 
@@ -38,10 +39,11 @@ class BaseDistribution(ABC):
     def __init__(self, *args):
         """Initialize the distribution"""
 
-    def __call__(self):
+    @abstractmethod
+    def __call__(self) -> BackendDistribution:
         """Get the distribution object from the backend"""
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         """Get a parameter, or if a probflow.Parameter, get a sample"""
         param = getattr(self, key)
         if callable(param):
@@ -49,22 +51,22 @@ class BaseDistribution(ABC):
         else:
             return param
 
-    def prob(self, y):
+    def prob(self, y: TensorLike) -> BackendTensor:
         """Compute the probability of some data given this distribution"""
         if get_backend() == "pytorch":
             return self().log_prob(to_tensor(y)).exp()
         else:
             return self().prob(to_tensor(y))
 
-    def log_prob(self, y):
+    def log_prob(self, y: TensorLike) -> BackendTensor:
         """Compute the log probability of some data given this distribution"""
         return self().log_prob(to_tensor(y))
 
-    def cdf(self, y):
+    def cdf(self, y: TensorLike) -> BackendTensor:
         """Cumulative probability of some data along this distribution"""
         return self().cdf(to_tensor(y))
 
-    def mean(self):
+    def mean(self) -> BackendTensor:
         """Compute the mean of this distribution
 
         Note that this uses the mode of distributions for which the mean
@@ -77,14 +79,14 @@ class BaseDistribution(ABC):
             except NotImplementedError:
                 return self().mode()
 
-    def mode(self):
+    def mode(self) -> BackendTensor:
         """Compute the mode of this distribution"""
         if get_backend() == "pytorch":
             return self().mode
         else:
             return self().mode()
 
-    def sample(self, n=1):
+    def sample(self, n: int = 1) -> BackendTensor:
         """Generate a random sample from this distribution"""
         if get_backend() == "pytorch":
             try:
@@ -274,36 +276,36 @@ class BaseDataGenerator(ABC):
     def __init__(self, *args):
         """Initialize the data generator"""
 
-    def on_epoch_start(self):
+    def on_epoch_start(self) -> None:
         """Will be called at the start of each training epoch"""
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         """Will be called at the end of each training epoch"""
 
     @property
     @abstractmethod
-    def n_samples(self):
+    def n_samples(self) -> int:
         """Number of samples in the dataset"""
 
     @property
     @abstractmethod
-    def batch_size(self):
+    def batch_size(self) -> int:
         """Number of samples to generate each minibatch"""
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Number of batches per epoch"""
         return ceil(self.n_samples / self.batch_size)
 
     @abstractmethod
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> tuple[TensorLike, TensorLike]:
         """Generate one batch of data"""
 
     @abstractmethod
-    def __iter__(self):
+    def __iter__(self) -> "BaseDataGenerator":
         """Get an iterator over batches"""
 
     @abstractmethod
-    def __next__(self):
+    def __next__(self) -> tuple[TensorLike | None, TensorLike | None]:
         """Get the next batch"""
 
 
@@ -318,17 +320,17 @@ class BaseCallback(ABC):
         """Initialize the callback"""
 
     @abstractmethod
-    def on_train_start(self):
+    def on_train_start(self) -> None:
         """Will be called at the start of training"""
 
     @abstractmethod
-    def on_epoch_start(self):
+    def on_epoch_start(self) -> None:
         """Will be called at the start of each training epoch"""
 
     @abstractmethod
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         """Will be called at the end of each training epoch"""
 
     @abstractmethod
-    def on_train_end(self):
+    def on_train_end(self) -> None:
         """Will be called at the end of training"""

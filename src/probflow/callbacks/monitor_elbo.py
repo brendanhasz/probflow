@@ -33,13 +33,18 @@ class MonitorELBO(Callback):
         self.start_time: float | None = None
         self.wall_times: list[float] = []
 
-    def on_epoch_start(self):
+    def on_epoch_start(self) -> None:
         """Record start time at the beginning of the first epoch"""
         if self.start_time is None:
             self.start_time = time.time()
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         """Store the ELBO at the end of each epoch."""
+        if self.start_time is None:
+            raise RuntimeError(
+                "MonitorELBO callback was not initialized properly.  "
+                "on_epoch_start() was not called before on_epoch_end()."
+            )
         self.current_elbo = self.model.get_elbo()
         self.current_epoch += 1
         self.elbos += [self.current_elbo]
@@ -48,7 +53,7 @@ class MonitorELBO(Callback):
         if self.verbose:
             print(f"Epoch {self.current_epoch} \tELBO: {self.current_elbo}")
 
-    def plot(self, x: str = "epoch", **kwargs):
+    def plot(self, x: str = "epoch", **kwargs) -> None:
         """Plot the ELBO as a function of epoch
 
         Parameters

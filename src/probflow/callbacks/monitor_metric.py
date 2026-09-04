@@ -64,13 +64,18 @@ class MonitorMetric(Callback):
         self.start_time: float | None = None
         self.wall_times: list[float] = []
 
-    def on_epoch_start(self):
+    def on_epoch_start(self) -> None:
         """Record start time at the beginning of the first epoch"""
         if self.start_time is None:
             self.start_time = time.time()
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         """Compute the metric on validation data at the end of each epoch."""
+        if self.start_time is None:
+            raise RuntimeError(
+                "MonitorMetric callback was not initialized properly.  "
+                "on_epoch_start() was not called before on_epoch_end()."
+            )
         self.current_metric = self.model.metric(self.metric_fn, self.data)
         self.current_epoch += 1
         self.metrics += [self.current_metric]
@@ -81,7 +86,7 @@ class MonitorMetric(Callback):
                 f"Epoch {self.current_epoch} \t{self.metric_name}: {self.current_metric}"
             )
 
-    def plot(self, x: str = "epoch", **kwargs):
+    def plot(self, x: str = "epoch", **kwargs) -> None:
         """Plot the metric being monitored as a function of epoch
 
         Parameters

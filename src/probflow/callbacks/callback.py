@@ -11,16 +11,16 @@ class Callback(BaseCallback):
     def __init__(self, *args):
         """Initialize the callback"""
 
-    def on_train_start(self):
+    def on_train_start(self) -> None:
         """Will be called at the start of training. By default does nothing."""
 
-    def on_epoch_start(self):
+    def on_epoch_start(self) -> None:
         """Will be called at the start of each training epoch.  By default does
         nothing."""
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         """Will be called at the end of each training epoch.  By default does
         nothing."""
 
-    def on_train_end(self):
+    def on_train_end(self) -> None:
         """Will be called at the end of training. By default does nothing."""

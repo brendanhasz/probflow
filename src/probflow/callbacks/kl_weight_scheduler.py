@@ -41,7 +41,7 @@ class KLWeightScheduler(Callback):
         self.epochs: list[int] = []
         self.kl_weights: list[float] = []
 
-    def on_epoch_start(self):
+    def on_epoch_start(self) -> None:
         """Set the KL weight at the start of each epoch."""
         self.current_epoch += 1
         self.current_w = self.fn(self.current_epoch)
@@ -51,7 +51,7 @@ class KLWeightScheduler(Callback):
         if self.verbose:
             print(f"Epoch {self.current_epoch} - KL weight {self.current_w}")
 
-    def plot(self, **kwargs):
+    def plot(self, **kwargs) -> None:
         """Plot the KL weight as a function of epoch
 
         Parameters

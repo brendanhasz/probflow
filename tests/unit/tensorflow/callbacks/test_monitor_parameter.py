@@ -15,8 +15,9 @@ def test_MonitorParameter(plot):
     my_model.fit(x, y, batch_size=5, epochs=10, callbacks=[mp])
     assert isinstance(mp.current_epoch, int)
     assert mp.current_epoch == 10
-    assert isinstance(mp.current_params, np.ndarray)
-    assert mp.current_params
+    assert isinstance(mp.current_params, dict)
+    assert "Weight" in mp.current_params
+    assert isinstance(mp.current_params["Weight"], np.ndarray)
     assert isinstance(mp.epochs, list)
     assert len(mp.epochs) == 10
     assert isinstance(mp.parameter_values, list)

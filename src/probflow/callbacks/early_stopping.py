@@ -68,7 +68,7 @@ class EarlyStopping(Callback):
         self.name = name
         # TODO: restore_best_weights? using save_model and load_model?
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         """Stop training if there was no improvement since the last epoch."""
         self.epoch += 1
         if isinstance(self.metric_fn, MonitorMetric):
