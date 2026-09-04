@@ -67,14 +67,17 @@ __all__ = [
     "zeros",
 ]
 
+from collections.abc import Sequence
 
 from probflow.utils.base import BaseDistribution
 from probflow.utils.casting import make_input_tensor, to_tensor
 from probflow.utils.settings import get_backend, get_datatype
 from probflow.utils.typing import (
     BackendDistribution,
+    BackendTensor,
     BackendVariable,
     ScalarLike,
+    TensorLike,
 )
 
 
@@ -115,7 +118,7 @@ def kl_divergence(
 
 
 @make_input_tensor
-def expand_dims(val, axis):
+def expand_dims(val: BackendTensor, axis: int | None) -> BackendTensor:
     """Add a singular dimension to a Tensor"""
     if axis is None:
         return val
@@ -130,7 +133,7 @@ def expand_dims(val, axis):
 
 
 @make_input_tensor
-def squeeze(val):
+def squeeze(val: BackendTensor) -> BackendTensor:
     """Remove singleton dimensions"""
     if get_backend() == "pytorch":
         import torch
@@ -142,7 +145,7 @@ def squeeze(val):
         return tf.squeeze(val)
 
 
-def ones(shape):
+def ones(shape: int | Sequence[int]) -> BackendTensor:
     """Tensor full of ones."""
     if get_backend() == "pytorch":
         import torch
@@ -154,7 +157,7 @@ def ones(shape):
         return tf.ones(shape, dtype=get_datatype())
 
 
-def zeros(shape):
+def zeros(shape: int | Sequence[int]) -> BackendTensor:
     """Tensor full of zeros."""
     if get_backend() == "pytorch":
         import torch
@@ -166,7 +169,7 @@ def zeros(shape):
         return tf.zeros(shape, dtype=get_datatype())
 
 
-def full(shape, value):
+def full(shape: int | Sequence[int], value: float) -> BackendTensor:
     """Tensor full of some value."""
     if get_backend() == "pytorch":
         import torch
@@ -178,7 +181,7 @@ def full(shape, value):
         return tf.cast(tf.fill(shape, value), dtype=get_datatype())
 
 
-def randn(shape):
+def randn(shape: int | Sequence[int]) -> BackendTensor:
     """Tensor full of random values drawn from a standard normal."""
     if get_backend() == "pytorch":
         import torch
@@ -190,7 +193,7 @@ def randn(shape):
         return tf.random.normal(shape, dtype=get_datatype())
 
 
-def rand_rademacher(shape):
+def rand_rademacher(shape: int | Sequence[int]) -> BackendTensor:
     """Tensor full of random -1s or 1s (i.e. drawn from a Rademacher dist)."""
     if get_backend() == "pytorch":
         import torch
@@ -205,7 +208,7 @@ def rand_rademacher(shape):
             return tfp.python.math.random_rademacher(shape)
 
 
-def shape(x):
+def shape(x: BackendTensor) -> list[int]:
     """Get a list of integers representing this tensor's shape"""
     if get_backend() == "pytorch":
         return [s for s in x.shape]
@@ -213,7 +216,7 @@ def shape(x):
         return [s for s in x.shape]
 
 
-def eye(dims):
+def eye(dims: int) -> BackendTensor:
     """Identity matrix."""
     if get_backend() == "pytorch":
         import torch
@@ -225,7 +228,9 @@ def eye(dims):
         return tf.eye(dims, dtype=get_datatype())
 
 
-def sum(val, axis=-1, keepdims=False):
+def sum(
+    val: BackendTensor, axis: int | None = -1, keepdims: bool = False
+) -> BackendTensor:
     """The sum."""
     if get_backend() == "pytorch":
         import torch
@@ -240,7 +245,9 @@ def sum(val, axis=-1, keepdims=False):
         return tf.reduce_sum(val, axis=axis, keepdims=keepdims)
 
 
-def prod(val, axis=-1, keepdims=False):
+def prod(
+    val: BackendTensor, axis: int | None = -1, keepdims: bool = False
+) -> BackendTensor:
     """The product."""
     if get_backend() == "pytorch":
         import torch
@@ -252,7 +259,9 @@ def prod(val, axis=-1, keepdims=False):
         return tf.reduce_prod(val, axis=axis, keepdims=keepdims)
 
 
-def mean(val, axis=-1, keepdims=False):
+def mean(
+    val: BackendTensor, axis: int | None = -1, keepdims: bool = False
+) -> BackendTensor:
     """The mean."""
     if get_backend() == "pytorch":
         import torch
@@ -264,7 +273,9 @@ def mean(val, axis=-1, keepdims=False):
         return tf.reduce_mean(val, axis=axis, keepdims=keepdims)
 
 
-def std(val, axis=-1, keepdims=False):
+def std(
+    val: BackendTensor, axis: int | None = -1, keepdims: bool = False
+) -> BackendTensor:
     """The uncorrected sample standard deviation."""
     if get_backend() == "pytorch":
         import torch
@@ -276,7 +287,7 @@ def std(val, axis=-1, keepdims=False):
         return tf.math.reduce_std(val, axis=axis, keepdims=keepdims)
 
 
-def round(val):
+def round(val: BackendTensor) -> BackendTensor:
     """Round to the closest integer"""
     if get_backend() == "pytorch":
         import torch
@@ -288,7 +299,7 @@ def round(val):
         return tf.math.round(val)
 
 
-def abs(val):
+def abs(val: BackendTensor) -> BackendTensor:
     """Absolute value"""
     if get_backend() == "pytorch":
         import torch
@@ -300,7 +311,7 @@ def abs(val):
         return tf.math.abs(val)
 
 
-def square(val):
+def square(val: BackendTensor) -> BackendTensor:
     """Power of 2"""
     if get_backend() == "pytorch":
         return val**2
@@ -310,7 +321,7 @@ def square(val):
         return tf.math.square(val)
 
 
-def sqrt(val):
+def sqrt(val: BackendTensor) -> BackendTensor:
     """The square root."""
     if get_backend() == "pytorch":
         import torch
@@ -322,7 +333,7 @@ def sqrt(val):
         return tf.sqrt(val)
 
 
-def exp(val):
+def exp(val: BackendTensor) -> BackendTensor:
     """The natural exponent."""
     if get_backend() == "pytorch":
         import torch
@@ -334,7 +345,7 @@ def exp(val):
         return tf.exp(val)
 
 
-def relu(val):
+def relu(val: BackendTensor) -> BackendTensor:
     """Linear rectification."""
     if get_backend() == "pytorch":
         import torch
@@ -346,7 +357,7 @@ def relu(val):
         return tf.nn.relu(val)
 
 
-def softplus(val):
+def softplus(val: BackendTensor) -> BackendTensor:
     """Linear rectification."""
     if get_backend() == "pytorch":
         import torch
@@ -358,7 +369,7 @@ def softplus(val):
         return tf.math.softplus(val)
 
 
-def sigmoid(val):
+def sigmoid(val: BackendTensor) -> BackendTensor:
     """Sigmoid function."""
     if get_backend() == "pytorch":
         import torch
@@ -370,7 +381,9 @@ def sigmoid(val):
         return tf.math.sigmoid(val)
 
 
-def gather(vals, inds, axis=0):
+def gather(
+    vals: BackendTensor, inds: TensorLike, axis: int = 0
+) -> BackendTensor:
     """Gather values by index"""
     if get_backend() == "pytorch":
         import torch
@@ -382,7 +395,7 @@ def gather(vals, inds, axis=0):
         return tf.gather(vals, inds, axis=axis)
 
 
-def cat(vals, axis=0):
+def cat(vals: Sequence[BackendTensor], axis: int = 0) -> BackendTensor:
     """Concatenate tensors"""
     if get_backend() == "pytorch":
         import torch
@@ -394,7 +407,7 @@ def cat(vals, axis=0):
         return tf.concat(vals, axis=axis)
 
 
-def additive_logistic_transform(vals):
+def additive_logistic_transform(vals: BackendTensor) -> BackendTensor:
     """The additive logistic transformation"""
     if get_backend() == "pytorch":
         import torch
@@ -416,7 +429,7 @@ def additive_logistic_transform(vals):
         return exp_vals / tf.reduce_sum(exp_vals, axis=-1, keepdims=True)
 
 
-def insert_col_of(vals, val):
+def insert_col_of(vals: BackendTensor, val: ScalarLike) -> BackendTensor:
     """Add a column of a value to the left side of a tensor"""
     if get_backend() == "pytorch":
         import torch
@@ -434,7 +447,7 @@ def insert_col_of(vals, val):
         )
 
 
-def new_variable(initial_values) -> BackendVariable:
+def new_variable(initial_values: TensorLike) -> BackendVariable:
     """Get a new variable with the current backend, and initialize it"""
     if get_backend() == "pytorch":
         import torch
@@ -446,7 +459,7 @@ def new_variable(initial_values) -> BackendVariable:
         return tf.Variable(initial_values)
 
 
-def log_cholesky_transform(x):
+def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
     r"""Perform the log cholesky transform on a vector of values.
 
     This turns a vector of :math:`\frac{N(N+1)}{2}` unconstrained values into a
@@ -481,7 +494,7 @@ def log_cholesky_transform(x):
         return E @ tf.transpose(E)
 
 
-def transpose(x):
+def transpose(x: BackendTensor) -> BackendTensor:
     """Transpose a matrix or batch of matrices"""
     if get_backend() == "pytorch":
         import torch
@@ -496,7 +509,7 @@ def transpose(x):
         return tf.transpose(x, perm=perm)
 
 
-def reshape(x, new_shape):
+def reshape(x: BackendTensor, new_shape: Sequence[int]) -> BackendTensor:
     """Reshape a tensor"""
     if get_backend() == "pytorch":
         import torch
@@ -508,7 +521,7 @@ def reshape(x, new_shape):
         return tf.reshape(x, new_shape)
 
 
-def copy_tensor(x):
+def copy_tensor(x: BackendTensor) -> BackendTensor:
     """Copy a tensor, detaching it from the gradient/backend/etc/etc"""
     if get_backend() == "pytorch":
         return x.detach().clone()

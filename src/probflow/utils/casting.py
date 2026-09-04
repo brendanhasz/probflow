@@ -18,12 +18,16 @@ __all__ = [
     "to_tensor",
 ]
 
+from collections.abc import Callable
+from typing import Concatenate, ParamSpec
 
 import numpy as np
 import pandas as pd
 
 from probflow.utils.settings import get_backend, get_datatype
 from probflow.utils.typing import BackendTensor, TensorLike
+
+P = ParamSpec("P")
 
 
 def to_numpy(x: TensorLike) -> np.ndarray:
@@ -87,7 +91,9 @@ def to_default_dtype(x: TensorLike) -> TensorLike:
         return tf.cast(x, get_datatype())
 
 
-def make_input_tensor(fn):
+def make_input_tensor(
+    fn: Callable[Concatenate[BackendTensor, P], BackendTensor],
+) -> Callable[Concatenate[TensorLike, P], BackendTensor]:
     def tensor_fn(*args, **kwargs):
         return fn(to_tensor(args[0]), *args[1:], **kwargs)
 
