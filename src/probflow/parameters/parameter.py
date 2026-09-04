@@ -241,7 +241,7 @@ class Parameter(BaseParameter):
         with Sampling(n=n):
             return to_numpy(self())
 
-    def prior_sample(self, n: int = 1):
+    def prior_sample(self, n: int = 1) -> np.ndarray:
         """Sample from the prior distribution.
 
         Parameters
@@ -264,7 +264,9 @@ class Parameter(BaseParameter):
         else:
             return to_numpy(self.transform(self.prior.sample(n)))
 
-    def posterior_ci(self, ci: float = 0.95, n: int = 10000):
+    def posterior_ci(
+        self, ci: float = 0.95, n: int = 10000
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Posterior confidence intervals
 
         Parameters

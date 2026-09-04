@@ -683,7 +683,15 @@ class Model(BaseModel, Module):
         metric_fn = get_metric_fn(metric)
         return float(metric_fn(y_true, y_pred))
 
-    def _param_data(self, params: str | list[str] | None, func: Callable):
+    def _param_data(
+        self,
+        params: str | list[str] | None,
+        func: Callable,
+    ) -> (
+        dict[str, np.ndarray | tuple[np.ndarray, np.ndarray]]
+        | tuple[np.ndarray, np.ndarray]
+        | np.ndarray
+    ):
         """Get data about parameters in the model"""
         if isinstance(params, str):
             return next(func(p) for p in self.parameters if p.name == params)
@@ -755,7 +763,10 @@ class Model(BaseModel, Module):
         params: str | list[str] | None = None,
         ci: float = 0.95,
         n: int = 10000,
-    ) -> dict[str, tuple[float, float]] | tuple[float, float]:
+    ) -> (
+        dict[str, tuple[np.ndarray, np.ndarray]]
+        | tuple[np.ndarray, np.ndarray]
+    ):
         """Posterior confidence intervals
 
         TODO: Docs... params is a list of strings of params to plot
@@ -820,7 +831,7 @@ class Model(BaseModel, Module):
     def _param_plot(
         self,
         func: Callable,
-        params: None | list[str] = None,
+        params: str | list[str] | None = None,
         cols: int = 1,
         tight_layout: bool = True,
         **kwargs,
@@ -828,6 +839,8 @@ class Model(BaseModel, Module):
         """Plot parameter data"""
         if params is None:
             param_list = self.parameters
+        elif isinstance(params, str):
+            param_list = [p for p in self.parameters if p.name == params]
         else:
             param_list = [p for p in self.parameters if p.name in params]
         rows = int(np.ceil(len(param_list) / cols))
