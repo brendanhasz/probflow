@@ -1,5 +1,5 @@
 
-.PHONY: install-with-tensorflow install-with-pytorch test-tensorflow test-pytorch test-stats-tensorflow test-stats-pytorch test format lint type-check docs bump-minor bump-patch package push-package clean
+.PHONY: install test-unit test-stats test format docs bump-minor bump-patch package push-package clean
 
 BACKEND ?= tensorflow
 AVAILABLE_BACKENDS := tensorflow pytorch
@@ -39,15 +39,6 @@ bump-minor:
 # Bump patch version number
 bump-patch:
 	uv version --bump patch
-
-# Build and check the package
-package:
-	uv build
-	uvx twine check dist/*
-
-# Push the package to pypi
-push-package:
-	uv publish
 
 # Clean up build artifacts and caches
 clean:
