@@ -103,9 +103,9 @@ def test_Model_0D():
 
     # metric
     metric = my_model.metric("mae", x[:30], y[:30])
-    assert isinstance(metric, np.floating)
+    assert isinstance(metric, float)
     metric = my_model.metric("mse", x[:30], y[:30])
-    assert isinstance(metric, np.floating)
+    assert isinstance(metric, float)
     assert metric >= 0
 
     # posterior_mean w/ no args should return all params
@@ -447,9 +447,9 @@ def test_Model_ArrayDataGenerators():
 
     # metric
     metric = my_model.metric("mae", data)
-    assert isinstance(metric, np.floating)
+    assert isinstance(metric, float)
     metric = my_model.metric("mse", data)
-    assert isinstance(metric, np.floating)
+    assert isinstance(metric, float)
     assert metric >= 0
 
 
@@ -513,9 +513,9 @@ def test_Model_1D():
 
     # metric
     metric = my_model.metric("mse", x[:30, :], y[:30, :])
-    assert isinstance(metric, np.floating)
+    assert isinstance(metric, float)
     metric = my_model.metric("mae", x[:30, :], y[:30, :])
-    assert isinstance(metric, np.floating)
+    assert isinstance(metric, float)
     assert metric >= 0
 
     # posterior_mean w/ no args should return all params

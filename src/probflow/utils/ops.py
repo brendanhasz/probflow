@@ -71,9 +71,13 @@ __all__ = [
 from probflow.utils.base import BaseDistribution
 from probflow.utils.casting import make_input_tensor, to_tensor
 from probflow.utils.settings import get_backend, get_datatype
+from probflow.utils.typing import BackendDistribution, ScalarLike
 
 
-def kl_divergence(P, Q):
+def kl_divergence(
+    P: BaseDistribution | BackendDistribution,
+    Q: BaseDistribution | BackendDistribution,
+) -> ScalarLike:
     """Compute the Kullback–Leibler divergence between two distributions.
 
     Parameters

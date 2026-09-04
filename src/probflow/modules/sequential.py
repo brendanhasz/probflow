@@ -1,5 +1,8 @@
 from collections.abc import Callable
 
+from probflow.utils.casting import to_tensor
+from probflow.utils.typing import BackendTensor, TensorLike
+
 from .module import Module
 
 
@@ -19,8 +22,9 @@ class Sequential(Module):
     def __init__(self, steps: list[Callable], name: str = "Sequential"):
         self.steps = steps  # store the list of steps
 
-    def __call__(self, x):
+    def __call__(self, x: TensorLike) -> BackendTensor:
         """Perform the forward pass"""
+        x = to_tensor(x)
         for step in self.steps:
             x = step(x)
         return x

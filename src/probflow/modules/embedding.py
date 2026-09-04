@@ -1,5 +1,7 @@
 import probflow.utils.ops as O
 from probflow.parameters import DeterministicParameter, Parameter
+from probflow.utils.casting import to_tensor
+from probflow.utils.typing import BackendTensor, TensorLike
 
 from .module import Module
 
@@ -111,8 +113,9 @@ class Embedding(Module):
             for i in range(len(d))
         ]
 
-    def __call__(self, x):
+    def __call__(self, x: TensorLike) -> BackendTensor:
         """Perform the forward pass"""
+        x = to_tensor(x)
         embs = [
             O.gather(self.embeddings[i](), x[:, i])
             for i in range(len(self.embeddings))

@@ -25,7 +25,8 @@ if TYPE_CHECKING:
     ScalarLike: TypeAlias = (
         int | float | np.ndarray | tf.Tensor | tf.Variable | torch.Tensor
     )
-
+    BackendTensor: TypeAlias = tf.Tensor | tf.Variable | torch.Tensor
+    BackendVariable: TypeAlias = tf.Variable | torch.nn.Parameter
     BackendDistribution: TypeAlias = (
         torch.distributions.distribution.Distribution
         | tfp.distributions.Distribution
@@ -34,4 +35,6 @@ if TYPE_CHECKING:
 else:
     TensorLike = Any
     ScalarLike = Any
+    BackendTensor = Any
+    BackendVariable = Any
     BackendDistribution = Any

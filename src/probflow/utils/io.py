@@ -1,6 +1,7 @@
 """Functions for saving and loading ProbFlow  objects"""
 
 import base64
+from pathlib import Path
 
 import cloudpickle
 
@@ -12,7 +13,7 @@ __all__ = [
 ]
 
 
-def dumps(obj):
+def dumps(obj: object) -> str:
     """Serialize a probflow object to a json-safe string.
 
     Note
@@ -27,12 +28,12 @@ def dumps(obj):
     return base64.b64encode(cloudpickle.dumps(obj)).decode("utf8")
 
 
-def loads(s):
+def loads(s: str) -> object:
     """Deserialize a probflow object from string"""
     return cloudpickle.loads(base64.b64decode(s.encode("utf8")))
 
 
-def dump(obj, filename):
+def dump(obj: object, filename: str | Path) -> None:
     """Serialize a probflow object to file
 
     Note
@@ -48,7 +49,7 @@ def dump(obj, filename):
         cloudpickle.dump(obj, f)
 
 
-def load(filename):
+def load(filename: str | Path) -> object:
     """Deserialize a probflow object from file"""
     with open(filename, "rb") as f:
         return cloudpickle.load(f)

@@ -1,6 +1,7 @@
 from collections.abc import Callable
 
 import probflow.utils.ops as O
+from probflow.utils.typing import BackendTensor, TensorLike
 
 from .batch_normalization import BatchNormalization
 from .dense import Dense
@@ -93,7 +94,7 @@ class DenseNetwork(Module):
         else:
             self.batch_norms = []
 
-    def __call__(self, x):
+    def __call__(self, x: TensorLike) -> BackendTensor:
         for i in range(len(self.layers)):
             x = self.layers[i](x)
             if self.batch_norm and self.batch_norm_loc == "before":

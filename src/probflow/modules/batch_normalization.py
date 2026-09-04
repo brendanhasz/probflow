@@ -5,6 +5,7 @@ from probflow.distributions import Deterministic, Normal
 from probflow.parameters import Parameter
 from probflow.utils.base import BaseDistribution
 from probflow.utils.initializers import xavier
+from probflow.utils.typing import BackendTensor, TensorLike
 
 from .module import Module
 
@@ -124,7 +125,7 @@ class BatchNormalization(Module):
         bias_prior: BaseDistribution | None = Normal(0, 1),
         weight_initializer: dict[str, Callable] = {"loc": xavier},
         bias_initializer: dict[str, Callable] = {"loc": xavier},
-        name="BatchNormalization",
+        name: str = "BatchNormalization",
     ):
 
         # Add the batch dimension
@@ -155,7 +156,7 @@ class BatchNormalization(Module):
             name=name + "_bias",
         )
 
-    def __call__(self, x):
+    def __call__(self, x: TensorLike) -> BackendTensor:
         """Perform the forward pass"""
         mean = O.mean(x, axis=-2, keepdims=True)
         std = O.std(x, axis=-2, keepdims=True)

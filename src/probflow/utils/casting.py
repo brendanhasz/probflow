@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 
 from probflow.utils.settings import get_backend, get_datatype
-from probflow.utils.typing import TensorLike
+from probflow.utils.typing import BackendTensor, TensorLike
 
 
 def to_numpy(x: TensorLike) -> np.ndarray:
@@ -52,7 +52,7 @@ def to_numpy(x: TensorLike) -> np.ndarray:
         return np.array(x)
 
 
-def to_tensor(x: TensorLike) -> TensorLike:
+def to_tensor(x: TensorLike) -> BackendTensor:
     """Make x a tensor if not already"""
 
     # Get numpy data if pandas

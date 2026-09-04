@@ -15,9 +15,10 @@ from probflow.utils.settings import (
     get_samples,
     get_static_sampling_uuid,
 )
+from probflow.utils.typing import BackendTensor, BackendVariable, ScalarLike
 
 
-def cache_static_samples(fn):
+def _cache_static_samples(fn):
     """Decorator to return static samples if they are currently cached"""
 
     def wrapped_fn(param):
@@ -146,12 +147,12 @@ class Parameter(BaseParameter):
             self.untransformed_variables[var] = O.new_variable(initial_value)
 
     @property
-    def n_parameters(self):
+    def n_parameters(self) -> int:
         """Get the number of independent parameters"""
         return int(np.prod(self.shape))
 
     @property
-    def n_variables(self):
+    def n_variables(self) -> int:
         """Get the number of underlying variables"""
         return int(
             sum(
@@ -163,12 +164,12 @@ class Parameter(BaseParameter):
         )
 
     @property
-    def trainable_variables(self):
+    def trainable_variables(self) -> list[BackendVariable]:
         """Get a list of trainable variables from the backend"""
         return [e for e in self.untransformed_variables.values()]
 
     @property
-    def variables(self):
+    def variables(self) -> dict[str, BackendTensor]:
         """Variables after applying their respective transformations"""
         return {
             name: self.var_transform[name](val)
@@ -176,12 +177,12 @@ class Parameter(BaseParameter):
         }
 
     @property
-    def posterior(self):
+    def posterior(self) -> BaseDistribution:
         """This Parameter's variational posterior distribution"""
         return self.posterior_fn(**self.variables)
 
-    @cache_static_samples
-    def __call__(self):
+    @_cache_static_samples
+    def __call__(self) -> BackendTensor:
         """Return a sample from or the MAP estimate of this parameter.
 
         Returns
@@ -197,7 +198,7 @@ class Parameter(BaseParameter):
         else:
             return self.transform(self.posterior.sample(n_samples))
 
-    def kl_loss(self):
+    def kl_loss(self) -> ScalarLike:
         """Compute the sum of the Kullback–Leibler divergences between this
         parameter's priors and its variational posteriors."""
         if self.prior is None:
@@ -207,8 +208,8 @@ class Parameter(BaseParameter):
                 O.kl_divergence(self.posterior, self.prior), axis=None
             )
 
-    def bayesian_update(self):
-        """Update priors to match the current posterior"""
+    def bayesian_update(self) -> None:
+        """Update priors to match the current posterior."""
         self.prior = self.posterior_fn(
             **{
                 k: self.var_transform[k](O.copy_tensor(v))
@@ -216,11 +217,11 @@ class Parameter(BaseParameter):
             }
         )
 
-    def posterior_mean(self):
+    def posterior_mean(self) -> np.ndarray:
         """Get the mean of the posterior distribution(s)"""
         return to_numpy(self())
 
-    def posterior_sample(self, n: int = 1):
+    def posterior_sample(self, n: int = 1) -> np.ndarray:
         """Sample from the posterior distribution.
 
         Parameters

@@ -15,11 +15,19 @@ __all__ = [
 
 from abc import ABC, abstractmethod
 from math import ceil
+from pathlib import Path
 from typing import Any
+
+import numpy as np
 
 from probflow.utils.casting import to_tensor
 from probflow.utils.settings import get_backend
-from probflow.utils.typing import TensorLike
+from probflow.utils.typing import (
+    BackendDistribution,
+    BackendTensor,
+    BackendVariable,
+    ScalarLike,
+)
 
 
 class BaseDistribution(ABC):
@@ -102,42 +110,141 @@ class BaseDistribution(ABC):
 class BaseParameter(ABC):
     """Abstract base class for ProbFlow Parameters"""
 
+    name: str
+
     @abstractmethod
     def __init__(self, *args):
         """Initialize the parameter"""
 
     @abstractmethod
-    def __call__(self):
+    def __call__(self) -> BackendTensor:
         """Return a sample from or the MAP estimate of this parameter."""
 
+    @property
     @abstractmethod
-    def kl_loss(self):
+    def n_parameters(self) -> int:
+        """Get the number of independent parameters"""
+
+    @property
+    @abstractmethod
+    def n_variables(self) -> int:
+        """Get the number of underlying variables"""
+
+    @property
+    @abstractmethod
+    def trainable_variables(self) -> list[BackendVariable]:
+        """Get a list of trainable variables from the backend"""
+
+    @property
+    @abstractmethod
+    def variables(self) -> dict[str, BackendTensor]:
+        """Variables after applying their respective transformations"""
+
+    @property
+    @abstractmethod
+    def posterior(self) -> BaseDistribution:
+        """This Parameter's variational posterior distribution"""
+
+    @abstractmethod
+    def kl_loss(self) -> ScalarLike:
         """Compute the sum of the Kullback–Leibler divergences between this
         parameter's priors and its variational posteriors."""
 
     @abstractmethod
-    def posterior_mean(self):
+    def bayesian_update(self) -> None:
+        """Update priors to match the current posterior."""
+
+    @abstractmethod
+    def posterior_mean(self) -> np.ndarray:
         """Get the mean of the posterior distribution(s)."""
 
     @abstractmethod
-    def posterior_sample(self):
-        """Get the mean of the posterior distribution(s)."""
+    def posterior_sample(self, n: int = 1) -> np.ndarray:
+        """Sample from the posterior distribution."""
 
     @abstractmethod
-    def prior_sample(self):
-        """Get the mean of the posterior distribution(s)."""
+    def prior_sample(self, n: int = 1) -> np.ndarray:
+        """Sample from the prior distribution."""
 
 
 class BaseModule(ABC):
     """Abstract base class for ProbFlow Modules"""
+
+    _kl_losses: list[ScalarLike]
 
     @abstractmethod
     def __init__(self, *args):
         """Initialize the module (abstract method)"""
 
     @abstractmethod
-    def __call__(self, *args, **kwargs) -> TensorLike:
+    def __call__(self, *args, **kwargs) -> BackendTensor:
         """Perform forward pass, returning a tensor (abstract method)"""
+
+    @property
+    @abstractmethod
+    def parameters(self) -> list[BaseParameter]:
+        """A list of |Parameters| in this |Module| and its sub-Modules."""
+
+    @property
+    @abstractmethod
+    def modules(self) -> list["BaseModule"]:
+        """A list of sub-Modules in this |Module|, including itself."""
+
+    @property
+    @abstractmethod
+    def trainable_variables(self) -> list[BackendVariable]:
+        """A list of trainable backend variables within this |Module|"""
+
+    @property
+    @abstractmethod
+    def n_parameters(self) -> int:
+        """Get the number of independent parameters of this module"""
+
+    @property
+    @abstractmethod
+    def n_variables(self) -> int:
+        """Get the number of underlying variables in this module"""
+
+    @abstractmethod
+    def bayesian_update(self) -> None:
+        """Perform a Bayesian update of all |Parameters| in this module.  Sets
+        the prior to the current variational posterior for all parameters.
+        """
+
+    @abstractmethod
+    def kl_loss(self) -> ScalarLike:
+        """Compute the sum of the Kullback-Leibler divergences between
+        priors and their variational posteriors for all |Parameters| in this
+        |Module| and its sub-Modules."""
+
+    @abstractmethod
+    def kl_loss_batch(self) -> ScalarLike:
+        """Compute the sum of additional Kullback-Leibler divergences due to
+        data in this batch"""
+
+    @abstractmethod
+    def reset_kl_loss(self) -> None:
+        """Reset additional loss due to KL divergences"""
+
+    @abstractmethod
+    def add_kl_loss(self, loss: ScalarLike) -> None:
+        """Add additional loss due to KL divergences."""
+
+    @abstractmethod
+    def add_kl_loss_between(
+        self,
+        d1: BaseDistribution | BackendDistribution,
+        d2: BaseDistribution | BackendDistribution,
+    ) -> None:
+        """Add additional loss due to KL divergences between two distributions."""
+
+    @abstractmethod
+    def dumps(self) -> str:
+        """Serialize module object to bytes."""
+
+    @abstractmethod
+    def save(self, filename: str | Path) -> None:
+        """Save module object to file."""
 
 
 class BaseModel(ABC):

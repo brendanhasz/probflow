@@ -206,12 +206,12 @@ def test_Module_lists_and_dicts():
     the_module.add_kl_loss(3.145)
     assert is_close(the_module.kl_loss_batch().numpy(), 3.145)
 
-    # And should also be able to pass two dists to add_kl_loss
+    # And should also be able to add kl losses from two distributions
     the_module.reset_kl_loss()
     d1 = tfd.Normal(0.0, 1.0)
     d2 = tfd.Normal(1.0, 1.0)
     assert the_module.kl_loss_batch() == 0
-    the_module.add_kl_loss(d1, d2)
+    the_module.add_kl_loss_between(d1, d2)
     assert the_module.kl_loss_batch().numpy() > 0.0
 
 
