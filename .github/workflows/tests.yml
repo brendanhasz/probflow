@@ -14,7 +14,16 @@ permissions:
   code-quality: write
 
 jobs:
-  build:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: 3.10
+    - uses: pre-commit/action@v3.0.1
+
+  unit-test-and-build:
 
     runs-on: ubuntu-latest
     strategy:
@@ -33,9 +42,6 @@ jobs:
     - name: Install dependencies, ${{ matrix.backend }}, and probflow
       run: |
         uv sync --extra ${{ matrix.backend }}
-    - name: Lint with ruff
-      run: |
-        uv run ruff check src/probflow tests
     - name: Run tests
       run: |
         uv run pytest tests/unit/${{ matrix.backend }} --cov=probflow --cov-report xml:coverage.xml
