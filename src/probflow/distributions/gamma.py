@@ -1,3 +1,5 @@
+"""The Gamma distribution."""
+
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import get_backend
 from probflow.utils.typing import BackendDistribution, TensorLike
@@ -59,7 +61,7 @@ class Gamma(BaseDistribution):
         self.rate = rate
 
     def __call__(self) -> BackendDistribution:
-        """Get the distribution object from the backend"""
+        """Get the distribution object from the backend."""
         if get_backend() == "pytorch":
             import torch.distributions as tod
 

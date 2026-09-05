@@ -1,3 +1,5 @@
+"""A parameter bounded on either side."""
+
 from collections.abc import Callable
 
 import probflow.utils.ops as O
@@ -8,7 +10,7 @@ from probflow.utils.initializers import scale_xavier, xavier
 
 
 class BoundedParameter(Parameter):
-    r"""A parameter bounded on either side
+    r"""A parameter bounded on either side.
 
     This is a convenience class for creating a parameter :math:`\beta` bounded
     on both sides.  It uses a logit-normal posterior distribution:
@@ -53,7 +55,6 @@ class BoundedParameter(Parameter):
 
     Examples
     --------
-
     TODO
 
     """

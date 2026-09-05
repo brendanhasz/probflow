@@ -1,3 +1,5 @@
+"""Set the learning rate as a function of the current epoch."""
+
 from collections.abc import Callable
 
 import matplotlib.pyplot as plt
@@ -6,7 +8,7 @@ from .callback import Callback
 
 
 class LearningRateScheduler(Callback):
-    """Set the learning rate as a function of the current epoch
+    """Set the learning rate as a function of the current epoch.
 
     Parameters
     ----------
@@ -20,7 +22,6 @@ class LearningRateScheduler(Callback):
 
     Examples
     --------
-
     See the user guide section on :ref:`user-guide-lr-scheduler`.
     training`.
 
@@ -55,7 +56,7 @@ class LearningRateScheduler(Callback):
             )
 
     def plot(self, **kwargs) -> None:
-        """Plot the learning rate as a function of epoch
+        """Plot the learning rate as a function of epoch.
 
         Parameters
         ----------

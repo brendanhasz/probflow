@@ -1,4 +1,4 @@
-"""Tests probflow.utils.initializers"""
+"""Tests probflow.utils.initializers."""
 
 import numpy as np
 import tensorflow as tf
@@ -7,8 +7,7 @@ from probflow.utils import initializers
 
 
 def test_xavier():
-    """Tests probflow.utils.initializers.xavier"""
-
+    """Tests probflow.utils.initializers.xavier."""
     # Small array
     val1 = initializers.xavier([4, 3])
     assert isinstance(val1, tf.Tensor)
@@ -28,8 +27,7 @@ def test_xavier():
 
 
 def test_scale_xavier():
-    """Tests probflow.utils.initializers.scale_xavier"""
-
+    """Tests probflow.utils.initializers.scale_xavier."""
     # Small array
     val1 = initializers.scale_xavier([4, 3])
     assert isinstance(val1, tf.Tensor)
@@ -49,8 +47,7 @@ def test_scale_xavier():
 
 
 def test_pos_xavier():
-    """Tests probflow.utils.initializers.pos_xavier"""
-
+    """Tests probflow.utils.initializers.pos_xavier."""
     # Small array
     val1 = initializers.pos_xavier([4, 3])
     assert isinstance(val1, tf.Tensor)

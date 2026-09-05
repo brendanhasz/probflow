@@ -1,10 +1,10 @@
-"""Torch backend distributions"""
+"""Torch backend distributions."""
 
 from probflow.utils.typing import BackendDistribution
 
 
 def get_TorchDeterministic() -> type[BackendDistribution]:
-
+    """Return a PyTorch deterministic distribution class."""
     from numbers import Number
 
     import torch

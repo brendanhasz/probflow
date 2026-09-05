@@ -1,4 +1,4 @@
-"""Tests probflow.utils.plotting module and methods which use it"""
+"""Tests probflow.utils.plotting module and methods which use it."""
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +9,7 @@ import probflow as pf
 
 
 def test_approx_kde(plot):
-    """Tests utils.plotting.approx_kde"""
+    """Tests utils.plotting.approx_kde."""
     data = np.random.randn(1000)
     x, y = pf.utils.plotting.approx_kde(data)
     assert x.shape[0] == y.shape[0]
@@ -31,8 +31,7 @@ def is_color(color_value) -> bool:
 
 
 def test_get_next_color():
-    """Tests utils.plotting.get_next_color"""
-
+    """Tests utils.plotting.get_next_color."""
     # default
     col = pf.utils.plotting.get_next_color(None, 0)
     assert is_color(col)
@@ -47,8 +46,7 @@ def test_get_next_color():
 
 
 def test_get_ix_label():
-    """Tests utils.plotting.get_ix_label"""
-
+    """Tests utils.plotting.get_ix_label."""
     # 1d
     lab = pf.utils.plotting.get_ix_label(2, [3])
     assert isinstance(lab, str)
@@ -66,8 +64,7 @@ def test_get_ix_label():
 
 
 def test_plot_dist(plot):
-    """Tests utils.plotting.plot_dist"""
-
+    """Tests utils.plotting.plot_dist."""
     data = np.random.randn(1000)
 
     # Should error on invalid ci
@@ -121,8 +118,7 @@ def test_plot_dist(plot):
 
 
 def test_plot_line(plot):
-    """Tests utils.plotting.plot_line"""
-
+    """Tests utils.plotting.plot_line."""
     x = np.linspace(0, 10, 100)
     y = np.random.randn(100)
 
@@ -142,8 +138,7 @@ def test_plot_line(plot):
 
 
 def test_fill_between(plot):
-    """Tests utils.plotting.fill_between"""
-
+    """Tests utils.plotting.fill_between."""
     x = np.linspace(0, 10, 100)
     y1 = np.random.randn(100)
     y2 = np.random.randn(100) + 5
@@ -170,7 +165,7 @@ def test_fill_between(plot):
 
 
 def test_centered_text(plot):
-    """Tests utils.plotting.centered_text"""
+    """Tests utils.plotting.centered_text."""
     plt.plot(np.linspace(0, 1, 10), np.random.randn(10))
     pf.utils.plotting.centered_text("lala")
     if plot:
@@ -179,8 +174,7 @@ def test_centered_text(plot):
 
 
 def test_plot_discrete_dist(plot):
-    """Tests utils.plotting.plot_discrete_dist"""
-
+    """Tests utils.plotting.plot_discrete_dist."""
     # Should work for categorical variables
     pf.utils.plotting.plot_discrete_dist(np.array([0, 0, 1, 1, 1, 2]))
     if plot:
@@ -201,8 +195,7 @@ def test_plot_discrete_dist(plot):
 
 
 def test_plot_categorical_dist(plot):
-    """Tests utils.plotting.plot_categorical_dist"""
-
+    """Tests utils.plotting.plot_categorical_dist."""
     # Should work for categorical variables
     pf.utils.plotting.plot_categorical_dist(np.array([0, 0, 1, 1, 1, 2]))
     if plot:
@@ -219,8 +212,7 @@ def test_plot_categorical_dist(plot):
 
 
 def test_plot_by(plot):
-    """Tests utils.plotting.plot_by"""
-
+    """Tests utils.plotting.plot_by."""
     x = np.linspace(0, 10, 100)
     data = np.random.randn(100)
 
@@ -260,7 +252,7 @@ def test_plot_by(plot):
 
 
 def test_posterior_plot(plot):
-    """Tests posterior_plot method of parameter and model"""
+    """Tests posterior_plot method of parameter and model."""
 
     class MyModel(pf.Model):
         def __init__(self):
@@ -297,7 +289,7 @@ def test_posterior_plot(plot):
 
 
 def test_prior_plot(plot):
-    """Tests prior_plot method of parameter and model"""
+    """Tests prior_plot method of parameter and model."""
 
     class MyModel(pf.Model):
         def __init__(self):

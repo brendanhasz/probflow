@@ -5,6 +5,7 @@ import pytest
 
 
 def pytest_addoption(parser):
+    """Provide pytest addoption."""
     parser.addoption(
         "--plot", action="store_true", default=False, help="Show plots"
     )
@@ -15,6 +16,7 @@ def pytest_addoption(parser):
 
 
 def pytest_generate_tests(metafunc):
+    """Provide pytest generate tests."""
     args = ["plot"]  # , 'N', 'val_name']
     for arg in args:
         val = getattr(metafunc.config.option, arg)
@@ -24,6 +26,7 @@ def pytest_generate_tests(metafunc):
 
 @pytest.fixture
 def random():
+    """Provide random."""
     np.random.seed(12345)
     try:
         import tensorflow as tf

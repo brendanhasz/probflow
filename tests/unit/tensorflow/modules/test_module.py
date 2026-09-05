@@ -11,11 +11,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_Module():
-    """Tests the Module abstract base class"""
+    """Tests the Module abstract base class."""
 
     class TestModule(Module):
         def __init__(self):
@@ -91,7 +92,7 @@ def test_Module():
 
 
 def test_Module_nesting():
-    """Tests creating Modules within Modules"""
+    """Tests creating Modules within Modules."""
 
     # Non-nested module
     class TestModule(Module):
@@ -159,7 +160,7 @@ def test_Module_nesting():
 
 
 def test_Module_lists_and_dicts():
-    """Tests creating Modules which have list/dict attribs w/ params"""
+    """Tests creating Modules which have list/dict attribs w/ params."""
 
     # Module which contains lists/dicts w/ parameters
     class TestModule3(Module):
@@ -216,7 +217,7 @@ def test_Module_lists_and_dicts():
 
 
 def test_Module_lists_and_dicts_nesting():
-    """Tests creating Modules which have list/dict attribs w/ params+modules"""
+    """Tests creating Modules which have list/dict attribs w/ params+modules."""
 
     # A basic Module
     class TestModule1(Module):

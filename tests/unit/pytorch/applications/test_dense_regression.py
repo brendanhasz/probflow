@@ -4,8 +4,7 @@ from probflow.applications import DenseRegression
 
 
 def test_DenseRegression():
-    """Tests probflow.applications.DenseRegression"""
-
+    """Tests probflow.applications.DenseRegression."""
     # Data
     x = np.random.randn(100, 5).astype("float32")
     w = np.random.randn(5, 1).astype("float32")
@@ -37,8 +36,7 @@ def test_DenseRegression():
 
 
 def test_DenseRegression_heteroscedastic():
-    """Tests probflow.applications.DenseRegression w/ heteroscedastic"""
-
+    """Tests probflow.applications.DenseRegression w/ heteroscedastic."""
     # Data
     x = np.random.randn(100, 5).astype("float32")
     w = np.random.randn(5, 1).astype("float32")
@@ -71,8 +69,7 @@ def test_DenseRegression_heteroscedastic():
 
 
 def test_DenseRegression_multivariate():
-    """Tests probflow.applications.DenseRegression w/ >1 output dims"""
-
+    """Tests probflow.applications.DenseRegression w/ >1 output dims."""
     # Data
     N = 256
     Di = 7
@@ -104,8 +101,7 @@ def test_DenseRegression_multivariate():
 
 
 def test_DenseRegression_multimc_eager():
-    """Tests DenseRegression w/ n_mc>1 in eager mode"""
-
+    """Tests DenseRegression w/ n_mc>1 in eager mode."""
     # Data
     N = 100
     Di = 7
@@ -137,8 +133,7 @@ def test_DenseRegression_multimc_eager():
 
 
 def test_DenseRegression_multimc_noneager():
-    """Tests DenseRegression w/ n_mc>1 in non-eager mode"""
-
+    """Tests DenseRegression w/ n_mc>1 in non-eager mode."""
     # Data
     N = 100
     Di = 7

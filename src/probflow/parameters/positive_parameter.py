@@ -1,3 +1,5 @@
+"""A parameter which takes only positive values."""
+
 from collections.abc import Callable
 
 import probflow.utils.ops as O
@@ -53,7 +55,6 @@ class PositiveParameter(Parameter):
 
     Examples
     --------
-
     TODO
 
     """

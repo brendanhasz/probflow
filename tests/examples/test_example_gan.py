@@ -1,4 +1,4 @@
-"""Tests example GAN model"""
+"""Tests example GAN model."""
 
 import numpy as np
 import tensorflow as tf
@@ -10,11 +10,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_gmm():
-    """Tests gaussian mixture model example"""
+    """Tests gaussian mixture model example."""
 
     class Generator(pf.Model):
         def __init__(self, dims):
@@ -27,6 +28,7 @@ def test_gmm():
             return self.G(z)
 
         def log_likelihood(self, _, x):
+            """Provide log likelihood."""
             labels = tf.ones([x.shape[0], 1])
             true_ll = self.D(self(x)).log_prob(labels)
             return tf.reduce_sum(true_ll)
@@ -40,6 +42,7 @@ def test_gmm():
             return pf.Bernoulli(self.D(x))
 
         def log_likelihood(self, _, x):
+            """Provide log likelihood."""
             labels = tf.ones([x.shape[0], 1])
             true_ll = self(x).log_prob(labels)
             fake_ll = self(self.G(x)).log_prob(0 * labels)
@@ -51,6 +54,7 @@ def test_gmm():
             self.x = x
 
         def on_epoch_end(self):
+            """Provide on epoch end."""
             self.G.fit(self.x, epochs=1)
 
     # Data

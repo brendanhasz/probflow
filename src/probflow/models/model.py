@@ -1,3 +1,5 @@
+"""Abstract base class for probflow models."""
+
 from collections.abc import Callable
 from typing import Any
 
@@ -24,7 +26,6 @@ class Model(BaseModel, Module):
 
     Methods
     -------
-
     This class inherits several methods and properties from :class:`.Module`:
 
     * :attr:`~parameters`
@@ -90,7 +91,7 @@ class Model(BaseModel, Module):
     def log_likelihood(
         self, x_data: TensorLike | None, y_data: TensorLike | None
     ) -> ScalarLike:
-        """Compute the sum log likelihood of the model given a batch of data"""
+        """Compute the sum log likelihood of the model given a batch of data."""
         if x_data is None and y_data is None:
             raise ValueError("x_data and y_data cannot both be None")
         elif x_data is None:
@@ -129,14 +130,13 @@ class Model(BaseModel, Module):
         return self._kl_weight * kl_loss - log_loss
 
     def get_elbo(self) -> ScalarLike:
-        """Get the current ELBO on training data"""
+        """Get the current ELBO on training data."""
         return self._current_elbo
 
     def _train_step_tensorflow(
         self, n: int, flipout: bool = False, eager: bool = False, n_mc: int = 1
     ) -> Any:
-        """Get the training step function for TensorFlow"""
-
+        """Get the training step function for TensorFlow."""
         import tensorflow as tf
 
         def train_fn(x_data, y_data):
@@ -157,8 +157,7 @@ class Model(BaseModel, Module):
     def _train_step_pytorch(
         self, n: int, flipout: bool = False, eager: bool = False, n_mc: int = 1
     ) -> Any:
-        """Get the training step function for PyTorch"""
-
+        """Get the training step function for PyTorch."""
         import torch
 
         if eager:
@@ -200,7 +199,7 @@ class Model(BaseModel, Module):
                     return elbo_loss
 
             class TraceCacher:
-                """Cache traces for inputs of different sizes"""
+                """Cache traces for inputs of different sizes."""
 
                 def __init__(self, model):
                     self.fns = {}  # map from input shapes to traced function
@@ -241,7 +240,7 @@ class Model(BaseModel, Module):
             return train_fn
 
     def train_step(self, x_data: TensorLike, y_data: TensorLike) -> None:
-        """Perform one training step"""
+        """Perform one training step."""
         elbo = self._train_fn(x_data, y_data)
         if get_backend() == "pytorch":
             self._current_elbo += elbo.detach().numpy()
@@ -264,7 +263,7 @@ class Model(BaseModel, Module):
         eager: bool = False,
         n_mc: int = 1,
     ) -> None:
-        r"""Fit the model to data
+        r"""Fit the model to data.
 
         TODO
 
@@ -331,7 +330,6 @@ class Model(BaseModel, Module):
 
         See the user guide section on :doc:`/user_guide/fitting`.
         """
-
         # Determine a somewhat reasonable learning rate if none was passed
         if lr is not None:
             self._learning_rate = lr
@@ -418,11 +416,11 @@ class Model(BaseModel, Module):
             c.on_train_end()
 
     def stop_training(self) -> None:
-        """Stop the training of the model"""
+        """Stop the training of the model."""
         self._is_training = False
 
     def set_learning_rate(self, lr: float) -> None:
-        """Set the learning rate used by this model's optimizer"""
+        """Set the learning rate used by this model's optimizer."""
         if not isinstance(lr, float):
             raise TypeError("lr must be a float")
         else:
@@ -436,7 +434,7 @@ class Model(BaseModel, Module):
             self._optimizer.learning_rate.assign(self._learning_rate)
 
     def set_kl_weight(self, w: float) -> None:
-        """Set the weight of the KL term's contribution to the ELBO loss"""
+        """Set the weight of the KL term's contribution to the ELBO loss."""
         if not isinstance(w, float):
             raise TypeError("w must be a float")
         else:
@@ -450,7 +448,7 @@ class Model(BaseModel, Module):
         axis: int = 1,
         batch_size: int | None = None,
     ) -> np.ndarray:
-        """Sample from the model"""
+        """Sample from the model."""
         samples = []
         for x_data, _ in make_generator(x, test=True, batch_size=batch_size):
             if x_data is None:
@@ -465,7 +463,7 @@ class Model(BaseModel, Module):
         n: int = 1000,
         batch_size: int | None = None,
     ) -> np.ndarray:
-        """Draw samples from the posterior predictive distribution given x
+        """Draw samples from the posterior predictive distribution given x.
 
         TODO: Docs...
 
@@ -500,7 +498,7 @@ class Model(BaseModel, Module):
         batch_size: int | None = None,
     ) -> np.ndarray:
         """Draw samples of the model's estimate given x, including only
-        aleatoric uncertainty (uncertainty due to noise)
+        aleatoric uncertainty (uncertainty due to noise).
 
         TODO: Docs...
 
@@ -533,7 +531,7 @@ class Model(BaseModel, Module):
     ) -> np.ndarray:
         """Draw samples of the model's estimate given x, including only
         epistemic uncertainty (uncertainty due to uncertainty as to the
-        model's parameter values)
+        model's parameter values).
 
         TODO: Docs...
 
@@ -567,7 +565,7 @@ class Model(BaseModel, Module):
         method: str = "mean",
         batch_size: int | None = None,
     ) -> np.ndarray:
-        """Predict dependent variable using the model
+        """Predict dependent variable using the model.
 
         TODO... using maximum a posteriori param estimates etc
 
@@ -616,7 +614,7 @@ class Model(BaseModel, Module):
         y: TensorLike | None = None,
         batch_size: int | None = None,
     ) -> float:
-        """Compute a metric of model performance
+        """Compute a metric of model performance.
 
         TODO: docs
 
@@ -667,7 +665,6 @@ class Model(BaseModel, Module):
         -------
         TODO
         """
-
         # Get true values and predictions
         y_true = []
         y_pred = []
@@ -692,7 +689,7 @@ class Model(BaseModel, Module):
         | tuple[np.ndarray, np.ndarray]
         | np.ndarray
     ):
-        """Get data about parameters in the model"""
+        """Get data about parameters in the model."""
         if isinstance(params, str):
             return next(func(p) for p in self.parameters if p.name == params)
         elif isinstance(params, list):
@@ -705,7 +702,7 @@ class Model(BaseModel, Module):
     def posterior_mean(
         self, params: str | list[str] | None = None
     ) -> dict[str, np.ndarray] | np.ndarray:
-        """Get the mean of the posterior distribution(s)
+        """Get the mean of the posterior distribution(s).
 
         TODO: Docs... params is a list of strings of params to plot
 
@@ -732,7 +729,7 @@ class Model(BaseModel, Module):
     def posterior_sample(
         self, params: str | list[str] | None = None, n: int = 10000
     ) -> dict[str, np.ndarray] | np.ndarray:
-        """Draw samples from parameter posteriors
+        """Draw samples from parameter posteriors.
 
         TODO: Docs... params is a list of strings of params to plot
 
@@ -767,7 +764,7 @@ class Model(BaseModel, Module):
         dict[str, tuple[np.ndarray, np.ndarray]]
         | tuple[np.ndarray, np.ndarray]
     ):
-        """Posterior confidence intervals
+        """Posterior confidence intervals.
 
         TODO: Docs... params is a list of strings of params to plot
 
@@ -803,7 +800,7 @@ class Model(BaseModel, Module):
     def prior_sample(
         self, params: str | list[str] | None = None, n: int = 10000
     ) -> dict[str, np.ndarray] | np.ndarray:
-        """Draw samples from parameter priors
+        """Draw samples from parameter priors.
 
         TODO: Docs... params is a list of strings of params to plot
 
@@ -836,7 +833,7 @@ class Model(BaseModel, Module):
         tight_layout: bool = True,
         **kwargs,
     ) -> None:
-        """Plot parameter data"""
+        """Plot parameter data."""
         if params is None:
             param_list = self.parameters
         elif isinstance(params, str):
@@ -853,7 +850,7 @@ class Model(BaseModel, Module):
     def posterior_plot(
         self, params: str | list[str] | None = None, cols: int = 1, **kwargs
     ) -> None:
-        """Plot posterior distributions of the model's parameters
+        """Plot posterior distributions of the model's parameters.
 
         TODO: Docs... params is a list of strings of params to plot
 
@@ -874,7 +871,7 @@ class Model(BaseModel, Module):
     def prior_plot(
         self, params: str | list[str] | None = None, cols: int = 1, **kwargs
     ) -> None:
-        """Plot prior distributions of the model's parameters
+        """Plot prior distributions of the model's parameters.
 
         TODO: Docs... params is a list of strings of params to plot
 
@@ -901,7 +898,7 @@ class Model(BaseModel, Module):
         n: int = 1000,
         batch_size: int | None = None,
     ) -> np.ndarray:
-        """Compute the log probability of `y` given the model
+        """Compute the log probability of `y` given the model.
 
         TODO: Docs...
 
@@ -939,7 +936,6 @@ class Model(BaseModel, Module):
             Log probabilities. Shape is determined by ``individually``,
             ``distribution``, and ``n`` kwargs.
         """
-
         # Get a distribution of samples
         if distribution:
             with Sampling(n=1, flipout=False):
@@ -978,7 +974,7 @@ class Model(BaseModel, Module):
         y: TensorLike | None = None,
         **kwargs,
     ) -> np.ndarray:
-        """Compute the probability of ``y`` given the model
+        """Compute the probability of ``y`` given the model.
 
         TODO: Docs...
 

@@ -1,5 +1,5 @@
 """
-The applications module contains pre-built |Models|
+The applications module contains pre-built |Models|.
 
 * :class:`.LinearRegression` - a linear regression model
 * :class:`.LogisticRegression` - a Bi- or Multinomial logistic regression model

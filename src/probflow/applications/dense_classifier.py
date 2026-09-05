@@ -1,3 +1,5 @@
+"""A classifier which uses a multilayer dense neural network."""
+
 import probflow.utils.ops as O
 from probflow.distributions import Categorical
 from probflow.models import CategoricalModel
@@ -7,7 +9,7 @@ from probflow.utils.typing import TensorLike
 
 
 class DenseClassifier(CategoricalModel):
-    r"""A classifier which uses a multilayer dense neural network
+    r"""A classifier which uses a multilayer dense neural network.
 
     TODO: explain, math, diagram, examples, etc
 
@@ -34,11 +36,13 @@ class DenseClassifier(CategoricalModel):
     """
 
     def __init__(self, d: list[int], **kwargs):
+        """Initialize the DenseClassifier."""
         d[-1] -= (
             1  # Use first class as "pivot" class, so only need to predict k-1 classes
         )
         self.network = DenseNetwork(d, **kwargs)
 
     def __call__(self, x: TensorLike) -> Categorical:
+        """Forward pass of the DenseClassifier."""
         x = to_tensor(x)
         return Categorical(O.insert_col_of(self.network(x), 0))

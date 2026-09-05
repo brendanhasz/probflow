@@ -1,3 +1,5 @@
+"""Dense neural network layer."""
+
 import probflow.utils.ops as O
 from probflow.modules.module import Module
 from probflow.parameters import DeterministicParameter, Parameter
@@ -55,7 +57,7 @@ class Dense(Module):
         bias_kwargs: dict = {},
         name: str = "Dense",
     ):
-
+        """Initialize the Dense layer."""
         # Check values
         if d_in < 1:
             raise ValueError("d_in must be >0")
@@ -78,8 +80,7 @@ class Dense(Module):
         )
 
     def __call__(self, x: TensorLike) -> BackendTensor:
-        """Perform the forward pass"""
-
+        """Perform the forward pass."""
         x = to_tensor(x)
 
         # Using the Flipout estimator

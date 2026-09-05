@@ -19,7 +19,7 @@ from probflow.utils.typing import BackendTensor, ScalarLike
 
 
 def xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
-    """Xavier initializer"""
+    """Xavier initializer."""
     scale = np.sqrt(2 / sum(shape))
     if get_backend() == "pytorch":
         # TODO: use truncated normal for torch
@@ -38,7 +38,7 @@ def xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
 
 
 def scale_xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
-    """Xavier initializer for scale variables"""
+    """Xavier initializer for scale variables."""
     vals = xavier(shape)
     if get_backend() == "pytorch":
         import torch
@@ -53,7 +53,7 @@ def scale_xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
 
 
 def pos_xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
-    """Xavier initializer for positive variables"""
+    """Xavier initializer for positive variables."""
     vals = xavier(shape)
     if get_backend() == "pytorch":
         import torch
@@ -71,7 +71,6 @@ def full_of(
     val: ScalarLike,
 ) -> Callable[[list[int] | tuple[int, ...]], BackendTensor]:
     """Get initializer which returns tensor full of single value."""
-
     import probflow.utils.ops as O
 
     def init(shape: list[int] | tuple[int, ...]) -> BackendTensor:

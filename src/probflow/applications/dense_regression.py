@@ -1,3 +1,5 @@
+"""A regression using a multilayer dense neural network."""
+
 import probflow.utils.ops as O
 from probflow.distributions import Normal
 from probflow.models import ContinuousModel
@@ -8,7 +10,7 @@ from probflow.utils.typing import TensorLike
 
 
 class DenseRegression(ContinuousModel):
-    r"""A regression using a multilayer dense neural network
+    r"""A regression using a multilayer dense neural network.
 
     TODO: explain, math, diagram, examples, etc
 
@@ -42,6 +44,7 @@ class DenseRegression(ContinuousModel):
     """
 
     def __init__(self, d: list[int], heteroscedastic: bool = False, **kwargs):
+        """Initialize the DenseRegression."""
         self.heteroscedastic: bool = heteroscedastic
         if heteroscedastic:
             self.d_out = d[-1]
@@ -52,6 +55,7 @@ class DenseRegression(ContinuousModel):
             self.std = ScaleParameter([1, d[-1]], name="std")
 
     def __call__(self, x: TensorLike) -> Normal:
+        """Forward pass of the DenseRegression."""
         x = to_tensor(x)
         if self.heteroscedastic:
             p = self.network(x)

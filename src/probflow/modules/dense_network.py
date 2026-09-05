@@ -1,3 +1,5 @@
+"""A multilayer dense neural network."""
+
 from collections.abc import Callable
 
 import probflow.utils.ops as O
@@ -9,7 +11,7 @@ from .module import Module
 
 
 class DenseNetwork(Module):
-    r"""A multilayer dense neural network
+    r"""A multilayer dense neural network.
 
     TODO: explain, math, diagram, examples, etc
 
@@ -62,7 +64,7 @@ class DenseNetwork(Module):
         batch_norm_kwargs: dict = {},
         **kwargs,
     ):
-
+        """Initialize the DenseNetwork."""
         self.name = name
 
         # Activations
@@ -95,6 +97,7 @@ class DenseNetwork(Module):
             self.batch_norms = []
 
     def __call__(self, x: TensorLike) -> BackendTensor:
+        """Forward pass of the DenseNetwork."""
         for i in range(len(self.layers)):
             x = self.layers[i](x)
             if self.batch_norm and self.batch_norm_loc == "before":

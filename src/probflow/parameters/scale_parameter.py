@@ -1,3 +1,5 @@
+"""Standard deviation parameter."""
+
 from collections.abc import Callable
 
 import probflow.utils.ops as O
@@ -60,7 +62,6 @@ class ScaleParameter(Parameter):
 
     Examples
     --------
-
     Use :class:`.ScaleParameter` to create a standard deviation parameter
     for a :class:`.Normal` distribution:
 

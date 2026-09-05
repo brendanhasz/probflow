@@ -4,8 +4,7 @@ import probflow as pf
 
 
 def test_DataGenerator_workers():
-    """Tests probflow.data.DataGenerator w/ multiple worker processes"""
-
+    """Tests probflow.data.DataGenerator w/ multiple worker processes."""
     # Data
     x = np.random.randn(100, 3).astype("float32")
     w = np.random.randn(3, 1).astype("float32")

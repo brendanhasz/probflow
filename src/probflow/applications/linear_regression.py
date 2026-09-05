@@ -1,3 +1,5 @@
+"""A multiple linear regression."""
+
 import probflow.utils.ops as O
 from probflow.distributions import Normal
 from probflow.models import ContinuousModel
@@ -7,7 +9,7 @@ from probflow.utils.typing import TensorLike
 
 
 class LinearRegression(ContinuousModel):
-    r"""A multiple linear regression
+    r"""A multiple linear regression.
 
     TODO: explain, math, diagram, examples, etc
 
@@ -33,6 +35,7 @@ class LinearRegression(ContinuousModel):
     """
 
     def __init__(self, d: int, d_o: int = 1, heteroscedastic: bool = False):
+        """Initialize the LinearRegression."""
         self.heteroscedastic = heteroscedastic
         if heteroscedastic:
             self.d_o = d_o
@@ -44,6 +47,7 @@ class LinearRegression(ContinuousModel):
             self.std = ScaleParameter([1, d_o], name="std")
 
     def __call__(self, x: TensorLike) -> Normal:
+        """Forward pass of the LinearRegression."""
         x = to_tensor(x)
         if self.heteroscedastic:
             p = x @ self.weights() + self.bias()

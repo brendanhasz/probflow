@@ -2,8 +2,7 @@ from probflow.parameters import PositiveParameter
 
 
 def test_PositiveParameter():
-    """Tests probflow.parameters.PositiveParameter"""
-
+    """Tests probflow.parameters.PositiveParameter."""
     # Create the parameter
     param = PositiveParameter()
 

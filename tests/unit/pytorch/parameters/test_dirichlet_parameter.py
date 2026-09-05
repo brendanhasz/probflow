@@ -4,8 +4,7 @@ from probflow.parameters import DirichletParameter
 
 
 def test_DirichletParameter():
-    """Tests probflow.parameters.DirichletParameter"""
-
+    """Tests probflow.parameters.DirichletParameter."""
     # Should error with incorrect params
     with pytest.raises(TypeError):
         param = DirichletParameter(k="a")

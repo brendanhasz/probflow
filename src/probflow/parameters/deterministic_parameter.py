@@ -1,3 +1,5 @@
+"""A parameter which is not probabilistic."""
+
 from collections.abc import Callable
 
 from probflow.distributions import Deterministic, Normal
@@ -39,7 +41,6 @@ class DeterministicParameter(Parameter):
 
     Examples
     --------
-
     TODO
 
     """

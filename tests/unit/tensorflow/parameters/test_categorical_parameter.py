@@ -8,12 +8,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_CategoricalParameter():
-    """Tests probflow.parameters.CategoricalParameter"""
-
+    """Tests probflow.parameters.CategoricalParameter."""
     # Should error with incorrect params
     with pytest.raises(TypeError):
         param = CategoricalParameter(k="a")

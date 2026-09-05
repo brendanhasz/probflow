@@ -4,8 +4,7 @@ from probflow.applications import PoissonRegression
 
 
 def test_PoissonRegression():
-    """Tests probflow.applications.PoissonRegression"""
-
+    """Tests probflow.applications.PoissonRegression."""
     # Data
     x = np.random.randn(100, 5).astype("float32")
     w = np.random.randn(5, 1).astype("float32")
@@ -23,8 +22,7 @@ def test_PoissonRegression():
 
 
 def test_PoissonRegression_multiMC_eager():
-    """Tests PoissonRegression w/ n_mc>1 in eager mode"""
-
+    """Tests PoissonRegression w/ n_mc>1 in eager mode."""
     # Data
     x = np.random.randn(100, 5).astype("float32")
     w = np.random.randn(5, 1).astype("float32")
@@ -42,8 +40,7 @@ def test_PoissonRegression_multiMC_eager():
 
 
 def test_PoissonRegression_multiMC_noneager():
-    """Tests PoissonRegression w/ n_mc>1 in non-eager mode"""
-
+    """Tests PoissonRegression w/ n_mc>1 in non-eager mode."""
     # Data
     x = np.random.randn(100, 5).astype("float32")
     w = np.random.randn(5, 1).astype("float32")

@@ -1,3 +1,5 @@
+"""Stop training early when some metric stops decreasing."""
+
 from collections.abc import Callable
 
 import numpy as np
@@ -8,8 +10,7 @@ from .monitor_metric import MonitorMetric
 
 
 class EarlyStopping(Callback):
-    """Stop training early when some metric stops decreasing
-
+    """Stop training early when some metric stops decreasing.
 
     Parameters
     ----------

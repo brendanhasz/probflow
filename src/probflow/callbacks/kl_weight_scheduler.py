@@ -1,3 +1,5 @@
+"""Set the weight of the KL term's contribution to the ELBO loss each epoch."""
+
 from collections.abc import Callable
 
 import matplotlib.pyplot as plt
@@ -6,7 +8,7 @@ from .callback import Callback
 
 
 class KLWeightScheduler(Callback):
-    """Set the weight of the KL term's contribution to the ELBO loss each epoch
+    """Set the weight of the KL term's contribution to the ELBO loss each epoch.
 
     Parameters
     ----------
@@ -20,7 +22,6 @@ class KLWeightScheduler(Callback):
 
     Examples
     --------
-
     See the user guide section on :ref:`user-guide-kl-scheduler`.
 
     """
@@ -52,7 +53,7 @@ class KLWeightScheduler(Callback):
             print(f"Epoch {self.current_epoch} - KL weight {self.current_w}")
 
     def plot(self, **kwargs) -> None:
-        """Plot the KL weight as a function of epoch
+        """Plot the KL weight as a function of epoch.
 
         Parameters
         ----------

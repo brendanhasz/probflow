@@ -10,8 +10,8 @@ from probflow.callbacks import (
 
 
 def test_EarlyStopping():
-
     # Get a model and data
+    """Test EarlyStopping."""
     my_model, x, y = get_model_and_data()
 
     # Test EarlyStopping
@@ -30,8 +30,8 @@ def test_EarlyStopping():
 
 
 def test_multiple_callbacks():
-
     # Get a model and data
+    """Test multiple callbacks."""
     my_model, x, y = get_model_and_data()
 
     # Test multiple callbacks at the same time
@@ -43,8 +43,8 @@ def test_multiple_callbacks():
 
 
 def test_EarlyStopping_given_MonitorMetric():
-
     # Get a model and data
+    """Test EarlyStopping given MonitorMetric."""
     my_model, x, y = get_model_and_data()
 
     # Test EarlyStopping
@@ -54,8 +54,8 @@ def test_EarlyStopping_given_MonitorMetric():
 
 
 def test_EarlyStopping_given_MonitorELBO():
-
     # Get a model and data
+    """Test EarlyStopping given MonitorELBO."""
     my_model, x, y = get_model_and_data()
 
     # Test EarlyStopping

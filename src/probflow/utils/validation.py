@@ -1,10 +1,6 @@
-"""
-The utils.validation module contains functions for checking that inputs have
-the correct type.
+"""Functions for checking that inputs have the correct type.
 
 * :func:`.ensure_tensor_like`
-
-----------
 
 """
 
@@ -18,8 +14,7 @@ from probflow.utils.settings import get_backend
 
 
 def ensure_tensor_like(obj: Any, name: str) -> None:
-    """Determine whether an object can be cast to a Tensor"""
-
+    """Determine whether an object can be cast to a Tensor."""
     # Check for non-backend-dependent types
     if isinstance(
         obj,

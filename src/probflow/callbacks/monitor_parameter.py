@@ -1,11 +1,12 @@
+"""Monitor the mean value of Parameter(s) over the course of training."""
+
 import matplotlib.pyplot as plt
 
 from .callback import Callback
 
 
 class MonitorParameter(Callback):
-    """Monitor the mean value of Parameter(s) over the course of training
-
+    """Monitor the mean value of Parameter(s) over the course of training.
 
     Parameters
     ----------
@@ -15,7 +16,6 @@ class MonitorParameter(Callback):
 
     Examples
     --------
-
     See the user guide section on :ref:`user-guide-monitor-parameter`.
 
     """
@@ -39,7 +39,7 @@ class MonitorParameter(Callback):
         self.epochs += [self.current_epoch]
 
     def plot(self, param: str | list[str] | None = None, **kwargs) -> None:
-        """Plot the parameter value(s) as a function of epoch
+        """Plot the parameter value(s) as a function of epoch.
 
         Parameters
         ----------

@@ -1,3 +1,5 @@
+"""The Categorical distribution."""
+
 import probflow.utils.ops as O
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import get_backend
@@ -60,7 +62,7 @@ class Categorical(BaseDistribution):
             self.ndim = get_ndims(logits, "logits")
 
     def __call__(self) -> BackendDistribution:
-        """Get the distribution object from the backend"""
+        """Get the distribution object from the backend."""
         if get_backend() == "pytorch":
             import torch.distributions as tod
 
@@ -73,13 +75,13 @@ class Categorical(BaseDistribution):
             return tfd.Categorical(logits=self["logits"], probs=self["probs"])
 
     def prob(self, y: TensorLike) -> TensorLike:
-        """Doesn't broadcast correctly when logits/probs and y are same dims"""
+        """Doesn't broadcast correctly when logits/probs and y are same dims."""
         if self.ndim == get_ndims(y):
             y = O.squeeze(y)
         return super().prob(y)
 
     def log_prob(self, y: TensorLike) -> TensorLike:
-        """Doesn't broadcast correctly when logits/probs and y are same dims"""
+        """Doesn't broadcast correctly when logits/probs and y are same dims."""
         if self.ndim == get_ndims(y):
             y = O.squeeze(y)
         return super().log_prob(y)

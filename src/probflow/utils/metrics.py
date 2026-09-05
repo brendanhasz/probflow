@@ -38,7 +38,7 @@ from probflow.utils.typing import TensorLike
 def as_numpy(
     fn: Callable[[np.ndarray, np.ndarray], float],
 ) -> Callable[[TensorLike, TensorLike], float]:
-    """Cast inputs to numpy arrays and same shape before computing metric"""
+    """Cast inputs to numpy arrays and same shape before computing metric."""
 
     def metric_fn(y_true: TensorLike, y_pred: TensorLike) -> float:
 
@@ -134,8 +134,7 @@ def f1_score(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 def get_metric_fn(
     metric: str | Callable[[TensorLike, TensorLike], float],
 ) -> Callable[[TensorLike, TensorLike], float]:
-    """Get a function corresponding to a metric string"""
-
+    """Get a function corresponding to a metric string."""
     # List of valid metric strings
     metrics = {
         "accuracy": accuracy,

@@ -1,3 +1,5 @@
+"""ProbFlow model where the dependent variable is categorical."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -90,7 +92,6 @@ class CategoricalModel(Model):
             Additional keyword arguments are passed to
             :func:`.plot_categorical_dist`
         """
-
         # Sample from the predictive distribution
         samples = self.predictive_sample(x, n=n, batch_size=batch_size)
 

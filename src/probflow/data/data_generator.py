@@ -1,3 +1,5 @@
+"""Abstract base class for a data generator."""
+
 import multiprocessing as mp
 from abc import abstractmethod
 
@@ -32,13 +34,12 @@ class DataGenerator(BaseDataGenerator):
     def get_batch(
         self, index: int
     ) -> tuple[TensorLike | None, TensorLike | None]:
-        """Generate one batch of data"""
+        """Generate one batch of data."""
 
     def __getitem__(
         self, index: int
     ) -> tuple[TensorLike | None, TensorLike | None]:
-        """Generate one batch of data"""
-
+        """Generate one batch of data."""
         # No multiprocessing
         if self.num_workers is None:
             return self.get_batch(index)
@@ -54,8 +55,7 @@ class DataGenerator(BaseDataGenerator):
             return self._queue.get()  # type: ignore
 
     def __iter__(self) -> "DataGenerator":
-        """Get an iterator over batches"""
-
+        """Get an iterator over batches."""
         # Multiprocessing?
         if self.num_workers is not None:
 
@@ -80,7 +80,7 @@ class DataGenerator(BaseDataGenerator):
         return self
 
     def __next__(self) -> tuple[TensorLike | None, TensorLike | None]:
-        """Get the next batch"""
+        """Get the next batch."""
         self._batch += 1
         if self._batch < len(self):
             return self[self._batch]

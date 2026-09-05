@@ -1,4 +1,4 @@
-"""Tests example correlation"""
+"""Tests example correlation."""
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,7 +11,7 @@ tfd = tfp.distributions
 
 
 def test_correlation(plot):
-    """Tests correlation example"""
+    """Tests correlation example."""
 
     class BayesianCorrelation(pf.Model):
         def __init__(self):

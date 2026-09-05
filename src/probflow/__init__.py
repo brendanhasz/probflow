@@ -1,3 +1,5 @@
+"""ProbFlow package."""
+
 from importlib.metadata import PackageNotFoundError, version
 
 from probflow.applications import *

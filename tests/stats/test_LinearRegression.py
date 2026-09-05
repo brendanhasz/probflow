@@ -10,8 +10,7 @@ BATCH_SIZE: int = 1000
 
 
 def test_linear_regression():
-    """Test that a linear regression recovers the true parameters"""
-
+    """Test that a linear regression recovers the true parameters."""
     # Set random seed
     np.random.seed(1234)
 

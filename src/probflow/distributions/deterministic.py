@@ -1,3 +1,5 @@
+"""A deterministic distribution."""
+
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import get_backend
 from probflow.utils.torch_distributions import get_TorchDeterministic
@@ -46,7 +48,7 @@ class Deterministic(BaseDistribution):
         self.loc = loc
 
     def __call__(self) -> BackendDistribution:
-        """Get the distribution object from the backend"""
+        """Get the distribution object from the backend."""
         if get_backend() == "pytorch":
             TorchDeterministic = get_TorchDeterministic()
             return TorchDeterministic(self["loc"])

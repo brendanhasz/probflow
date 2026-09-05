@@ -1,3 +1,5 @@
+"""Generate array-structured data to feed through a model."""
+
 import numpy as np
 import pandas as pd
 
@@ -100,19 +102,18 @@ class ArrayDataGenerator(DataGenerator):
 
     @property
     def n_samples(self) -> int:
-        """Number of samples in the dataset"""
+        """Number of samples in the dataset."""
         return self._n_samples
 
     @property
     def batch_size(self) -> int:
-        """Number of samples to generate each minibatch"""
+        """Number of samples to generate each minibatch."""
         return self._batch_size
 
     def get_batch(
         self, index: int
     ) -> tuple[TensorLike | None, TensorLike | None]:
-        """Generate one batch of data"""
-
+        """Generate one batch of data."""
         # Return none if no data
         if self._empty:
             return None, None
@@ -146,6 +147,6 @@ class ArrayDataGenerator(DataGenerator):
         return x, y
 
     def on_epoch_end(self) -> None:
-        """Shuffle data each epoch"""
+        """Shuffle data each epoch."""
         if self.shuffle:
             self.ids = np.random.permutation(self.n_samples)

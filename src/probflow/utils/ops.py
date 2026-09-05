@@ -99,7 +99,6 @@ def kl_divergence(
     kld : Tensor
         The Kullback–Leibler divergence between P and Q (KL(P || Q))
     """
-
     # Get the backend distribution if needed
     if isinstance(P, BaseDistribution):
         P = P()
@@ -119,7 +118,7 @@ def kl_divergence(
 
 @make_input_tensor
 def expand_dims(val: BackendTensor, axis: int | None) -> BackendTensor:
-    """Add a singular dimension to a Tensor"""
+    """Add a singular dimension to a Tensor."""
     if axis is None:
         return val
     if get_backend() == "pytorch":
@@ -134,7 +133,7 @@ def expand_dims(val: BackendTensor, axis: int | None) -> BackendTensor:
 
 @make_input_tensor
 def squeeze(val: BackendTensor) -> BackendTensor:
-    """Remove singleton dimensions"""
+    """Remove singleton dimensions."""
     if get_backend() == "pytorch":
         import torch
 
@@ -194,7 +193,7 @@ def randn(shape: int | Sequence[int]) -> BackendTensor:
 
 
 def rand_rademacher(shape: int | Sequence[int]) -> BackendTensor:
-    """Tensor full of random -1s or 1s (i.e. drawn from a Rademacher dist)."""
+    """Generate a tensor full of random -1s or 1s (i.e. drawn from a Rademacher dist)."""
     if get_backend() == "pytorch":
         import torch
 
@@ -209,7 +208,7 @@ def rand_rademacher(shape: int | Sequence[int]) -> BackendTensor:
 
 
 def shape(x: BackendTensor) -> list[int]:
-    """Get a list of integers representing this tensor's shape"""
+    """Get a list of integers representing this tensor's shape."""
     if get_backend() == "pytorch":
         return [s for s in x.shape]
     else:
@@ -217,7 +216,7 @@ def shape(x: BackendTensor) -> list[int]:
 
 
 def eye(dims: int) -> BackendTensor:
-    """Identity matrix."""
+    """Generate an identity matrix."""
     if get_backend() == "pytorch":
         import torch
 
@@ -231,7 +230,7 @@ def eye(dims: int) -> BackendTensor:
 def sum(
     val: BackendTensor, axis: int | None = -1, keepdims: bool = False
 ) -> BackendTensor:
-    """The sum."""
+    """Calculate the sum."""
     if get_backend() == "pytorch":
         import torch
 
@@ -248,7 +247,7 @@ def sum(
 def prod(
     val: BackendTensor, axis: int | None = -1, keepdims: bool = False
 ) -> BackendTensor:
-    """The product."""
+    """Calculate the product."""
     if get_backend() == "pytorch":
         import torch
 
@@ -262,7 +261,7 @@ def prod(
 def mean(
     val: BackendTensor, axis: int | None = -1, keepdims: bool = False
 ) -> BackendTensor:
-    """The mean."""
+    """Calculate the mean."""
     if get_backend() == "pytorch":
         import torch
 
@@ -276,7 +275,7 @@ def mean(
 def std(
     val: BackendTensor, axis: int | None = -1, keepdims: bool = False
 ) -> BackendTensor:
-    """The uncorrected sample standard deviation."""
+    """Calculate the uncorrected sample standard deviation."""
     if get_backend() == "pytorch":
         import torch
 
@@ -288,7 +287,7 @@ def std(
 
 
 def round(val: BackendTensor) -> BackendTensor:
-    """Round to the closest integer"""
+    """Round to the closest integer."""
     if get_backend() == "pytorch":
         import torch
 
@@ -300,7 +299,7 @@ def round(val: BackendTensor) -> BackendTensor:
 
 
 def abs(val: BackendTensor) -> BackendTensor:
-    """Absolute value"""
+    """Take the absolute value of a tensor."""
     if get_backend() == "pytorch":
         import torch
 
@@ -312,7 +311,7 @@ def abs(val: BackendTensor) -> BackendTensor:
 
 
 def square(val: BackendTensor) -> BackendTensor:
-    """Power of 2"""
+    """Square a tensor."""
     if get_backend() == "pytorch":
         return val**2
     else:
@@ -322,7 +321,7 @@ def square(val: BackendTensor) -> BackendTensor:
 
 
 def sqrt(val: BackendTensor) -> BackendTensor:
-    """The square root."""
+    """Apply the square root."""
     if get_backend() == "pytorch":
         import torch
 
@@ -334,7 +333,7 @@ def sqrt(val: BackendTensor) -> BackendTensor:
 
 
 def exp(val: BackendTensor) -> BackendTensor:
-    """The natural exponent."""
+    """Apply the natural exponent."""
     if get_backend() == "pytorch":
         import torch
 
@@ -384,7 +383,7 @@ def sigmoid(val: BackendTensor) -> BackendTensor:
 def gather(
     vals: BackendTensor, inds: TensorLike, axis: int = 0
 ) -> BackendTensor:
-    """Gather values by index"""
+    """Gather values by index."""
     if get_backend() == "pytorch":
         import torch
 
@@ -396,7 +395,7 @@ def gather(
 
 
 def cat(vals: Sequence[BackendTensor], axis: int = 0) -> BackendTensor:
-    """Concatenate tensors"""
+    """Concatenate tensors."""
     if get_backend() == "pytorch":
         import torch
 
@@ -408,7 +407,7 @@ def cat(vals: Sequence[BackendTensor], axis: int = 0) -> BackendTensor:
 
 
 def additive_logistic_transform(vals: BackendTensor) -> BackendTensor:
-    """The additive logistic transformation"""
+    """Apply the additive logistic transformation."""
     if get_backend() == "pytorch":
         import torch
 
@@ -430,7 +429,7 @@ def additive_logistic_transform(vals: BackendTensor) -> BackendTensor:
 
 
 def insert_col_of(vals: BackendTensor, val: ScalarLike) -> BackendTensor:
-    """Add a column of a value to the left side of a tensor"""
+    """Add a column of a value to the left side of a tensor."""
     if get_backend() == "pytorch":
         import torch
 
@@ -448,7 +447,7 @@ def insert_col_of(vals: BackendTensor, val: ScalarLike) -> BackendTensor:
 
 
 def new_variable(initial_values: TensorLike) -> BackendVariable:
-    """Get a new variable with the current backend, and initialize it"""
+    """Get a new variable with the current backend, and initialize it."""
     if get_backend() == "pytorch":
         import torch
 
@@ -468,13 +467,11 @@ def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
 
     References
     ----------
-
     - Jose C. Pinheiro & Douglas M. Bates.  `Unconstrained Parameterizations
       for Variance-Covariance Matrices
       <https://dx.doi.org/10.1007/BF00140873>`_ *Statistics and Computing*,
       1996.
     """
-
     if get_backend() == "pytorch":
         import numpy as np
         import torch
@@ -495,7 +492,7 @@ def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
 
 
 def transpose(x: BackendTensor) -> BackendTensor:
-    """Transpose a matrix or batch of matrices"""
+    """Transpose a matrix or batch of matrices."""
     if get_backend() == "pytorch":
         import torch
 
@@ -510,7 +507,7 @@ def transpose(x: BackendTensor) -> BackendTensor:
 
 
 def reshape(x: BackendTensor, new_shape: Sequence[int]) -> BackendTensor:
-    """Reshape a tensor"""
+    """Reshape a tensor."""
     if get_backend() == "pytorch":
         import torch
 
@@ -522,7 +519,7 @@ def reshape(x: BackendTensor, new_shape: Sequence[int]) -> BackendTensor:
 
 
 def copy_tensor(x: BackendTensor) -> BackendTensor:
-    """Copy a tensor, detaching it from the gradient/backend/etc/etc"""
+    """Copy a tensor, detaching it from the gradient/backend/etc/etc."""
     if get_backend() == "pytorch":
         return x.detach().clone()
     else:

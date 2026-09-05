@@ -1,3 +1,5 @@
+"""Functions for getting tensor shapes."""
+
 import numpy as np
 import pandas as pd
 
@@ -7,7 +9,7 @@ from probflow.utils.validation import ensure_tensor_like
 
 
 def get_ndims(x: TensorLike, name: str = "") -> int:
-    """Get the number of dimensions of any tensor-like object"""
+    """Get the number of dimensions of any tensor-like object."""
     ensure_tensor_like(x, name)
     if isinstance(x, (int, float)):
         return 1
@@ -20,7 +22,7 @@ def get_ndims(x: TensorLike, name: str = "") -> int:
 
 
 def get_shape(x: TensorLike) -> tuple[int, ...]:
-    """Get the shape of any tensor-like object"""
+    """Get the shape of any tensor-like object."""
     if isinstance(x, (int, float)):
         return (1,)
     if isinstance(x, list):

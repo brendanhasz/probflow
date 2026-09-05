@@ -1,3 +1,5 @@
+"""Make input a DataGenerator if not already."""
+
 from probflow.utils.typing import TensorLike
 
 from .array_data_generator import ArrayDataGenerator
@@ -12,7 +14,7 @@ def make_generator(
     test: bool = False,
     num_workers: int | None = None,
 ) -> DataGenerator:
-    """Make input a DataGenerator if not already"""
+    """Make input a DataGenerator if not already."""
     if isinstance(x, DataGenerator):
         return x
     else:

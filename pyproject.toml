@@ -57,10 +57,15 @@ packages = ["src/probflow"]
 line-length = 79
 
 [tool.ruff.lint]
-ignore = ["B006", "B008", "E203", "E501", "E731", "E741"]
+ignore = ["B006", "B008", "D105", "D205", "D401", "D404", "E203", "E501", "E731", "E741"]
+extend-select = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
 "src/probflow/__init__.py" = ["F401", "F403"]
+"tests/**" = ["D"]  # ignore docstring checks in tests
 
 [tool.pytest.ini_options]
 addopts = "-p no:warnings"

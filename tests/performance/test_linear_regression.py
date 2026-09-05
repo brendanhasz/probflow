@@ -17,6 +17,7 @@ eagers = [True, False]
 
 
 def get_data(N, D, dtype="float32"):
+    """Provide get data."""
     x = np.random.randn(N, D).astype(dtype)
     w = np.random.randn(D, 1).astype(dtype)
     y = x @ w + 0.1 * np.random.randn(D, 1).astype(dtype)
@@ -24,7 +25,7 @@ def get_data(N, D, dtype="float32"):
 
 
 def test_linear_regression_times():
-
+    """Test linear regression times."""
     times = []
 
     for N, D, backend, eager in product(ns, ds, backends, eagers):

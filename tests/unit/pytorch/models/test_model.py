@@ -15,11 +15,12 @@ from probflow.utils.casting import to_tensor
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_Model_0D():
-    """Tests the probflow.models.Model abstract base class"""
+    """Tests the probflow.models.Model abstract base class."""
 
     class MyModel(Model):
         def __init__(self):
@@ -287,7 +288,7 @@ def test_Model_0D():
 
 
 def test_Model_force_eager():
-    """Tests fitting probflow.model.Model forcing eager=True"""
+    """Tests fitting probflow.model.Model forcing eager=True."""
 
     class MyModel(Model):
         def __init__(self):
@@ -309,7 +310,7 @@ def test_Model_force_eager():
 
 
 def test_Model_force_no_flipout():
-    """Tests fitting probflow.model.Model forcing flipout=False"""
+    """Tests fitting probflow.model.Model forcing flipout=False."""
 
     class MyModel(Model):
         def __init__(self):
@@ -357,8 +358,7 @@ def test_Model_nonprobabilistic():
 
 
 def test_Model_with_dataframe():
-    """Tests fitting probflow.model.Model w/ DataFrame and eager=False"""
-
+    """Tests fitting probflow.model.Model w/ DataFrame and eager=False."""
     import pandas as pd
 
     class MyModel(Model):
@@ -395,7 +395,8 @@ def test_Model_with_dataframe():
 
 def test_Model_ArrayDataGenerators():
     """Tests the probflow.models.Model sampling/predictive methods when
-    passed ArrayDataGenerators"""
+    passed ArrayDataGenerators.
+    """
 
     class MyModel(Model):
         def __init__(self):
@@ -454,7 +455,7 @@ def test_Model_ArrayDataGenerators():
 
 
 def test_Model_1D():
-    """Tests the probflow.models.Model abstract base class"""
+    """Tests the probflow.models.Model abstract base class."""
 
     class MyModel(Model):
         def __init__(self):
@@ -672,7 +673,7 @@ def test_Model_1D():
 
 
 def test_generative_Model():
-    """Tests the probflow.models.Model w/ a generative model (only x)"""
+    """Tests the probflow.models.Model w/ a generative model (only x)."""
 
     class MyModel(Model):
         def __init__(self):
@@ -726,7 +727,7 @@ def test_generative_Model():
 
 
 def test_Model_nesting():
-    """Tests Model when it contains Modules and sub-modules"""
+    """Tests Model when it contains Modules and sub-modules."""
 
     class MyModule(Module):
         def __init__(self):
@@ -777,7 +778,7 @@ def test_Model_nesting():
 
 
 def test_Model_multiple_mc_0d_eager():
-    """Fit probflow.model.Model w/ n_mc>1 to 0d data in eager mode"""
+    """Fit probflow.model.Model w/ n_mc>1 to 0d data in eager mode."""
 
     class MyModel(Model):
         def __init__(self):
@@ -830,7 +831,7 @@ def test_Model_multiple_mc_0d_eager():
 
 
 def test_Model_multiple_mc_0d_noneager():
-    """Fit probflow.model.Model w/ n_mc>1 to 0d data in non-eager mode"""
+    """Fit probflow.model.Model w/ n_mc>1 to 0d data in non-eager mode."""
 
     class MyModel(Model):
         def __init__(self):
@@ -859,7 +860,7 @@ def test_Model_multiple_mc_0d_noneager():
 
 
 def test_Model_multiple_mc_1d_eager():
-    """Fit probflow.model.Model w/ n_mc>1 to vector data in eager mode"""
+    """Fit probflow.model.Model w/ n_mc>1 to vector data in eager mode."""
 
     class MyModel(Model):
         def __init__(self, d_in):
@@ -924,7 +925,7 @@ def test_Model_multiple_mc_1d_eager():
 
 
 def test_Model_multiple_mc_1d_noneager():
-    """Fit probflow.model.Model w/ n_mc>1 to vector data in non-eager mode"""
+    """Fit probflow.model.Model w/ n_mc>1 to vector data in non-eager mode."""
 
     class MyModel(Model):
         def __init__(self, d_in):
@@ -957,7 +958,7 @@ def test_Model_multiple_mc_1d_noneager():
 
 
 def test_Model_multiple_mc_2d_eager():
-    """Fit probflow.model.Model w/ n_mc>1 to multivar output in eager mode"""
+    """Fit probflow.model.Model w/ n_mc>1 to multivar output in eager mode."""
 
     class MyModel(Model):
         def __init__(self, d_in, d_out):
@@ -1022,7 +1023,7 @@ def test_Model_multiple_mc_2d_eager():
 
 
 def test_Model_multiple_mc_2d_noneager():
-    """Fit probflow.model.Model w/ n_mc>1 to multivar output w noneager mode"""
+    """Fit probflow.model.Model w/ n_mc>1 to multivar output w noneager mode."""
 
     class MyModel(Model):
         def __init__(self, d_in, d_out):
@@ -1055,7 +1056,7 @@ def test_Model_multiple_mc_2d_noneager():
 
 
 def test_Model_bayesian_updating():
-    """Tests doing Bayesian updates on a Model"""
+    """Tests doing Bayesian updates on a Model."""
 
     class MyModel(Model):
         def __init__(self):

@@ -8,12 +8,12 @@ tod = torch.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_InverseGamma():
-    """Tests InverseGamma distribution"""
-
+    """Tests InverseGamma distribution."""
     # Create the distribution
     dist = InverseGamma(5, 4)
 

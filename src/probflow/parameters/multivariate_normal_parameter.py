@@ -1,3 +1,5 @@
+"""A parameter with a multivariate normal posterior, with full covariance."""
+
 import probflow.utils.ops as O
 from probflow.distributions import MultivariateNormal
 from probflow.parameters.parameter import Parameter
@@ -28,12 +30,10 @@ class MultivariateNormalParameter(Parameter):
 
     Examples
     --------
-
     TODO
 
     References
     ----------
-
     - Jose C. Pinheiro & Douglas M. Bates.
       `Unconstrained Parameterizations for Variance-Covariance Matrices <https://dx.doi.org/10.1007/BF00140873>`_
       *Statistics and Computing*, 1996.

@@ -6,8 +6,8 @@ from probflow.callbacks import MonitorParameter
 
 
 def test_MonitorParameter(plot):
-
     # Get a model and data
+    """Test MonitorParameter."""
     my_model, x, y = get_model_and_data()
 
     # Test MonitorParameter

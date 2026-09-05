@@ -10,12 +10,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_Sequential():
-    """Tests probflow.modules.Sequential"""
-
+    """Tests probflow.modules.Sequential."""
     # Create the module
     seq = Sequential(
         [Dense(5, 10), tf.nn.relu, Dense(10, 3), tf.nn.relu, Dense(3, 1)]

@@ -1,3 +1,5 @@
+"""Probabilistic parameter(s)."""
+
 from collections.abc import Callable
 from typing import Any
 
@@ -19,7 +21,7 @@ from probflow.utils.typing import BackendTensor, BackendVariable, ScalarLike
 
 
 def _cache_static_samples(fn: Callable[..., Any]) -> Callable[..., Any]:
-    """Decorator to return static samples if they are currently cached"""
+    """Decorator to return static samples if they are currently cached."""
 
     def wrapped_fn(param: Any) -> Any:
         ss_uuid = get_static_sampling_uuid()
@@ -148,12 +150,12 @@ class Parameter(BaseParameter):
 
     @property
     def n_parameters(self) -> int:
-        """Get the number of independent parameters"""
+        """Get the number of independent parameters."""
         return int(np.prod(self.shape))
 
     @property
     def n_variables(self) -> int:
-        """Get the number of underlying variables"""
+        """Get the number of underlying variables."""
         return int(
             sum(
                 [
@@ -165,12 +167,12 @@ class Parameter(BaseParameter):
 
     @property
     def trainable_variables(self) -> list[BackendVariable]:
-        """Get a list of trainable variables from the backend"""
+        """Get a list of trainable variables from the backend."""
         return [e for e in self.untransformed_variables.values()]
 
     @property
     def variables(self) -> dict[str, BackendTensor]:
-        """Variables after applying their respective transformations"""
+        """Variables after applying their respective transformations."""
         return {
             name: self.var_transform[name](val)
             for name, val in self.untransformed_variables.items()
@@ -178,7 +180,7 @@ class Parameter(BaseParameter):
 
     @property
     def posterior(self) -> BaseDistribution:
-        """This Parameter's variational posterior distribution"""
+        """This Parameter's variational posterior distribution."""
         return self.posterior_fn(**self.variables)
 
     @_cache_static_samples
@@ -200,7 +202,8 @@ class Parameter(BaseParameter):
 
     def kl_loss(self) -> ScalarLike:
         """Compute the sum of the Kullback–Leibler divergences between this
-        parameter's priors and its variational posteriors."""
+        parameter's priors and its variational posteriors.
+        """
         if self.prior is None:
             return O.zeros([])
         else:
@@ -218,7 +221,7 @@ class Parameter(BaseParameter):
         )
 
     def posterior_mean(self) -> np.ndarray:
-        """Get the mean of the posterior distribution(s)"""
+        """Get the mean of the posterior distribution(s)."""
         return to_numpy(self())
 
     def posterior_sample(self, n: int = 1) -> np.ndarray:
@@ -268,7 +271,7 @@ class Parameter(BaseParameter):
     def posterior_ci(
         self, ci: float = 0.95, n: int = 10000
     ) -> tuple[np.ndarray, np.ndarray]:
-        """Posterior confidence intervals
+        """Posterior confidence intervals.
 
         Parameters
         ----------
@@ -286,7 +289,6 @@ class Parameter(BaseParameter):
         ub : float or |ndarray|
             Upper bound(s) of the confidence interval(s)
         """
-
         # Check values
         if ci < 0.0 or ci > 1.0:
             raise ValueError("ci must be between 0 and 1")
@@ -343,7 +345,6 @@ class Parameter(BaseParameter):
             Additional keyword arguments are passed to
             :meth:`.utils.plotting.plot_dist`
         """
-
         # Sample from the posterior
         samples = self.posterior_sample(n=n)
 
@@ -402,7 +403,6 @@ class Parameter(BaseParameter):
             See https://matplotlib.org/tutorials/colors/colors.html
             Default = use the default matplotlib color cycle
         """
-
         # Sample from the posterior
         samples = self.prior_sample(n=n)
 
@@ -424,7 +424,7 @@ class Parameter(BaseParameter):
     def _get_one_dim(
         self, val: BackendTensor, key: Any, axis: int
     ) -> BackendTensor:
-        """Slice along one axis, keeping the dimensionality of the input"""
+        """Slice along one axis, keeping the dimensionality of the input."""
         if isinstance(key, slice):
             if any(k is not None for k in [key.start, key.stop, key.step]):
                 ix = np.arange(*key.indices(val.shape[axis]))
@@ -438,7 +438,7 @@ class Parameter(BaseParameter):
             return O.gather(val, key, axis=axis)
 
     def __getitem__(self, key: Any) -> BackendTensor:
-        """Get a slice of a sample from the parameter
+        """Get a slice of a sample from the parameter.
 
         Example
         -------

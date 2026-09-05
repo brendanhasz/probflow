@@ -10,7 +10,7 @@ from probflow.utils.casting import to_tensor
 
 
 def test_ContinuousModel(plot):
-    """Tests probflow.models.ContinuousModel"""
+    """Tests probflow.models.ContinuousModel."""
 
     class MyModel(ContinuousModel):
         def __init__(self):

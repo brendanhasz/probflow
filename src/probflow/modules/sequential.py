@@ -1,3 +1,5 @@
+"""Apply a series of modules or functions sequentially."""
+
 from collections.abc import Callable
 
 from probflow.utils.casting import to_tensor
@@ -20,10 +22,11 @@ class Sequential(Module):
     """
 
     def __init__(self, steps: list[Callable], name: str = "Sequential"):
+        """Initialize the Sequential layer."""
         self.steps = steps  # store the list of steps
 
     def __call__(self, x: TensorLike) -> BackendTensor:
-        """Perform the forward pass"""
+        """Perform the forward pass."""
         x = to_tensor(x)
         for step in self.steps:
             x = step(x)

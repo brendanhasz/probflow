@@ -6,8 +6,8 @@ from probflow.callbacks import KLWeightScheduler
 
 
 def test_KLWeightScheduler(plot):
-
     # Get a model and data
+    """Test KLWeightScheduler."""
     my_model, x, y = get_model_and_data()
 
     # should error w/ invalid args

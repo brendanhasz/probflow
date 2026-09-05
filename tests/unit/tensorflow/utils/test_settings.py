@@ -1,4 +1,4 @@
-"""Tests the probflow.utils.settings module"""
+"""Tests the probflow.utils.settings module."""
 
 import uuid
 
@@ -9,8 +9,7 @@ from probflow.utils import settings
 
 
 def test_backend():
-    """Tests setting and getting the backend"""
-
+    """Tests setting and getting the backend."""
     # Default should be tensorflow
     assert settings.get_backend() == "tensorflow"
 
@@ -30,8 +29,7 @@ def test_backend():
 
 
 def test_datatype():
-    """Tests get and set_datatype"""
-
+    """Tests get and set_datatype."""
     assert isinstance(settings.get_datatype(), tf.DType)
     assert settings.get_datatype() == tf.float32
 
@@ -45,8 +43,7 @@ def test_datatype():
 
 
 def test_samples():
-    """Tests setting and getting the number of samples"""
-
+    """Tests setting and getting the number of samples."""
     # Default should be None
     assert settings.get_samples() is None
 
@@ -72,8 +69,7 @@ def test_samples():
 
 
 def test_flipout():
-    """Tests setting and getting the flipout setting"""
-
+    """Tests setting and getting the flipout setting."""
     # Default should be False
     assert settings.get_flipout() is False
 
@@ -93,8 +89,7 @@ def test_flipout():
 
 
 def test_static_sampling_uuid():
-    """Tests setting and getting the static sampling uuid"""
-
+    """Tests setting and getting the static sampling uuid."""
     # Default should be None
     assert settings.get_static_sampling_uuid() is None
 
@@ -116,8 +111,7 @@ def test_static_sampling_uuid():
 
 
 def test_sampling():
-    """Tests the Sampling context manager"""
-
+    """Tests the Sampling context manager."""
     # Defaults before sampling
     assert settings.get_backend() == "tensorflow"
     assert settings.get_samples() is None

@@ -6,8 +6,8 @@ from probflow.callbacks import TimeOut
 
 
 def test_TimeOut():
-
     # Get a model and data
+    """Test TimeOut."""
     my_model, x, y = get_model_and_data()
 
     # Test TimeOut

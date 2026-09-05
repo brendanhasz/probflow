@@ -33,18 +33,18 @@ from probflow.utils.typing import (
 
 
 class BaseDistribution(ABC):
-    """Abstract base class for ProbFlow Distributions"""
+    """Abstract base class for ProbFlow Distributions."""
 
     @abstractmethod
     def __init__(self, *args):
-        """Initialize the distribution"""
+        """Initialize the distribution."""
 
     @abstractmethod
     def __call__(self) -> BackendDistribution:
-        """Get the distribution object from the backend"""
+        """Get the distribution object from the backend."""
 
     def __getitem__(self, key: str) -> Any:
-        """Get a parameter, or if a probflow.Parameter, get a sample"""
+        """Get a parameter, or if a probflow.Parameter, get a sample."""
         param = getattr(self, key)
         if callable(param):
             return param()
@@ -52,25 +52,26 @@ class BaseDistribution(ABC):
             return param
 
     def prob(self, y: TensorLike) -> BackendTensor:
-        """Compute the probability of some data given this distribution"""
+        """Compute the probability of some data given this distribution."""
         if get_backend() == "pytorch":
             return self().log_prob(to_tensor(y)).exp()
         else:
             return self().prob(to_tensor(y))
 
     def log_prob(self, y: TensorLike) -> BackendTensor:
-        """Compute the log probability of some data given this distribution"""
+        """Compute the log probability of some data given this distribution."""
         return self().log_prob(to_tensor(y))
 
     def cdf(self, y: TensorLike) -> BackendTensor:
-        """Cumulative probability of some data along this distribution"""
+        """Cumulative probability of some data along this distribution."""
         return self().cdf(to_tensor(y))
 
     def mean(self) -> BackendTensor:
-        """Compute the mean of this distribution
+        """Compute the mean of this distribution.
 
         Note that this uses the mode of distributions for which the mean
-        is undefined (for example, a categorical distribution)"""
+        is undefined (for example, a categorical distribution)
+        """
         if get_backend() == "pytorch":
             return self().mean
         else:
@@ -80,14 +81,14 @@ class BaseDistribution(ABC):
                 return self().mode()
 
     def mode(self) -> BackendTensor:
-        """Compute the mode of this distribution"""
+        """Compute the mode of this distribution."""
         if get_backend() == "pytorch":
             return self().mode
         else:
             return self().mode()
 
     def sample(self, n: int = 1) -> BackendTensor:
-        """Generate a random sample from this distribution"""
+        """Generate a random sample from this distribution."""
         if get_backend() == "pytorch":
             try:
                 if isinstance(n, int) and n == 1:
@@ -111,7 +112,7 @@ class BaseDistribution(ABC):
 
 
 class BaseParameter(ABC):
-    """Abstract base class for ProbFlow Parameters"""
+    """Abstract base class for ProbFlow Parameters."""
 
     shape: list[int]
     posterior_fn: type[BaseDistribution]
@@ -124,7 +125,7 @@ class BaseParameter(ABC):
 
     @abstractmethod
     def __init__(self, *args):
-        """Initialize the parameter"""
+        """Initialize the parameter."""
 
     @abstractmethod
     def __call__(self) -> BackendTensor:
@@ -133,32 +134,33 @@ class BaseParameter(ABC):
     @property
     @abstractmethod
     def n_parameters(self) -> int:
-        """Get the number of independent parameters"""
+        """Get the number of independent parameters."""
 
     @property
     @abstractmethod
     def n_variables(self) -> int:
-        """Get the number of underlying variables"""
+        """Get the number of underlying variables."""
 
     @property
     @abstractmethod
     def trainable_variables(self) -> list[BackendVariable]:
-        """Get a list of trainable variables from the backend"""
+        """Get a list of trainable variables from the backend."""
 
     @property
     @abstractmethod
     def variables(self) -> dict[str, BackendTensor]:
-        """Variables after applying their respective transformations"""
+        """Variables after applying their respective transformations."""
 
     @property
     @abstractmethod
     def posterior(self) -> BaseDistribution:
-        """This Parameter's variational posterior distribution"""
+        """This Parameter's variational posterior distribution."""
 
     @abstractmethod
     def kl_loss(self) -> ScalarLike:
         """Compute the sum of the Kullback–Leibler divergences between this
-        parameter's priors and its variational posteriors."""
+        parameter's priors and its variational posteriors.
+        """
 
     @abstractmethod
     def bayesian_update(self) -> None:
@@ -178,17 +180,17 @@ class BaseParameter(ABC):
 
 
 class BaseModule(ABC):
-    """Abstract base class for ProbFlow Modules"""
+    """Abstract base class for ProbFlow Modules."""
 
     _kl_losses: list[ScalarLike]
 
     @abstractmethod
     def __init__(self, *args):
-        """Initialize the module (abstract method)"""
+        """Initialize the module (abstract method)."""
 
     @abstractmethod
     def __call__(self, *args, **kwargs) -> BackendTensor:
-        """Perform forward pass, returning a tensor (abstract method)"""
+        """Perform forward pass, returning a tensor (abstract method)."""
 
     @property
     @abstractmethod
@@ -203,17 +205,17 @@ class BaseModule(ABC):
     @property
     @abstractmethod
     def trainable_variables(self) -> list[BackendVariable]:
-        """A list of trainable backend variables within this |Module|"""
+        """A list of trainable backend variables within this |Module|."""
 
     @property
     @abstractmethod
     def n_parameters(self) -> int:
-        """Get the number of independent parameters of this module"""
+        """Get the number of independent parameters of this module."""
 
     @property
     @abstractmethod
     def n_variables(self) -> int:
-        """Get the number of underlying variables in this module"""
+        """Get the number of underlying variables in this module."""
 
     @abstractmethod
     def bayesian_update(self) -> None:
@@ -225,16 +227,16 @@ class BaseModule(ABC):
     def kl_loss(self) -> ScalarLike:
         """Compute the sum of the Kullback-Leibler divergences between
         priors and their variational posteriors for all |Parameters| in this
-        |Module| and its sub-Modules."""
+        |Module| and its sub-Modules.
+        """
 
     @abstractmethod
     def kl_loss_batch(self) -> ScalarLike:
-        """Compute the sum of additional Kullback-Leibler divergences due to
-        data in this batch"""
+        """Sum of additional Kullback-Leibler divergences due to data in this batch."""
 
     @abstractmethod
     def reset_kl_loss(self) -> None:
-        """Reset additional loss due to KL divergences"""
+        """Reset additional loss due to KL divergences."""
 
     @abstractmethod
     def add_kl_loss(self, loss: ScalarLike) -> None:
@@ -258,79 +260,79 @@ class BaseModule(ABC):
 
 
 class BaseModel(ABC):
-    """Abstract base class for ProbFlow Models"""
+    """Abstract base class for ProbFlow Models."""
 
     @abstractmethod
     def __init__(self, *args):
-        """Initialize the model (abstract method)"""
+        """Initialize the model (abstract method)."""
 
     @abstractmethod
     def __call__(self, *args, **kwargs) -> BaseDistribution:
-        """Perform forward pass, returning a distribution (abstract method)"""
+        """Perform forward pass, returning a distribution (abstract method)."""
 
 
 class BaseDataGenerator(ABC):
-    """Abstract base class for ProbFlow DataGenerators"""
+    """Abstract base class for ProbFlow DataGenerators."""
 
     @abstractmethod
     def __init__(self, *args):
-        """Initialize the data generator"""
+        """Initialize the data generator."""
 
     def on_epoch_start(self) -> None:
-        """Will be called at the start of each training epoch"""
+        """Will be called at the start of each training epoch."""
 
     def on_epoch_end(self) -> None:
-        """Will be called at the end of each training epoch"""
+        """Will be called at the end of each training epoch."""
 
     @property
     @abstractmethod
     def n_samples(self) -> int:
-        """Number of samples in the dataset"""
+        """Number of samples in the dataset."""
 
     @property
     @abstractmethod
     def batch_size(self) -> int:
-        """Number of samples to generate each minibatch"""
+        """Number of samples to generate each minibatch."""
 
     def __len__(self) -> int:
-        """Number of batches per epoch"""
+        """Number of batches per epoch."""
         return ceil(self.n_samples / self.batch_size)
 
     @abstractmethod
     def __getitem__(self, index: int) -> tuple[TensorLike, TensorLike]:
-        """Generate one batch of data"""
+        """Generate one batch of data."""
 
     @abstractmethod
     def __iter__(self) -> "BaseDataGenerator":
-        """Get an iterator over batches"""
+        """Get an iterator over batches."""
 
     @abstractmethod
     def __next__(self) -> tuple[TensorLike | None, TensorLike | None]:
-        """Get the next batch"""
+        """Get the next batch."""
 
 
 class BaseCallback(ABC):
-    """Abstract base class for ProbFlow Callbacks"""
+    """Abstract base class for ProbFlow Callbacks."""
 
     # Reference to the model
     model: Any = None
 
     @abstractmethod
     def __init__(self, *args):
-        """Initialize the callback"""
+        """Initialize the callback."""
 
     @abstractmethod
     def on_train_start(self) -> None:
-        """Will be called at the start of training"""
+        """Will be called at the start of training."""
 
     @abstractmethod
     def on_epoch_start(self) -> None:
-        """Will be called at the start of each training epoch"""
+        """Will be called at the start of each training epoch."""
 
     @abstractmethod
     def on_epoch_end(self) -> None:
-        """Will be called at the end of each training epoch"""
+        """Will be called at the end of each training epoch."""
 
     @abstractmethod
     def on_train_end(self) -> None:
-        """Will be called at the end of training"""
+        """Will be called at the end of training."""

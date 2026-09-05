@@ -1,3 +1,5 @@
+"""Categorical parameter."""
+
 from collections.abc import Callable
 
 import probflow.utils.ops as O
@@ -53,7 +55,6 @@ class CategoricalParameter(Parameter):
 
     Examples
     --------
-
     TODO: creating variable
 
     """

@@ -1,7 +1,4 @@
-"""
-The utils.settings module contains global settings about the backend to use,
-what sampling method to use, the default device, and default datatype.
-
+"""Blobal settings about backend type, sampling method, default device, and default datatype.
 
 Backend
 -------
@@ -87,7 +84,7 @@ from probflow.utils.typing import BackendDataType
 
 
 class _Settings:
-    """Class to store ProbFlow global settings
+    """Class to store ProbFlow global settings.
 
     Attributes
     ----------
@@ -145,7 +142,7 @@ def set_backend(backend: str) -> None:
 
 
 def get_datatype() -> BackendDataType:
-    """Get the default datatype used for Tensors
+    """Get the default datatype used for Tensors.
 
     Returns
     -------
@@ -166,7 +163,7 @@ def get_datatype() -> BackendDataType:
 
 
 def set_datatype(datatype: BackendDataType) -> None:
-    """Set the datatype to use for Tensors
+    """Set the datatype to use for Tensors.
 
     Parameters
     ----------
@@ -190,7 +187,7 @@ def set_datatype(datatype: BackendDataType) -> None:
 
 
 def get_samples() -> int | None:
-    """Get how many samples (if any) are being drawn from parameter posteriors
+    """Get how many samples (if any) are being drawn from parameter posteriors.
 
     Returns
     -------
@@ -202,7 +199,7 @@ def get_samples() -> int | None:
 
 
 def set_samples(samples: int | None) -> None:
-    """Set how many samples (if any) to draw from parameter posteriors
+    """Set how many samples (if any) to draw from parameter posteriors.
 
     Parameters
     ----------
@@ -230,7 +227,7 @@ def get_flipout() -> bool:
 
 
 def set_flipout(flipout: bool) -> None:
-    """Set whether to use flipout where possible while sampling during training
+    """Set whether to use flipout where possible while sampling during training.
 
     Parameters
     ----------
@@ -244,12 +241,12 @@ def set_flipout(flipout: bool) -> None:
 
 
 def get_static_sampling_uuid() -> uuid.UUID | None:
-    """Get the current static sampling UUID"""
+    """Get the current static sampling UUID."""
     return __SETTINGS__._STATIC_SAMPLING_UUID
 
 
 def set_static_sampling_uuid(uuid_value: uuid.UUID | None) -> None:
-    """Set the current static sampling UUID"""
+    """Set the current static sampling UUID."""
     if uuid_value is None or isinstance(uuid_value, uuid.UUID):
         __SETTINGS__._STATIC_SAMPLING_UUID = uuid_value
     else:
@@ -258,7 +255,6 @@ def set_static_sampling_uuid(uuid_value: uuid.UUID | None) -> None:
 
 class Sampling:
     """Use sampling while within this context manager.
-
 
     Keyword Arguments
     -----------------
@@ -350,7 +346,7 @@ class Sampling:
             set_static_sampling_uuid(uuid.uuid4())
 
     def __exit__(self, _type, _val, _tb):
-        """End sampling and reset sampling settings to defaults"""
+        """End sampling and reset sampling settings to defaults."""
         if self._n is not None:
             set_samples(None)
         if self._flipout is not None:

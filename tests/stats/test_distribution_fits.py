@@ -1,4 +1,4 @@
-"""Tests the statistical accuracy of fitting some distributions"""
+"""Tests the statistical accuracy of fitting some distributions."""
 
 import numpy as np
 
@@ -10,13 +10,12 @@ BATCH_SIZE: int = 1000
 
 
 def is_close(a, b, th=1e-5):
-    """Check two values are close"""
+    """Check two values are close."""
     return np.abs(a - b) < th
 
 
 def test_fit_normal(random):
-    """Test fitting a normal distribution"""
-
+    """Test fitting a normal distribution."""
     # Generate data
     mu = np.random.randn()
     sig = np.exp(np.random.randn())
@@ -49,8 +48,7 @@ def test_fit_normal(random):
 
 
 def test_fit_studentt(random):
-    """Test fitting a student t distribution"""
-
+    """Test fitting a student t distribution."""
     # Generate data
     mu = np.random.randn(1).astype("float32")
     sig = np.exp(np.random.randn(1)).astype("float32")
@@ -84,8 +82,7 @@ def test_fit_studentt(random):
 
 
 def test_fit_cauchy(random):
-    """Test fitting a cauchy distribution"""
-
+    """Test fitting a cauchy distribution."""
     # Generate data
     mu = np.random.randn(1).astype("float32")
     sig = np.exp(np.random.randn(1)).astype("float32")
@@ -119,8 +116,7 @@ def test_fit_cauchy(random):
 
 
 def test_fit_gamma(random):
-    """Test fitting a gamma distribution"""
-
+    """Test fitting a gamma distribution."""
     # Generate data
     alpha = np.array([1.0]).astype("float32")
     beta = np.array([1.0]).astype("float32")
@@ -152,8 +148,7 @@ def test_fit_gamma(random):
 
 
 def test_fit_bernoulli(random):
-    """Test fitting a bernoulli distribution"""
-
+    """Test fitting a bernoulli distribution."""
     # Generate data
     N = 1000
     prob = 0.7
@@ -178,8 +173,7 @@ def test_fit_bernoulli(random):
 
 
 def test_fit_categorical(random):
-    """Test fitting a categorical distribution"""
-
+    """Test fitting a categorical distribution."""
     # Generate data
     probs = [0.3, 0.2, 0.5]
     x = np.random.choice(len(probs), N_DATAPOINTS, p=probs).astype("float32")
@@ -204,8 +198,7 @@ def test_fit_categorical(random):
 
 
 def test_fit_poisson(random):
-    """Test fitting a poisson distribution"""
-
+    """Test fitting a poisson distribution."""
     # Generate data
     rate = 10
     x = np.random.poisson(rate, N_DATAPOINTS).astype("float32")

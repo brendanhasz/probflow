@@ -1,3 +1,5 @@
+"""A categorical embedding layer."""
+
 import probflow.utils.ops as O
 from probflow.parameters import DeterministicParameter, Parameter
 from probflow.utils.casting import to_tensor
@@ -60,7 +62,6 @@ class Embedding(Module):
 
     Examples
     --------
-
     Embed 10k word IDs into a 50-dimensional space:
 
     .. code-block:: python
@@ -84,7 +85,7 @@ class Embedding(Module):
         name: str = "Embedding",
         **kwargs,
     ):
-
+        """Initialize the Embedding layer."""
         # Convert to list if not already
         if isinstance(k, int):
             k = [k]
@@ -114,7 +115,7 @@ class Embedding(Module):
         ]
 
     def __call__(self, x: TensorLike) -> BackendTensor:
-        """Perform the forward pass"""
+        """Perform the forward pass."""
         x = to_tensor(x)
         embs = [
             O.gather(self.embeddings[i](), x[:, i])

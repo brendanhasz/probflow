@@ -11,7 +11,6 @@ BATCH_SIZE: int = 100
 
 def test_logistic_regression():
     """Test that a logistic regression recovers the true parameters."""
-
     # Set random seed for reproducibility
     np.random.seed(1234)
 

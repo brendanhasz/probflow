@@ -1,3 +1,5 @@
+"""Monitor some metric on validation data."""
+
 import time
 
 import matplotlib.pyplot as plt
@@ -12,8 +14,7 @@ from .callback import Callback
 
 
 class MonitorMetric(Callback):
-    """Monitor some metric on validation data
-
+    """Monitor some metric on validation data.
 
     Parameters
     ----------
@@ -65,7 +66,7 @@ class MonitorMetric(Callback):
         self.wall_times: list[float] = []
 
     def on_epoch_start(self) -> None:
-        """Record start time at the beginning of the first epoch"""
+        """Record start time at the beginning of the first epoch."""
         if self.start_time is None:
             self.start_time = time.time()
 
@@ -87,7 +88,7 @@ class MonitorMetric(Callback):
             )
 
     def plot(self, x: str = "epoch", **kwargs) -> None:
-        """Plot the metric being monitored as a function of epoch
+        """Plot the metric being monitored as a function of epoch.
 
         Parameters
         ----------

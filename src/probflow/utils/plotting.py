@@ -20,7 +20,7 @@ COLORS: list[tuple[float, float, float]] = plt.rcParams[
 def approx_kde(
     data: np.ndarray, bins: int = 500, bw: float = 0.075
 ) -> tuple[np.ndarray, np.ndarray]:
-    """A fast approximation to kernel density estimation.
+    """Quickly approximate kernel density estimation.
 
     Parameters
     ----------
@@ -57,7 +57,7 @@ def approx_kde(
 def get_next_color(
     def_color: str | Sequence[str | tuple[float, float, float]] | None, ix: int
 ) -> str | tuple[float, float, float]:
-    """Get the next color in the color cycle"""
+    """Get the next color in the color cycle."""
     if def_color is None:
         return COLORS[ix % len(COLORS)]
     if isinstance(def_color, str):
@@ -67,7 +67,7 @@ def get_next_color(
 
 
 def get_ix_label(ix: int, shape: Sequence[int]) -> str:
-    """Get a string representation of the current index"""
+    """Get a string representation of the current index."""
     dims = np.zeros(len(shape))
     for d in range(len(shape) - 1, 0, -1):
         prod = np.prod(shape[:d])
@@ -124,7 +124,6 @@ def plot_dist(
         Whether to show legends for plots with >1 distribution
         Default = True
     """
-
     # Check inputs
     if ci < 0.0 or ci > 1.0:
         raise ValueError("ci must be between 0 and 1")
@@ -225,7 +224,6 @@ def plot_line(
         See https://matplotlib.org/tutorials/colors/colors.html
         Default = use the default matplotlib color cycle
     """
-
     # If 1d make 2d
     if ydata.ndim == 1:
         ydata = np.expand_dims(ydata, 1)
@@ -286,7 +284,6 @@ def fill_between(
         See https://matplotlib.org/tutorials/colors/colors.html
         Default = use the default matplotlib color cycle
     """
-
     # Check shapes
     if not np.all(lb.shape == ub.shape):
         raise ValueError("lb and ub must have same shape")
@@ -329,7 +326,7 @@ def fill_between(
 
 
 def centered_text(text: str) -> None:
-    """Display text centered in the figure"""
+    """Display text centered in the figure."""
     plt.gca().text(
         0.5,
         0.5,
@@ -341,7 +338,7 @@ def centered_text(text: str) -> None:
 
 
 def plot_discrete_dist(x: np.ndarray) -> None:
-    """Plot histogram of discrete variable"""
+    """Plot histogram of discrete variable."""
     minx = np.min(x)
     maxx = np.max(x)
     be = np.linspace(minx - 0.5, maxx + 0.5, int(maxx - minx + 2))
@@ -352,7 +349,7 @@ def plot_discrete_dist(x: np.ndarray) -> None:
 
 
 def plot_categorical_dist(x: np.ndarray) -> None:
-    """Plot histogram of categorical variable"""
+    """Plot histogram of categorical variable."""
     xc = pd.Series(x.ravel()).value_counts().sort_index()
     xc = xc / xc.sum()  # normalize
     plt.bar(xc.index, xc.values)
@@ -412,7 +409,6 @@ def plot_by(
     data_o : |ndarray|
         ``func`` applied to ``data`` values in each ``x`` bin
     """
-
     # Check types
     if not isinstance(bins, int):
         raise TypeError("bins must be an int")

@@ -1,4 +1,4 @@
-"""Tests example robust heteroscedastic regression"""
+"""Tests example robust heteroscedastic regression."""
 
 import numpy as np
 import tensorflow as tf
@@ -10,7 +10,7 @@ tfd = tfp.distributions
 
 
 def test_correlation(plot):
-    """Tests correlation example"""
+    """Tests correlation example."""
 
     class RobustHeteroscedasticRegression(pf.ContinuousModel):
         def __init__(self, dims):

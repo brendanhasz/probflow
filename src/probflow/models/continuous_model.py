@@ -1,3 +1,5 @@
+"""ProbFlow model where the dependent variable is continuous and 1-dimensional."""
+
 from collections.abc import Callable
 
 import matplotlib.pyplot as plt
@@ -101,8 +103,7 @@ class ContinuousModel(Model):
         n: int = 1000,
         batch_size: int | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
-        """Compute intervals on some type of sample"""
-
+        """Compute intervals on some type of sample."""
         # Compute in batches?
         if batch_size is not None:
             intervals = [
@@ -318,7 +319,6 @@ class ContinuousModel(Model):
         TODO
 
         """
-
         # Sample from the predictive distribution
         samples = self.predictive_sample(x, n=n, batch_size=batch_size)
 
@@ -347,7 +347,7 @@ class ContinuousModel(Model):
     def _get_y(
         self, x: TensorLike | DataGenerator, y: TensorLike | None
     ) -> np.ndarray:
-        """Get y, even when x is a DataGenerator and y is None"""
+        """Get y, even when x is a DataGenerator and y is None."""
         if y is not None:
             return to_numpy(y)
         else:
@@ -385,7 +385,6 @@ class ContinuousModel(Model):
         -------
         prcs : |ndarray| of float between 0 and 1
         """
-
         # Need both x and y data
         if y is None and not isinstance(x, DataGenerator):
             raise TypeError("need both x and y to compute predictive prc")
@@ -462,7 +461,6 @@ class ContinuousModel(Model):
             Whether each observation was covered by the predictive
             distribution's confidence interval.
         """
-
         # Check values
         if n < 1:
             raise ValueError("n must be greater than 0")
@@ -573,7 +571,6 @@ class ContinuousModel(Model):
             Coverage of the ``ci`` confidence interval of the predictive
             distribution in each bin.
         """
-
         # Compute whether each sample was covered by the predictive interval
         covered = self.pred_dist_covered(
             x, y=y, n=n, ci=ci, batch_size=batch_size
@@ -637,13 +634,11 @@ class ContinuousModel(Model):
 
         References
         ----------
-
         - Andrew Gelman, Ben Goodrich, Jonah Gabry, & Aki Vehtari.
           `R-squared for Bayesian regression models. <https://doi.org/10.1080/00031305.2018.1549100>`_
           *The American Statistician*, 2018.
 
         """
-
         # Get true y values
         y_true = self._get_y(x, y)
 
@@ -859,16 +854,14 @@ class ContinuousModel(Model):
         Or, even more simply, just use :meth:`~calibration_curve_plot`.
 
 
-        See also
+        See Also
         --------
-
         * :meth:`~calibration_curve_plot`
         * :meth:`~expected_calibration_error`
 
 
         References
         ----------
-
         - Volodymyr Kuleshov, Nathan Fenner, and Stefano Ermon.
           `Accurate Uncertainties for Deep Learning Using Calibrated Regression
           <https://arxiv.org/abs/1807.00263>`_, 2018.
@@ -914,9 +907,8 @@ class ContinuousModel(Model):
             Additional keyword arguments are passed to :func:`.plot_dist`
 
 
-        See also
+        See Also
         --------
-
         * :meth:`~calibration_curve`
         * :meth:`~expected_calibration_error`
 
@@ -953,7 +945,7 @@ class ContinuousModel(Model):
         resolution: int = 100,
         batch_size: int | None = None,
     ) -> float | dict[str, float]:
-        r"""Compute one or more of several calibration metrics
+        r"""Compute one or more of several calibration metrics.
 
         Regression calibration metrics measure the error between a model's
         regression calibration curve and the ideal calibration curve - i.e.,
@@ -1104,9 +1096,8 @@ class ContinuousModel(Model):
             {"msce": 0.123, "mace": 0.211}
 
 
-        See also
+        See Also
         --------
-
         * :meth:`~calibration_curve`
         * :meth:`~calibration_curve_plot`
         * :meth:`~sharpness`
@@ -1115,7 +1106,6 @@ class ContinuousModel(Model):
 
         References
         ----------
-
         - Volodymyr Kuleshov, Nathan Fenner, and Stefano Ermon.
           `Accurate Uncertainties for Deep Learning Using Calibrated Regression
           <https://arxiv.org/abs/1807.00263>`_, 2018.
@@ -1138,7 +1128,7 @@ class ContinuousModel(Model):
         n: int = 1000,
         batch_size: int | None = None,
     ) -> float:
-        r"""Compute the sharpness of the model's uncertainty estimates
+        r"""Compute the sharpness of the model's uncertainty estimates.
 
         The "sharpness" of a model's uncertainty estimates is the root mean of
         the estimated variances:
@@ -1192,16 +1182,14 @@ class ContinuousModel(Model):
             0.173
 
 
-        See also
+        See Also
         --------
-
         * :meth:`~calibration_metric`
         * :meth:`~dispersion_metric`
 
 
         References
         ----------
-
         - Kevin Tran, Willie Neiswanger, Junwoong Yoon, Qingyang Zhang, Eric
           Xing, Zachary W. Ulissi.  `Methods for comparing uncertainty
           quantifications for material property predictions
@@ -1229,7 +1217,7 @@ class ContinuousModel(Model):
         n: int = 1000,
         batch_size: int | None = None,
     ) -> float | dict[str, float]:
-        r"""Compute one or more of several calibration metrics
+        r"""Compute one or more of several calibration metrics.
 
         Dispersion metrics measure how much a model's uncertainty estimates
         vary.  There are several different dispersion metrics:
@@ -1309,16 +1297,14 @@ class ContinuousModel(Model):
             0.625
 
 
-        See also
+        See Also
         --------
-
         * :meth:`~calibration_metric`
         * :meth:`~sharpness`
 
 
         References
         ----------
-
         - Kevin Tran, Willie Neiswanger, Junwoong Yoon, Qingyang Zhang, Eric
           Xing, Zachary W. Ulissi.  `Methods for comparing uncertainty
           quantifications for material property predictions

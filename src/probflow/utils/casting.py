@@ -1,6 +1,4 @@
-"""
-The utils.casting module contains functions for casting back and forth
-betweeen Tensors and numpy arrays.
+"""Functions for casting back and forth betweeen Tensors and numpy arrays.
 
 * :func:`.to_numpy`
 * :func:`.to_tensor`
@@ -31,7 +29,7 @@ P = ParamSpec("P")
 
 
 def to_numpy(x: TensorLike) -> np.ndarray:
-    """Convert tensor to numpy array"""
+    """Convert tensor to numpy array."""
     if isinstance(x, list):
         return [to_numpy(e) for e in x]
     elif isinstance(x, np.ndarray):
@@ -57,8 +55,7 @@ def to_numpy(x: TensorLike) -> np.ndarray:
 
 
 def to_tensor(x: TensorLike) -> BackendTensor:
-    """Make x a tensor if not already"""
-
+    """Make x a tensor if not already."""
     # Get numpy data if pandas
     if isinstance(x, pd.DataFrame):
         x = x.values
@@ -78,6 +75,7 @@ def to_tensor(x: TensorLike) -> BackendTensor:
 
 
 def to_default_dtype(x: TensorLike) -> TensorLike:
+    """Cast a tensor to the default backend datatype."""
     if get_backend() == "pytorch":
         import torch
 
@@ -94,6 +92,8 @@ def to_default_dtype(x: TensorLike) -> TensorLike:
 def make_input_tensor(
     fn: Callable[Concatenate[BackendTensor, P], BackendTensor],
 ) -> Callable[Concatenate[TensorLike, P], BackendTensor]:
+    """Decorator to cast the first argument to a function to the default backend datatype."""
+
     def tensor_fn(*args, **kwargs) -> BackendTensor:
         return fn(to_tensor(args[0]), *args[1:], **kwargs)
 

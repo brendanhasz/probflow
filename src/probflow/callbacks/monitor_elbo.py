@@ -1,3 +1,5 @@
+"""Monitor the ELBO on the training data."""
+
 import time
 
 import matplotlib.pyplot as plt
@@ -7,8 +9,7 @@ from .callback import Callback
 
 
 class MonitorELBO(Callback):
-    """Monitor the ELBO on the training data
-
+    """Monitor the ELBO on the training data.
 
     Parameters
     ----------
@@ -34,7 +35,7 @@ class MonitorELBO(Callback):
         self.wall_times: list[float] = []
 
     def on_epoch_start(self) -> None:
-        """Record start time at the beginning of the first epoch"""
+        """Record start time at the beginning of the first epoch."""
         if self.start_time is None:
             self.start_time = time.time()
 
@@ -54,7 +55,7 @@ class MonitorELBO(Callback):
             print(f"Epoch {self.current_epoch} \tELBO: {self.current_elbo}")
 
     def plot(self, x: str = "epoch", **kwargs) -> None:
-        """Plot the ELBO as a function of epoch
+        """Plot the ELBO as a function of epoch.
 
         Parameters
         ----------

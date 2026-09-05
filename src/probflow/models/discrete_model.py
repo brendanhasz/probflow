@@ -1,3 +1,5 @@
+"""ProbFlow model where the dependent variable is discrete."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -106,7 +108,6 @@ class DiscreteModel(ContinuousModel):
             Additional keyword arguments are passed to
             :func:`.plot_discrete_dist`
         """
-
         # Sample from the predictive distribution
         samples = self.predictive_sample(x, n=n, batch_size=batch_size)
 
@@ -133,9 +134,9 @@ class DiscreteModel(ContinuousModel):
                 plot_discrete_dist(samples[:, i], **kwargs)
 
     def r_squared(self, *args, **kwargs):
-        """Cannot compute R squared for a discrete model"""
+        """Cannot compute R squared for a discrete model."""
         raise RuntimeError("Cannot compute R squared for a discrete model")
 
     def r_squared_plot(self, *args, **kwargs):
-        """Cannot compute R squared for a discrete model"""
+        """Cannot compute R squared for a discrete model."""
         raise RuntimeError("Cannot compute R squared for a discrete model")

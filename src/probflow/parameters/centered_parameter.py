@@ -1,3 +1,5 @@
+"""A vector of parameters centered at 0."""
+
 import numpy as np
 
 import probflow.utils.ops as O
@@ -75,7 +77,6 @@ class CenteredParameter(Parameter):
 
     Examples
     --------
-
     TODO
 
     """

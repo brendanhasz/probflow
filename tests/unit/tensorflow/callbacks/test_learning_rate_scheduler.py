@@ -6,8 +6,8 @@ from probflow.callbacks import LearningRateScheduler
 
 
 def test_LearningRateScheduler(plot):
-
     # Get a model and data
+    """Test LearningRateScheduler."""
     my_model, x, y = get_model_and_data()
 
     # Test LearningRateScheduler

@@ -1,3 +1,5 @@
+"""Dirichlet parameter."""
+
 from collections.abc import Callable
 
 import probflow.utils.ops as O
@@ -58,7 +60,6 @@ class DirichletParameter(Parameter):
 
     Examples
     --------
-
     TODO: creating variable
 
     """

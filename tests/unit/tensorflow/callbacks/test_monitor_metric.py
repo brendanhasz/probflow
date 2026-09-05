@@ -6,8 +6,8 @@ from probflow.callbacks import MonitorMetric
 
 
 def test_MonitorMetric(plot):
-
     # Get a model and data
+    """Test MonitorMetric."""
     my_model, x, y = get_model_and_data()
 
     # Test MontiorMetric
