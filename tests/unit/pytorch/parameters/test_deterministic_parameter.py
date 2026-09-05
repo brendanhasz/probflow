@@ -4,8 +4,7 @@ from probflow.parameters import DeterministicParameter
 
 
 def test_DeterministicParameter():
-    """Tests probflow.parameters.DeterministicParameter"""
-
+    """Tests probflow.parameters.DeterministicParameter."""
     # Create the parameter
     param = DeterministicParameter()
 

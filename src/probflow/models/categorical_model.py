@@ -1,7 +1,11 @@
+"""ProbFlow model where the dependent variable is categorical."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 
+from probflow.data.data_generator import DataGenerator
 from probflow.utils.plotting import plot_categorical_dist
+from probflow.utils.typing import TensorLike
 
 from .model import Model
 
@@ -57,7 +61,14 @@ class CategoricalModel(Model):
 
     """
 
-    def pred_dist_plot(self, x, n=10000, cols=1, batch_size=None, **kwargs):
+    def pred_dist_plot(
+        self,
+        x: TensorLike | DataGenerator | None = None,
+        n: int = 10000,
+        cols: int = 1,
+        batch_size: int | None = None,
+        **kwargs,
+    ) -> None:
         """Plot posterior predictive distribution from the model given ``x``.
 
         TODO: Docs...
@@ -65,7 +76,7 @@ class CategoricalModel(Model):
 
         Parameters
         ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
+        x : |TensorLike| or |DataGenerator| or None
             Independent variable values of the dataset to evaluate (aka the
             "features").
         n : int
@@ -81,7 +92,6 @@ class CategoricalModel(Model):
             Additional keyword arguments are passed to
             :func:`.plot_categorical_dist`
         """
-
         # Sample from the predictive distribution
         samples = self.predictive_sample(x, n=n, batch_size=batch_size)
 
@@ -96,47 +106,9 @@ class CategoricalModel(Model):
             samples = samples.reshape([Ns, N])
 
         # Plot the predictive distributions
-        rows = np.ceil(N / cols)
+        rows = int(np.ceil(N / cols))
         for i in range(N):
             plt.subplot(rows, cols, i + 1)
             plot_categorical_dist(samples[:, i])
             plt.xlabel("Datapoint " + str(i))
         plt.tight_layout()
-
-    def calibration_curve(
-        self, x, y=None, split_by=None, bins=10, plot=True, batch_size=None
-    ):
-        """Plot and return the categorical calibration curve.
-
-        Plots and returns the calibration curve (estimated
-        probability of outcome vs the true probability of that
-        outcome).
-
-        Parameters
-        ----------
-        x : |ndarray| or |DataFrame| or |Series| or Tensor or |DataGenerator|
-            Independent variable values of the dataset to evaluate (aka the
-            "features").  Or a |DataGenerator| for both x and y.
-        y : |ndarray| or |DataFrame| or |Series| or Tensor
-            Dependent variable values of the dataset to evaluate (aka the
-            "target").
-        split_by : int
-            Draw the calibration curve independently for datapoints
-            with each unique value in `x[:,split_by]` (a categorical
-            column).
-        bins : int, list of float, or |ndarray|
-            Bins used to compute the curve.  If an integer, will use
-            `bins` evenly-spaced bins from 0 to 1.  If a vector,
-            `bins` is the vector of bin edges.
-        plot : bool
-            Whether to plot the curve
-        batch_size : None or int
-            Compute using batches of this many datapoints.  Default is `None`
-            (i.e., do not use batching).
-
-        #TODO: split by continuous cols as well? Then will need to define bins or edges too
-
-        TODO: Docs...
-
-        """
-        # TODO

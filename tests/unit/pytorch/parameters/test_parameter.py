@@ -10,8 +10,7 @@ tod = torch.distributions
 
 
 def test_Parameter_scalar():
-    """Tests the generic scalar Parameter"""
-
+    """Tests the generic scalar Parameter."""
     # Create scalar parameter
     param = Parameter()
 
@@ -81,14 +80,12 @@ def test_Parameter_scalar():
 
     # sampling statement should allow static samples
     sample1 = param()
-    with Sampling(static=True):
-        with Sampling(n=1):
-            sample2 = param()
-            sample3 = param()
-    with Sampling(static=True):
-        with Sampling(n=1):
-            sample4 = param()
-            sample5 = param()
+    with Sampling(static=True), Sampling(n=1):
+        sample2 = param()
+        sample3 = param()
+    with Sampling(static=True), Sampling(n=1):
+        sample4 = param()
+        sample5 = param()
     assert sample1.ndim == 1
     assert sample2.ndim == 1
     assert sample3.ndim == 1
@@ -108,14 +105,12 @@ def test_Parameter_scalar():
     assert sample2.detach().numpy() != sample4.detach().numpy()
 
     # sampling statement should allow static samples (and work w/ n>1)
-    with Sampling(static=True):
-        with Sampling(n=5):
-            sample1 = param()
-            sample2 = param()
-    with Sampling(static=True):
-        with Sampling(n=5):
-            sample3 = param()
-            sample4 = param()
+    with Sampling(static=True), Sampling(n=5):
+        sample1 = param()
+        sample2 = param()
+    with Sampling(static=True), Sampling(n=5):
+        sample3 = param()
+        sample4 = param()
     assert sample1.ndim == 2
     assert sample2.ndim == 2
     assert sample3.ndim == 2
@@ -158,8 +153,7 @@ def test_Parameter_scalar():
 
 
 def test_Parameter_no_prior():
-    """Tests a parameter with no prior"""
-
+    """Tests a parameter with no prior."""
     # Create parameter with no prior
     param = Parameter(prior=None)
 
@@ -181,8 +175,7 @@ def test_Parameter_no_prior():
 
 
 def test_Parameter_1D():
-    """Tests a 1D Parameter"""
-
+    """Tests a 1D Parameter."""
     # Create 1D parameter
     param = Parameter(shape=5)
 
@@ -234,8 +227,7 @@ def test_Parameter_1D():
 
 
 def test_Parameter_2D():
-    """Tests a 2D Parameter"""
-
+    """Tests a 2D Parameter."""
     # Create 1D parameter
     param = Parameter(shape=[5, 4], name="lala")
 
@@ -297,8 +289,7 @@ def test_Parameter_2D():
 
 
 def test_Parameter_slicing():
-    """Tests a slicing Parameters"""
-
+    """Tests a slicing Parameters."""
     # Create 1D parameter
     param = Parameter(shape=[2, 3, 4, 5])
 
@@ -340,8 +331,7 @@ def test_Parameter_slicing():
 
 
 def test_Parameter_posterior_ci():
-    """Tests probflow.parameters.Parameter.posterior_ci"""
-
+    """Tests probflow.parameters.Parameter.posterior_ci."""
     # With a scalar parameter
     param = Parameter()
     lb, ub = param.posterior_ci()
@@ -384,8 +374,7 @@ def test_Parameter_posterior_ci():
 
 
 def test_Parameter_float_initializer():
-    """Tests a 2D Parameter with a float initializer"""
-
+    """Tests a 2D Parameter with a float initializer."""
     # Create 1D parameter
     param = Parameter(
         shape=[5, 4], name="lala2", initializer={"loc": 1.0, "scale": 2.0}

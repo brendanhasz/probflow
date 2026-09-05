@@ -1,5 +1,8 @@
+"""The Student-t distribution."""
+
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import get_backend
+from probflow.utils.typing import BackendDistribution, TensorLike
 from probflow.utils.validation import ensure_tensor_like
 
 
@@ -51,7 +54,12 @@ class StudentT(BaseDistribution):
         Default = 1
     """
 
-    def __init__(self, df=1, loc=0, scale=1):
+    def __init__(
+        self,
+        df: TensorLike = 1,
+        loc: TensorLike = 0,
+        scale: TensorLike = 1,
+    ) -> None:
 
         # Check input
         ensure_tensor_like(df, "df")
@@ -63,8 +71,8 @@ class StudentT(BaseDistribution):
         self.loc = loc
         self.scale = scale
 
-    def __call__(self):
-        """Get the distribution object from the backend"""
+    def __call__(self) -> BackendDistribution:
+        """Get the distribution object from the backend."""
         if get_backend() == "pytorch":
             import torch.distributions as tod
 
@@ -76,7 +84,7 @@ class StudentT(BaseDistribution):
 
             return tfd.StudentT(self["df"], self["loc"], self["scale"])
 
-    def mean(self):
+    def mean(self) -> TensorLike:
         """Compute the mean of this distribution.
 
         Note that the mean of a StudentT distribution is technically

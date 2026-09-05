@@ -4,7 +4,7 @@ from probflow.callbacks import Callback
 
 
 def test_Callback(plot):
-
+    """Test Callback."""
     my_model, x, y = get_model_and_data()
 
     # Create a callback class
@@ -13,6 +13,7 @@ def test_Callback(plot):
             self.count = 0
 
         def on_epoch_end(self):
+            """Provide on epoch end."""
             self.count += 1
 
     # Create a callback object

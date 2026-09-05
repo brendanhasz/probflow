@@ -1,10 +1,13 @@
-from typing import Callable, Dict, List, Type, Union
+"""A layer which normalizes its inputs."""
+
+from collections.abc import Callable
 
 import probflow.utils.ops as O
 from probflow.distributions import Deterministic, Normal
 from probflow.parameters import Parameter
 from probflow.utils.base import BaseDistribution
 from probflow.utils.initializers import xavier
+from probflow.utils.typing import BackendTensor, TensorLike
 
 from .module import Module
 
@@ -88,7 +91,6 @@ class BatchNormalization(Module):
 
     Examples
     --------
-
     Batch normalize the output of a :class:`.Dense` layer:
 
     .. code-block:: python
@@ -117,21 +119,27 @@ class BatchNormalization(Module):
 
     def __init__(
         self,
-        shape: Union[int, List[int]],
-        weight_posterior: Type[BaseDistribution] = Deterministic,
-        bias_posterior: Type[BaseDistribution] = Deterministic,
-        weight_prior: BaseDistribution = Normal(0, 1),
-        bias_prior: BaseDistribution = Normal(0, 1),
-        weight_initializer: Dict[str, Callable] = {"loc": xavier},
-        bias_initializer: Dict[str, Callable] = {"loc": xavier},
-        name="BatchNormalization",
+        shape: int | list[int],
+        weight_posterior: type[BaseDistribution] = Deterministic,
+        bias_posterior: type[BaseDistribution] = Deterministic,
+        weight_prior: BaseDistribution | None = Normal(0, 1),
+        bias_prior: BaseDistribution | None = Normal(0, 1),
+        weight_initializer: dict[str, Callable] = {"loc": xavier},
+        bias_initializer: dict[str, Callable] = {"loc": xavier},
+        name: str = "BatchNormalization",
     ):
-
+        """Initialize the BatchNormalization."""
         # Add the batch dimension
         if isinstance(shape, int):
             shape = [1, shape]
         else:
             shape = [1] + shape
+
+        # Set default priors if None
+        if weight_prior is None:
+            weight_prior = Normal(0, 1)
+        if bias_prior is None:
+            bias_prior = Normal(0, 1)
 
         # Create the parameters
         self.weight = Parameter(
@@ -149,8 +157,8 @@ class BatchNormalization(Module):
             name=name + "_bias",
         )
 
-    def __call__(self, x):
-        """Perform the forward pass"""
+    def __call__(self, x: TensorLike) -> BackendTensor:
+        """Perform the forward pass."""
         mean = O.mean(x, axis=-2, keepdims=True)
         std = O.std(x, axis=-2, keepdims=True)
         return self.weight() * (x - mean) / std + self.bias()

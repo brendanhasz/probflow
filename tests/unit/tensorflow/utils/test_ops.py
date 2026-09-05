@@ -7,12 +7,12 @@ from probflow.utils import ops
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_kl_divergence():
-    """Tests kl_divergence"""
-
+    """Tests kl_divergence."""
     # Divergence between a distribution and itself should be 0
     dist = tfp.distributions.Normal(0, 1)
     assert ops.kl_divergence(dist, dist).numpy() == 0.0
@@ -36,8 +36,7 @@ def test_kl_divergence():
 
 
 def test_squeeze():
-    """Tests squeeze"""
-
+    """Tests squeeze."""
     x = tf.random.normal([3, 2, 1])
     xo = ops.squeeze(x)
     assert isinstance(xo, tf.Tensor)
@@ -54,8 +53,7 @@ def test_squeeze():
 
 
 def test_ones():
-    """Tests ones"""
-
+    """Tests ones."""
     # Scalar
     ones = ops.ones([1])
     assert isinstance(ones, tf.Tensor)
@@ -89,8 +87,7 @@ def test_ones():
 
 
 def test_zeros():
-    """Tests zeros"""
-
+    """Tests zeros."""
     # Scalar
     zeros = ops.zeros([1])
     assert isinstance(zeros, tf.Tensor)
@@ -124,8 +121,7 @@ def test_zeros():
 
 
 def test_full():
-    """Tests full"""
-
+    """Tests full."""
     # Scalar
     twos = ops.full([1], 2.0)
     assert isinstance(twos, tf.Tensor)
@@ -159,8 +155,7 @@ def test_full():
 
 
 def test_randn():
-    """Tests randn"""
-
+    """Tests randn."""
     # Scalar
     x = ops.randn([1])
     assert isinstance(x, tf.Tensor)
@@ -195,8 +190,7 @@ def test_randn():
 
 
 def test_rand_rademacher():
-    """Tests rand_rademacher"""
-
+    """Tests rand_rademacher."""
     # Scalar
     x = ops.rand_rademacher([1])
     assert isinstance(x, tf.Tensor)
@@ -230,8 +224,7 @@ def test_rand_rademacher():
 
 
 def test_shape():
-    """Tests shape"""
-
+    """Tests shape."""
     # Scalar
     x = ops.shape(tf.random.normal([1]))
     assert isinstance(x, list)
@@ -257,8 +250,7 @@ def test_shape():
 
 
 def test_eye():
-    """Tests eye"""
-
+    """Tests eye."""
     # Scalar
     eye = ops.eye(4)
     assert isinstance(eye, tf.Tensor)
@@ -270,8 +262,7 @@ def test_eye():
 
 
 def test_sum():
-    """Tests sum"""
-
+    """Tests sum."""
     # Should sum along the last dimension by default
     ones = tf.ones([5, 4, 3])
     val = ops.sum(ones)
@@ -303,8 +294,7 @@ def test_sum():
 
 
 def test_prod():
-    """Tests prod"""
-
+    """Tests prod."""
     # Should prod along the last dimension by default
     ones = tf.ones([5, 4, 3])
     val = ops.prod(ones)
@@ -329,8 +319,7 @@ def test_prod():
 
 
 def test_mean():
-    """Tests mean"""
-
+    """Tests mean."""
     # Should mean along the last dimension by default
     ones = tf.ones([5, 4, 3])
     val = ops.mean(ones)
@@ -355,8 +344,7 @@ def test_mean():
 
 
 def test_std():
-    """Tests std"""
-
+    """Tests std."""
     # Should std along the last dimension by default
     ones = tf.ones([5, 4, 3])
     val = ops.std(ones)
@@ -383,8 +371,7 @@ def test_std():
 
 
 def _test_elementwise(fn, inputs, outputs):
-    """Test elementwise function"""
-
+    """Test elementwise function."""
     # Should be elementwise
     val = fn(tf.random.normal([5, 4, 3]))
     assert isinstance(val, tf.Tensor)
@@ -400,45 +387,45 @@ def _test_elementwise(fn, inputs, outputs):
 
 
 def test_round():
-    """Tests round"""
+    """Tests round."""
     _test_elementwise(
         ops.round, [-0.9, 0.00001, 1.0, 3.14], [-1.0, 0.0, 1.0, 3.0]
     )
 
 
 def test_abs():
-    """Tests abs"""
+    """Tests abs."""
     _test_elementwise(ops.abs, [-1.0, 0.0, 1.0], [1.0, 0.0, 1.0])
 
 
 def test_square():
-    """Tests square"""
+    """Tests square."""
     _test_elementwise(
         ops.square, [-2.0, -1.0, 0.0, 1.0, 3.0], [4.0, 1.0, 0.0, 1.0, 9.0]
     )
 
 
 def test_sqrt():
-    """Tests sqrt"""
+    """Tests sqrt."""
     _test_elementwise(ops.sqrt, [0.0, 1.0, 4.0, 100.0], [0.0, 1.0, 2.0, 10.0])
 
 
 def test_exp():
-    """Tests exp"""
+    """Tests exp."""
     _test_elementwise(
         ops.exp, [-1.0, 0.0, 1.0, 4.0], [np.exp(-1.0), 1.0, np.e, np.exp(4.0)]
     )
 
 
 def test_relu():
-    """Tests relu"""
+    """Tests relu."""
     _test_elementwise(
         ops.relu, [-1.0, -0.1, 0.0, 0.1, 1.0], [0.0, 0.0, 0.0, 0.1, 1.0]
     )
 
 
 def test_softplus():
-    """Tests softplus"""
+    """Tests softplus."""
     sp = lambda x: np.log(1.0 + np.exp(x))
     _test_elementwise(
         ops.softplus,
@@ -448,7 +435,7 @@ def test_softplus():
 
 
 def test_sigmoid():
-    """Tests sigmoid"""
+    """Tests sigmoid."""
     sm = lambda x: 1.0 / (1.0 + np.exp(-x))
     _test_elementwise(
         ops.sigmoid,
@@ -458,8 +445,7 @@ def test_sigmoid():
 
 
 def test_gather():
-    """Tests gather"""
-
+    """Tests gather."""
     # Should lookup along 1st axis by default
     vals = tf.constant([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
     inds = tf.constant([0, 1, 2, 1, 0], dtype=tf.int32)

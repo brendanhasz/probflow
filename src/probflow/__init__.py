@@ -1,3 +1,7 @@
+"""ProbFlow package."""
+
+from importlib.metadata import PackageNotFoundError, version
+
 from probflow.applications import *
 from probflow.callbacks import *
 from probflow.data import *
@@ -9,4 +13,7 @@ from probflow.utils.base import *
 from probflow.utils.io import *
 from probflow.utils.settings import *
 
-__version__ = "2.4.1"
+try:
+    __version__ = version("probflow")
+except PackageNotFoundError:
+    __version__ = "unknown"

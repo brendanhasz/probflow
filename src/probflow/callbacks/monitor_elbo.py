@@ -1,3 +1,5 @@
+"""Monitor the ELBO on the training data."""
+
 import time
 
 import matplotlib.pyplot as plt
@@ -7,8 +9,7 @@ from .callback import Callback
 
 
 class MonitorELBO(Callback):
-    """Monitor the ELBO on the training data
-
+    """Monitor the ELBO on the training data.
 
     Parameters
     ----------
@@ -24,36 +25,37 @@ class MonitorELBO(Callback):
 
     """
 
-    def __init__(self, verbose=False):
-        self.current_elbo = np.nan
-        self.current_epoch = 0
-        self.elbos = []
-        self.epochs = []
-        self.verbose = verbose
-        self.start_time = None
-        self.wall_times = []
+    def __init__(self, verbose: bool = False):
+        self.current_elbo: float = np.nan
+        self.current_epoch: int = 0
+        self.elbos: list[float] = []
+        self.epochs: list[int] = []
+        self.verbose: bool = verbose
+        self.start_time: float | None = None
+        self.wall_times: list[float] = []
 
-    def on_epoch_start(self):
-        """Record start time at the beginning of the first epoch"""
+    def on_epoch_start(self) -> None:
+        """Record start time at the beginning of the first epoch."""
         if self.start_time is None:
             self.start_time = time.time()
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         """Store the ELBO at the end of each epoch."""
+        if self.start_time is None:
+            raise RuntimeError(
+                "MonitorELBO callback was not initialized properly.  "
+                "on_epoch_start() was not called before on_epoch_end()."
+            )
         self.current_elbo = self.model.get_elbo()
         self.current_epoch += 1
         self.elbos += [self.current_elbo]
         self.epochs += [self.current_epoch]
         self.wall_times += [time.time() - self.start_time]
         if self.verbose:
-            print(
-                "Epoch {} \tELBO: {}".format(
-                    self.current_epoch, self.current_elbo
-                )
-            )
+            print(f"Epoch {self.current_epoch} \tELBO: {self.current_elbo}")
 
-    def plot(self, x="epoch", **kwargs):
-        """Plot the ELBO as a function of epoch
+    def plot(self, x: str = "epoch", **kwargs) -> None:
+        """Plot the ELBO as a function of epoch.
 
         Parameters
         ----------

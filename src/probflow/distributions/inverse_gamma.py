@@ -1,5 +1,8 @@
+"""The Inverse-gamma distribution."""
+
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import get_backend
+from probflow.utils.typing import BackendDistribution, TensorLike
 from probflow.utils.validation import ensure_tensor_like
 
 
@@ -50,7 +53,7 @@ class InverseGamma(BaseDistribution):
 
     """
 
-    def __init__(self, concentration, scale):
+    def __init__(self, concentration: TensorLike, scale: TensorLike) -> None:
 
         # Check input
         ensure_tensor_like(concentration, "concentration")
@@ -60,8 +63,8 @@ class InverseGamma(BaseDistribution):
         self.concentration = concentration
         self.scale = scale
 
-    def __call__(self):
-        """Get the distribution object from the backend"""
+    def __call__(self) -> BackendDistribution:
+        """Get the distribution object from the backend."""
         if get_backend() == "pytorch":
             import torch
             import torch.distributions as tod

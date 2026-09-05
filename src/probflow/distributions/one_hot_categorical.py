@@ -1,5 +1,8 @@
+"""The Categorical distribution, parameterized by categories-len vectors."""
+
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import get_backend
+from probflow.utils.typing import BackendDistribution, TensorLike
 from probflow.utils.validation import ensure_tensor_like
 
 
@@ -20,7 +23,9 @@ class OneHotCategorical(BaseDistribution):
     probs : int, float, |ndarray|, or Tensor
     """
 
-    def __init__(self, logits=None, probs=None):
+    def __init__(
+        self, logits: TensorLike | None = None, probs: TensorLike | None = None
+    ) -> None:
 
         # Check input
         if logits is None and probs is None:
@@ -34,8 +39,8 @@ class OneHotCategorical(BaseDistribution):
         self.logits = logits
         self.probs = probs
 
-    def __call__(self):
-        """Get the distribution object from the backend"""
+    def __call__(self) -> BackendDistribution:
+        """Get the distribution object from the backend."""
         if get_backend() == "pytorch":
             import torch.distributions as tod
 

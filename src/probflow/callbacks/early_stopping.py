@@ -1,3 +1,7 @@
+"""Stop training early when some metric stops decreasing."""
+
+from collections.abc import Callable
+
 import numpy as np
 
 from .callback import Callback
@@ -6,8 +10,7 @@ from .monitor_metric import MonitorMetric
 
 
 class EarlyStopping(Callback):
-    """Stop training early when some metric stops decreasing
-
+    """Stop training early when some metric stops decreasing.
 
     Parameters
     ----------
@@ -37,7 +40,11 @@ class EarlyStopping(Callback):
     """
 
     def __init__(
-        self, metric_fn, patience=0, verbose=True, name="EarlyStopping"
+        self,
+        metric_fn: Callable[[], float | int] | MonitorMetric | MonitorELBO,
+        patience: int = 0,
+        verbose: bool = True,
+        name: str = "EarlyStopping",
     ):
 
         # Check types
@@ -55,14 +62,14 @@ class EarlyStopping(Callback):
         # Store values
         self.metric_fn = metric_fn
         self.patience = patience
-        self.best = np.Inf
+        self.best = np.inf
         self.count = 0
         self.epoch = 0
         self.verbose = verbose
         self.name = name
         # TODO: restore_best_weights? using save_model and load_model?
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         """Stop training if there was no improvement since the last epoch."""
         self.epoch += 1
         if isinstance(self.metric_fn, MonitorMetric):

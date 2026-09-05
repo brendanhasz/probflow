@@ -1,12 +1,12 @@
-from typing import List, Union
+"""A vector of parameters centered at 0."""
 
 import numpy as np
 
 import probflow.utils.ops as O
 from probflow.distributions import Normal
+from probflow.parameters.parameter import Parameter
 from probflow.utils.casting import to_default_dtype, to_tensor
-
-from .parameter import Parameter
+from probflow.utils.typing import BackendTensor
 
 
 class CenteredParameter(Parameter):
@@ -15,7 +15,7 @@ class CenteredParameter(Parameter):
     Uses a QR decomposition to transform a vector of :math:`K-1` unconstrained
     parameters into a vector of :math:`K` variables centered at zero (i.e. the
     mean of the elements in the vector is 0).  It starts with a :math:`K \times
-    K` matrix :math:`A` which has :math:`1`s along the diagonal and :math:`-1`s
+    K` matrix :math:`A` which has :math:`1` along the diagonal and :math:`-1`
     along the bottom - except for the bottom-right element which is :math:`0`:
 
     .. math::
@@ -77,16 +77,15 @@ class CenteredParameter(Parameter):
 
     Examples
     --------
-
     TODO
 
     """
 
     def __init__(
         self,
-        shape: Union[int, List[int]],
+        shape: int | list[int],
         center_by: str = "all",
-        name="CenteredParameter",
+        name: str = "CenteredParameter",
     ):
 
         # Get a list representing the shape
@@ -122,7 +121,7 @@ class CenteredParameter(Parameter):
         self._A_qr = to_default_dtype(to_tensor(Q[:, :-1]))
 
         # Transform function
-        def A_qr_transform(u):
+        def A_qr_transform(u: BackendTensor) -> BackendTensor:
             if center_by == "row":
                 return O.transpose(self._A_qr @ u)
             elif center_by == "all" and shape[1] > 1:

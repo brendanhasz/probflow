@@ -8,12 +8,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_BoundedParameter():
-    """Tests probflow.parameters.BoundedParameter"""
-
+    """Tests probflow.parameters.BoundedParameter."""
     # Should error with incorrect params
     with pytest.raises(ValueError):
         param = BoundedParameter(min=1.0, max=0.0)

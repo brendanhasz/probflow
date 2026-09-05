@@ -1,5 +1,4 @@
-"""Tests probflow.utils.initializers w/ torch backend"""
-
+"""Tests probflow.utils.initializers w/ torch backend."""
 
 import numpy as np
 import torch
@@ -9,8 +8,7 @@ from probflow.utils import initializers
 
 
 def test_xavier_torch():
-    """Tests probflow.utils.initializers.xavier w/ torch backend"""
-
+    """Tests probflow.utils.initializers.xavier w/ torch backend."""
     pf.set_backend("pytorch")
 
     # Small array
@@ -32,8 +30,7 @@ def test_xavier_torch():
 
 
 def test_scale_xavier_torch():
-    """Tests probflow.utils.initializers.scale_xavier w/ torch backend"""
-
+    """Tests probflow.utils.initializers.scale_xavier w/ torch backend."""
     pf.set_backend("pytorch")
 
     # Small array
@@ -55,8 +52,7 @@ def test_scale_xavier_torch():
 
 
 def test_pos_xavier_torch():
-    """Tests probflow.utils.initializers.pos_xavier w/ torch backend"""
-
+    """Tests probflow.utils.initializers.pos_xavier w/ torch backend."""
     pf.set_backend("pytorch")
 
     # Small array

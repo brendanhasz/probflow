@@ -6,12 +6,12 @@ from probflow.utils import ops
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_kl_divergence():
-    """Tests kl_divergence"""
-
+    """Tests kl_divergence."""
     pf.set_backend("pytorch")
 
     # Divergence between a distribution and itself should be 0
@@ -37,8 +37,7 @@ def test_kl_divergence():
 
 
 def test_squeeze():
-    """Tests squeeze"""
-
+    """Tests squeeze."""
     x = torch.randn([3, 2, 1])
     xo = ops.squeeze(x)
     assert isinstance(xo, torch.Tensor)
@@ -55,8 +54,7 @@ def test_squeeze():
 
 
 def test_expand_dims():
-    """Tests expand_dims"""
-
+    """Tests expand_dims."""
     pf.set_backend("pytorch")
 
     val = torch.randn(3)
@@ -73,8 +71,7 @@ def test_expand_dims():
 
 
 def test_ones():
-    """Tests ones"""
-
+    """Tests ones."""
     pf.set_backend("pytorch")
 
     # Scalar
@@ -110,8 +107,7 @@ def test_ones():
 
 
 def test_zeros():
-    """Tests zeros"""
-
+    """Tests zeros."""
     pf.set_backend("pytorch")
 
     # Scalar
@@ -147,8 +143,7 @@ def test_zeros():
 
 
 def test_randn():
-    """Tests randn"""
-
+    """Tests randn."""
     # Scalar
     x = ops.randn([1])
     assert isinstance(x, torch.Tensor)
@@ -183,8 +178,7 @@ def test_randn():
 
 
 def test_rand_rademacher():
-    """Tests rand_rademacher"""
-
+    """Tests rand_rademacher."""
     # Scalar
     x = ops.rand_rademacher([1])
     assert isinstance(x, torch.Tensor)
@@ -218,8 +212,7 @@ def test_rand_rademacher():
 
 
 def test_shape():
-    """Tests shape"""
-
+    """Tests shape."""
     # Scalar
     x = ops.shape(torch.randn([1]))
     assert isinstance(x, list)
@@ -245,8 +238,7 @@ def test_shape():
 
 
 def test_eye():
-    """Tests eye"""
-
+    """Tests eye."""
     # Scalar
     eye = ops.eye(4)
     assert isinstance(eye, torch.Tensor)
@@ -258,8 +250,7 @@ def test_eye():
 
 
 def test_sum():
-    """Tests sum"""
-
+    """Tests sum."""
     pf.set_backend("pytorch")
 
     # Should sum along the last dimension by default
@@ -293,8 +284,7 @@ def test_sum():
 
 
 def test_prod():
-    """Tests prod"""
-
+    """Tests prod."""
     pf.set_backend("pytorch")
 
     # Should prod along the last dimension by default
@@ -321,8 +311,7 @@ def test_prod():
 
 
 def test_mean():
-    """Tests mean"""
-
+    """Tests mean."""
     pf.set_backend("pytorch")
 
     # Should mean along the last dimension by default
@@ -349,8 +338,7 @@ def test_mean():
 
 
 def test_std():
-    """Tests std"""
-
+    """Tests std."""
     pf.set_backend("pytorch")
 
     # Should std along the last dimension by default
@@ -379,8 +367,7 @@ def test_std():
 
 
 def _test_elementwise(fn, inputs, outputs):
-    """Test elementwise function"""
-
+    """Test elementwise function."""
     # Should be elementwise
     val = fn(torch.randn([5, 4, 3]))
     assert isinstance(val, torch.Tensor)
@@ -396,7 +383,7 @@ def _test_elementwise(fn, inputs, outputs):
 
 
 def test_round():
-    """Tests round"""
+    """Tests round."""
     pf.set_backend("pytorch")
     _test_elementwise(
         ops.round, [-0.9, 0.00001, 1.0, 3.14], [-1.0, 0.0, 1.0, 3.0]
@@ -404,13 +391,13 @@ def test_round():
 
 
 def test_abs():
-    """Tests abs"""
+    """Tests abs."""
     pf.set_backend("pytorch")
     _test_elementwise(ops.abs, [-1.0, 0.0, 1.0], [1.0, 0.0, 1.0])
 
 
 def test_square():
-    """Tests square"""
+    """Tests square."""
     pf.set_backend("pytorch")
     _test_elementwise(
         ops.square, [-2.0, -1.0, 0.0, 1.0, 3.0], [4.0, 1.0, 0.0, 1.0, 9.0]
@@ -418,13 +405,13 @@ def test_square():
 
 
 def test_sqrt():
-    """Tests sqrt"""
+    """Tests sqrt."""
     pf.set_backend("pytorch")
     _test_elementwise(ops.sqrt, [0.0, 1.0, 4.0, 100.0], [0.0, 1.0, 2.0, 10.0])
 
 
 def test_exp():
-    """Tests exp"""
+    """Tests exp."""
     pf.set_backend("pytorch")
     _test_elementwise(
         ops.exp, [-1.0, 0.0, 1.0, 4.0], [np.exp(-1.0), 1.0, np.e, np.exp(4.0)]
@@ -432,7 +419,7 @@ def test_exp():
 
 
 def test_relu():
-    """Tests relu"""
+    """Tests relu."""
     pf.set_backend("pytorch")
     _test_elementwise(
         ops.relu, [-1.0, -0.1, 0.0, 0.1, 1.0], [0.0, 0.0, 0.0, 0.1, 1.0]
@@ -440,7 +427,7 @@ def test_relu():
 
 
 def test_softplus():
-    """Tests softplus"""
+    """Tests softplus."""
     pf.set_backend("pytorch")
     sp = lambda x: np.log(1.0 + np.exp(x))
     _test_elementwise(
@@ -451,7 +438,7 @@ def test_softplus():
 
 
 def test_sigmoid():
-    """Tests sigmoid"""
+    """Tests sigmoid."""
     pf.set_backend("pytorch")
     sm = lambda x: 1.0 / (1.0 + np.exp(-x))
     _test_elementwise(
@@ -462,8 +449,7 @@ def test_sigmoid():
 
 
 def test_gather():
-    """Tests gather"""
-
+    """Tests gather."""
     pf.set_backend("pytorch")
 
     # Should lookup along 1st axis by default
@@ -505,7 +491,7 @@ def test_gather():
 
 
 def test_cat():
-    """Tests cat"""
+    """Tests cat."""
     pf.set_backend("pytorch")
     a = torch.randn([2, 3, 5])
     b = torch.randn([2, 3, 5])
@@ -527,7 +513,7 @@ def test_cat():
 
 
 def test_additive_logistic_transform():
-    """Tests additive_logistic_transform"""
+    """Tests additive_logistic_transform."""
     pf.set_backend("pytorch")
     a = torch.randn([2, 3, 5])
     val = ops.additive_logistic_transform(a)
@@ -538,7 +524,7 @@ def test_additive_logistic_transform():
 
 
 def test_insert_col_of():
-    """Tests add_col_of"""
+    """Tests add_col_of."""
     pf.set_backend("pytorch")
     a = torch.randn([2, 3, 5])
     val = ops.insert_col_of(a, 1)

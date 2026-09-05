@@ -1,10 +1,14 @@
+"""Set the learning rate as a function of the current epoch."""
+
+from collections.abc import Callable
+
 import matplotlib.pyplot as plt
 
 from .callback import Callback
 
 
 class LearningRateScheduler(Callback):
-    """Set the learning rate as a function of the current epoch
+    """Set the learning rate as a function of the current epoch.
 
     Parameters
     ----------
@@ -18,13 +22,12 @@ class LearningRateScheduler(Callback):
 
     Examples
     --------
-
     See the user guide section on :ref:`user-guide-lr-scheduler`.
     training`.
 
     """
 
-    def __init__(self, fn, verbose: bool = False):
+    def __init__(self, fn: Callable[[int], float], verbose: bool = False):
 
         # Check type
         if not callable(fn):
@@ -33,14 +36,14 @@ class LearningRateScheduler(Callback):
             raise TypeError("fn must return a float given an epoch number")
 
         # Store function
-        self.fn = fn
-        self.verbose = verbose
-        self.current_epoch = 0
-        self.current_lr = 0
-        self.epochs = []
-        self.learning_rate = []
+        self.fn: Callable[[int], float] = fn
+        self.verbose: bool = verbose
+        self.current_epoch: int = 0
+        self.current_lr: float = 0.0
+        self.epochs: list[int] = []
+        self.learning_rate: list[float] = []
 
-    def on_epoch_start(self):
+    def on_epoch_start(self) -> None:
         """Set the learning rate at the start of each epoch."""
         self.current_epoch += 1
         self.current_lr = self.fn(self.current_epoch)
@@ -52,8 +55,8 @@ class LearningRateScheduler(Callback):
                 f"Epoch {self.current_epoch} - learning rate {self.current_lr}"
             )
 
-    def plot(self, **kwargs):
-        """Plot the learning rate as a function of epoch
+    def plot(self, **kwargs) -> None:
+        """Plot the learning rate as a function of epoch.
 
         Parameters
         ----------

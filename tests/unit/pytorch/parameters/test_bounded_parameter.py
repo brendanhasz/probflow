@@ -4,8 +4,7 @@ from probflow.parameters import BoundedParameter
 
 
 def test_BoundedParameter():
-    """Tests probflow.parameters.BoundedParameter"""
-
+    """Tests probflow.parameters.BoundedParameter."""
     # Should error with incorrect params
     with pytest.raises(ValueError):
         param = BoundedParameter(min=1.0, max=0.0)

@@ -1,5 +1,4 @@
-"""Tests examples in example_linear_regression"""
-
+"""Tests examples in example_linear_regression."""
 
 import numpy as np
 import pandas as pd
@@ -8,8 +7,7 @@ import probflow as pf
 
 
 def test_example_linear_regression_simple():
-    """Tests example_linear_regression simple linear regression"""
-
+    """Tests example_linear_regression simple linear regression."""
     # Data
     randn = lambda *a: np.random.randn(*a).astype("float32")
     x = randn(100)
@@ -32,8 +30,7 @@ def test_example_linear_regression_simple():
 
 
 def test_example_linear_regression_multiple():
-    """Tests example_linear_regression multiple linear regression"""
-
+    """Tests example_linear_regression multiple linear regression."""
     # Data
     D = 3
     N = 256

@@ -9,12 +9,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_Gamma():
-    """Tests Gamma distribution"""
-
+    """Tests Gamma distribution."""
     # Create the distribution
     dist = Gamma(5, 4)
 

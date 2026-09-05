@@ -1,11 +1,12 @@
+"""Stop training after a certain amount of time."""
+
 import time
 
 from .callback import Callback
 
 
 class TimeOut(Callback):
-    """Stop training after a certain amount of time
-
+    """Stop training after a certain amount of time.
 
     Parameters
     ----------
@@ -28,20 +29,25 @@ class TimeOut(Callback):
 
     """
 
-    def __init__(self, time_limit, verbose=True):
+    def __init__(self, time_limit: float, verbose: bool = True):
 
         # Store values
-        self.time_limit = time_limit
-        self.start_time = None
-        self.verbose = verbose
+        self.time_limit: float | int = time_limit
+        self.start_time: float | None = None
+        self.verbose: bool = verbose
 
-    def on_epoch_start(self):
-        """Record start time at the beginning of the first epoch"""
+    def on_epoch_start(self) -> None:
+        """Record start time at the beginning of the first epoch."""
         if self.start_time is None:
             self.start_time = time.time()
 
-    def on_epoch_end(self):
-        """Stop training if time limit has been passed"""
+    def on_epoch_end(self) -> None:
+        """Stop training if time limit has been passed."""
+        if self.start_time is None:
+            raise RuntimeError(
+                "TimeOut callback was not initialized properly.  "
+                "on_epoch_start() was not called before on_epoch_end()."
+            )
         dt = time.time() - self.start_time
         if self.time_limit < dt:
             self.model.stop_training()

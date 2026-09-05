@@ -7,7 +7,7 @@ from probflow.utils.casting import to_tensor
 
 
 def get_model_and_data():
-    """Gets a simple model and data for testing callbacks"""
+    """Gets a simple model and data for testing callbacks."""
 
     class MyModel(Model):
         def __init__(self):

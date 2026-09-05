@@ -1,7 +1,11 @@
-from probflow.distributions import Deterministic, Normal
-from probflow.utils.initializers import xavier
+"""A parameter which is not probabilistic."""
 
-from .parameter import Parameter
+from collections.abc import Callable
+
+from probflow.distributions import Deterministic, Normal
+from probflow.parameters.parameter import Parameter
+from probflow.utils.base import BaseDistribution
+from probflow.utils.initializers import xavier
 
 
 class DeterministicParameter(Parameter):
@@ -37,20 +41,19 @@ class DeterministicParameter(Parameter):
 
     Examples
     --------
-
     TODO
 
     """
 
     def __init__(
         self,
-        shape=1,
-        posterior=Deterministic,
-        prior=Normal(0, 1),
-        transform=None,
-        initializer={"loc": xavier},
-        var_transform={"loc": None},
-        name="DeterministicParameter",
+        shape: int | list[int] = 1,
+        posterior: type[BaseDistribution] = Deterministic,
+        prior: BaseDistribution | None = Normal(0, 1),
+        transform: Callable | None = None,
+        initializer: dict[str, Callable] = {"loc": xavier},
+        var_transform: dict[str, Callable | None] = {"loc": None},
+        name: str = "DeterministicParameter",
     ):
         super().__init__(
             shape=shape,

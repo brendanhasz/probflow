@@ -1,5 +1,4 @@
-"""Tests example probabilistic PCA"""
-
+"""Tests example probabilistic PCA."""
 
 import numpy as np
 import tensorflow as tf
@@ -11,11 +10,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_gmm():
-    """Tests gaussian mixture model example"""
+    """Tests gaussian mixture model example."""
 
     class PPCA(pf.Model):
         def __init__(self, d, q):

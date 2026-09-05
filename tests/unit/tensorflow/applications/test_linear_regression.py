@@ -4,8 +4,7 @@ from probflow.applications import LinearRegression
 
 
 def test_LinearRegression():
-    """Tests probflow.applications.LinearRegression"""
-
+    """Tests probflow.applications.LinearRegression."""
     # Data
     x = np.random.randn(100, 5).astype("float32")
     w = np.random.randn(5, 1).astype("float32")
@@ -37,8 +36,7 @@ def test_LinearRegression():
 
 
 def test_LinearRegression_heteroscedastic():
-    """Tests probflow.applications.LinearRegression w/ heteroscedastic"""
-
+    """Tests probflow.applications.LinearRegression w/ heteroscedastic."""
     # Data
     x = np.random.randn(100, 5).astype("float32")
     w = np.random.randn(5, 1).astype("float32")
@@ -71,8 +69,7 @@ def test_LinearRegression_heteroscedastic():
 
 
 def test_LinearRegression_multivariate():
-    """Tests probflow.applications.LinearRegression w/ d_o>1"""
-
+    """Tests probflow.applications.LinearRegression w/ d_o>1."""
     # Data
     N = 256
     Di = 7
@@ -104,8 +101,7 @@ def test_LinearRegression_multivariate():
 
 
 def test_LinearRegression_multimc_eager():
-    """Tests inearRegression w/ n_mc>1 in eager mode"""
-
+    """Tests inearRegression w/ n_mc>1 in eager mode."""
     # Data
     N = 100
     Di = 7
@@ -137,8 +133,7 @@ def test_LinearRegression_multimc_eager():
 
 
 def test_LinearRegression_multimc_noneager():
-    """Tests inearRegression w/ n_mc>1 in non-eager mode"""
-
+    """Tests inearRegression w/ n_mc>1 in non-eager mode."""
     # Data
     N = 100
     Di = 7

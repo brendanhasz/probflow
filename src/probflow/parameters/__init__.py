@@ -40,7 +40,6 @@ Parameters.
 
 """
 
-
 __all__ = [
     "BoundedParameter",
     "CategoricalParameter",

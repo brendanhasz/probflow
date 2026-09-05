@@ -1,17 +1,20 @@
+"""Monitor some metric on validation data."""
+
 import time
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 from probflow.data import make_generator
+from probflow.data.data_generator import DataGenerator
 from probflow.utils.metrics import get_metric_fn
+from probflow.utils.typing import TensorLike
 
 from .callback import Callback
 
 
 class MonitorMetric(Callback):
-    """Monitor some metric on validation data
-
+    """Monitor some metric on validation data.
 
     Parameters
     ----------
@@ -35,7 +38,13 @@ class MonitorMetric(Callback):
     See the user guide section on :ref:`monitoring-a-metric`.
     """
 
-    def __init__(self, metric, x, y=None, verbose=False):
+    def __init__(
+        self,
+        metric: str,
+        x: TensorLike | DataGenerator,
+        y: TensorLike | None = None,
+        verbose: bool = False,
+    ):
 
         # Store metric
         self.metric_fn = get_metric_fn(metric)
@@ -48,21 +57,26 @@ class MonitorMetric(Callback):
         self.data = make_generator(x, y)
 
         # Store metrics and epochs
-        self.current_metric = np.nan
-        self.current_epoch = 0
-        self.metrics = []
-        self.epochs = []
-        self.verbose = verbose
-        self.start_time = None
-        self.wall_times = []
+        self.current_metric: float = np.nan
+        self.current_epoch: int = 0
+        self.metrics: list[float] = []
+        self.epochs: list[int] = []
+        self.verbose: bool = verbose
+        self.start_time: float | None = None
+        self.wall_times: list[float] = []
 
-    def on_epoch_start(self):
-        """Record start time at the beginning of the first epoch"""
+    def on_epoch_start(self) -> None:
+        """Record start time at the beginning of the first epoch."""
         if self.start_time is None:
             self.start_time = time.time()
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         """Compute the metric on validation data at the end of each epoch."""
+        if self.start_time is None:
+            raise RuntimeError(
+                "MonitorMetric callback was not initialized properly.  "
+                "on_epoch_start() was not called before on_epoch_end()."
+            )
         self.current_metric = self.model.metric(self.metric_fn, self.data)
         self.current_epoch += 1
         self.metrics += [self.current_metric]
@@ -70,13 +84,11 @@ class MonitorMetric(Callback):
         self.wall_times += [time.time() - self.start_time]
         if self.verbose:
             print(
-                "Epoch {} \t{}: {}".format(
-                    self.current_epoch, self.metric_name, self.current_metric
-                )
+                f"Epoch {self.current_epoch} \t{self.metric_name}: {self.current_metric}"
             )
 
-    def plot(self, x="epoch", **kwargs):
-        """Plot the metric being monitored as a function of epoch
+    def plot(self, x: str = "epoch", **kwargs) -> None:
+        """Plot the metric being monitored as a function of epoch.
 
         Parameters
         ----------

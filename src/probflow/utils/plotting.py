@@ -6,16 +6,38 @@ TODO: more info...
 
 """
 
+from collections.abc import Callable, Sequence
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-COLORS = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+COLORS: list[tuple[float, float, float]] = plt.rcParams[
+    "axes.prop_cycle"
+].by_key()["color"]
 
 
-def approx_kde(data, bins=500, bw=0.075):
-    """A fast approximation to kernel density estimation."""
+def approx_kde(
+    data: np.ndarray, bins: int = 500, bw: float = 0.075
+) -> tuple[np.ndarray, np.ndarray]:
+    """Quickly approximate kernel density estimation.
+
+    Parameters
+    ----------
+    data : |ndarray|
+        Vector of data to estimate the density of.
+    bins : int
+        Number of bins to use for the histogram.  Default = 500
+    bw : float
+        Bandwidth of the kernel density estimate.  Default = 0.075
+
+    Returns
+    -------
+    x_out : |ndarray|
+        Vector of X values of the estimated density.
+    y_out : |ndarray|
+        Vector of Y values of the estimated density, same size as ``x_out``.
+    """
     stds = 3  # use a gaussian kernel w/ this many std devs
     counts, be = np.histogram(data, bins=bins)
     db = be[1] - be[0]
@@ -32,18 +54,20 @@ def approx_kde(data, bins=500, bw=0.075):
     return x_out, y_out
 
 
-def get_next_color(def_color, ix):
-    """Get the next color in the color cycle"""
+def get_next_color(
+    def_color: str | Sequence[str | tuple[float, float, float]] | None, ix: int
+) -> str | tuple[float, float, float]:
+    """Get the next color in the color cycle."""
     if def_color is None:
         return COLORS[ix % len(COLORS)]
-    elif isinstance(def_color, list):
-        return def_color[ix % len(def_color)]
-    else:
+    if isinstance(def_color, str):
         return def_color
+    else:
+        return def_color[ix % len(def_color)]
 
 
-def get_ix_label(ix, shape):
-    """Get a string representation of the current index"""
+def get_ix_label(ix: int, shape: Sequence[int]) -> str:
+    """Get a string representation of the current index."""
     dims = np.zeros(len(shape))
     for d in range(len(shape) - 1, 0, -1):
         prod = np.prod(shape[:d])
@@ -51,22 +75,22 @@ def get_ix_label(ix, shape):
         ix -= dims[d] * prod
     dims[0] = ix
     if len(shape) == 1:
-        return str(dims[0].astype("int32"))
+        return str(int(dims[0]))
     else:
-        return str(list(dims.astype("int32")))
+        return str([int(d) for d in dims])
 
 
 def plot_dist(
-    data,
-    xlabel="",
-    style="fill",
-    bins=20,
-    ci=0.0,
-    bw=0.075,
-    alpha=0.4,
-    color=None,
-    legend=True,
-):
+    data: np.ndarray,
+    xlabel: str = "",
+    style: str = "fill",
+    bins: int = 20,
+    ci: float = 0.0,
+    bw: float = 0.075,
+    alpha: float = 0.4,
+    color: str | Sequence[str | tuple[float, float, float]] | None = None,
+    legend: bool = True,
+) -> None:
     """Plot the distribution of samples.
 
     Parameters
@@ -100,7 +124,6 @@ def plot_dist(
         Whether to show legends for plots with >1 distribution
         Default = True
     """
-
     # Check inputs
     if ci < 0.0 or ci > 1.0:
         raise ValueError("ci must be between 0 and 1")
@@ -153,7 +176,7 @@ def plot_dist(
                     alpha=alpha,
                 )
         elif style == "hist":
-            _, be, patches = plt.hist(
+            _, be, _ = plt.hist(
                 data[:, i], alpha=alpha, bins=bins, color=next_color, label=lab
             )
             if ci:
@@ -174,7 +197,14 @@ def plot_dist(
     plt.gca().spines["right"].set_visible(False)
 
 
-def plot_line(xdata, ydata, xlabel="", ylabel="", fmt="-", color=None):
+def plot_line(
+    xdata: np.ndarray,
+    ydata: np.ndarray,
+    xlabel: str = "",
+    ylabel: str = "",
+    fmt: str = "-",
+    color: str | Sequence[str | tuple[float, float, float]] | None = None,
+) -> None:
     """Plot lines.
 
     Parameters
@@ -194,7 +224,6 @@ def plot_line(xdata, ydata, xlabel="", ylabel="", fmt="-", color=None):
         See https://matplotlib.org/tutorials/colors/colors.html
         Default = use the default matplotlib color cycle
     """
-
     # If 1d make 2d
     if ydata.ndim == 1:
         ydata = np.expand_dims(ydata, 1)
@@ -225,7 +254,15 @@ def plot_line(xdata, ydata, xlabel="", ylabel="", fmt="-", color=None):
     plt.ylabel(ylabel)
 
 
-def fill_between(xdata, lb, ub, xlabel="", ylabel="", alpha=0.3, color=None):
+def fill_between(
+    xdata: np.ndarray,
+    lb: np.ndarray,
+    ub: np.ndarray,
+    xlabel: str = "",
+    ylabel: str = "",
+    alpha: float = 0.3,
+    color: str | Sequence[str | tuple[float, float, float]] | None = None,
+) -> None:
     """Fill between lines.
 
     Parameters
@@ -247,7 +284,6 @@ def fill_between(xdata, lb, ub, xlabel="", ylabel="", alpha=0.3, color=None):
         See https://matplotlib.org/tutorials/colors/colors.html
         Default = use the default matplotlib color cycle
     """
-
     # Check shapes
     if not np.all(lb.shape == ub.shape):
         raise ValueError("lb and ub must have same shape")
@@ -289,8 +325,8 @@ def fill_between(xdata, lb, ub, xlabel="", ylabel="", alpha=0.3, color=None):
     plt.ylabel(ylabel)
 
 
-def centered_text(text):
-    """Display text centered in the figure"""
+def centered_text(text: str) -> None:
+    """Display text centered in the figure."""
     plt.gca().text(
         0.5,
         0.5,
@@ -301,8 +337,8 @@ def centered_text(text):
     )
 
 
-def plot_discrete_dist(x):
-    """Plot histogram of discrete variable"""
+def plot_discrete_dist(x: np.ndarray) -> None:
+    """Plot histogram of discrete variable."""
     minx = np.min(x)
     maxx = np.max(x)
     be = np.linspace(minx - 0.5, maxx + 0.5, int(maxx - minx + 2))
@@ -312,8 +348,8 @@ def plot_discrete_dist(x):
     plt.bar(bc, xc)
 
 
-def plot_categorical_dist(x):
-    """Plot histogram of categorical variable"""
+def plot_categorical_dist(x: np.ndarray) -> None:
+    """Plot histogram of categorical variable."""
     xc = pd.Series(x.ravel()).value_counts().sort_index()
     xc = xc / xc.sum()  # normalize
     plt.bar(xc.index, xc.values)
@@ -325,8 +361,15 @@ def plot_categorical_dist(x):
 
 
 def plot_by(
-    x, data, bins=30, func="mean", plot=True, bootstrap=100, ci=0.95, **kwargs
-):
+    x: np.ndarray,
+    data: np.ndarray,
+    bins: int = 30,
+    func: str | Callable = "mean",
+    plot: bool = True,
+    bootstrap: int | None = 100,
+    ci: float = 0.95,
+    **kwargs,
+) -> tuple[np.ndarray, np.ndarray]:
     """Compute and plot some function func of data as a function of x.
 
     Parameters
@@ -366,7 +409,6 @@ def plot_by(
     data_o : |ndarray|
         ``func`` applied to ``data`` values in each ``x`` bin
     """
-
     # Check types
     if not isinstance(bins, int):
         raise TypeError("bins must be an int")
@@ -408,7 +450,6 @@ def plot_by(
 
     # 1 Dimensional
     if x.shape[1] == 1:
-
         # Create bins over x
         edges = np.linspace(min(x), max(x), int(bins)).flatten()
         edges[-1] += 1e-9
@@ -417,7 +458,6 @@ def plot_by(
 
         # Bootstrap estimate coverage uncertainty
         if bootstrap is not None:
-
             # Compute func for data in each bins
             boots = pd.DataFrame(index=range(1, bins))
             for iB in range(bootstrap):
@@ -452,8 +492,9 @@ def plot_by(
 
     # 2 Dimensional
     elif x.shape[1] == 2:
-
-        pass
+        raise NotImplementedError(
+            "plot_by for 2 dimensions not implemented yet"
+        )
         # TODO
 
     else:

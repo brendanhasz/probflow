@@ -9,12 +9,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_Poisson():
-    """Tests Poisson distribution"""
-
+    """Tests Poisson distribution."""
     # Create the distribution
     dist = Poisson(3)
 
@@ -25,7 +25,9 @@ def test_Poisson():
     assert isinstance(dist(), tfd.Poisson)
 
     # Test methods
-    ppdf = lambda x, r: np.power(r, x) * np.exp(-r) / np.math.factorial(x)
+    ppdf = lambda x, r: (
+        np.power(r, x) * np.exp(-r) / np.prod(np.arange(1, x + 1))
+    )
     assert is_close(dist.prob(0).numpy(), ppdf(0, 3))
     assert is_close(dist.prob(1).numpy(), ppdf(1, 3))
     assert is_close(dist.prob(2).numpy(), ppdf(2, 3))

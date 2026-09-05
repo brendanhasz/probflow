@@ -9,7 +9,7 @@ from probflow.parameters import Parameter
 
 
 def test_DiscreteModel(plot):
-    """Tests probflow.models.DiscreteModel"""
+    """Tests probflow.models.DiscreteModel."""
 
     class MyModel(DiscreteModel):
         def __init__(self):
