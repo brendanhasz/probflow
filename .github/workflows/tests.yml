@@ -45,13 +45,11 @@ jobs:
     - name: Run tests
       run: |
         uv run pytest tests/unit/${{ matrix.backend }} --cov=probflow --cov-report xml:coverage.xml
-    - name: Upload coverage report
-      uses: actions/upload-code-coverage@v1
+    - name: Upload coverage report to CodeCov
+      uses: codecov/codecov-action@v5
       with:
-        file: coverage.xml
-        language: Python
-        label: code-coverage/pytest/${{ matrix.python-version }}/${{ matrix.backend }}
-        fail-on-error: false
+        files: ./coverage.xml
+        verbose: true
     - name: Ensure the package builds
       run: |
         uv build
