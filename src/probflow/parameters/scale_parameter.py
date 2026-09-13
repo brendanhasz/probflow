@@ -1,8 +1,12 @@
+"""Standard deviation parameter."""
+
+from collections.abc import Callable
+
 import probflow.utils.ops as O
 from probflow.distributions import Gamma
+from probflow.parameters.parameter import Parameter
+from probflow.utils.base import BaseDistribution
 from probflow.utils.initializers import full_of
-
-from .parameter import Parameter
 
 
 class ScaleParameter(Parameter):
@@ -58,7 +62,6 @@ class ScaleParameter(Parameter):
 
     Examples
     --------
-
     Use :class:`.ScaleParameter` to create a standard deviation parameter
     for a :class:`.Normal` distribution:
 
@@ -68,13 +71,19 @@ class ScaleParameter(Parameter):
 
     def __init__(
         self,
-        shape=1,
-        posterior=Gamma,
-        prior=Gamma(5, 1),
-        transform=lambda x: O.sqrt(1.0 / x),
-        initializer={"concentration": full_of(4.0), "rate": full_of(1.0)},
-        var_transform={"concentration": O.exp, "rate": O.exp},
-        name="ScaleParameter",
+        shape: int | list[int] = 1,
+        posterior: type[BaseDistribution] = Gamma,
+        prior: BaseDistribution = Gamma(5, 1),
+        transform: Callable | None = lambda x: O.sqrt(1.0 / x),
+        initializer: dict[str, Callable] = {
+            "concentration": full_of(4.0),
+            "rate": full_of(1.0),
+        },
+        var_transform: dict[str, Callable | None] = {
+            "concentration": O.exp,
+            "rate": O.exp,
+        },
+        name: str = "ScaleParameter",
     ):
         super().__init__(
             shape=shape,

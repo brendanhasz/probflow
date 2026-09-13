@@ -15,7 +15,6 @@ training process.
 
 """
 
-
 __all__ = [
     "Callback",
     "EarlyStopping",

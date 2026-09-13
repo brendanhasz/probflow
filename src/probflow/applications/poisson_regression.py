@@ -1,12 +1,15 @@
+"""A Poisson regression."""
+
 import probflow.utils.ops as O
 from probflow.distributions import Poisson
 from probflow.models import DiscreteModel
 from probflow.parameters import Parameter
 from probflow.utils.casting import to_tensor
+from probflow.utils.typing import TensorLike
 
 
 class PoissonRegression(DiscreteModel):
-    r"""A Poisson regression (a type of generalized linear model)
+    r"""A Poisson regression (a type of generalized linear model).
 
     TODO: explain, math, diagram, examples, etc
 
@@ -24,9 +27,11 @@ class PoissonRegression(DiscreteModel):
     """
 
     def __init__(self, d: int):
+        """Initialize the PoissonRegression."""
         self.weights = Parameter([d, 1], name="weights")
         self.bias = Parameter([1, 1], name="bias")
 
-    def __call__(self, x):
+    def __call__(self, x: TensorLike) -> Poisson:
+        """Forward pass of the PoissonRegression."""
         x = to_tensor(x)
         return Poisson(O.exp(x @ self.weights() + self.bias()))

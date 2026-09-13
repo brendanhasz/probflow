@@ -7,12 +7,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_PositiveParameter():
-    """Tests probflow.parameters.PositiveParameter"""
-
+    """Tests probflow.parameters.PositiveParameter."""
     # Create the parameter
     param = PositiveParameter()
 

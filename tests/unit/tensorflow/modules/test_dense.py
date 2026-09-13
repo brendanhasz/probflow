@@ -11,12 +11,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_Dense():
-    """Tests probflow.modules.Dense"""
-
+    """Tests probflow.modules.Dense."""
     # Should error w/ int < 1
     with pytest.raises(ValueError):
         dense = Dense(0, 1)

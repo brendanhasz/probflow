@@ -1,5 +1,9 @@
+"""Generate array-structured data to feed through a model."""
+
 import numpy as np
 import pandas as pd
+
+from probflow.utils.typing import TensorLike
 
 from .data_generator import DataGenerator
 
@@ -31,12 +35,12 @@ class ArrayDataGenerator(DataGenerator):
 
     def __init__(
         self,
-        x=None,
-        y=None,
-        batch_size=None,
-        shuffle=False,
-        test=False,
-        num_workers=None,
+        x: TensorLike | DataGenerator | None = None,
+        y: TensorLike | None = None,
+        batch_size: int | None = None,
+        shuffle: bool = False,
+        test: bool = False,
+        num_workers: int | None = None,
     ):
 
         # Set number of worker threads
@@ -68,9 +72,8 @@ class ArrayDataGenerator(DataGenerator):
             self._empty = False
 
         # Check sizes are consistent
-        if x is not None and y is not None:
-            if x.shape[0] != y.shape[0]:
-                raise ValueError("x and y must contain same number of samples")
+        if x is not None and y is not None and x.shape[0] != y.shape[0]:
+            raise ValueError("x and y must contain same number of samples")
 
         # Generative model?
         if not test and y is None:
@@ -79,7 +82,7 @@ class ArrayDataGenerator(DataGenerator):
 
         # Number of samples
         if x is None:
-            self._n_samples = y.shape[0]
+            self._n_samples = y.shape[0]  # type: ignore
         else:
             self._n_samples = x.shape[0]
 
@@ -98,18 +101,19 @@ class ArrayDataGenerator(DataGenerator):
         self.on_epoch_end()
 
     @property
-    def n_samples(self):
-        """Number of samples in the dataset"""
+    def n_samples(self) -> int:
+        """Number of samples in the dataset."""
         return self._n_samples
 
     @property
-    def batch_size(self):
-        """Number of samples to generate each minibatch"""
+    def batch_size(self) -> int:
+        """Number of samples to generate each minibatch."""
         return self._batch_size
 
-    def get_batch(self, index):
-        """Generate one batch of data"""
-
+    def get_batch(
+        self, index: int
+    ) -> tuple[TensorLike | None, TensorLike | None]:
+        """Generate one batch of data."""
         # Return none if no data
         if self._empty:
             return None, None
@@ -142,7 +146,7 @@ class ArrayDataGenerator(DataGenerator):
         # Return both x and y
         return x, y
 
-    def on_epoch_end(self):
-        """Shuffle data each epoch"""
+    def on_epoch_end(self) -> None:
+        """Shuffle data each epoch."""
         if self.shuffle:
             self.ids = np.random.permutation(self.n_samples)

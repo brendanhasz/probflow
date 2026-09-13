@@ -10,20 +10,25 @@ Functions to initialize posterior distribution variables.
 
 """
 
+from collections.abc import Callable
 
 import numpy as np
 
 from probflow.utils.settings import get_backend, get_datatype
+from probflow.utils.typing import BackendTensor, ScalarLike
 
 
-def xavier(shape):
-    """Xavier initializer"""
+def xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
+    """Xavier initializer."""
     scale = np.sqrt(2 / sum(shape))
     if get_backend() == "pytorch":
         # TODO: use truncated normal for torch
         import torch
 
-        return torch.randn(shape, dtype=get_datatype()) * scale
+        x = torch.empty(shape)
+        torch.nn.init.trunc_normal_(x, mean=0.0, std=scale)
+        return x
+        # return torch.randn(shape, dtype=get_datatype()) * scale
     else:
         import tensorflow as tf
 
@@ -32,8 +37,8 @@ def xavier(shape):
         )
 
 
-def scale_xavier(shape):
-    """Xavier initializer for scale variables"""
+def scale_xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
+    """Xavier initializer for scale variables."""
     vals = xavier(shape)
     if get_backend() == "pytorch":
         import torch
@@ -47,8 +52,8 @@ def scale_xavier(shape):
         return vals + 2 - 2 * tf.math.log(numel) / tf.math.log(10.0)
 
 
-def pos_xavier(shape):
-    """Xavier initializer for positive variables"""
+def pos_xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
+    """Xavier initializer for positive variables."""
     vals = xavier(shape)
     if get_backend() == "pytorch":
         import torch
@@ -62,12 +67,13 @@ def pos_xavier(shape):
         return vals + tf.math.log(numel) / tf.math.log(10.0)
 
 
-def full_of(val):
-    """Get initializer which returns tensor full of single value"""
-
+def full_of(
+    val: ScalarLike,
+) -> Callable[[list[int] | tuple[int, ...]], BackendTensor]:
+    """Get initializer which returns tensor full of single value."""
     import probflow.utils.ops as O
 
-    def init(shape):
+    def init(shape: list[int] | tuple[int, ...]) -> BackendTensor:
         return val * O.ones(shape)
 
     return init

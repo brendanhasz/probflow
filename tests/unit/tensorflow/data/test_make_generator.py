@@ -4,8 +4,8 @@ from probflow.data import ArrayDataGenerator, make_generator
 
 
 def test_make_generator():
-
     # Create some data
+    """Test make generator."""
     x = np.random.randn(100, 3)
     w = np.random.randn(3, 1)
     b = np.random.randn()

@@ -4,8 +4,7 @@ from probflow.applications import LogisticRegression
 
 
 def test_LogisticRegression():
-    """Tests probflow.applications.LinearRegression"""
-
+    """Tests probflow.applications.LinearRegression."""
     # Data
     x = np.random.randn(100, 5).astype("float32")
     w = np.random.randn(5, 1).astype("float32")
@@ -23,8 +22,7 @@ def test_LogisticRegression():
 
 
 def test_MultinomialLogisticRegression():
-    """Tests probflow.applications.LinearRegression w/ >2 output classes"""
-
+    """Tests probflow.applications.LinearRegression w/ >2 output classes."""
     # Data
     x = np.random.randn(100, 5).astype("float32")
     w = np.random.randn(5, 3).astype("float32")
@@ -43,8 +41,7 @@ def test_MultinomialLogisticRegression():
 
 
 def test_LogisticRegression_multiMC_eager():
-    """Tests LinearRegression w/ n_mc>1 in eager mode"""
-
+    """Tests LinearRegression w/ n_mc>1 in eager mode."""
     # Data
     x = np.random.randn(100, 5).astype("float32")
     w = np.random.randn(5, 3).astype("float32")
@@ -63,8 +60,7 @@ def test_LogisticRegression_multiMC_eager():
 
 
 def test_LogisticRegression_multiMC_noneager():
-    """Tests LinearRegression w/ n_mc>1 in non-eager mode"""
-
+    """Tests LinearRegression w/ n_mc>1 in non-eager mode."""
     # Data
     x = np.random.randn(100, 5).astype("float32")
     w = np.random.randn(5, 3).astype("float32")

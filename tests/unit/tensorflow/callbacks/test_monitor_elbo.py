@@ -6,8 +6,8 @@ from probflow.callbacks import MonitorELBO
 
 
 def test_MonitorELBO(plot):
-
     # Get a model and data
+    """Test MonitorELBO."""
     my_model, x, y = get_model_and_data()
 
     # Test MontiorELBO

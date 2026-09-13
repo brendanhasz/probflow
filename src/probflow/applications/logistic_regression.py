@@ -1,12 +1,15 @@
+"""A logistic regression."""
+
 import probflow.utils.ops as O
 from probflow.distributions import Categorical
 from probflow.models import CategoricalModel
 from probflow.parameters import Parameter
 from probflow.utils.casting import to_tensor
+from probflow.utils.typing import TensorLike
 
 
 class LogisticRegression(CategoricalModel):
-    r"""A logistic regression
+    r"""A logistic regression.
 
     TODO: explain, math, diagram, examples, etc
 
@@ -28,10 +31,12 @@ class LogisticRegression(CategoricalModel):
     """
 
     def __init__(self, d: int, k: int = 2):
+        """Initialize the LogisticRegression."""
         self.weights = Parameter([d, k - 1], name="weights")
         self.bias = Parameter([1, k - 1], name="bias")
 
-    def __call__(self, x):
+    def __call__(self, x: TensorLike) -> Categorical:
+        """Forward pass of the LogisticRegression."""
         x = to_tensor(x)
         return Categorical(
             O.insert_col_of(x @ self.weights() + self.bias(), 0)

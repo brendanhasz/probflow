@@ -8,10 +8,9 @@ TODO: Data utilities, more info...
 
 """
 
-
 __all__ = [
-    "DataGenerator",
     "ArrayDataGenerator",
+    "DataGenerator",
     "make_generator",
 ]
 

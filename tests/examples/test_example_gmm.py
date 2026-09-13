@@ -1,5 +1,4 @@
-"""Tests exmaple gaussian mixture model"""
-
+"""Tests exmaple gaussian mixture model."""
 
 import numpy as np
 import tensorflow_probability as tfp
@@ -10,11 +9,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_gmm():
-    """Tests gaussian mixture model example"""
+    """Tests gaussian mixture model example."""
 
     class GaussianMixtureModel(pf.Model):
         def __init__(self, d, k):

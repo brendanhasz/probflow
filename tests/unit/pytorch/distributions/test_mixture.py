@@ -7,12 +7,12 @@ from probflow.distributions import Mixture, Normal
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_Mixture():
-    """Tests Mixture distribution"""
-
+    """Tests Mixture distribution."""
     # Should fail w incorrect args
     with pytest.raises(ValueError):
         dist = Mixture(Normal(torch.tensor([1, 2]), torch.tensor([1, 2])))

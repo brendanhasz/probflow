@@ -1,4 +1,7 @@
-from typing import Callable, Dict, List, Type, Union
+"""Probabilistic parameter(s)."""
+
+from collections.abc import Callable
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,12 +17,13 @@ from probflow.utils.settings import (
     get_samples,
     get_static_sampling_uuid,
 )
+from probflow.utils.typing import BackendTensor, BackendVariable, ScalarLike
 
 
-def cache_static_samples(fn):
-    """Decorator to return static samples if they are currently cached"""
+def _cache_static_samples(fn: Callable[..., Any]) -> Callable[..., Any]:
+    """Decorator to return static samples if they are currently cached."""
 
-    def wrapped_fn(param):
+    def wrapped_fn(param: Any) -> Any:
         ss_uuid = get_static_sampling_uuid()
         if ss_uuid is None:
             return fn(param)
@@ -66,7 +70,7 @@ class Parameter(BaseParameter):
     posterior : |Distribution| class
         Probability distribution class to use to approximate the posterior.
         Default = :class:`.Normal`
-    prior : |Distribution| object
+    prior : |Distribution| object or None
         Prior probability distribution function which has been instantiated
         with parameters.
         Default = :class:`.Normal` ``(0,1)``
@@ -96,15 +100,15 @@ class Parameter(BaseParameter):
 
     def __init__(
         self,
-        shape: Union[int, List[int]] = 1,
-        posterior: Type[BaseDistribution] = Normal,
-        prior: BaseDistribution = Normal(0, 1),
-        transform: Callable = None,
-        initializer: Dict[str, Callable] = {
+        shape: int | list[int] = 1,
+        posterior: type[BaseDistribution] = Normal,
+        prior: BaseDistribution | None = Normal(0, 1),
+        transform: Callable | None = None,
+        initializer: dict[str, Callable] = {
             "loc": xavier,
             "scale": scale_xavier,
         },
-        var_transform: Dict[str, Callable] = {
+        var_transform: dict[str, Callable | None] = {
             "loc": None,
             "scale": O.softplus,
         },
@@ -123,18 +127,18 @@ class Parameter(BaseParameter):
         self.shape = shape
         self.posterior_fn = posterior
         self.prior = prior
-        self.transform = transform if transform else lambda x: x
+        self.transform = transform if transform is not None else lambda x: x
         self.initializer = initializer
         self.name = name
         self._static_samples_uuid = None
         self.var_transform = {
-            n: (f if f else lambda x: x) for (n, f) in var_transform.items()
+            n: (f if f is not None else lambda x: x)
+            for (n, f) in var_transform.items()
         }
 
         # Create variables for the variational distribution
-        self.untransformed_variables = dict()
+        self.untransformed_variables: dict[str, BackendVariable] = {}
         for var, init in initializer.items():
-
             # Int or float initializations = start whole array at that value
             if isinstance(init, (int, float)):
                 initial_value = O.full(shape, init)
@@ -145,13 +149,13 @@ class Parameter(BaseParameter):
             self.untransformed_variables[var] = O.new_variable(initial_value)
 
     @property
-    def n_parameters(self):
-        """Get the number of independent parameters"""
+    def n_parameters(self) -> int:
+        """Get the number of independent parameters."""
         return int(np.prod(self.shape))
 
     @property
-    def n_variables(self):
-        """Get the number of underlying variables"""
+    def n_variables(self) -> int:
+        """Get the number of underlying variables."""
         return int(
             sum(
                 [
@@ -162,25 +166,25 @@ class Parameter(BaseParameter):
         )
 
     @property
-    def trainable_variables(self):
-        """Get a list of trainable variables from the backend"""
+    def trainable_variables(self) -> list[BackendVariable]:
+        """Get a list of trainable variables from the backend."""
         return [e for e in self.untransformed_variables.values()]
 
     @property
-    def variables(self):
-        """Variables after applying their respective transformations"""
+    def variables(self) -> dict[str, BackendTensor]:
+        """Variables after applying their respective transformations."""
         return {
             name: self.var_transform[name](val)
             for name, val in self.untransformed_variables.items()
         }
 
     @property
-    def posterior(self):
-        """This Parameter's variational posterior distribution"""
+    def posterior(self) -> BaseDistribution:
+        """This Parameter's variational posterior distribution."""
         return self.posterior_fn(**self.variables)
 
-    @cache_static_samples
-    def __call__(self):
+    @_cache_static_samples
+    def __call__(self) -> BackendTensor:
         """Return a sample from or the MAP estimate of this parameter.
 
         Returns
@@ -196,9 +200,10 @@ class Parameter(BaseParameter):
         else:
             return self.transform(self.posterior.sample(n_samples))
 
-    def kl_loss(self):
+    def kl_loss(self) -> ScalarLike:
         """Compute the sum of the Kullback–Leibler divergences between this
-        parameter's priors and its variational posteriors."""
+        parameter's priors and its variational posteriors.
+        """
         if self.prior is None:
             return O.zeros([])
         else:
@@ -206,8 +211,8 @@ class Parameter(BaseParameter):
                 O.kl_divergence(self.posterior, self.prior), axis=None
             )
 
-    def bayesian_update(self):
-        """Update priors to match the current posterior"""
+    def bayesian_update(self) -> None:
+        """Update priors to match the current posterior."""
         self.prior = self.posterior_fn(
             **{
                 k: self.var_transform[k](O.copy_tensor(v))
@@ -215,11 +220,11 @@ class Parameter(BaseParameter):
             }
         )
 
-    def posterior_mean(self):
-        """Get the mean of the posterior distribution(s)"""
+    def posterior_mean(self) -> np.ndarray:
+        """Get the mean of the posterior distribution(s)."""
         return to_numpy(self())
 
-    def posterior_sample(self, n: int = 1):
+    def posterior_sample(self, n: int = 1) -> np.ndarray:
         """Sample from the posterior distribution.
 
         Parameters
@@ -240,7 +245,7 @@ class Parameter(BaseParameter):
         with Sampling(n=n):
             return to_numpy(self())
 
-    def prior_sample(self, n: int = 1):
+    def prior_sample(self, n: int = 1) -> np.ndarray:
         """Sample from the prior distribution.
 
         Parameters
@@ -263,8 +268,10 @@ class Parameter(BaseParameter):
         else:
             return to_numpy(self.transform(self.prior.sample(n)))
 
-    def posterior_ci(self, ci: float = 0.95, n: int = 10000):
-        """Posterior confidence intervals
+    def posterior_ci(
+        self, ci: float = 0.95, n: int = 10000
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Posterior confidence intervals.
 
         Parameters
         ----------
@@ -282,7 +289,6 @@ class Parameter(BaseParameter):
         ub : float or |ndarray|
             Upper bound(s) of the confidence interval(s)
         """
-
         # Check values
         if ci < 0.0 or ci > 1.0:
             raise ValueError("ci must be between 0 and 1")
@@ -300,13 +306,13 @@ class Parameter(BaseParameter):
         self,
         n: int = 10000,
         style: str = "fill",
-        bins: Union[int, list, np.ndarray] = 20,
+        bins: int = 20,
         ci: float = 0.0,
         bw: float = 0.075,
         alpha: float = 0.4,
-        color=None,
-        **kwargs
-    ):
+        color: Any = None,
+        **kwargs,
+    ) -> None:
         """Plot distribution of samples from the posterior distribution.
 
         Parameters
@@ -339,7 +345,6 @@ class Parameter(BaseParameter):
             Additional keyword arguments are passed to
             :meth:`.utils.plotting.plot_dist`
         """
-
         # Sample from the posterior
         samples = self.posterior_sample(n=n)
 
@@ -353,7 +358,7 @@ class Parameter(BaseParameter):
             bw=bw,
             alpha=alpha,
             color=color,
-            **kwargs
+            **kwargs,
         )
 
         # Label with parameter name
@@ -363,12 +368,12 @@ class Parameter(BaseParameter):
         self,
         n: int = 10000,
         style: str = "fill",
-        bins: Union[int, list, np.ndarray] = 20,
+        bins: int = 20,
         ci: float = 0.0,
         bw: float = 0.075,
         alpha: float = 0.4,
-        color=None,
-    ):
+        color: Any = None,
+    ) -> None:
         """Plot distribution of samples from the prior distribution.
 
         Parameters
@@ -398,7 +403,6 @@ class Parameter(BaseParameter):
             See https://matplotlib.org/tutorials/colors/colors.html
             Default = use the default matplotlib color cycle
         """
-
         # Sample from the posterior
         samples = self.prior_sample(n=n)
 
@@ -417,8 +421,10 @@ class Parameter(BaseParameter):
         # Label with parameter name
         plt.xlabel(self.name + " prior")
 
-    def _get_one_dim(self, val, key, axis):
-        """Slice along one axis, keeping the dimensionality of the input"""
+    def _get_one_dim(
+        self, val: BackendTensor, key: Any, axis: int
+    ) -> BackendTensor:
+        """Slice along one axis, keeping the dimensionality of the input."""
         if isinstance(key, slice):
             if any(k is not None for k in [key.start, key.stop, key.step]):
                 ix = np.arange(*key.indices(val.shape[axis]))
@@ -431,8 +437,8 @@ class Parameter(BaseParameter):
         else:
             return O.gather(val, key, axis=axis)
 
-    def __getitem__(self, key):
-        """Get a slice of a sample from the parameter
+    def __getitem__(self, key: Any) -> BackendTensor:
+        """Get a slice of a sample from the parameter.
 
         Example
         -------
@@ -454,7 +460,7 @@ class Parameter(BaseParameter):
         else:
             return self._get_one_dim(x, key, 0)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             "<pf."
             + self.__class__.__name__

@@ -1,8 +1,11 @@
+"""Dense neural network layer."""
+
 import probflow.utils.ops as O
 from probflow.modules.module import Module
 from probflow.parameters import DeterministicParameter, Parameter
 from probflow.utils.casting import to_tensor
 from probflow.utils.settings import get_flipout, get_samples
+from probflow.utils.typing import BackendTensor, TensorLike
 
 
 class Dense(Module):
@@ -54,7 +57,7 @@ class Dense(Module):
         bias_kwargs: dict = {},
         name: str = "Dense",
     ):
-
+        """Initialize the Dense layer."""
         # Check values
         if d_in < 1:
             raise ValueError("d_in must be >0")
@@ -76,9 +79,8 @@ class Dense(Module):
             shape=[1, d_out], name=name + "_bias", **bias_kwargs
         )
 
-    def __call__(self, x):
-        """Perform the forward pass"""
-
+    def __call__(self, x: TensorLike) -> BackendTensor:
+        """Perform the forward pass."""
         x = to_tensor(x)
 
         # Using the Flipout estimator
@@ -89,7 +91,6 @@ class Dense(Module):
             and get_samples() is not None
             and get_samples() == 1
         ):
-
             # Flipout-estimated weight samples
             s = O.rand_rademacher(O.shape(x))
             r = O.rand_rademacher([O.shape(x)[0], self.d_out])

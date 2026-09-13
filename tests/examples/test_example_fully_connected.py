@@ -1,5 +1,4 @@
-"""Tests examples in example_fully_connected"""
-
+"""Tests examples in example_fully_connected."""
 
 import numpy as np
 import tensorflow as tf
@@ -8,20 +7,22 @@ import probflow as pf
 
 
 def rand(*a):
+    """Provide rand."""
     return np.random.rand(*a).astype("float32")
 
 
 def randn(*a):
+    """Provide randn."""
     return np.random.randn(*a).astype("float32")
 
 
 def zscore(x):
+    """Provide zscore."""
     return (x - np.mean(x, axis=0)) / np.std(x, axis=0)
 
 
 def test_example_fully_connected_manually():
-    """Tests example_fully_connected#manually"""
-
+    """Tests example_fully_connected#manually."""
     # Generate data
     N = 1024
     x = 10 * rand(N, 1) - 5
@@ -64,8 +65,7 @@ def test_example_fully_connected_manually():
 
 
 def test_example_fully_connected_modules():
-    """Tests example_fully_connected using Modules"""
-
+    """Tests example_fully_connected using Modules."""
     # Generate data
     N = 1024
     x = 10 * rand(N, 1) - 5
@@ -95,8 +95,7 @@ def test_example_fully_connected_modules():
 
 
 def test_example_fully_connected_DenseRegression():
-    """Tests example_fully_connected using DenseRegression"""
-
+    """Tests example_fully_connected using DenseRegression."""
     # Generate data
     N = 1024
     D = 5
@@ -110,8 +109,7 @@ def test_example_fully_connected_DenseRegression():
 
 
 def test_example_fully_connected_DenseClassifier():
-    """Tests example_fully_connected using DenseClassifier"""
-
+    """Tests example_fully_connected using DenseClassifier."""
     # Generate data
     N = 1024
     D = 5

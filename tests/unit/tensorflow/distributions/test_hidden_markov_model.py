@@ -9,12 +9,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_HiddenMarkovModel():
-    """Tests hidden Markov model distribution"""
-
+    """Tests hidden Markov model distribution."""
     # Create the distribution (3 states)
     initial = tf.random.normal([3])
     transition = tf.random.normal([3, 3])

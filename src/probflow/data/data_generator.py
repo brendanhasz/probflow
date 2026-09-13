@@ -1,7 +1,10 @@
+"""Abstract base class for a data generator."""
+
 import multiprocessing as mp
 from abc import abstractmethod
 
 from probflow.utils.base import BaseDataGenerator
+from probflow.utils.typing import TensorLike
 
 
 class DataGenerator(BaseDataGenerator):
@@ -24,35 +27,35 @@ class DataGenerator(BaseDataGenerator):
 
     """
 
-    def __init__(self, num_workers=None):
-        self.num_workers = num_workers
+    def __init__(self, num_workers: int | None = None):
+        self.num_workers: int | None = num_workers
 
     @abstractmethod
-    def get_batch(self, index):
-        """Generate one batch of data"""
+    def get_batch(
+        self, index: int
+    ) -> tuple[TensorLike | None, TensorLike | None]:
+        """Generate one batch of data."""
 
-    def __getitem__(self, index):
-        """Generate one batch of data"""
-
+    def __getitem__(
+        self, index: int
+    ) -> tuple[TensorLike | None, TensorLike | None]:
+        """Generate one batch of data."""
         # No multiprocessing
         if self.num_workers is None:
-
             return self.get_batch(index)
 
         # Multiprocessing
         else:
-
             # Start the next worker
             pid = index + self.num_workers
             if pid < len(self):
                 self._workers[pid].start()
 
             # Return data from the multiprocessing queue
-            return self._queue.get()
+            return self._queue.get()  # type: ignore
 
-    def __iter__(self):
-        """Get an iterator over batches"""
-
+    def __iter__(self) -> "DataGenerator":
+        """Get an iterator over batches."""
         # Multiprocessing?
         if self.num_workers is not None:
 
@@ -60,7 +63,7 @@ class DataGenerator(BaseDataGenerator):
                 queue.put(self.get_batch(index))
 
             # Create the queue and worker processes
-            self._queue = mp.Queue()
+            self._queue: mp.Queue = mp.Queue()
             self._workers = [
                 mp.Process(target=get_data, args=(i, self._queue))
                 for i in range(len(self))
@@ -76,8 +79,8 @@ class DataGenerator(BaseDataGenerator):
         # Return iterator
         return self
 
-    def __next__(self):
-        """Get the next batch"""
+    def __next__(self) -> tuple[TensorLike | None, TensorLike | None]:
+        """Get the next batch."""
         self._batch += 1
         if self._batch < len(self):
             return self[self._batch]

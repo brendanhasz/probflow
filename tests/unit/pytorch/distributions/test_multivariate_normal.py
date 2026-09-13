@@ -8,12 +8,12 @@ tod = torch.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_MultivariateNormal():
-    """Tests the MultivariateNormal distribution"""
-
+    """Tests the MultivariateNormal distribution."""
     # Create the distribution
     loc = torch.Tensor([1.0, 2.0])
     cov = torch.Tensor([[1.0, 0.0], [0.0, 1.0]])

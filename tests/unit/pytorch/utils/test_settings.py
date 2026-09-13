@@ -1,4 +1,4 @@
-"""Tests the probflow.utils.settings module when backend = pytorch"""
+"""Tests the probflow.utils.settings module when backend = pytorch."""
 
 import pytest
 import torch
@@ -7,8 +7,7 @@ import probflow as pf
 
 
 def test_datatype():
-    """Tests get and set_datatype"""
-
+    """Tests get and set_datatype."""
     assert isinstance(pf.get_datatype(), torch.dtype)
     assert pf.get_datatype() == torch.float32
 

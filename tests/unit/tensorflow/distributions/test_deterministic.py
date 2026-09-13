@@ -10,12 +10,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_Deterministic():
-    """Tests Deterministic distribution"""
-
+    """Tests Deterministic distribution."""
     # Create the distribution
     dist = Deterministic()
 

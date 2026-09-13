@@ -6,8 +6,7 @@ from probflow.data import ArrayDataGenerator
 
 
 def test_ArrayDataGenerator():
-    """Tests probflow.data.ArrayDataGenerator"""
-
+    """Tests probflow.data.ArrayDataGenerator."""
     # Should error with invalid args
     with pytest.raises(TypeError):
         dg = ArrayDataGenerator(x="lala")

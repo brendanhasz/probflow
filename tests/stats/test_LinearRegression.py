@@ -1,33 +1,32 @@
-"""Tests the statistical accuracy of a Linear Regression w/ ProbFlow"""
-
+"""Tests the statistical accuracy of a Linear Regression w/ ProbFlow."""
 
 import numpy as np
-import tensorflow as tf
 
 import probflow as pf
 
+N_DATAPOINTS: int = 10000
+N_EPOCHS: int = 1000
+BATCH_SIZE: int = 1000
+
 
 def test_linear_regression():
-    """Test that a linear regression recovers the true parameters"""
-
+    """Test that a linear regression recovers the true parameters."""
     # Set random seed
     np.random.seed(1234)
-    tf.random.set_seed(1234)
 
     # Generate data
-    N = 1000
     D = 5
-    x = np.random.randn(N, D).astype("float32")
+    x = np.random.randn(N_DATAPOINTS, D).astype("float32")
     w = np.random.randn(D, 1)
     b = np.random.randn()
     std = np.exp(np.random.randn())
-    noise = std * np.random.randn(N, 1)
+    noise = std * np.random.randn(N_DATAPOINTS, 1)
     y = x @ w + b + noise
     y = y.astype("float32")
 
     # Create and fit model
     model = pf.LinearRegression(D)
-    model.fit(x, y, batch_size=100, epochs=1000, lr=1e-2)
+    model.fit(x, y, batch_size=BATCH_SIZE, epochs=N_EPOCHS, lr=1e-2)
 
     # Compute and check confidence intervals on the weights
     lb, ub = model.posterior_ci("weights")

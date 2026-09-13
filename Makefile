@@ -1,52 +1,46 @@
 
-.PHONY: init-tensorflow init-pytorch test-tensorflow test-pytorch format docs bump-minor bump-patch package push-package clean
+.PHONY: install test-unit test-stats test format docs bump-minor bump-patch package push-package clean
 
-init-tensorflow:
-	python3 -m venv venv; \
-	. venv/bin/activate; \
-	pip install -e .[dev,tensorflow]
+BACKEND ?= tensorflow
+AVAILABLE_BACKENDS := tensorflow pytorch
 
-init-pytorch:
-	python3 -m venv venv; \
-	. venv/bin/activate; \
-	pip install -e .[dev,pytorch]
+# Install probflow package and requirements
+install:
+	uv sync --extra $(BACKEND) --extra docs
 
-test-tensorflow:
-	. venv/bin/activate; \
-	pytest tests/unit/tensorflow
+# Run unit tests
+test-unit: install
+	uv run pytest tests/unit/$(BACKEND)
 
-test-pytorch:
-	. venv/bin/activate; \
-	pytest tests/unit/pytorch
+# Run statistical checks
+test-stats: install
+	uv run pytest tests/stats --backend=$(BACKEND)
 
+# Run all tests, including statistical checks, for all backends
+test:
+	@for backend in $(AVAILABLE_BACKENDS); do \
+		$(MAKE) test-unit BACKEND=$$backend; \
+		$(MAKE) test-stats BACKEND=$$backend; \
+	done
+
+# Format, lint, and type check code
 format:
-	. venv/bin/activate; \
-        autoflake -r --in-place --remove-all-unused-imports --ignore-init-module-imports src/probflow tests; \
-        isort src/probflow tests; \
-	black src/probflow tests; \
-	flake8 src/probflow tests
+	uv run pre-commit run --all-files
 
+# Build documentation
 docs:
-	. venv/bin/activate; \
-	sphinx-build -b html docs docs/_html
+	uv sync --extra docs
+	uv run sphinx-build -b html docs docs/_html
 
+# Bump minor version number
 bump-minor:
-	. venv/bin/activate; \
-	bumpversion minor
+	uv version --bump minor
 
+# Bump patch version number
 bump-patch:
-	. venv/bin/activate; \
-	bumpversion patch
+	uv version --bump patch
 
-package:
-	. venv/bin/activate; \
-	python setup.py sdist bdist_wheel; \
-	twine check dist/*
-
-push-package:
-	. venv/bin/activate; \
-	twine upload dist/*
-
+# Clean up build artifacts and caches
 clean:
 	rm -rf .pytest_cache docs/_html build dist src/probflow.egg-info
 	find . -type d -name __pycache__ -exec rm -rf {} \+

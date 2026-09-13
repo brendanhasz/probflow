@@ -1,5 +1,8 @@
+"""The Dirichlet distribution."""
+
 from probflow.utils.base import BaseDistribution
 from probflow.utils.settings import get_backend
+from probflow.utils.typing import BackendDistribution, TensorLike
 from probflow.utils.validation import ensure_tensor_like
 
 
@@ -41,7 +44,7 @@ class Dirichlet(BaseDistribution):
         Concentration parameter of the Dirichlet distribution (:math:`\alpha`).
     """
 
-    def __init__(self, concentration):
+    def __init__(self, concentration: TensorLike) -> None:
 
         # Check input
         ensure_tensor_like(concentration, "concentration")
@@ -49,8 +52,8 @@ class Dirichlet(BaseDistribution):
         # Store args
         self.concentration = concentration
 
-    def __call__(self):
-        """Get the distribution object from the backend"""
+    def __call__(self) -> BackendDistribution:
+        """Get the distribution object from the backend."""
         if get_backend() == "pytorch":
             import torch.distributions as tod
 

@@ -8,7 +8,7 @@ from probflow.utils.casting import to_tensor
 
 
 def test_CategoricalModel(plot):
-    """Tests probflow.models.CategoricalModel"""
+    """Tests probflow.models.CategoricalModel."""
 
     class MyModel(CategoricalModel):
         def __init__(self):

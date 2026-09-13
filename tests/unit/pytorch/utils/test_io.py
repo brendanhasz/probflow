@@ -4,10 +4,12 @@ import probflow as pf
 
 
 def isclose(a, b, thresh=1e-6):
+    """Provide isclose."""
     return np.all(np.abs(a - b) < thresh)
 
 
 def get_test_data(N, D):
+    """Provide get test data."""
     x = np.random.randn(N, D).astype("float32")
     w = np.random.randn(D, 1).astype("float32")
     y = x @ w + 0.1 * np.random.randn(N, 1).astype("float32")
@@ -15,6 +17,7 @@ def get_test_data(N, D):
 
 
 def test_dumps_and_loads_before_fitting():
+    """Test dumps and loads before fitting."""
     pf.set_backend("pytorch")
     model1 = pf.LinearRegression(7)
     model2 = pf.loads(model1.dumps())
@@ -27,6 +30,7 @@ def test_dumps_and_loads_before_fitting():
 
 
 def test_dump_and_load_before_fitting(tmpdir):
+    """Test dump and load before fitting."""
     pf.set_backend("pytorch")
     model1 = pf.LinearRegression(7)
     fname = str(tmpdir.join("test_model.pkl"))
@@ -41,6 +45,7 @@ def test_dump_and_load_before_fitting(tmpdir):
 
 
 def test_dumps_and_loads_after_fitting():
+    """Test dumps and loads after fitting."""
     pf.set_backend("pytorch")
     model1 = pf.LinearRegression(7)
     x, y = get_test_data(1024, 7)
@@ -55,6 +60,7 @@ def test_dumps_and_loads_after_fitting():
 
 
 def test_dump_and_load_after_fitting(tmpdir):
+    """Test dump and load after fitting."""
     pf.set_backend("pytorch")
     model1 = pf.LinearRegression(7)
     x, y = get_test_data(1024, 7)

@@ -6,7 +6,7 @@ from probflow.utils import casting
 
 
 def test_to_numpy():
-
+    """Test to numpy."""
     df = pd.DataFrame(np.random.randn(5, 2))
     o = casting.to_numpy(df)
     assert isinstance(o, np.ndarray)
@@ -23,7 +23,7 @@ def test_to_numpy():
 
 
 def test_to_tensor():
-
+    """Test to tensor."""
     df = pd.DataFrame(np.random.randn(5, 2))
     o = casting.to_tensor(df)
     assert o.ndim == 2

@@ -8,14 +8,16 @@ from probflow.utils import metrics
 
 
 def is_close(a, b, tol=1e-5):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_as_numpy():
-    """Tests probflow.utils.metrics.as_numpy"""
+    """Tests probflow.utils.metrics.as_numpy."""
 
     @metrics.as_numpy
     def func(a, b):
+        """Provide func."""
         assert isinstance(a, np.ndarray)
         assert isinstance(b, np.ndarray)
         assert a.ndim == b.ndim
@@ -68,8 +70,7 @@ def test_as_numpy():
 
 
 def test_accuracy():
-    """Tests probflow.utils.metrics.accuracy"""
-
+    """Tests probflow.utils.metrics.accuracy."""
     # Predictive dist
     probs = tf.constant([1, 1, 1, 1, 1, 1], dtype=tf.float32)
     pred_dist = Bernoulli(probs=probs)
@@ -80,8 +81,7 @@ def test_accuracy():
 
 
 def test_mean_squared_error():
-    """Tests probflow.utils.metrics.mean_squared_error"""
-
+    """Tests probflow.utils.metrics.mean_squared_error."""
     # Predictive dist
     preds = tf.constant([0, 1, 2, 0, 0, 0], dtype=tf.float32)
     pred_dist = Normal(preds, 1)
@@ -94,8 +94,7 @@ def test_mean_squared_error():
 
 
 def test_sum_squared_error():
-    """Tests probflow.utils.metrics.sum_squared_error"""
-
+    """Tests probflow.utils.metrics.sum_squared_error."""
     # Predictive dist
     preds = tf.constant([0, 1, 2, 0, 0, 0], dtype=tf.float32)
     pred_dist = Normal(preds, 1)
@@ -106,8 +105,7 @@ def test_sum_squared_error():
 
 
 def test_mean_absolute_error():
-    """Tests probflow.utils.metrics.mean_absolute_error"""
-
+    """Tests probflow.utils.metrics.mean_absolute_error."""
     # Predictive dist
     preds = tf.constant([0, 1, 2, 0, 0, 0], dtype=tf.float32)
     pred_dist = Normal(preds, 1)
@@ -118,8 +116,7 @@ def test_mean_absolute_error():
 
 
 def test_r_squared():
-    """Tests probflow.utils.metrics.r_squared"""
-
+    """Tests probflow.utils.metrics.r_squared."""
     # Predictive dist
     preds = tf.constant([0, 1, 2, 2, 2], dtype=tf.float32)
     pred_dist = Normal(preds, 1)
@@ -130,8 +127,7 @@ def test_r_squared():
 
 
 def test_true_positive_rate():
-    """Tests probflow.utils.metrics.true_positive_rate"""
-
+    """Tests probflow.utils.metrics.true_positive_rate."""
     # Predictive dist
     probs = tf.constant([1, 1, 1, 1, 1, 0], dtype=tf.float32)
     pred_dist = Bernoulli(probs=probs)
@@ -142,8 +138,7 @@ def test_true_positive_rate():
 
 
 def test_true_negative_rate():
-    """Tests probflow.utils.metrics.true_negative_rate"""
-
+    """Tests probflow.utils.metrics.true_negative_rate."""
     # Predictive dist
     probs = tf.constant([1, 1, 1, 1, 1, 0], dtype=tf.float32)
     pred_dist = Bernoulli(probs=probs)
@@ -156,8 +151,7 @@ def test_true_negative_rate():
 
 
 def test_precision():
-    """Tests probflow.utils.metrics.precision"""
-
+    """Tests probflow.utils.metrics.precision."""
     # Predictive dist
     probs = tf.constant([1, 1, 1, 1, 1, 0], dtype=tf.float32)
     pred_dist = Bernoulli(probs=probs)
@@ -168,8 +162,7 @@ def test_precision():
 
 
 def test_f1_score():
-    """Tests probflow.utils.metrics.f1_score"""
-
+    """Tests probflow.utils.metrics.f1_score."""
     # Predictive dist
     probs = tf.constant([0, 1, 1, 1, 1, 0], dtype=tf.float32)
     pred_dist = Bernoulli(probs=probs)
@@ -183,8 +176,7 @@ def test_f1_score():
 
 
 def test_get_metric_fn():
-    """Tests probflow.utils.metrics.get_metric_fn"""
-
+    """Tests probflow.utils.metrics.get_metric_fn."""
     metric_fn = metrics.get_metric_fn("f1")
 
     # Predictive dist

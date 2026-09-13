@@ -4,8 +4,7 @@ from probflow.parameters import CategoricalParameter
 
 
 def test_CategoricalParameter():
-    """Tests probflow.parameters.CategoricalParameter"""
-
+    """Tests probflow.parameters.CategoricalParameter."""
     # Should error with incorrect params
     with pytest.raises(TypeError):
         param = CategoricalParameter(k="a")

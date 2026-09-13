@@ -7,12 +7,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_ScaleParameter():
-    """Tests probflow.parameters.ScaleParameter"""
-
+    """Tests probflow.parameters.ScaleParameter."""
     # Create the parameter
     param = ScaleParameter()
 

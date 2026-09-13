@@ -10,12 +10,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_BatchNormalization():
-    """Tests probflow.modules.BatchNormalization"""
-
+    """Tests probflow.modules.BatchNormalization."""
     # Create the module
     bn = BatchNormalization(5)
 
@@ -73,8 +73,7 @@ def test_BatchNormalization():
 
 
 def test_BatchNormalization_2d():
-    """Tests BatchNormalization with 2d inputs"""
-
+    """Tests BatchNormalization with 2d inputs."""
     # Create the module
     bn = BatchNormalization([4, 3])
 

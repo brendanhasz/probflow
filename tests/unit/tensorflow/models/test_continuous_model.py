@@ -12,11 +12,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_ContinuousModel(plot):
-    """Tests probflow.models.ContinuousModel"""
+    """Tests probflow.models.ContinuousModel."""
 
     class MyModel(ContinuousModel):
         def __init__(self):
@@ -155,7 +156,7 @@ def test_ContinuousModel(plot):
 
     # predictive distribution covered for each sample
     cov = model.pred_dist_coverage(x[:11, :], y[:11, :])
-    assert isinstance(cov, np.float)
+    assert isinstance(cov, float)
 
     # plot coverage by
     xo, co = model.coverage_by(x[:, :1], x, y)
@@ -336,7 +337,7 @@ def test_ContinuousModel(plot):
 
 
 def test_ContinuousModel_multivariate():
-    """Tests probflow.models.ContinuousModel w/ multivariate target"""
+    """Tests probflow.models.ContinuousModel w/ multivariate target."""
 
     class MyModel(ContinuousModel):
         def __init__(self):

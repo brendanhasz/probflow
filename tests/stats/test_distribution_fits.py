@@ -1,29 +1,26 @@
-"""Tests the statistical accuracy of fitting some distributions"""
-
+"""Tests the statistical accuracy of fitting some distributions."""
 
 import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 import probflow as pf
 
-tfd = tfp.distributions
+N_DATAPOINTS: int = 10000
+N_EPOCHS: int = 1000
+BATCH_SIZE: int = 1000
 
 
 def is_close(a, b, th=1e-5):
-    """Check two values are close"""
+    """Check two values are close."""
     return np.abs(a - b) < th
 
 
 def test_fit_normal(random):
-    """Test fitting a normal distribution"""
-
+    """Test fitting a normal distribution."""
     # Generate data
-    N = 1000
     mu = np.random.randn()
     sig = np.exp(np.random.randn())
-    x = np.random.randn(N, 1).astype("float32")
-    x = x * sig + mu
+    x = np.random.randn(N_DATAPOINTS, 1)
+    x = (x * sig + mu).astype("float32")
 
     class NormalModel(pf.Model):
         def __init__(self):
@@ -35,7 +32,7 @@ def test_fit_normal(random):
 
     # Create and fit model
     model = NormalModel()
-    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
+    model.fit(x, batch_size=BATCH_SIZE, epochs=N_EPOCHS, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci("mu")
@@ -51,14 +48,13 @@ def test_fit_normal(random):
 
 
 def test_fit_studentt(random):
-    """Test fitting a student t distribution"""
-
+    """Test fitting a student t distribution."""
     # Generate data
-    N = 1000
     mu = np.random.randn(1).astype("float32")
     sig = np.exp(np.random.randn(1)).astype("float32")
-    df = np.array([1.0]).astype("float32")
-    x = tfd.StudentT(df, mu, sig).sample(N).numpy()
+    x = (np.random.standard_t(1.0, N_DATAPOINTS) * sig[0] + mu[0]).astype(
+        "float32"
+    )
 
     class StudenttModel(pf.Model):
         def __init__(self):
@@ -66,11 +62,11 @@ def test_fit_studentt(random):
             self.sig = pf.ScaleParameter(name="sig")
 
         def __call__(self):
-            return pf.StudentT(df, self.mu(), self.sig())
+            return pf.StudentT(1.0, self.mu(), self.sig())
 
     # Create and fit model
     model = StudenttModel()
-    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
+    model.fit(x, batch_size=BATCH_SIZE, epochs=N_EPOCHS, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci("mu")
@@ -86,13 +82,13 @@ def test_fit_studentt(random):
 
 
 def test_fit_cauchy(random):
-    """Test fitting a cauchy distribution"""
-
+    """Test fitting a cauchy distribution."""
     # Generate data
-    N = 1000
     mu = np.random.randn(1).astype("float32")
     sig = np.exp(np.random.randn(1)).astype("float32")
-    x = tfd.Cauchy(mu, sig).sample(N).numpy()
+    x = (np.random.standard_cauchy(N_DATAPOINTS) * sig[0] + mu[0]).astype(
+        "float32"
+    )
 
     class CauchyModel(pf.Model):
         def __init__(self):
@@ -104,7 +100,7 @@ def test_fit_cauchy(random):
 
     # Create and fit model
     model = CauchyModel()
-    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
+    model.fit(x, batch_size=BATCH_SIZE, epochs=N_EPOCHS, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci("mu")
@@ -120,13 +116,11 @@ def test_fit_cauchy(random):
 
 
 def test_fit_gamma(random):
-    """Test fitting a gamma distribution"""
-
+    """Test fitting a gamma distribution."""
     # Generate data
-    N = 1000
     alpha = np.array([1.0]).astype("float32")
     beta = np.array([1.0]).astype("float32")
-    x = tfd.Gamma(alpha, beta).sample(N).numpy().astype("float32")
+    x = np.random.gamma(alpha[0], 1 / beta[0], N_DATAPOINTS).astype("float32")
 
     class GammaModel(pf.Model):
         def __init__(self):
@@ -138,7 +132,7 @@ def test_fit_gamma(random):
 
     # Create and fit model
     model = GammaModel()
-    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
+    model.fit(x, batch_size=BATCH_SIZE, epochs=N_EPOCHS, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci("alpha")
@@ -154,12 +148,11 @@ def test_fit_gamma(random):
 
 
 def test_fit_bernoulli(random):
-    """Test fitting a bernoulli distribution"""
-
+    """Test fitting a bernoulli distribution."""
     # Generate data
     N = 1000
     prob = 0.7
-    x = (tf.random.uniform([N]) < prob).numpy().astype("float32")
+    x = (np.random.uniform(0, 1, N) < prob).astype("float32")
 
     class BernoulliModel(pf.Model):
         def __init__(self):
@@ -170,7 +163,7 @@ def test_fit_bernoulli(random):
 
     # Create and fit model
     model = BernoulliModel()
-    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
+    model.fit(x, batch_size=BATCH_SIZE, epochs=N_EPOCHS, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci("prob")
@@ -180,12 +173,10 @@ def test_fit_bernoulli(random):
 
 
 def test_fit_categorical(random):
-    """Test fitting a categorical distribution"""
-
+    """Test fitting a categorical distribution."""
     # Generate data
-    N = 1000
     probs = [0.3, 0.2, 0.5]
-    x = tfd.Categorical(probs=probs).sample(N).numpy().astype("float32")
+    x = np.random.choice(len(probs), N_DATAPOINTS, p=probs).astype("float32")
 
     class CategoricalModel(pf.Model):
         def __init__(self):
@@ -196,7 +187,7 @@ def test_fit_categorical(random):
 
     # Create and fit model
     model = CategoricalModel()
-    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
+    model.fit(x, batch_size=BATCH_SIZE, epochs=N_EPOCHS, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci("probs")
@@ -207,12 +198,10 @@ def test_fit_categorical(random):
 
 
 def test_fit_poisson(random):
-    """Test fitting a poisson distribution"""
-
+    """Test fitting a poisson distribution."""
     # Generate data
-    N = 10000
     rate = 10
-    x = tf.random.poisson([N], rate).numpy()
+    x = np.random.poisson(rate, N_DATAPOINTS).astype("float32")
 
     class PoissonModel(pf.Model):
         def __init__(self):
@@ -223,7 +212,7 @@ def test_fit_poisson(random):
 
     # Create and fit model
     model = PoissonModel()
-    model.fit(x, batch_size=100, epochs=1000, lr=1e-2)
+    model.fit(x, batch_size=BATCH_SIZE, epochs=N_EPOCHS, lr=1e-2)
 
     # Check inferences for mean are correct
     lb, ub = model.posterior_ci("rate")

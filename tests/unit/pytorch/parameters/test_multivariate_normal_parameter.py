@@ -5,8 +5,7 @@ from probflow.parameters import MultivariateNormalParameter
 
 
 def test_MultivariateNormalParameter():
-    """Tests probflow.parameters.MultivariateNormalParameter"""
-
+    """Tests probflow.parameters.MultivariateNormalParameter."""
     # Create the parameter
     param = MultivariateNormalParameter(4)
 

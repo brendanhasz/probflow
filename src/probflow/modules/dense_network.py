@@ -1,6 +1,9 @@
-from typing import Callable, List
+"""A multilayer dense neural network."""
+
+from collections.abc import Callable
 
 import probflow.utils.ops as O
+from probflow.utils.typing import BackendTensor, TensorLike
 
 from .batch_normalization import BatchNormalization
 from .dense import Dense
@@ -8,7 +11,7 @@ from .module import Module
 
 
 class DenseNetwork(Module):
-    r"""A multilayer dense neural network
+    r"""A multilayer dense neural network.
 
     TODO: explain, math, diagram, examples, etc
 
@@ -53,15 +56,15 @@ class DenseNetwork(Module):
 
     def __init__(
         self,
-        d: List[int],
+        d: list[int],
         activation: Callable = O.relu,
         batch_norm: bool = False,
         batch_norm_loc: str = "after",
         name: str = "DenseNetwork",
         batch_norm_kwargs: dict = {},
-        **kwargs
+        **kwargs,
     ):
-
+        """Initialize the DenseNetwork."""
         self.name = name
 
         # Activations
@@ -83,15 +86,18 @@ class DenseNetwork(Module):
                 name + "_BatchNormalization" + str(i)
                 for i in range(len(d) - 2)
             ]
-            self.batch_norms = [
+            self.batch_norms: list[BatchNormalization | Callable] = [
                 BatchNormalization(
                     d[i + 1], name=names[i], **batch_norm_kwargs
                 )
                 for i in range(len(d) - 2)
             ]
             self.batch_norms += [lambda x: x]  # no batch norm after last layer
+        else:
+            self.batch_norms = []
 
-    def __call__(self, x):
+    def __call__(self, x: TensorLike) -> BackendTensor:
+        """Forward pass of the DenseNetwork."""
         for i in range(len(self.layers)):
             x = self.layers[i](x)
             if self.batch_norm and self.batch_norm_loc == "before":

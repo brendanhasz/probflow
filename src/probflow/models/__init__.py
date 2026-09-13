@@ -13,12 +13,11 @@ TODO: more...
 
 """
 
-
 __all__ = [
-    "Model",
+    "CategoricalModel",
     "ContinuousModel",
     "DiscreteModel",
-    "CategoricalModel",
+    "Model",
 ]
 
 

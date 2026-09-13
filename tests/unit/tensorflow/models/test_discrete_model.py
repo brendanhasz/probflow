@@ -12,11 +12,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_DiscreteModel(plot):
-    """Tests probflow.models.DiscreteModel"""
+    """Tests probflow.models.DiscreteModel."""
 
     class MyModel(DiscreteModel):
         def __init__(self):

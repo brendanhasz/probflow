@@ -10,7 +10,7 @@ from probflow.utils.casting import to_tensor
 
 
 def test_ContinuousModel(plot):
-    """Tests probflow.models.ContinuousModel"""
+    """Tests probflow.models.ContinuousModel."""
 
     class MyModel(ContinuousModel):
         def __init__(self):
@@ -150,7 +150,7 @@ def test_ContinuousModel(plot):
 
     # predictive distribution covered for each sample
     cov = model.pred_dist_coverage(x[:11, :], y[:11, :])
-    assert isinstance(cov, np.float)
+    assert isinstance(cov, float)
 
     # plot coverage by
     xo, co = model.coverage_by(x[:, :1], x, y)

@@ -11,12 +11,12 @@ tfd = tfp.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_DenseNetwork():
-    """Tests probflow.modules.DenseNetwork"""
-
+    """Tests probflow.modules.DenseNetwork."""
     # Should error w/ int < 1
     with pytest.raises(ValueError):
         DenseNetwork([0, 1, 5])

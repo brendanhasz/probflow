@@ -1,10 +1,12 @@
-from typing import List, Union
+"""Dirichlet parameter."""
+
+from collections.abc import Callable
 
 import probflow.utils.ops as O
 from probflow.distributions import Dirichlet
+from probflow.parameters.parameter import Parameter
+from probflow.utils.base import BaseDistribution
 from probflow.utils.initializers import pos_xavier
-
-from .parameter import Parameter
 
 
 class DirichletParameter(Parameter):
@@ -58,7 +60,6 @@ class DirichletParameter(Parameter):
 
     Examples
     --------
-
     TODO: creating variable
 
     """
@@ -66,13 +67,15 @@ class DirichletParameter(Parameter):
     def __init__(
         self,
         k: int = 2,
-        shape: Union[int, List[int]] = [],
-        posterior=Dirichlet,
-        prior=None,
-        transform=None,
-        initializer={"concentration": pos_xavier},
-        var_transform={"concentration": O.softplus},
-        name="DirichletParameter",
+        shape: int | list[int] = [],
+        posterior: type[BaseDistribution] = Dirichlet,
+        prior: BaseDistribution | None = None,
+        transform: Callable | None = None,
+        initializer: dict[str, Callable] = {"concentration": pos_xavier},
+        var_transform: dict[str, Callable | None] = {
+            "concentration": O.softplus
+        },
+        name: str = "DirichletParameter",
     ):
 
         # Check type of k

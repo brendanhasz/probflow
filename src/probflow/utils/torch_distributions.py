@@ -1,8 +1,10 @@
-"""Torch backend distributions"""
+"""Torch backend distributions."""
+
+from probflow.utils.typing import BackendDistribution
 
 
-def get_TorchDeterministic():
-
+def get_TorchDeterministic() -> type[BackendDistribution]:
+    """Return a PyTorch deterministic distribution class."""
     from numbers import Number
 
     import torch
@@ -11,9 +13,9 @@ def get_TorchDeterministic():
     from torch.distributions.utils import broadcast_all
 
     class TorchDeterministic(torch.distributions.distribution.Distribution):
-        """Deterministic distribution for PyTorch"""
+        """Deterministic distribution for PyTorch."""
 
-        arg_constraints = {"loc": constraints.real}
+        arg_constraints = {"loc": constraints.real}  # noqa: RUF012
         support = constraints.real
         has_rsample = True
 
@@ -36,9 +38,7 @@ def get_TorchDeterministic():
                 batch_shape = torch.Size()
             else:
                 batch_shape = self.loc.size()
-            super(TorchDeterministic, self).__init__(
-                batch_shape, validate_args=validate_args
-            )
+            super().__init__(batch_shape, validate_args=validate_args)
 
         def expand(self, batch_shape, _instance=None):
             new = self._get_checked_instance(TorchDeterministic, _instance)

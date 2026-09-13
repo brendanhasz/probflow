@@ -2,7 +2,7 @@ ProbFlow
 ========
 
 .. meta::
-    :property=og\:image: https://raw.githubusercontent.com/brendanhasz/probflow/master/docs/img/probflow_og_image.png
+    :property=og\:image: https://raw.githubusercontent.com/brendanhasz/probflow/main/docs/img/probflow_og_image.png
     :property=og\:image\:width: 1200
     :property=og\:image\:height: 1200
 
@@ -12,12 +12,12 @@ ProbFlow
     :target: https://pypi.org/project/probflow/
 
 .. |Build Badge| image:: https://github.com/brendanhasz/probflow/workflows/tests/badge.svg
-    :target: https://github.com/brendanhasz/probflow/actions?query=branch%3Amaster
+    :target: https://github.com/brendanhasz/probflow/actions?query=branch%3Amain
 
 .. |Docs Badge| image:: https://readthedocs.org/projects/probflow/badge/
     :target: http://probflow.readthedocs.io
 
-.. |Coverage Badge| image:: https://codecov.io/gh/brendanhasz/probflow/branch/master/graph/badge.svg
+.. |Coverage Badge| image:: https://codecov.io/gh/brendanhasz/probflow/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/brendanhasz/probflow
 
 .. toctree::

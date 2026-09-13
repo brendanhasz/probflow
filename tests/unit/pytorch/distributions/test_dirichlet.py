@@ -8,12 +8,12 @@ tod = torch.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_Dirichlet():
-    """Tests Dirichlet distribution"""
-
+    """Tests Dirichlet distribution."""
     # Create the distribution
     dist = Dirichlet(torch.tensor([1.0, 2.0, 3.0]))
 

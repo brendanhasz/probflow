@@ -8,12 +8,12 @@ tod = torch.distributions
 
 
 def is_close(a, b, tol=1e-3):
+    """Check whether a value is close."""
     return np.abs(a - b) < tol
 
 
 def test_Categorical():
-    """Tests Categorical distribution"""
-
+    """Tests Categorical distribution."""
     # Create the distribution
     dist = Categorical(torch.tensor([0.0, 1.0, 2.0]))
 

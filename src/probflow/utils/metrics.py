@@ -13,120 +13,113 @@ Evaluation metrics
 
 """
 
-
 __all__ = [
     "accuracy",
-    "mean_squared_error",
-    "sum_squared_error",
-    "mean_absolute_error",
-    "r_squared",
-    "true_positive_rate",
-    "true_negative_rate",
-    "precision",
     "f1_score",
     "get_metric_fn",
+    "mean_absolute_error",
+    "mean_squared_error",
+    "precision",
+    "r_squared",
+    "sum_squared_error",
+    "true_negative_rate",
+    "true_positive_rate",
 ]
 
 
+from collections.abc import Callable
+
 import numpy as np
-import pandas as pd
+
+from probflow.utils.casting import to_numpy
+from probflow.utils.typing import TensorLike
 
 
-def as_numpy(fn):
-    """Cast inputs to numpy arrays and same shape before computing metric"""
+def as_numpy(
+    fn: Callable[[np.ndarray, np.ndarray], float],
+) -> Callable[[TensorLike, TensorLike], float]:
+    """Cast inputs to numpy arrays and same shape before computing metric."""
 
-    def metric_fn(y_true, y_pred):
+    def metric_fn(y_true: TensorLike, y_pred: TensorLike) -> float:
 
-        # Cast y_true to numpy array
-        if isinstance(y_true, (pd.Series, pd.DataFrame)):
-            new_y_true = y_true.values
-        elif isinstance(y_true, np.ndarray):
-            new_y_true = y_true
-        else:
-            new_y_true = y_true.numpy()
-
-        # Cast y_pred to numpy array
-        if isinstance(y_pred, (pd.Series, pd.DataFrame)):
-            new_y_pred = y_pred.values
-        elif isinstance(y_pred, np.ndarray):
-            new_y_pred = y_pred
-        else:
-            new_y_pred = y_pred.numpy()
+        # Cast to numpy arrays
+        y_true_np = to_numpy(y_true)
+        y_pred_np = to_numpy(y_pred)
 
         # Ensure correct sizes
-        if new_y_true.ndim == 1:
-            new_y_true = np.expand_dims(new_y_true, 1)
-        if new_y_pred.ndim == 1:
-            new_y_pred = np.expand_dims(new_y_pred, 1)
+        if y_true_np.ndim == 1:
+            y_true_np = np.expand_dims(y_true_np, 1)
+        if y_pred_np.ndim == 1:
+            y_pred_np = np.expand_dims(y_pred_np, 1)
 
         # Return metric function on consistent arrays
-        return fn(new_y_true, new_y_pred)
+        return fn(y_true_np, y_pred_np)
 
     return metric_fn
 
 
 @as_numpy
-def accuracy(y_true, y_pred):
+def accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """Accuracy of predictions."""
-    return np.mean(y_pred == y_true)
+    return float(np.mean(y_pred == y_true))
 
 
 @as_numpy
-def mean_squared_error(y_true, y_pred):
+def mean_squared_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """Mean squared error."""
-    return np.mean(np.square(y_true - y_pred))
+    return float(np.mean(np.square(y_true - y_pred)))
 
 
 @as_numpy
-def sum_squared_error(y_true, y_pred):
+def sum_squared_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """Sum of squared error."""
-    return np.sum(np.square(y_true - y_pred))
+    return float(np.sum(np.square(y_true - y_pred)))
 
 
 @as_numpy
-def mean_absolute_error(y_true, y_pred):
+def mean_absolute_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """Mean absolute error."""
-    return np.mean(np.abs(y_true - y_pred))
+    return float(np.mean(np.abs(y_true - y_pred)))
 
 
 @as_numpy
-def r_squared(y_true, y_pred):
+def r_squared(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """Coefficient of determination."""
     ss_tot = np.sum(np.square(y_true - np.mean(y_true)))
     ss_res = np.sum(np.square(y_true - y_pred))
-    return 1.0 - ss_res / ss_tot
+    return float(1.0 - ss_res / ss_tot)
 
 
 @as_numpy
-def true_positive_rate(y_true, y_pred):
+def true_positive_rate(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """True positive rate aka sensitivity aka recall."""
     p = np.sum(y_true == 1)
     tp = np.sum((y_pred == y_true) & (y_true == 1))
-    return tp / p
+    return float(tp / p)
 
 
 @as_numpy
-def true_negative_rate(y_true, y_pred):
+def true_negative_rate(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """True negative rate aka specificity aka selectivity."""
     n = np.sum(y_true == 0)
     tn = np.sum((y_pred == y_true) & (y_true == 0))
-    return tn / n
+    return float(tn / n)
 
 
 @as_numpy
-def precision(y_true, y_pred):
+def precision(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """Precision."""
     ap = np.sum(y_pred)
     tp = np.sum((y_pred == y_true) & (y_true == 1))
-    return tp / ap
+    return float(tp / ap)
 
 
 @as_numpy
-def f1_score(y_true, y_pred):
+def f1_score(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """F-measure."""
     p = precision(y_true, y_pred)
     r = true_positive_rate(y_true, y_pred)
-    return 2 * (p * r) / (p + r)
+    return float(2 * (p * r) / (p + r))
 
 
 # TODO: jaccard_similarity
@@ -138,9 +131,10 @@ def f1_score(y_true, y_pred):
 # TODO: cross_entropy
 
 
-def get_metric_fn(metric):
-    """Get a function corresponding to a metric string"""
-
+def get_metric_fn(
+    metric: str | Callable[[TensorLike, TensorLike], float],
+) -> Callable[[TensorLike, TensorLike], float]:
+    """Get a function corresponding to a metric string."""
     # List of valid metric strings
     metrics = {
         "accuracy": accuracy,

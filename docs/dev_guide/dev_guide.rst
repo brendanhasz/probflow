@@ -13,10 +13,9 @@ Requirements
 
 First make sure you've got the following installed:
 
-* make
 * git
-* python3
-* `virtualenv <http://docs.python.org/3/library/venv.html>`_
+* `uv <https://docs.astral.sh/uv/>`_
+* make
 
 
 Setting up a development environment
@@ -34,40 +33,37 @@ you're connecting to github
    git clone git@github.com:<your_github_username>/probflow.git
    cd probflow
 
-Then, to set up a development environment with tensorflow, run
+Then, to set up a development environment with probflow and required packages installed, run
 
-.. code-block:: bash
+.. tabs::
 
-   make init-tensorflow
+    .. group-tab:: TensorFlow
 
-or alternatively to set up a dev environment with pytorch,
+         .. code-block:: bash
 
-.. code-block:: bash
+            make install
 
-   make init-tensorflow
+    .. group-tab:: PyTorch
 
-The above command creates a new virtual environment called ``venv``, activates
-that virtual environment, installs the requirements (including tensorflow or
-pytorch), dev requirements, and the ProbFlow package in editable mode from your
-version of the source code - see the ``Makefile`` for the commands it's
-running).
+         .. code-block:: bash
+
+            make install BACKEND=pytorch
+
+The above command creates a virtual environment (via ``uv``), and installs
+the requirements (including tensorflow or pytorch), dev requirements, and the
+ProbFlow package in editable mode from your version of the source code - see
+the ``Makefile`` for the commands it's running).
 
 
 Tests
 -----
 
 Then you can edit the source code, which is in ``src/probflow``.  The tests are
-in ``tests``.  To run the tensorflow tests, run
+in ``tests``.  To run all the tests, run
 
 .. code-block:: bash
 
-   make test-tensorflow
-
-and to run the PyTorch tests, run
-
-.. code-block:: bash
-
-   make test-pytorch
+   make test
 
 If you get an error during the tests and want to debug, the tests are written
 using `pytest <http://docs.pytest.org>`_, so to drop into the
@@ -75,19 +71,25 @@ using `pytest <http://docs.pytest.org>`_, so to drop into the
 
 .. code-block:: bash
 
-   . venv/bin/activate
-   pytest tests/test_you_want_to_run.py --pdb
+   uv run pytest tests/test_you_want_to_run.py --pdb
 
 
 Style
 -----
 
-To run the autoformatting (using ``isort`` and ``black``) and style checks
-(using ``flake8``), run
+To run the autoformatting, style checks (using ``ruff``), and typing checks (using ``mypy``), run
 
 .. code-block:: bash
 
    make format
+
+
+Version bumping
+---------------
+
+To automatically bump the minor or patch version number, run ``make bump-minor`` or ``make bump-patch``.
+This will update the version number in ``pyproject.toml``.
+You can then commit that change, push it to your fork, and make a pull request.
 
 
 Documentation
