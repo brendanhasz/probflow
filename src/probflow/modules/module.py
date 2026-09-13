@@ -117,9 +117,9 @@ class Module(BaseModule):
 
         Parameters
         ----------
-        d1 : |BaseDistribution| or backend distribution
+        d1 : |Distribution|
             The first distribution.
-        d2 : |BaseDistribution| or backend distribution
+        d2 : |Distribution|
             The second distribution.
         """
         self._kl_losses += [O.sum(O.kl_divergence(d1, d2), axis=None)]

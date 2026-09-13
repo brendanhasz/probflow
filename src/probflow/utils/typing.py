@@ -40,3 +40,7 @@ else:
     BackendVariable = Any
     BackendDataType = Any
     BackendDistribution = Any
+
+TensorLike.__doc__ = (
+    """A Tensor-like object (e.g., TensorFlow Tensor, numpy array, etc)."""
+)

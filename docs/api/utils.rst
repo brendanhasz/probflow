@@ -6,39 +6,23 @@ Utils
 The :mod:`.utils` module contains utility classes, functions, and settings
 which ProbFlow uses internally.  The sub-modules of :mod:`.utils` are:
 
-* :mod:`.settings` - backend, datatype, and sampling settings
 * :mod:`.base` - abstract base classes for ProbFlow objects
-* :mod:`.ops` - backend-independent mathematical operations
 * :mod:`.casting` - backend-independent casting operations
 * :mod:`.initializers` - backend-independent variable initializer functions
 * :mod:`.io` - functions for loading and saving models
 * :mod:`.metrics` - functions for computing various model performance metrics
+* :mod:`.ops` - backend-independent mathematical operations
 * :mod:`.plotting` - functions for plotting distributions, posteriors, etc
+* :mod:`.settings` - backend, datatype, and sampling settings
+* :mod:`.shape` - functions for getting shapes of tensors
 * :mod:`.torch_distributions` - manual implementations of missing torch dists
+* :mod:`.typing` - type hinting utils
 * :mod:`.validation` - functions for data type validation
-
-Settings
---------
-
-.. automodule:: probflow.utils.settings
-   :members:
-   :inherited-members:
-   :show-inheritance:
-
 
 Base
 ----
 
 .. automodule:: probflow.utils.base
-   :members:
-   :inherited-members:
-   :show-inheritance:
-
-
-Ops
----
-
-.. automodule:: probflow.utils.ops
    :members:
    :inherited-members:
    :show-inheritance:
@@ -80,6 +64,15 @@ Metrics
    :show-inheritance:
 
 
+Ops
+---
+
+.. automodule:: probflow.utils.ops
+   :members:
+   :inherited-members:
+   :show-inheritance:
+
+
 Plotting
 --------
 
@@ -89,10 +82,37 @@ Plotting
    :show-inheritance:
 
 
+Settings
+--------
+
+.. automodule:: probflow.utils.settings
+   :members:
+   :inherited-members:
+   :show-inheritance:
+
+
+Shape
+-----
+
+.. automodule:: probflow.utils.shape
+   :members:
+   :inherited-members:
+   :show-inheritance:
+
+
 Torch Distributions
 -------------------
 
 .. automodule:: probflow.utils.torch_distributions
+   :members:
+   :inherited-members:
+   :show-inheritance:
+
+
+Typing
+------
+
+.. automodule:: probflow.utils.typing
    :members:
    :inherited-members:
    :show-inheritance:

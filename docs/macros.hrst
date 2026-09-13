@@ -31,5 +31,7 @@
 .. |DataFrames| replace:: :class:`DataFrames <pandas.DataFrame>`
 .. |Series| replace:: :class:`Series <pandas.Series>`
 
+.. |TensorLike| replace:: :obj:`probflow.utils.typing.TensorLike`
+
 .. role:: raw-html(raw)
    :format: html

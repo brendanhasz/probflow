@@ -18,10 +18,10 @@ class Mixture(BaseDistribution):
     ----------
     distributions : |Distribution|
         Distributions to mix.
-    logits : |Tensor|
+    logits : |TensorLike|
         Logit probabilities of the mixture weights.  Either this or
         `probs` must be specified.
-    probs : |Tensor|
+    probs : |TensorLike|
         Raw probabilities of the mixture weights.  Either this or
         `probs` must be specified.  Must sum to 1 along the last axis.
     """
