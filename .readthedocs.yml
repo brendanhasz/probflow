@@ -4,10 +4,6 @@
 # Required
 version: 2
 
-# Build HTML format only for faster builds
-formats:
-  - html
-
 build:
   os: ubuntu-22.04
   tools:
