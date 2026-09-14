@@ -7,7 +7,7 @@ version: 1.0.0
 
 # Python Testing Skill via uv
 
-This skill ensures that all Python test suites, quality gates, and ad-hoc scripts are strictly executed inside the `uv` environment. You must never invoke testing framework commands (`pytest`, `unittest`) directly on the host system.
+This skill ensures that all Python test suites, quality gates, and ad-hoc scripts are strictly executed inside the `uv` environment. You must never invoke testing framework commands (`pytest`) directly on the host system.
 
 ## Core Directives
 
@@ -31,9 +31,8 @@ uv run pytest -v --color=no
 ### 2. Quality Gates & Pre-Commit Checks
 A task involving code changes is only considered "done" when the following test and linting checklist passes successfully via `uv`:
 
-- `uv run ruff format` leaves the code unchanged.
-- `uv run ruff check` reports zero errors.
-- `uv run pytest` passes cleanly with full test coverage preserved.
+- `uv run pre-commit run --all-files` leaves the code unchanged and reports zero errors.
+- `uv run pytest` passes cleanly.
 
 ### 3. Ad-hoc/Isolated Script Checks
 If you need to execute temporary scripts or evaluate Python object behaviors to diagnose a failing test, always spin them up using the project's pinned virtual environment context:
