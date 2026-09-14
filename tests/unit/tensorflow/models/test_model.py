@@ -1,10 +1,9 @@
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
+import probflow.utils.ops as O
 from probflow.data import ArrayDataGenerator
-from probflow.distributions import Normal
+from probflow.distributions import Gamma, Normal
 from probflow.models import Model
 from probflow.modules import Dense, Module
 from probflow.parameters import (
@@ -12,13 +11,6 @@ from probflow.parameters import (
     Parameter,
     ScaleParameter,
 )
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
 
 
 def test_Model_0D():
@@ -336,7 +328,7 @@ def test_Model_nonprobabilistic():
     class MyModel(Model):
         def __init__(self):
             self.net = Dense(1, 1, probabilistic=False)
-            self.std = DeterministicParameter(transform=tf.math.softplus)
+            self.std = DeterministicParameter(transform=O.softplus)
 
         def __call__(self, x):
             return Normal(self.net(x), self.std())
@@ -731,7 +723,7 @@ def test_Model_nesting():
         def __init__(self):
             self.module = MyModule()
             self.std = ScaleParameter(
-                [1, 1], name="Std", prior=tfd.Gamma(1.0, 1.0)
+                [1, 1], name="Std", prior=Gamma(1.0, 1.0)
             )
 
         def __call__(self, x):

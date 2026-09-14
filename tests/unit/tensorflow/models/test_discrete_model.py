@@ -1,19 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
+import probflow.utils.ops as O
 from probflow.distributions import Normal, Poisson
 from probflow.models import DiscreteModel
 from probflow.parameters import Parameter
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
 
 
 def test_DiscreteModel(plot):
@@ -25,7 +17,7 @@ def test_DiscreteModel(plot):
             self.bias = Parameter([1, 1], name="Bias")
 
         def __call__(self, x):
-            return Poisson(tf.nn.softplus(x @ self.weight() + self.bias()))
+            return Poisson(O.softplus(x @ self.weight() + self.bias()))
 
     # Instantiate the model
     model = MyModel()
