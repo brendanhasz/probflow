@@ -1,24 +1,17 @@
 import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 from probflow.modules import Dense, Sequential
 from probflow.parameters import Parameter
 from probflow.utils.settings import Sampling
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+import probflow.utils.ops as O
+from probflow.utils.validation import ensure_tensor_like
 
 
 def test_Sequential():
     """Tests probflow.modules.Sequential."""
     # Create the module
     seq = Sequential(
-        [Dense(5, 10), tf.nn.relu, Dense(10, 3), tf.nn.relu, Dense(3, 1)]
+        [Dense(5, 10), O.relu, Dense(10, 3), O.relu, Dense(3, 1)]
     )
 
     # Steps should be list
@@ -26,7 +19,7 @@ def test_Sequential():
     assert len(seq.steps) == 5
 
     # Test MAP outputs are the same
-    x = tf.random.normal([4, 5])
+    x = O.randn([4, 5])
     samples1 = seq(x)
     samples2 = seq(x)
     assert np.all(samples1.numpy() == samples2.numpy())
@@ -61,5 +54,5 @@ def test_Sequential():
 
     # kl_loss should return sum of KL losses
     kl_loss = seq.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    ensure_tensor_like(kl_loss)
     assert kl_loss.ndim == 0

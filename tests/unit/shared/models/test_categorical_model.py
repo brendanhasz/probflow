@@ -1,18 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-import tensorflow_probability as tfp
 
 from probflow.distributions import Bernoulli
 from probflow.models import CategoricalModel
 from probflow.parameters import Parameter
 
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
 
 
 def test_CategoricalModel(plot):

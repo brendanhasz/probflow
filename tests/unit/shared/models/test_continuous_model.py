@@ -1,19 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-import tensorflow_probability as tfp
 
 from probflow.data import make_generator
 from probflow.distributions import Normal
 from probflow.models import ContinuousModel
 from probflow.parameters import Parameter, ScaleParameter
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
 
 
 def test_ContinuousModel(plot):

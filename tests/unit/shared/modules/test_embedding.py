@@ -1,18 +1,12 @@
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 from probflow.modules import Embedding
 from probflow.parameters import DeterministicParameter
 from probflow.utils.settings import Sampling
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+import probflow.utils.ops as O
+from probflow.utils.validation import is_backend_tensor
+from probflow.utils.casting import to_numpy
 
 
 def test_Embedding():
@@ -39,10 +33,10 @@ def test_Embedding():
     assert all(isinstance(e, DeterministicParameter) for e in emb.embeddings)
 
     # Test MAP outputs are the same
-    x = tf.random.uniform([20, 1], minval=0, maxval=9, dtype=tf.dtypes.int32)
+    x = np.random.default_rng().integers(low=0, high=9, size=(20, 1)).astype(np.int32)
     samples1 = emb(x)
     samples2 = emb(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(to_numpy(samples1) == to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 20
     assert samples1.shape[1] == 5
@@ -51,14 +45,14 @@ def test_Embedding():
     with Sampling(n=1):
         samples1 = emb(x)
         samples2 = emb(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(to_numpy(samples1) == to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 20
     assert samples1.shape[1] == 5
 
     # kl_loss should return sum of KL losses
     kl_loss = emb.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert is_backend_tensor(kl_loss)
     assert kl_loss.ndim == 0
 
     # Should be able to embed multiple columns by passing list of k and d
@@ -72,23 +66,27 @@ def test_Embedding():
     assert emb.parameters[1].shape == [20, 4]
 
     # Test MAP outputs are the same
-    x1 = tf.random.uniform([20, 1], minval=0, maxval=9, dtype=tf.dtypes.int32)
-    x2 = tf.random.uniform([20, 1], minval=0, maxval=19, dtype=tf.dtypes.int32)
-    x = tf.concat([x1, x2], axis=1)
+    x = np.concatenate(
+        (
+            np.random.default_rng().integers(low=0, high=9, size=(20, 1)).astype(np.int32),
+            np.random.default_rng().integers(low=0, high=19, size=(20, 1)).astype(np.int32),
+        ),
+        axis=1,
+    )
     samples1 = emb(x)
     samples2 = emb(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(to_numpy(samples1) == to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 20
     assert samples1.shape[1] == 9
 
     # With probabilistic = True, samples should be different
     emb = Embedding(10, 5, probabilistic=True)
-    x = tf.random.uniform([20, 1], minval=0, maxval=9, dtype=tf.dtypes.int32)
+    x = np.random.default_rng().integers(low=0, high=9, size=(20, 1)).astype(np.int32)
     with Sampling(n=1):
         samples1 = emb(x)
         samples2 = emb(x)
-    assert np.all(samples1.numpy() != samples2.numpy())
+    assert np.all(to_numpy(samples1) != to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 20
     assert samples1.shape[1] == 5

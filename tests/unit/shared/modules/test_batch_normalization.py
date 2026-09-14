@@ -1,17 +1,10 @@
 import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 from probflow.modules import BatchNormalization, Dense, Sequential
 from probflow.parameters import Parameter
 from probflow.utils.settings import Sampling
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+import probflow.utils.ops as O
+from probflow.utils.validation import is_backend_tensor
 
 
 def test_BatchNormalization():
@@ -20,7 +13,7 @@ def test_BatchNormalization():
     bn = BatchNormalization(5)
 
     # Test MAP outputs are the same
-    x = tf.random.normal([4, 5])
+    x = O.randn([4, 5])
     samples1 = bn(x)
     samples2 = bn(x)
     assert np.all(samples1.numpy() == samples2.numpy())
@@ -50,7 +43,7 @@ def test_BatchNormalization():
 
     # kl_loss should return sum of KL losses
     kl_loss = bn.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert is_backend_tensor(kl_loss)
     assert kl_loss.ndim == 0
 
     # Test it works w/ dense layer and sequential
@@ -58,15 +51,15 @@ def test_BatchNormalization():
         [
             Dense(5, 10),
             BatchNormalization(10),
-            tf.nn.relu,
+            O.relu,
             Dense(10, 3),
             BatchNormalization(3),
-            tf.nn.relu,
+            O.relu,
             Dense(3, 1),
         ]
     )
     assert len(seq.parameters) == 10
-    out = seq(tf.random.normal([6, 5]))
+    out = seq(O.randn([6, 5]))
     assert out.ndim == 2
     assert out.shape[0] == 6
     assert out.shape[1] == 1
@@ -78,7 +71,7 @@ def test_BatchNormalization_2d():
     bn = BatchNormalization([4, 3])
 
     # Test MAP outputs are the same
-    x = tf.random.normal([5, 4, 3])
+    x = O.randn([5, 4, 3])
     samples1 = bn(x)
     samples2 = bn(x)
     assert np.all(samples1.numpy() == samples2.numpy())
