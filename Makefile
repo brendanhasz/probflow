@@ -1,12 +1,12 @@
 
-.PHONY: install test-unit test-stats test format docs bump-minor bump-patch package push-package clean
+.PHONY: install test-unit test-stats test format docs bump-minor bump-patch clean
 
 BACKEND ?= tensorflow
 AVAILABLE_BACKENDS := tensorflow pytorch
 
 # Install probflow package and requirements
 install:
-	uv sync --extra $(BACKEND) --extra docs
+	uv sync --extra $(BACKEND)
 
 # Run unit tests
 test-unit: install

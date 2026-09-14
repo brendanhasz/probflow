@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "probflow"
-version = "2.5.1"
+version = "2.6.0"
 description = "A Python package for building Bayesian models with TensorFlow or PyTorch"
 readme = { file = "README.md", content-type = "text/markdown" }
 license = "MIT"
@@ -36,8 +36,6 @@ pytorch = [
     "torch >= 1.5.0",
 ]
 docs = [
-    "tensorflow >= 2.2.0",
-    "tensorflow-probability >= 0.10.0",
     "sphinx >= 3.1.2",
     "sphinx-tabs >= 1.1.13",
     "sphinx_rtd_theme >= 0.5.0",

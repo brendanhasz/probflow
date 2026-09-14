@@ -8,22 +8,84 @@ import tensorflow as tf
 from probflow.utils import settings
 
 
-def test_backend():
+def test_backend(monkeypatch):
     """Tests setting and getting the backend."""
-    # Default should be tensorflow
-    assert settings.get_backend() == "tensorflow"
 
-    # Should be able to change to pytorch and back
+    def get_mock_find_spec(
+        tensorflow_installed,
+        tensorflow_probability_installed,
+        pytorch_installed,
+    ):
+        def mock_find_spec(package_name):
+            installed = {
+                "tensorflow": tensorflow_installed,
+                "tensorflow_probability": tensorflow_probability_installed,
+                "torch": pytorch_installed,
+            }
+            return object() if installed.get(package_name, False) else None
+
+        return mock_find_spec
+
+    # Freshly initialized settings should not have a backend chosen yet.
+    settings.__SETTINGS__._BACKEND = None
+    assert settings.__SETTINGS__._BACKEND is None
+
+    # If tensorflow is installed, should default to TF backend
+    monkeypatch.setattr(
+        settings.importlib.util,
+        "find_spec",
+        get_mock_find_spec(
+            tensorflow_installed=True,
+            tensorflow_probability_installed=True,
+            pytorch_installed=False,
+        ),
+    )
+    assert settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
+
+    # If pytorch is installed and TF is not, should default to pytorch backend
+    monkeypatch.setattr(
+        settings.importlib.util,
+        "find_spec",
+        get_mock_find_spec(
+            tensorflow_installed=False,
+            tensorflow_probability_installed=False,
+            pytorch_installed=True,
+        ),
+    )
+    settings.__SETTINGS__._BACKEND = None
+    assert settings.get_backend() is settings.ProbflowBackend.PYTORCH
+
+    # If no backend is installed, should show warning but continue w/ TF
+    monkeypatch.setattr(
+        settings.importlib.util,
+        "find_spec",
+        get_mock_find_spec(
+            tensorflow_installed=False,
+            tensorflow_probability_installed=False,
+            pytorch_installed=False,
+        ),
+    )
+    settings.__SETTINGS__._BACKEND = None
+    with pytest.warns(UserWarning, match="No backend is installed"):
+        assert settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
+
+    # Should be able to change to pytorch and back using enums.
+    settings.set_backend(settings.ProbflowBackend.PYTORCH)
+    assert settings.get_backend() is settings.ProbflowBackend.PYTORCH
+    settings.set_backend(settings.ProbflowBackend.TENSORFLOW)
+    assert settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
+
+    # Should also work when passed the correct strings.
     settings.set_backend("pytorch")
-    assert settings.get_backend() == "pytorch"
+    assert settings.get_backend() is settings.ProbflowBackend.PYTORCH
     settings.set_backend("tensorflow")
-    assert settings.get_backend() == "tensorflow"
+    assert settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
 
-    # But not anything else
+    # But not any invalid string
     with pytest.raises(ValueError):
         settings.set_backend("lalala")
 
-    # And it has to be a str
+    # And it has to be a str or ProbflowBackend
     with pytest.raises(TypeError):
         settings.set_backend(1)
 
@@ -113,34 +175,34 @@ def test_static_sampling_uuid():
 def test_sampling():
     """Tests the Sampling context manager."""
     # Defaults before sampling
-    assert settings.get_backend() == "tensorflow"
+    assert settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
     assert settings.get_samples() is None
     assert settings.get_flipout() is False
     assert settings.get_static_sampling_uuid() is None
 
     # Default should be Not to change anything
     with settings.Sampling():
-        assert settings.get_backend() == "tensorflow"
+        assert settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
         assert settings.get_samples() is None
         assert settings.get_flipout() is False
         assert settings.get_static_sampling_uuid() is None
 
     # Should be able to set samples and flipout via kwargs
     with settings.Sampling(n=100, flipout=True):
-        assert settings.get_backend() == "tensorflow"
+        assert settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
         assert settings.get_samples() == 100
         assert settings.get_flipout() is True
         assert settings.get_static_sampling_uuid() is None
 
     # Should return to defaults after sampling
-    assert settings.get_backend() == "tensorflow"
+    assert settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
     assert settings.get_samples() is None
     assert settings.get_flipout() is False
     assert settings.get_static_sampling_uuid() is None
 
     # Should be able to set static sampling uuid
     with settings.Sampling(static=True):
-        assert settings.get_backend() == "tensorflow"
+        assert settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
         assert settings.get_samples() is None
         assert settings.get_flipout() is False
         assert settings.get_static_sampling_uuid() is not None
@@ -156,27 +218,29 @@ def test_sampling():
         assert settings.get_static_sampling_uuid() is None
 
     # Should return to defaults after sampling
-    assert settings.get_backend() == "tensorflow"
+    assert settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
     assert settings.get_samples() is None
     assert settings.get_flipout() is False
     assert settings.get_static_sampling_uuid() is None
 
     # Should be able to nest sampling context managers
     with settings.Sampling(static=True):
-        assert settings.get_backend() == "tensorflow"
+        assert settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
         assert settings.get_samples() is None
         assert settings.get_flipout() is False
         assert settings.get_static_sampling_uuid() is not None
         assert isinstance(settings.get_static_sampling_uuid(), uuid.UUID)
         with settings.Sampling(n=100, flipout=True):
-            assert settings.get_backend() == "tensorflow"
+            assert (
+                settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
+            )
             assert settings.get_samples() == 100
             assert settings.get_flipout() is True
             assert settings.get_static_sampling_uuid() is not None
             assert isinstance(settings.get_static_sampling_uuid(), uuid.UUID)
 
     # Should return to defaults after sampling
-    assert settings.get_backend() == "tensorflow"
+    assert settings.get_backend() is settings.ProbflowBackend.TENSORFLOW
     assert settings.get_samples() is None
     assert settings.get_flipout() is False
     assert settings.get_static_sampling_uuid() is None

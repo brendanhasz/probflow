@@ -1,7 +1,7 @@
 """The Student-t distribution."""
 
 from probflow.utils.base import BaseDistribution
-from probflow.utils.settings import get_backend
+from probflow.utils.settings import ProbflowBackend, get_backend
 from probflow.utils.typing import BackendDistribution, TensorLike
 from probflow.utils.validation import ensure_tensor_like
 
@@ -73,7 +73,7 @@ class StudentT(BaseDistribution):
 
     def __call__(self) -> BackendDistribution:
         """Get the distribution object from the backend."""
-        if get_backend() == "pytorch":
+        if get_backend() == ProbflowBackend.PYTORCH:
             import torch.distributions as tod
 
             return tod.studentT.StudentT(

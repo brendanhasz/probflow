@@ -10,7 +10,7 @@ EPOCHS = 100
 BATCH_SIZE = 1024
 ns = [1024, 8192, 65536]
 ds = [1, 2, 10, 100]
-backends = ["pytorch", "tensorflow"]
+backends = [pf.ProbflowBackend.PYTORCH, pf.ProbflowBackend.TENSORFLOW]
 eagers = [True, False]
 # TODO: dtype (float32 or float64)
 # TODO: n_mc_samples (when that's implemented)

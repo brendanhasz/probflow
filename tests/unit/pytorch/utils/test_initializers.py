@@ -9,7 +9,7 @@ from probflow.utils import initializers
 
 def test_xavier_torch():
     """Tests probflow.utils.initializers.xavier w/ torch backend."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
     # Small array
     val1 = initializers.xavier([4, 3])
@@ -31,7 +31,7 @@ def test_xavier_torch():
 
 def test_scale_xavier_torch():
     """Tests probflow.utils.initializers.scale_xavier w/ torch backend."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
     # Small array
     val1 = initializers.scale_xavier([4, 3])
@@ -53,7 +53,7 @@ def test_scale_xavier_torch():
 
 def test_pos_xavier_torch():
     """Tests probflow.utils.initializers.pos_xavier w/ torch backend."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
     # Small array
     val1 = initializers.pos_xavier([4, 3])

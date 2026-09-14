@@ -15,10 +15,11 @@ def pytest_addoption(parser):
 def set_backend(request):
     """Provide set backend."""
     backend = request.config.getoption("--backend")
-    if backend not in ["tensorflow", "pytorch"]:
+    import probflow as pf
+
+    if backend not in [b.value for b in pf.ProbflowBackend]:
         raise ValueError(
             "Invalid backend specified. Must be 'tensorflow' or 'pytorch'."
         )
-    import probflow as pf
 
-    pf.set_backend(backend)
+    pf.set_backend(pf.ProbflowBackend(backend))

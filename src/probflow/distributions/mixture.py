@@ -1,7 +1,7 @@
 """A mixture distribution."""
 
 from probflow.utils.base import BaseDistribution
-from probflow.utils.settings import get_backend
+from probflow.utils.settings import ProbflowBackend, get_backend
 from probflow.utils.typing import BackendDistribution, TensorLike
 from probflow.utils.validation import ensure_tensor_like
 
@@ -43,7 +43,7 @@ class Mixture(BaseDistribution):
 
         # Distributions should be a pf, tf, or pt distribution
         if not isinstance(distributions, BaseDistribution):
-            if get_backend() == "pytorch":
+            if get_backend() == ProbflowBackend.PYTORCH:
                 import torch.distributions as tod
 
                 if not isinstance(distributions, tod.Distribution):
@@ -65,7 +65,7 @@ class Mixture(BaseDistribution):
 
     def __call__(self) -> BackendDistribution:
         """Get the distribution object from the backend."""
-        if get_backend() == "pytorch":
+        if get_backend() == ProbflowBackend.PYTORCH:
             import torch
             import torch.distributions as tod
 

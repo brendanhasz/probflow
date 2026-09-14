@@ -14,7 +14,7 @@ from probflow.modules import Module
 from probflow.utils.base import BaseCallback, BaseModel
 from probflow.utils.casting import to_numpy
 from probflow.utils.metrics import get_metric_fn
-from probflow.utils.settings import Sampling, get_backend
+from probflow.utils.settings import ProbflowBackend, Sampling, get_backend
 from probflow.utils.shape import get_shape
 from probflow.utils.typing import ScalarLike, TensorLike
 
@@ -242,7 +242,7 @@ class Model(BaseModel, Module):
     def train_step(self, x_data: TensorLike, y_data: TensorLike) -> None:
         """Perform one training step."""
         elbo = self._train_fn(x_data, y_data)
-        if get_backend() == "pytorch":
+        if get_backend() == ProbflowBackend.PYTORCH:
             self._current_elbo += elbo.detach().numpy()
         else:
             self._current_elbo += elbo.numpy()
@@ -348,7 +348,7 @@ class Model(BaseModel, Module):
 
         # Use default optimizer if none specified
         if optimizer is None and self._optimizer is None:
-            if get_backend() == "pytorch":
+            if get_backend() == ProbflowBackend.PYTORCH:
                 import torch
 
                 self._optimizer = torch.optim.Adam(
@@ -371,7 +371,7 @@ class Model(BaseModel, Module):
             eager = True
 
         # Create a function to perform one training step
-        if get_backend() == "pytorch":
+        if get_backend() == ProbflowBackend.PYTORCH:
             self._train_fn = self._train_step_pytorch(
                 self._data.n_samples, flipout, eager=eager, n_mc=n_mc
             )
@@ -427,7 +427,7 @@ class Model(BaseModel, Module):
             self._learning_rate = lr
         if self._optimizer is None:
             return
-        if get_backend() == "pytorch":
+        if get_backend() == ProbflowBackend.PYTORCH:
             for g in self._optimizer.param_groups:
                 g["lr"] = self._learning_rate
         else:
