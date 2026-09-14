@@ -28,9 +28,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up uv
-      uses: astral-sh/setup-uv@v10
-      with:
-        enable-cache: true
+      uses: astral-sh/setup-uv@v10.1.0
 
     - name: Build distribution
       run: uv build
