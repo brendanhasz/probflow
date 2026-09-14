@@ -1,27 +1,37 @@
-# This workflows will upload a Python Package using uv when a release is created
+# This workflow will upload a Python Package using uv when a release is published
 # For more information see: https://docs.astral.sh/uv/guides/publish/
 
-name: Upload Python Package
+name: Publish Python Package
 
 on:
   release:
-    types: [created]
+    types: [published]
 
 jobs:
-  deploy:
+  pypi-publish:
 
+    name: Upload release to PyPI
     runs-on: ubuntu-latest
 
+    # Environment to restrict deployment permissions
+    environment:
+      name: pypi
+      url: https://pypi.org/p/probflow
+
+    # Permissions for Trusted Publishing (OIDC)
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Install uv
-      uses: astral-sh/setup-uv@v3
-      with:
-        python-version: '3.x'
-    - name: Build and publish
-      env:
-        UV_PUBLISH_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        UV_PUBLISH_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        uv build
-        uv publish
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v10.1.0
+
+    - name: Build distribution
+      run: uv build
+
+    - name: Publish package to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
