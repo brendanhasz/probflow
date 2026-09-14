@@ -2451,8 +2451,6 @@ docs = [
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "sphinx-rtd-theme" },
     { name = "sphinx-tabs" },
-    { name = "tensorflow" },
-    { name = "tensorflow-probability" },
 ]
 pytorch = [
     { name = "torch" },
@@ -2479,9 +2477,7 @@ requires-dist = [
     { name = "sphinx", marker = "extra == 'docs'", specifier = ">=3.1.2" },
     { name = "sphinx-rtd-theme", marker = "extra == 'docs'", specifier = ">=0.5.0" },
     { name = "sphinx-tabs", marker = "extra == 'docs'", specifier = ">=1.1.13" },
-    { name = "tensorflow", marker = "extra == 'docs'", specifier = ">=2.2.0" },
     { name = "tensorflow", marker = "extra == 'tensorflow'", specifier = ">=2.2.0" },
-    { name = "tensorflow-probability", marker = "extra == 'docs'", specifier = ">=0.10.0" },
     { name = "tensorflow-probability", marker = "extra == 'tensorflow'", specifier = ">=0.10.0" },
     { name = "tf-keras", marker = "extra == 'tensorflow'" },
     { name = "torch", marker = "extra == 'pytorch'", specifier = ">=1.5.0" },
