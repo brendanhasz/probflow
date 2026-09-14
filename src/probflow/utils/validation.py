@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 from probflow.utils.base import BaseParameter
-from probflow.utils.settings import get_backend
+from probflow.utils.settings import ProbflowBackend, get_backend
 
 
 def ensure_tensor_like(obj: Any, name: str) -> None:
@@ -33,7 +33,7 @@ def ensure_tensor_like(obj: Any, name: str) -> None:
         return
 
     # Check for backend-dependent types
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         if not isinstance(obj, (torch.Tensor, BaseParameter)):

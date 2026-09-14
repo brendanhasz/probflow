@@ -19,7 +19,7 @@ TensorFlow is the default backend, but you can set which backend to use:
 
    import probflow as pf
 
-   pf.set_backend('pytorch') #or 'tensorflow'
+   pf.set_backend(pf.ProbflowBackend.PYTORCH)  # or pf.ProbflowBackend.TENSORFLOW
 
 You can see which backend is currently being used by:
 

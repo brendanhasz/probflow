@@ -18,7 +18,7 @@ def get_test_data(N, D):
 
 def test_dumps_and_loads_before_fitting():
     """Test dumps and loads before fitting."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     model1 = pf.LinearRegression(7)
     model2 = pf.loads(model1.dumps())
     assert isinstance(model2, pf.LinearRegression)
@@ -31,7 +31,7 @@ def test_dumps_and_loads_before_fitting():
 
 def test_dump_and_load_before_fitting(tmpdir):
     """Test dump and load before fitting."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     model1 = pf.LinearRegression(7)
     fname = str(tmpdir.join("test_model.pkl"))
     model1.save(fname)
@@ -46,7 +46,7 @@ def test_dump_and_load_before_fitting(tmpdir):
 
 def test_dumps_and_loads_after_fitting():
     """Test dumps and loads after fitting."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     model1 = pf.LinearRegression(7)
     x, y = get_test_data(1024, 7)
     model1.fit(x, y, epochs=2)
@@ -61,7 +61,7 @@ def test_dumps_and_loads_after_fitting():
 
 def test_dump_and_load_after_fitting(tmpdir):
     """Test dump and load after fitting."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     model1 = pf.LinearRegression(7)
     x, y = get_test_data(1024, 7)
     model1.fit(x, y, epochs=2)

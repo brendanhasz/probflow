@@ -12,7 +12,7 @@ def is_close(a, b, tol=1e-3):
 
 def test_kl_divergence():
     """Tests kl_divergence."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
     # Divergence between a distribution and itself should be 0
     dist = torch.distributions.normal.Normal(0, 1)
@@ -55,7 +55,7 @@ def test_squeeze():
 
 def test_expand_dims():
     """Tests expand_dims."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
     val = torch.randn(3)
     val = ops.expand_dims(val, 1)
@@ -72,7 +72,7 @@ def test_expand_dims():
 
 def test_ones():
     """Tests ones."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
     # Scalar
     ones = ops.ones([1])
@@ -108,7 +108,7 @@ def test_ones():
 
 def test_zeros():
     """Tests zeros."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
     # Scalar
     zeros = ops.zeros([1])
@@ -251,7 +251,7 @@ def test_eye():
 
 def test_sum():
     """Tests sum."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
     # Should sum along the last dimension by default
     ones = torch.ones([5, 4, 3])
@@ -285,7 +285,7 @@ def test_sum():
 
 def test_prod():
     """Tests prod."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
     # Should prod along the last dimension by default
     ones = torch.ones([5, 4, 3])
@@ -312,7 +312,7 @@ def test_prod():
 
 def test_mean():
     """Tests mean."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
     # Should mean along the last dimension by default
     ones = torch.ones([5, 4, 3])
@@ -339,7 +339,7 @@ def test_mean():
 
 def test_std():
     """Tests std."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
     # Should std along the last dimension by default
     ones = torch.ones([5, 4, 3])
@@ -384,7 +384,7 @@ def _test_elementwise(fn, inputs, outputs):
 
 def test_round():
     """Tests round."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     _test_elementwise(
         ops.round, [-0.9, 0.00001, 1.0, 3.14], [-1.0, 0.0, 1.0, 3.0]
     )
@@ -392,13 +392,13 @@ def test_round():
 
 def test_abs():
     """Tests abs."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     _test_elementwise(ops.abs, [-1.0, 0.0, 1.0], [1.0, 0.0, 1.0])
 
 
 def test_square():
     """Tests square."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     _test_elementwise(
         ops.square, [-2.0, -1.0, 0.0, 1.0, 3.0], [4.0, 1.0, 0.0, 1.0, 9.0]
     )
@@ -406,13 +406,13 @@ def test_square():
 
 def test_sqrt():
     """Tests sqrt."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     _test_elementwise(ops.sqrt, [0.0, 1.0, 4.0, 100.0], [0.0, 1.0, 2.0, 10.0])
 
 
 def test_exp():
     """Tests exp."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     _test_elementwise(
         ops.exp, [-1.0, 0.0, 1.0, 4.0], [np.exp(-1.0), 1.0, np.e, np.exp(4.0)]
     )
@@ -420,7 +420,7 @@ def test_exp():
 
 def test_relu():
     """Tests relu."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     _test_elementwise(
         ops.relu, [-1.0, -0.1, 0.0, 0.1, 1.0], [0.0, 0.0, 0.0, 0.1, 1.0]
     )
@@ -428,7 +428,7 @@ def test_relu():
 
 def test_softplus():
     """Tests softplus."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     sp = lambda x: np.log(1.0 + np.exp(x))
     _test_elementwise(
         ops.softplus,
@@ -439,7 +439,7 @@ def test_softplus():
 
 def test_sigmoid():
     """Tests sigmoid."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     sm = lambda x: 1.0 / (1.0 + np.exp(-x))
     _test_elementwise(
         ops.sigmoid,
@@ -450,7 +450,7 @@ def test_sigmoid():
 
 def test_gather():
     """Tests gather."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
     # Should lookup along 1st axis by default
     vals = torch.Tensor([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
@@ -492,7 +492,7 @@ def test_gather():
 
 def test_cat():
     """Tests cat."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     a = torch.randn([2, 3, 5])
     b = torch.randn([2, 3, 5])
     val = ops.cat([a, b])
@@ -514,7 +514,7 @@ def test_cat():
 
 def test_additive_logistic_transform():
     """Tests additive_logistic_transform."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     a = torch.randn([2, 3, 5])
     val = ops.additive_logistic_transform(a)
     assert val.ndim == 3
@@ -525,7 +525,7 @@ def test_additive_logistic_transform():
 
 def test_insert_col_of():
     """Tests add_col_of."""
-    pf.set_backend("pytorch")
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
     a = torch.randn([2, 3, 5])
     val = ops.insert_col_of(a, 1)
     assert val.ndim == 3

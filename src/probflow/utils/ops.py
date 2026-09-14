@@ -71,7 +71,7 @@ from collections.abc import Sequence
 
 from probflow.utils.base import BaseDistribution
 from probflow.utils.casting import make_input_tensor, to_tensor
-from probflow.utils.settings import get_backend, get_datatype
+from probflow.utils.settings import ProbflowBackend, get_backend, get_datatype
 from probflow.utils.typing import (
     BackendDistribution,
     BackendTensor,
@@ -106,7 +106,7 @@ def kl_divergence(
         Q = Q()
 
     # Compute KL divergence with the backend
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.distributions.kl.kl_divergence(P, Q)
@@ -121,7 +121,7 @@ def expand_dims(val: BackendTensor, axis: int | None) -> BackendTensor:
     """Add a singular dimension to a Tensor."""
     if axis is None:
         return val
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.unsqueeze(val, axis)
@@ -134,7 +134,7 @@ def expand_dims(val: BackendTensor, axis: int | None) -> BackendTensor:
 @make_input_tensor
 def squeeze(val: BackendTensor) -> BackendTensor:
     """Remove singleton dimensions."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.squeeze(val)
@@ -146,7 +146,7 @@ def squeeze(val: BackendTensor) -> BackendTensor:
 
 def ones(shape: int | Sequence[int]) -> BackendTensor:
     """Tensor full of ones."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.ones(shape, dtype=get_datatype())
@@ -158,7 +158,7 @@ def ones(shape: int | Sequence[int]) -> BackendTensor:
 
 def zeros(shape: int | Sequence[int]) -> BackendTensor:
     """Tensor full of zeros."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.zeros(shape, dtype=get_datatype())
@@ -170,7 +170,7 @@ def zeros(shape: int | Sequence[int]) -> BackendTensor:
 
 def full(shape: int | Sequence[int], value: float) -> BackendTensor:
     """Tensor full of some value."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.full(shape, value, dtype=get_datatype())
@@ -182,7 +182,7 @@ def full(shape: int | Sequence[int], value: float) -> BackendTensor:
 
 def randn(shape: int | Sequence[int]) -> BackendTensor:
     """Tensor full of random values drawn from a standard normal."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.randn(shape, dtype=get_datatype())
@@ -194,7 +194,7 @@ def randn(shape: int | Sequence[int]) -> BackendTensor:
 
 def rand_rademacher(shape: int | Sequence[int]) -> BackendTensor:
     """Generate a tensor full of random -1s or 1s (i.e. drawn from a Rademacher dist)."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return 2 * torch.randint(0, 2, shape, dtype=get_datatype()) - 1
@@ -209,7 +209,7 @@ def rand_rademacher(shape: int | Sequence[int]) -> BackendTensor:
 
 def shape(x: BackendTensor) -> list[int]:
     """Get a list of integers representing this tensor's shape."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         return [s for s in x.shape]
     else:
         return [s for s in x.shape]
@@ -217,7 +217,7 @@ def shape(x: BackendTensor) -> list[int]:
 
 def eye(dims: int) -> BackendTensor:
     """Generate an identity matrix."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.eye(dims, dtype=get_datatype())
@@ -231,7 +231,7 @@ def sum(
     val: BackendTensor, axis: int | None = -1, keepdims: bool = False
 ) -> BackendTensor:
     """Calculate the sum."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         if axis is None:
@@ -248,7 +248,7 @@ def prod(
     val: BackendTensor, axis: int | None = -1, keepdims: bool = False
 ) -> BackendTensor:
     """Calculate the product."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.prod(val, dim=axis, keepdim=keepdims)
@@ -262,7 +262,7 @@ def mean(
     val: BackendTensor, axis: int | None = -1, keepdims: bool = False
 ) -> BackendTensor:
     """Calculate the mean."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.mean(val, dim=axis, keepdim=keepdims)
@@ -276,7 +276,7 @@ def std(
     val: BackendTensor, axis: int | None = -1, keepdims: bool = False
 ) -> BackendTensor:
     """Calculate the uncorrected sample standard deviation."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.std(val, dim=axis, keepdim=keepdims)
@@ -288,7 +288,7 @@ def std(
 
 def round(val: BackendTensor) -> BackendTensor:
     """Round to the closest integer."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.round(val)
@@ -300,7 +300,7 @@ def round(val: BackendTensor) -> BackendTensor:
 
 def abs(val: BackendTensor) -> BackendTensor:
     """Take the absolute value of a tensor."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.abs(val)
@@ -312,7 +312,7 @@ def abs(val: BackendTensor) -> BackendTensor:
 
 def square(val: BackendTensor) -> BackendTensor:
     """Square a tensor."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         return val**2
     else:
         import tensorflow as tf
@@ -322,7 +322,7 @@ def square(val: BackendTensor) -> BackendTensor:
 
 def sqrt(val: BackendTensor) -> BackendTensor:
     """Apply the square root."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.sqrt(val)
@@ -334,7 +334,7 @@ def sqrt(val: BackendTensor) -> BackendTensor:
 
 def exp(val: BackendTensor) -> BackendTensor:
     """Apply the natural exponent."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.exp(val)
@@ -346,7 +346,7 @@ def exp(val: BackendTensor) -> BackendTensor:
 
 def relu(val: BackendTensor) -> BackendTensor:
     """Linear rectification."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.nn.ReLU()(val)
@@ -358,7 +358,7 @@ def relu(val: BackendTensor) -> BackendTensor:
 
 def softplus(val: BackendTensor) -> BackendTensor:
     """Linear rectification."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.nn.Softplus()(val)
@@ -370,7 +370,7 @@ def softplus(val: BackendTensor) -> BackendTensor:
 
 def sigmoid(val: BackendTensor) -> BackendTensor:
     """Sigmoid function."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.nn.Sigmoid()(val)
@@ -384,7 +384,7 @@ def gather(
     vals: BackendTensor, inds: TensorLike, axis: int = 0
 ) -> BackendTensor:
     """Gather values by index."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.index_select(vals, axis, to_tensor(inds))
@@ -396,7 +396,7 @@ def gather(
 
 def cat(vals: Sequence[BackendTensor], axis: int = 0) -> BackendTensor:
     """Concatenate tensors."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.cat(vals, dim=axis)
@@ -408,7 +408,7 @@ def cat(vals: Sequence[BackendTensor], axis: int = 0) -> BackendTensor:
 
 def additive_logistic_transform(vals: BackendTensor) -> BackendTensor:
     """Apply the additive logistic transformation."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         ones_shape = [s for s in vals.shape[:-1]] + [1]
@@ -430,7 +430,7 @@ def additive_logistic_transform(vals: BackendTensor) -> BackendTensor:
 
 def insert_col_of(vals: BackendTensor, val: ScalarLike) -> BackendTensor:
     """Add a column of a value to the left side of a tensor."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         shape = [s for s in vals.shape[:-1]] + [1]
@@ -448,7 +448,7 @@ def insert_col_of(vals: BackendTensor, val: ScalarLike) -> BackendTensor:
 
 def new_variable(initial_values: TensorLike) -> BackendVariable:
     """Get a new variable with the current backend, and initialize it."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.nn.Parameter(initial_values)
@@ -472,7 +472,7 @@ def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
       <https://dx.doi.org/10.1007/BF00140873>`_ *Statistics and Computing*,
       1996.
     """
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import numpy as np
         import torch
 
@@ -493,7 +493,7 @@ def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
 
 def transpose(x: BackendTensor) -> BackendTensor:
     """Transpose a matrix or batch of matrices."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.transpose(x, -1, -2)
@@ -508,7 +508,7 @@ def transpose(x: BackendTensor) -> BackendTensor:
 
 def reshape(x: BackendTensor, new_shape: Sequence[int]) -> BackendTensor:
     """Reshape a tensor."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         return torch.reshape(x, tuple(new_shape))
@@ -520,7 +520,7 @@ def reshape(x: BackendTensor, new_shape: Sequence[int]) -> BackendTensor:
 
 def copy_tensor(x: BackendTensor) -> BackendTensor:
     """Copy a tensor, detaching it from the gradient/backend/etc/etc."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         return x.detach().clone()
     else:
         import tensorflow as tf

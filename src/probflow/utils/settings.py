@@ -64,9 +64,13 @@ variational distributions while inside the context manager.
 
 """
 
+import importlib.util
 import uuid
+import warnings
+from enum import Enum
 
 __all__ = [
+    "ProbflowBackend",
     "Sampling",
     "get_backend",
     "get_datatype",
@@ -81,6 +85,13 @@ __all__ = [
 ]
 
 from probflow.utils.typing import BackendDataType
+
+
+class ProbflowBackend(Enum):
+    """Automatic differentiation system to use."""
+
+    TENSORFLOW = "tensorflow"
+    PYTORCH = "pytorch"
 
 
 class _Settings:
@@ -102,7 +113,7 @@ class _Settings:
     """
 
     def __init__(self):
-        self._BACKEND: str = "tensorflow"
+        self._BACKEND: ProbflowBackend | None = None
         self._SAMPLES: int | None = None
         self._FLIPOUT: bool = False
         self._DATATYPE: BackendDataType | None = None
@@ -113,32 +124,72 @@ class _Settings:
 __SETTINGS__ = _Settings()
 
 
-def get_backend() -> str:
+def _is_importable(package_name: str) -> bool:
+    """Checks if a top-level package or module is available to be imported."""
+    try:
+        return importlib.util.find_spec(package_name) is not None
+    except ModuleNotFoundError:
+        return False
+
+
+def _is_tensorflow_installed() -> bool:
+    """Determine whether tensorflow and TF Probability packages are installed."""
+    return _is_importable("tensorflow") and _is_importable(
+        "tensorflow_probability"
+    )
+
+
+def _is_pytorch_installed() -> bool:
+    """Determine whether PyTorch package is installed."""
+    return _is_importable("torch")
+
+
+def get_backend() -> ProbflowBackend:
     """Get which backend is currently being used.
 
     Returns
     -------
-    backend : str {'tensorflow' or 'pytorch'}
+    backend : ProbflowBackend or str
         The current backend
     """
+    # Default to backend that is currently installed
+    if __SETTINGS__._BACKEND is None:
+        if _is_tensorflow_installed():
+            __SETTINGS__._BACKEND = ProbflowBackend.TENSORFLOW
+        elif _is_pytorch_installed():
+            __SETTINGS__._BACKEND = ProbflowBackend.PYTORCH
+        else:
+            warnings.warn(
+                "No backend is installed, continuing with default backend of Tensorflow"
+            )
+            __SETTINGS__._BACKEND = ProbflowBackend.TENSORFLOW
+
     return __SETTINGS__._BACKEND
 
 
-def set_backend(backend: str) -> None:
+def set_backend(backend: ProbflowBackend | str) -> None:
     """Set which backend is currently being used.
 
     Parameters
     ----------
-    backend : str {'tensorflow' or 'pytorch'}
-        The backend to use
+    backend : ProbflowBackend or str
+        The backend to use.  Should be a ProbflowBackend enum, or str ('tensorflow' or 'pytorch')
     """
-    if isinstance(backend, str):
-        if backend in ["tensorflow", "pytorch"]:
-            __SETTINGS__._BACKEND = backend
+    if isinstance(backend, ProbflowBackend):
+        __SETTINGS__._BACKEND = backend
+    elif isinstance(backend, str):
+        if backend in [b.value for b in ProbflowBackend]:
+            __SETTINGS__._BACKEND = ProbflowBackend(backend)
         else:
-            raise ValueError("backend must be either tensorflow or pytorch")
+            raise ValueError(
+                "backend must be a ProbflowBackend enum "
+                f"or a string in {[b.value for b in ProbflowBackend]}"
+            )
     else:
-        raise TypeError("backend must be a string")
+        raise TypeError(
+            "backend must be a ProbflowBackend enum "
+            f"or a string in {[b.value for b in ProbflowBackend]}"
+        )
 
 
 def get_datatype() -> BackendDataType:
@@ -150,7 +201,7 @@ def get_datatype() -> BackendDataType:
         The current default datatype
     """
     if __SETTINGS__._DATATYPE is None:
-        if get_backend() == "pytorch":
+        if get_backend() == ProbflowBackend.PYTORCH:
             import torch
 
             return torch.float32
@@ -170,7 +221,7 @@ def set_datatype(datatype: BackendDataType) -> None:
     datatype : tf.dtype or torch.dtype
         The default datatype to use
     """
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         if datatype is None or isinstance(datatype, torch.dtype):

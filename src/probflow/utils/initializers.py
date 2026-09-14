@@ -14,14 +14,14 @@ from collections.abc import Callable
 
 import numpy as np
 
-from probflow.utils.settings import get_backend, get_datatype
+from probflow.utils.settings import ProbflowBackend, get_backend, get_datatype
 from probflow.utils.typing import BackendTensor, ScalarLike
 
 
 def xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
     """Xavier initializer."""
     scale = np.sqrt(2 / sum(shape))
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         # TODO: use truncated normal for torch
         import torch
 
@@ -40,7 +40,7 @@ def xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
 def scale_xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
     """Xavier initializer for scale variables."""
     vals = xavier(shape)
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         numel = torch.prod(torch.Tensor(shape))
@@ -55,7 +55,7 @@ def scale_xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
 def pos_xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
     """Xavier initializer for positive variables."""
     vals = xavier(shape)
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         numel = torch.prod(torch.Tensor(shape))

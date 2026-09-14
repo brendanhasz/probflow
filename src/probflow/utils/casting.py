@@ -22,7 +22,7 @@ from typing import Concatenate, ParamSpec
 import numpy as np
 import pandas as pd
 
-from probflow.utils.settings import get_backend, get_datatype
+from probflow.utils.settings import ProbflowBackend, get_backend, get_datatype
 from probflow.utils.typing import BackendTensor, TensorLike
 
 P = ParamSpec("P")
@@ -36,14 +36,14 @@ def to_numpy(x: TensorLike) -> np.ndarray:
         return x
     elif isinstance(x, (pd.DataFrame, pd.Series)):
         return x.values
-    elif get_backend() == "tensorflow":
+    elif get_backend() == ProbflowBackend.TENSORFLOW:
         import tensorflow as tf
 
         if isinstance(x, (tf.Tensor, tf.Variable)):
             return x.numpy()
         else:
             return np.array(x)
-    elif get_backend() == "pytorch":
+    elif get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         if isinstance(x, torch.Tensor):
@@ -63,7 +63,7 @@ def to_tensor(x: TensorLike) -> BackendTensor:
         x = x.to_frame().values
 
     # Convert to backend tensor
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         if isinstance(x, torch.Tensor):
@@ -76,7 +76,7 @@ def to_tensor(x: TensorLike) -> BackendTensor:
 
 def to_default_dtype(x: TensorLike) -> TensorLike:
     """Cast a tensor to the default backend datatype."""
-    if get_backend() == "pytorch":
+    if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
         if isinstance(x, torch.Tensor):

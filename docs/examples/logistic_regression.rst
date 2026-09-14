@@ -122,7 +122,7 @@ predictions given the parameters and the input data:
 
             import torch
 
-            pf.set_backend('pytorch')
+            pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
             class LogisticRegression(pf.CategoricalModel):
 

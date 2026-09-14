@@ -2,7 +2,7 @@
 
 import probflow.utils.ops as O
 from probflow.utils.base import BaseDistribution
-from probflow.utils.settings import get_backend
+from probflow.utils.settings import ProbflowBackend, get_backend
 from probflow.utils.shape import get_ndims
 from probflow.utils.typing import BackendDistribution, TensorLike
 from probflow.utils.validation import ensure_tensor_like
@@ -63,7 +63,7 @@ class Categorical(BaseDistribution):
 
     def __call__(self) -> BackendDistribution:
         """Get the distribution object from the backend."""
-        if get_backend() == "pytorch":
+        if get_backend() == ProbflowBackend.PYTORCH:
             import torch.distributions as tod
 
             return tod.categorical.Categorical(
@@ -89,7 +89,7 @@ class Categorical(BaseDistribution):
     def mean(self) -> TensorLike:
         """Since this is a categorical distribution, return the mode."""
         # PyTorch mean method returns the mode
-        if get_backend() == "pytorch":
+        if get_backend() == ProbflowBackend.PYTORCH:
             return super().mode()
         # But TensorFlow returns a float value for the mean, so need to use mode instead
         else:

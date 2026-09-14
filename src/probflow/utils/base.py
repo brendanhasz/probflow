@@ -22,7 +22,7 @@ from typing import Any
 import numpy as np
 
 from probflow.utils.casting import to_tensor
-from probflow.utils.settings import get_backend
+from probflow.utils.settings import ProbflowBackend, get_backend
 from probflow.utils.typing import (
     BackendDistribution,
     BackendTensor,
@@ -53,7 +53,7 @@ class BaseDistribution(ABC):
 
     def prob(self, y: TensorLike) -> BackendTensor:
         """Compute the probability of some data given this distribution."""
-        if get_backend() == "pytorch":
+        if get_backend() == ProbflowBackend.PYTORCH:
             return self().log_prob(to_tensor(y)).exp()
         else:
             return self().prob(to_tensor(y))
@@ -72,7 +72,7 @@ class BaseDistribution(ABC):
         Note that this uses the mode of distributions for which the mean
         is undefined (for example, a categorical distribution)
         """
-        if get_backend() == "pytorch":
+        if get_backend() == ProbflowBackend.PYTORCH:
             return self().mean
         else:
             try:
@@ -82,14 +82,14 @@ class BaseDistribution(ABC):
 
     def mode(self) -> BackendTensor:
         """Compute the mode of this distribution."""
-        if get_backend() == "pytorch":
+        if get_backend() == ProbflowBackend.PYTORCH:
             return self().mode
         else:
             return self().mode()
 
     def sample(self, n: int = 1) -> BackendTensor:
         """Generate a random sample from this distribution."""
-        if get_backend() == "pytorch":
+        if get_backend() == ProbflowBackend.PYTORCH:
             try:
                 if isinstance(n, int) and n == 1:
                     return self().rsample()

@@ -104,7 +104,7 @@ parameters to generate probabilistic predictions.
 
             import torch
 
-            pf.set_backend('pytorch')
+            pf.set_backend(pf.ProbflowBackend.PYTORCH)
 
             class SimpleLinearRegression(pf.ContinuousModel):
 
