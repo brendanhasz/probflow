@@ -1,4 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# This workflow will install Python dependencies, lint, check docs build, and run tests with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: tests
@@ -18,11 +18,14 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Set up python
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-    - uses: pre-commit/action@v3.0.1
+    - name: Run pre-commit
+      uses: pre-commit/action@v3.0.1
 
   # Build docs
   docs:
@@ -39,6 +42,7 @@ jobs:
       run: |
         uv run sphinx-build -b html docs docs/_html
 
+  # Run unit tests w/ different backends and python versions
   unit-test:
 
     runs-on: ubuntu-latest
