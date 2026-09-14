@@ -1,16 +1,12 @@
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 from probflow.distributions import OneHotCategorical
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+from probflow.utils.casting import to_numpy
+from probflow.utils.validation import (
+    is_backend_distribution,
+    is_backend_tensor,
+)
 
 
 def test_OneHotCategorical():
@@ -23,19 +19,19 @@ def test_OneHotCategorical():
     assert dist.probs == [0.1, 0.2, 0.7]
 
     # Call should return backend obj
-    assert isinstance(dist(), tfd.OneHotCategorical)
+    assert is_backend_distribution(dist())
 
     # Test methods
-    assert is_close(dist.prob([1.0, 0, 0]).numpy(), 0.1)
-    assert is_close(dist.prob([0, 1.0, 0]).numpy(), 0.2)
-    assert is_close(dist.prob([0, 0, 1.0]).numpy(), 0.7)
+    assert np.isclose(to_numpy(dist.prob([1.0, 0, 0])), 0.1)
+    assert np.isclose(to_numpy(dist.prob([0, 1.0, 0])), 0.2)
+    assert np.isclose(to_numpy(dist.prob([0, 0, 1.0])), 0.7)
 
     # Test sampling
     samples = dist.sample()
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 1
     samples = dist.sample(10)
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 2
     assert samples.shape[0] == 10
     assert samples.shape[1] == 3
@@ -63,19 +59,19 @@ def test_OneHotCategorical():
     probs = dist.prob(
         [[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]
     )
-    assert is_close(probs[0], 0.7)
-    assert is_close(probs[1], 0.8)
-    assert is_close(probs[2], 0.01)
-    assert is_close(probs[3], 0.4)
+    assert np.isclose(probs[0], 0.7)
+    assert np.isclose(probs[1], 0.8)
+    assert np.isclose(probs[2], 0.01)
+    assert np.isclose(probs[3], 0.4)
 
     # And ensure sample dims are correct
     samples = dist.sample()
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 2
     assert samples.shape[0] == 4
     assert samples.shape[1] == 3
     samples = dist.sample(10)
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 3
     assert samples.shape[0] == 10
     assert samples.shape[1] == 4

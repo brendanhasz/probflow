@@ -1,16 +1,12 @@
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 from probflow.distributions import Cauchy
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+from probflow.utils.casting import to_numpy
+from probflow.utils.validation import (
+    is_backend_distribution,
+    is_backend_tensor,
+)
 
 
 def test_Cauchy():
@@ -23,22 +19,22 @@ def test_Cauchy():
     assert dist.scale == 1
 
     # Call should return backend obj
-    assert isinstance(dist(), tfd.Cauchy)
+    assert is_backend_distribution(dist())
 
     # Test methods
     cpdf = lambda x, m, s: 1.0 / (np.pi * s * (1 + (np.power((x - m) / s, 2))))
-    assert is_close(dist.prob(0).numpy(), cpdf(0, 0, 1))
-    assert is_close(dist.prob(1).numpy(), cpdf(1, 0, 1))
-    assert is_close(dist.log_prob(0).numpy(), np.log(cpdf(0, 0, 1)))
-    assert is_close(dist.log_prob(1).numpy(), np.log(cpdf(1, 0, 1)))
+    assert np.isclose(to_numpy(dist.prob(0)), cpdf(0, 0, 1))
+    assert np.isclose(to_numpy(dist.prob(1)), cpdf(1, 0, 1))
+    assert np.isclose(to_numpy(dist.log_prob(0)), np.log(cpdf(0, 0, 1)))
+    assert np.isclose(to_numpy(dist.log_prob(1)), np.log(cpdf(1, 0, 1)))
     assert dist.mean() == 0
 
     # Test sampling
     samples = dist.sample()
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 0
     samples = dist.sample(10)
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 1
     assert samples.shape[0] == 10
 

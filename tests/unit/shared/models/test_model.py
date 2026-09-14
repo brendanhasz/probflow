@@ -11,6 +11,7 @@ from probflow.parameters import (
     Parameter,
     ScaleParameter,
 )
+from probflow.utils.casting import to_numpy
 
 
 def test_Model_0D():
@@ -752,7 +753,7 @@ def test_Model_nesting():
     assert samples.shape[2] == 1
 
     # kl loss should be greater for outer model
-    assert my_model.kl_loss().numpy() > my_model.module.kl_loss().numpy()
+    assert to_numpy(my_model.kl_loss()) > to_numpy(my_model.module.kl_loss())
 
 
 def test_Model_multiple_mc_0d_eager():

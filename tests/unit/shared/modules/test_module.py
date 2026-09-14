@@ -1,18 +1,12 @@
 import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 import probflow.utils.ops as O
+from probflow.distributions.normal import Normal
 from probflow.modules import Module
 from probflow.parameters import Parameter
+from probflow.utils.casting import to_numpy
 from probflow.utils.settings import Sampling
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+from probflow.utils.validation import is_backend_tensor
 
 
 def test_Module():
@@ -51,44 +45,48 @@ def test_Module():
     var_list = the_module.trainable_variables
     assert isinstance(var_list, list)
     assert len(var_list) == 4
-    assert all(isinstance(v, tf.Variable) for v in var_list)
+    assert all(is_backend_tensor(v) for v in var_list)
 
     # kl_loss should return sum of all the kl losses
     kl_loss = the_module.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert is_backend_tensor(kl_loss)
     assert kl_loss.ndim == 0
 
     # calling a module should return a tensor
-    x = tf.random.normal([5])
+    x = O.randn([5])
     sample1 = the_module(x)
-    assert isinstance(sample1, tf.Tensor)
+    assert is_backend_tensor(sample1)
     assert sample1.ndim == 1
     assert sample1.shape[0] == 5
 
     # should be the same when sampling is off
     sample2 = the_module(x)
-    assert np.all(sample1.numpy() == sample2.numpy())
+    assert np.all(to_numpy(sample1) == to_numpy(sample2))
 
     # outputs should be different when sampling is on
     with Sampling(n=1):
         sample1 = the_module(x)
         sample2 = the_module(x)
-    assert np.all(sample1.numpy() != sample2.numpy())
+    assert np.all(to_numpy(sample1) != to_numpy(sample2))
 
     # bayesian_update should update all params in the module
-    assert tf.reduce_all(
-        the_module.p1.prior.loc != the_module.p1.posterior.loc
-    ).numpy()
-    assert tf.reduce_all(
-        the_module.p2.prior.scale != the_module.p2.posterior.scale
-    ).numpy()
+    assert np.all(
+        to_numpy(the_module.p1.prior.loc)
+        != to_numpy(the_module.p1.posterior.loc)
+    )
+    assert np.all(
+        to_numpy(the_module.p2.prior.scale)
+        != to_numpy(the_module.p2.posterior.scale)
+    )
     the_module.bayesian_update()
-    assert tf.reduce_all(
-        the_module.p1.prior.loc == the_module.p1.posterior.loc
-    ).numpy()
-    assert tf.reduce_all(
-        the_module.p2.prior.scale == the_module.p2.posterior.scale
-    ).numpy()
+    assert np.all(
+        to_numpy(the_module.p1.prior.loc)
+        == to_numpy(the_module.p1.posterior.loc)
+    )
+    assert np.all(
+        to_numpy(the_module.p2.prior.scale)
+        == to_numpy(the_module.p2.posterior.scale)
+    )
 
 
 def test_Module_nesting():
@@ -133,27 +131,27 @@ def test_Module_nesting():
     var_list = the_module.trainable_variables
     assert isinstance(var_list, list)
     assert len(var_list) == 6
-    assert all(isinstance(v, tf.Variable) for v in var_list)
+    assert all(is_backend_tensor(v) for v in var_list)
 
     # kl_loss should return sum of all the kl losses
     kl_loss = the_module.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert is_backend_tensor(kl_loss)
     assert kl_loss.ndim == 0
 
     # parent module's loss should be greater than child module's
-    assert the_module.kl_loss().numpy() > the_module.mod.kl_loss().numpy()
+    assert to_numpy(the_module.kl_loss()) > to_numpy(the_module.mod.kl_loss())
 
     # calling a module should return a tensor
-    x = tf.random.normal([5])
+    x = O.randn([5])
     sample1 = the_module(x)
-    assert isinstance(sample1, tf.Tensor)
+    assert is_backend_tensor(sample1)
     assert sample1.ndim == 1
     assert sample1.shape[0] == 5
 
     # of the appropriate size
-    x = tf.random.normal([5, 4])
+    x = O.randn([5, 4])
     sample1 = the_module(x)
-    assert isinstance(sample1, tf.Tensor)
+    assert is_backend_tensor(sample1)
     assert sample1.ndim == 2
     assert sample1.shape[0] == 5
     assert sample1.shape[1] == 4
@@ -176,7 +174,7 @@ def test_Module_lists_and_dicts():
 
         def __call__(self, x):
             return (
-                tf.ones([x.shape[0], 1])
+                O.ones([x.shape[0], 1])
                 + self.a_list[0]()
                 + self.a_list[1]()
                 + self.a_dict["a"]()
@@ -205,15 +203,15 @@ def test_Module_lists_and_dicts():
     the_module.reset_kl_loss()
     assert the_module.kl_loss_batch() == 0
     the_module.add_kl_loss(3.145)
-    assert is_close(the_module.kl_loss_batch().numpy(), 3.145)
+    assert np.isclose(to_numpy(the_module.kl_loss_batch()), 3.145)
 
     # And should also be able to add kl losses from two distributions
     the_module.reset_kl_loss()
-    d1 = tfd.Normal(0.0, 1.0)
-    d2 = tfd.Normal(1.0, 1.0)
+    d1 = Normal(0.0, 1.0)
+    d2 = Normal(1.0, 1.0)
     assert the_module.kl_loss_batch() == 0
     the_module.add_kl_loss_between(d1, d2)
-    assert the_module.kl_loss_batch().numpy() > 0.0
+    assert to_numpy(the_module.kl_loss_batch()) > 0.0
 
 
 def test_Module_lists_and_dicts_nesting():
@@ -253,7 +251,7 @@ def test_Module_lists_and_dicts_nesting():
 
         def __call__(self, x):
             return (
-                tf.ones([x.shape[0], 1])
+                O.ones([x.shape[0], 1])
                 + self.a_list[0]()
                 + self.a_list[1]()
                 + self.a_list[2]()
@@ -283,7 +281,7 @@ def test_Module_lists_and_dicts_nesting():
     var_list = the_module.trainable_variables
     assert isinstance(var_list, list)
     assert len(var_list) == 16
-    assert all(isinstance(v, tf.Variable) for v in var_list)
+    assert all(is_backend_tensor(v) for v in var_list)
 
     # n_params property should include all params in submodules
     nparams = the_module.n_parameters
@@ -297,28 +295,28 @@ def test_Module_lists_and_dicts_nesting():
 
     # kl_loss should return sum of all the kl losses
     kl_loss = the_module.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert is_backend_tensor(kl_loss)
     assert kl_loss.ndim == 0
 
     # parent module's loss should be greater than child module's
-    assert (
-        the_module.kl_loss().numpy() > the_module.a_list[2].kl_loss().numpy()
+    assert to_numpy(the_module.kl_loss()) > to_numpy(
+        the_module.a_list[2].kl_loss()
     )
-    assert (
-        the_module.kl_loss().numpy() > the_module.a_dict["c"].kl_loss().numpy()
+    assert to_numpy(the_module.kl_loss()) > to_numpy(
+        the_module.a_dict["c"].kl_loss()
     )
 
     # Loss should be the sum of all parameter losses w/i the module
-    assert is_close(
-        the_module.kl_loss().numpy(),
+    assert np.isclose(
+        to_numpy(the_module.kl_loss()),
         (
-            the_module.a_list[0].kl_loss().numpy()
-            + the_module.a_list[1].kl_loss().numpy()
-            + the_module.a_list[2].p1.kl_loss().numpy()
-            + the_module.a_list[2].p2.kl_loss().numpy()
-            + the_module.a_dict["a"].kl_loss().numpy()
-            + the_module.a_dict["b"].kl_loss().numpy()
-            + the_module.a_dict["c"].p1.kl_loss().numpy()
-            + the_module.a_dict["c"].p2.kl_loss().numpy()
+            to_numpy(the_module.a_list[0].kl_loss())
+            + to_numpy(the_module.a_list[1].kl_loss())
+            + to_numpy(the_module.a_list[2].p1.kl_loss())
+            + to_numpy(the_module.a_list[2].p2.kl_loss())
+            + to_numpy(the_module.a_dict["a"].kl_loss())
+            + to_numpy(the_module.a_dict["b"].kl_loss())
+            + to_numpy(the_module.a_dict["c"].p1.kl_loss())
+            + to_numpy(the_module.a_dict["c"].p2.kl_loss())
         ),
     )

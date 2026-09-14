@@ -1,16 +1,12 @@
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 from probflow.distributions import Poisson
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+from probflow.utils.casting import to_numpy
+from probflow.utils.validation import (
+    is_backend_distribution,
+    is_backend_tensor,
+)
 
 
 def test_Poisson():
@@ -22,28 +18,28 @@ def test_Poisson():
     assert dist.rate == 3
 
     # Call should return backend obj
-    assert isinstance(dist(), tfd.Poisson)
+    assert is_backend_distribution(dist())
 
     # Test methods
     ppdf = lambda x, r: (
         np.power(r, x) * np.exp(-r) / np.prod(np.arange(1, x + 1))
     )
-    assert is_close(dist.prob(0).numpy(), ppdf(0, 3))
-    assert is_close(dist.prob(1).numpy(), ppdf(1, 3))
-    assert is_close(dist.prob(2).numpy(), ppdf(2, 3))
-    assert is_close(dist.prob(3).numpy(), ppdf(3, 3))
-    assert is_close(dist.log_prob(0).numpy(), np.log(ppdf(0, 3)))
-    assert is_close(dist.log_prob(1).numpy(), np.log(ppdf(1, 3)))
-    assert is_close(dist.log_prob(2).numpy(), np.log(ppdf(2, 3)))
-    assert is_close(dist.log_prob(3).numpy(), np.log(ppdf(3, 3)))
-    assert dist.mean().numpy() == 3
+    assert np.isclose(to_numpy(dist.prob(0)), ppdf(0, 3))
+    assert np.isclose(to_numpy(dist.prob(1)), ppdf(1, 3))
+    assert np.isclose(to_numpy(dist.prob(2)), ppdf(2, 3))
+    assert np.isclose(to_numpy(dist.prob(3)), ppdf(3, 3))
+    assert np.isclose(to_numpy(dist.log_prob(0)), np.log(ppdf(0, 3)))
+    assert np.isclose(to_numpy(dist.log_prob(1)), np.log(ppdf(1, 3)))
+    assert np.isclose(to_numpy(dist.log_prob(2)), np.log(ppdf(2, 3)))
+    assert np.isclose(to_numpy(dist.log_prob(3)), np.log(ppdf(3, 3)))
+    assert to_numpy(dist.mean()) == 3
 
     # Test sampling
     samples = dist.sample()
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 0
     samples = dist.sample(10)
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 1
     assert samples.shape[0] == 10
 

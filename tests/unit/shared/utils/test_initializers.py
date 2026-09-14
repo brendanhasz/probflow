@@ -4,6 +4,7 @@ import numpy as np
 import tensorflow as tf
 
 from probflow.utils import initializers
+from probflow.utils.casting import to_numpy
 
 
 def test_xavier():
@@ -23,7 +24,7 @@ def test_xavier():
     assert val2.shape[1] == 300
 
     # Large array should have smaller value spread
-    assert np.std(val1.numpy()) > np.std(val2.numpy())
+    assert np.std(to_numpy(val1)) > np.std(to_numpy(val2))
 
 
 def test_scale_xavier():
@@ -43,7 +44,7 @@ def test_scale_xavier():
     assert val2.shape[1] == 300
 
     # Large array should have smaller value spread
-    assert np.mean(val1.numpy()) > np.mean(val2.numpy())
+    assert np.mean(to_numpy(val1)) > np.mean(to_numpy(val2))
 
 
 def test_pos_xavier():
@@ -63,4 +64,4 @@ def test_pos_xavier():
     assert val2.shape[1] == 300
 
     # Large array should have smaller value spread
-    assert np.mean(val1.numpy()) < np.mean(val2.numpy())
+    assert np.mean(to_numpy(val1)) < np.mean(to_numpy(val2))

@@ -5,6 +5,7 @@ import tensorflow_probability as tfp
 
 from probflow.parameters import Parameter
 from probflow.utils.base import BaseDistribution
+from probflow.utils.casting import to_numpy
 from probflow.utils.settings import Sampling
 
 tfd = tfp.distributions
@@ -58,7 +59,7 @@ def test_Parameter_scalar():
     assert sample2.ndim == 1
     assert sample1.shape[0] == 1
     assert sample2.shape[0] == 1
-    assert sample1.numpy() == sample2.numpy()
+    assert to_numpy(sample1) == to_numpy(sample2)
 
     # within a Sampling statement, should randomly sample from the dist
     with Sampling(n=1):
@@ -68,7 +69,7 @@ def test_Parameter_scalar():
     assert sample2.ndim == 1
     assert sample1.shape[0] == 1
     assert sample2.shape[0] == 1
-    assert sample1.numpy() != sample2.numpy()
+    assert to_numpy(sample1) != to_numpy(sample2)
 
     # sampling statement should effect N samples
     with Sampling(n=10):
@@ -80,7 +81,7 @@ def test_Parameter_scalar():
     assert sample1.shape[1] == 1
     assert sample2.shape[0] == 10
     assert sample2.shape[1] == 1
-    assert np.all(sample1.numpy() != sample2.numpy())
+    assert np.all(to_numpy(sample1) != to_numpy(sample2))
 
     # sampling statement should allow static samples
     sample1 = param()
@@ -100,13 +101,13 @@ def test_Parameter_scalar():
     assert sample3.shape[0] == 1
     assert sample4.shape[0] == 1
     assert sample5.shape[0] == 1
-    assert sample1.numpy() != sample2.numpy()
-    assert sample1.numpy() != sample3.numpy()
-    assert sample2.numpy() == sample3.numpy()
-    assert sample1.numpy() != sample4.numpy()
-    assert sample1.numpy() != sample5.numpy()
-    assert sample4.numpy() == sample5.numpy()
-    assert sample2.numpy() != sample4.numpy()
+    assert to_numpy(sample1) != to_numpy(sample2)
+    assert to_numpy(sample1) != to_numpy(sample3)
+    assert to_numpy(sample2) == to_numpy(sample3)
+    assert to_numpy(sample1) != to_numpy(sample4)
+    assert to_numpy(sample1) != to_numpy(sample5)
+    assert to_numpy(sample4) == to_numpy(sample5)
+    assert to_numpy(sample2) != to_numpy(sample4)
 
     # sampling statement should allow static samples (and work w/ n>1)
     with Sampling(static=True), Sampling(n=5):
@@ -127,12 +128,12 @@ def test_Parameter_scalar():
     assert sample3.shape[1] == 1
     assert sample4.shape[0] == 5
     assert sample4.shape[1] == 1
-    assert np.all(sample1.numpy() == sample2.numpy())
-    assert np.all(sample1.numpy() != sample3.numpy())
-    assert np.all(sample1.numpy() != sample4.numpy())
-    assert np.all(sample2.numpy() != sample3.numpy())
-    assert np.all(sample2.numpy() != sample4.numpy())
-    assert np.all(sample3.numpy() == sample4.numpy())
+    assert np.all(to_numpy(sample1) == to_numpy(sample2))
+    assert np.all(to_numpy(sample1) != to_numpy(sample3))
+    assert np.all(to_numpy(sample1) != to_numpy(sample4))
+    assert np.all(to_numpy(sample2) != to_numpy(sample3))
+    assert np.all(to_numpy(sample2) != to_numpy(sample4))
+    assert np.all(to_numpy(sample3) == to_numpy(sample4))
 
     # kl_loss should return sum of kl divergences
     kl_loss = param.kl_loss()
@@ -147,13 +148,13 @@ def test_Parameter_scalar():
     assert prior_sample.shape[0] == 7
 
     # prior and posterior shouldn't be the same (post was randomly initialized)
-    assert tf.reduce_all(param.prior.loc != param.posterior.loc).numpy()
-    assert tf.reduce_all(param.prior.scale != param.posterior.scale).numpy()
+    assert to_numpy(tf.reduce_all(param.prior.loc != param.posterior.loc))
+    assert to_numpy(tf.reduce_all(param.prior.scale != param.posterior.scale))
 
     # but they should be the same after running bayesian_update
     param.bayesian_update()
-    assert tf.reduce_all(param.prior.loc == param.posterior.loc).numpy()
-    assert tf.reduce_all(param.prior.scale == param.posterior.scale).numpy()
+    assert to_numpy(tf.reduce_all(param.prior.loc == param.posterior.loc))
+    assert to_numpy(tf.reduce_all(param.prior.scale == param.posterior.scale))
 
 
 def test_Parameter_no_prior():
@@ -165,7 +166,7 @@ def test_Parameter_no_prior():
     kl_loss = param.kl_loss()
     assert isinstance(kl_loss, tf.Tensor)
     assert kl_loss.ndim == 0
-    assert kl_loss.numpy() == 0.0
+    assert to_numpy(kl_loss) == 0.0
 
     # prior_sample should return nans with prior=None
     prior_sample = param.prior_sample()
@@ -298,35 +299,35 @@ def test_Parameter_slicing():
     param = Parameter(shape=[2, 3, 4, 5])
 
     # Should be able to slice!
-    sl = param[0].numpy()
+    sl = to_numpy(param[0])
     assert sl.ndim == 4
     assert sl.shape[0] == 1
     assert sl.shape[1] == 3
     assert sl.shape[2] == 4
     assert sl.shape[3] == 5
 
-    sl = param[:, :, :, :2].numpy()
+    sl = to_numpy(param[:, :, :, :2])
     assert sl.ndim == 4
     assert sl.shape[0] == 2
     assert sl.shape[1] == 3
     assert sl.shape[2] == 4
     assert sl.shape[3] == 2
 
-    sl = param[1, ..., :2].numpy()
+    sl = to_numpy(param[1, ..., :2])
     assert sl.ndim == 4
     assert sl.shape[0] == 1
     assert sl.shape[1] == 3
     assert sl.shape[2] == 4
     assert sl.shape[3] == 2
 
-    sl = param[...].numpy()
+    sl = to_numpy(param[...])
     assert sl.ndim == 4
     assert sl.shape[0] == 2
     assert sl.shape[1] == 3
     assert sl.shape[2] == 4
     assert sl.shape[3] == 5
 
-    sl = param[tf.constant([0]), :, ::2, :].numpy()
+    sl = to_numpy(param[tf.constant([0]), :, ::2, :])
     assert sl.ndim == 4
     assert sl.shape[0] == 1
     assert sl.shape[1] == 3

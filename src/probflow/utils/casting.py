@@ -31,7 +31,7 @@ P = ParamSpec("P")
 def to_numpy(x: TensorLike) -> np.ndarray:
     """Convert tensor to numpy array."""
     if isinstance(x, list):
-        return [to_numpy(e) for e in x]
+        return np.array(x)
     elif isinstance(x, np.ndarray):
         return x
     elif isinstance(x, (pd.DataFrame, pd.Series)):

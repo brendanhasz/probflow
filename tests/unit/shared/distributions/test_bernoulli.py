@@ -1,16 +1,12 @@
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 from probflow.distributions import Bernoulli
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+from probflow.utils.casting import to_numpy
+from probflow.utils.validation import (
+    is_backend_distribution,
+    is_backend_tensor,
+)
 
 
 def test_Bernoulli():
@@ -23,21 +19,21 @@ def test_Bernoulli():
     assert dist.probs is None
 
     # Call should return backend obj
-    assert isinstance(dist(), tfd.Bernoulli)
+    assert is_backend_distribution(dist())
 
     # Test methods
-    assert is_close(dist.prob(0).numpy(), 0.5)
-    assert is_close(dist.prob(1).numpy(), 0.5)
-    assert is_close(dist.log_prob(0).numpy(), np.log(0.5))
-    assert is_close(dist.log_prob(1).numpy(), np.log(0.5))
-    assert dist.mean().numpy() == 0.5
+    assert np.isclose(to_numpy(dist.prob(0)), 0.5)
+    assert np.isclose(to_numpy(dist.prob(1)), 0.5)
+    assert np.isclose(to_numpy(dist.log_prob(0)), np.log(0.5))
+    assert np.isclose(to_numpy(dist.log_prob(1)), np.log(0.5))
+    assert to_numpy(dist.mean()) == 0.5
 
     # Test sampling
     samples = dist.sample()
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 0
     samples = dist.sample(10)
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 1
     assert samples.shape[0] == 10
 
@@ -45,8 +41,8 @@ def test_Bernoulli():
     dist = Bernoulli(probs=0.8)
     assert dist.probs == 0.8
     assert dist.logits is None
-    assert is_close(dist.prob(0).numpy(), 0.2)
-    assert is_close(dist.prob(1).numpy(), 0.8)
+    assert np.isclose(to_numpy(dist.prob(0)), 0.2)
+    assert np.isclose(to_numpy(dist.prob(1)), 0.8)
 
     # But only with Tensor-like objs
     with pytest.raises(TypeError):

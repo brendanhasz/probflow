@@ -6,6 +6,7 @@ import pytest
 import tensorflow as tf
 
 import probflow as pf
+from probflow.utils.casting import to_numpy
 
 
 def test_approx_kde(plot):
@@ -182,13 +183,15 @@ def test_plot_discrete_dist(plot):
         plt.show()
 
     # Should work for discrete variables
-    pf.utils.plotting.plot_discrete_dist(tf.random.poisson([200], 5).numpy())
+    pf.utils.plotting.plot_discrete_dist(to_numpy(tf.random.poisson([200], 5)))
     if plot:
         plt.title("should be poisson-y")
         plt.show()
 
     # xlabel shouldn't show ALL values if lots of uniques
-    pf.utils.plotting.plot_discrete_dist(tf.random.poisson([2000], 10).numpy())
+    pf.utils.plotting.plot_discrete_dist(
+        to_numpy(tf.random.poisson([2000], 10))
+    )
     if plot:
         plt.title("should be poisson-y")
         plt.show()
@@ -204,7 +207,7 @@ def test_plot_categorical_dist(plot):
 
     # xlabel shouldn't show ALL values if lots of uniques
     pf.utils.plotting.plot_categorical_dist(
-        tf.random.poisson([2000], 50).numpy()
+        to_numpy(tf.random.poisson([2000], 50))
     )
     if plot:
         plt.title("should be poisson-y, not showing all xticklabels")

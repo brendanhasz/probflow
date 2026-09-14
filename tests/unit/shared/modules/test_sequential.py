@@ -1,18 +1,17 @@
 import numpy as np
 
+import probflow.utils.ops as O
 from probflow.modules import Dense, Sequential
 from probflow.parameters import Parameter
+from probflow.utils.casting import to_numpy
 from probflow.utils.settings import Sampling
-import probflow.utils.ops as O
-from probflow.utils.validation import ensure_tensor_like
+from probflow.utils.validation import is_backend_tensor
 
 
 def test_Sequential():
     """Tests probflow.modules.Sequential."""
     # Create the module
-    seq = Sequential(
-        [Dense(5, 10), O.relu, Dense(10, 3), O.relu, Dense(3, 1)]
-    )
+    seq = Sequential([Dense(5, 10), O.relu, Dense(10, 3), O.relu, Dense(3, 1)])
 
     # Steps should be list
     assert isinstance(seq.steps, list)
@@ -22,7 +21,7 @@ def test_Sequential():
     x = O.randn([4, 5])
     samples1 = seq(x)
     samples2 = seq(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(to_numpy(samples1) == to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 1
@@ -31,7 +30,7 @@ def test_Sequential():
     with Sampling(n=1):
         samples1 = seq(x)
         samples2 = seq(x)
-    assert np.all(samples1.numpy() != samples2.numpy())
+    assert np.all(to_numpy(samples1) != to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 1
@@ -54,5 +53,5 @@ def test_Sequential():
 
     # kl_loss should return sum of KL losses
     kl_loss = seq.kl_loss()
-    ensure_tensor_like(kl_loss)
+    assert is_backend_tensor(kl_loss)
     assert kl_loss.ndim == 0

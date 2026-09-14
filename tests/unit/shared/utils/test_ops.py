@@ -4,6 +4,7 @@ import tensorflow_probability as tfp
 
 import probflow as pf
 from probflow.utils import ops
+from probflow.utils.casting import to_numpy
 
 
 def is_close(a, b, tol=1e-3):
@@ -15,24 +16,24 @@ def test_kl_divergence():
     """Tests kl_divergence."""
     # Divergence between a distribution and itself should be 0
     dist = tfp.distributions.Normal(0, 1)
-    assert ops.kl_divergence(dist, dist).numpy() == 0.0
+    assert to_numpy(ops.kl_divergence(dist, dist)) == 0.0
 
     # Divergence between two different distributions should be >0
     d1 = tfp.distributions.Normal(0, 1)
     d2 = tfp.distributions.Normal(1, 1)
-    assert ops.kl_divergence(d1, d2).numpy() > 0.0
+    assert to_numpy(ops.kl_divergence(d1, d2)) > 0.0
 
     # Divergence between more different distributions should be larger
     d1 = tfp.distributions.Normal(0, 1)
     d2 = tfp.distributions.Normal(1, 1)
     d3 = tfp.distributions.Normal(2, 1)
-    assert (
-        ops.kl_divergence(d1, d2).numpy() < ops.kl_divergence(d1, d3).numpy()
+    assert to_numpy(ops.kl_divergence(d1, d2)) < to_numpy(
+        ops.kl_divergence(d1, d3)
     )
 
     # Should auto-convert probflow distibutions
     dist = pf.Normal(0, 1)
-    assert ops.kl_divergence(dist, dist).numpy() == 0.0
+    assert to_numpy(ops.kl_divergence(dist, dist)) == 0.0
 
 
 def test_squeeze():
@@ -59,14 +60,14 @@ def test_ones():
     assert isinstance(ones, tf.Tensor)
     assert ones.ndim == 1
     assert ones.shape[0] == 1
-    assert ones.numpy() == 1.0
+    assert to_numpy(ones) == 1.0
 
     # 1D
     ones = ops.ones([5])
     assert isinstance(ones, tf.Tensor)
     assert ones.ndim == 1
     assert ones.shape[0] == 5
-    assert all(ones.numpy() == 1.0)
+    assert all(to_numpy(ones) == 1.0)
 
     # 2D
     ones = ops.ones([5, 4])
@@ -74,7 +75,7 @@ def test_ones():
     assert ones.ndim == 2
     assert ones.shape[0] == 5
     assert ones.shape[1] == 4
-    assert np.all(ones.numpy() == 1.0)
+    assert np.all(to_numpy(ones) == 1.0)
 
     # 3D
     ones = ops.ones([5, 4, 3])
@@ -83,7 +84,7 @@ def test_ones():
     assert ones.shape[0] == 5
     assert ones.shape[1] == 4
     assert ones.shape[2] == 3
-    assert np.all(ones.numpy() == 1.0)
+    assert np.all(to_numpy(ones) == 1.0)
 
 
 def test_zeros():
@@ -93,14 +94,14 @@ def test_zeros():
     assert isinstance(zeros, tf.Tensor)
     assert zeros.ndim == 1
     assert zeros.shape[0] == 1
-    assert zeros.numpy() == 0.0
+    assert to_numpy(zeros) == 0.0
 
     # 1D
     zeros = ops.zeros([5])
     assert isinstance(zeros, tf.Tensor)
     assert zeros.ndim == 1
     assert zeros.shape[0] == 5
-    assert all(zeros.numpy() == 0.0)
+    assert all(to_numpy(zeros) == 0.0)
 
     # 2D
     zeros = ops.zeros([5, 4])
@@ -108,7 +109,7 @@ def test_zeros():
     assert zeros.ndim == 2
     assert zeros.shape[0] == 5
     assert zeros.shape[1] == 4
-    assert np.all(zeros.numpy() == 0.0)
+    assert np.all(to_numpy(zeros) == 0.0)
 
     # 3D
     zeros = ops.zeros([5, 4, 3])
@@ -117,7 +118,7 @@ def test_zeros():
     assert zeros.shape[0] == 5
     assert zeros.shape[1] == 4
     assert zeros.shape[2] == 3
-    assert np.all(zeros.numpy() == 0.0)
+    assert np.all(to_numpy(zeros) == 0.0)
 
 
 def test_full():
@@ -127,14 +128,14 @@ def test_full():
     assert isinstance(twos, tf.Tensor)
     assert twos.ndim == 1
     assert twos.shape[0] == 1
-    assert twos.numpy() == 2.0
+    assert to_numpy(twos) == 2.0
 
     # 1D
     twos = ops.full([5], 2)
     assert isinstance(twos, tf.Tensor)
     assert twos.ndim == 1
     assert twos.shape[0] == 5
-    assert all(twos.numpy() == 2.0)
+    assert all(to_numpy(twos) == 2.0)
 
     # 2D
     twos = ops.full([5, 4], 2.0)
@@ -142,7 +143,7 @@ def test_full():
     assert twos.ndim == 2
     assert twos.shape[0] == 5
     assert twos.shape[1] == 4
-    assert np.all(twos.numpy() == 2.0)
+    assert np.all(to_numpy(twos) == 2.0)
 
     # 3D
     twos = ops.full([5, 4, 3], 2)
@@ -151,7 +152,7 @@ def test_full():
     assert twos.shape[0] == 5
     assert twos.shape[1] == 4
     assert twos.shape[2] == 3
-    assert np.all(twos.numpy() == 2.0)
+    assert np.all(to_numpy(twos) == 2.0)
 
 
 def test_randn():
@@ -161,15 +162,15 @@ def test_randn():
     assert isinstance(x, tf.Tensor)
     assert x.ndim == 1
     assert x.shape[0] == 1
-    assert x.numpy() > -15
-    assert x.numpy() < 15
+    assert to_numpy(x) > -15
+    assert to_numpy(x) < 15
 
     # 1D
     x = ops.randn([5])
     assert isinstance(x, tf.Tensor)
     assert x.ndim == 1
     assert x.shape[0] == 5
-    assert np.unique(x.numpy()).shape[0] == 5
+    assert np.unique(to_numpy(x)).shape[0] == 5
 
     # 2D
     x = ops.randn([5, 4])
@@ -177,7 +178,7 @@ def test_randn():
     assert x.ndim == 2
     assert x.shape[0] == 5
     assert x.shape[1] == 4
-    assert np.unique(x.numpy()).shape[0] == 5 * 4
+    assert np.unique(to_numpy(x)).shape[0] == 5 * 4
 
     # 3D
     x = ops.randn([5, 4, 3])
@@ -186,7 +187,7 @@ def test_randn():
     assert x.shape[0] == 5
     assert x.shape[1] == 4
     assert x.shape[2] == 3
-    assert np.unique(x.numpy()).shape[0] == 5 * 4 * 3
+    assert np.unique(to_numpy(x)).shape[0] == 5 * 4 * 3
 
 
 def test_rand_rademacher():
@@ -196,14 +197,14 @@ def test_rand_rademacher():
     assert isinstance(x, tf.Tensor)
     assert x.ndim == 1
     assert x.shape[0] == 1
-    assert x.numpy() == -1 or x.numpy() == 1
+    assert to_numpy(x) == -1 or to_numpy(x) == 1
 
     # 1D
     x = ops.rand_rademacher([5])
     assert isinstance(x, tf.Tensor)
     assert x.ndim == 1
     assert x.shape[0] == 5
-    assert np.all((x.numpy() == -1) | (x.numpy() == 1))
+    assert np.all((to_numpy(x) == -1) | (to_numpy(x) == 1))
 
     # 2D
     x = ops.rand_rademacher([5, 4])
@@ -211,7 +212,7 @@ def test_rand_rademacher():
     assert x.ndim == 2
     assert x.shape[0] == 5
     assert x.shape[1] == 4
-    assert np.all((x.numpy() == -1) | (x.numpy() == 1))
+    assert np.all((to_numpy(x) == -1) | (to_numpy(x) == 1))
 
     # 3D
     x = ops.rand_rademacher([5, 4, 3])
@@ -220,7 +221,7 @@ def test_rand_rademacher():
     assert x.shape[0] == 5
     assert x.shape[1] == 4
     assert x.shape[2] == 3
-    assert np.all((x.numpy() == -1) | (x.numpy() == 1))
+    assert np.all((to_numpy(x) == -1) | (to_numpy(x) == 1))
 
 
 def test_shape():
@@ -257,8 +258,8 @@ def test_eye():
     assert eye.ndim == 2
     assert eye.shape[0] == 4
     assert eye.shape[1] == 4
-    assert eye.numpy()[0, 0] == 1.0
-    assert eye.numpy()[0, 1] == 0.0
+    assert to_numpy(eye)[0, 0] == 1.0
+    assert to_numpy(eye)[0, 1] == 0.0
 
 
 def test_sum():
@@ -270,7 +271,7 @@ def test_sum():
     assert val.ndim == 2
     assert val.shape[0] == 5
     assert val.shape[1] == 4
-    assert np.all(val.numpy() == 3.0)
+    assert np.all(to_numpy(val) == 3.0)
 
     # But can change that w/ the axis kwarg
     ones = tf.ones([5, 4, 3])
@@ -279,18 +280,18 @@ def test_sum():
     assert val.ndim == 2
     assert val.shape[0] == 5
     assert val.shape[1] == 3
-    assert np.all(val.numpy() == 4.0)
+    assert np.all(to_numpy(val) == 4.0)
 
     # Should sum along all dimensions w/ axis=None
     ones = tf.ones([5, 4, 3])
     val = ops.sum(ones, axis=None)
     assert isinstance(val, tf.Tensor)
     assert val.ndim == 0
-    assert val.numpy() == 60
+    assert to_numpy(val) == 60
 
     # Actually test values
     val = ops.sum(tf.constant([1.1, 2.0, 3.3]))
-    assert is_close(val.numpy(), 6.4)
+    assert is_close(to_numpy(val), 6.4)
 
 
 def test_prod():
@@ -302,7 +303,7 @@ def test_prod():
     assert val.ndim == 2
     assert val.shape[0] == 5
     assert val.shape[1] == 4
-    assert np.all(val.numpy() == 1.0)
+    assert np.all(to_numpy(val) == 1.0)
 
     # But can change that w/ the axis kwarg
     ones = tf.ones([5, 4, 3])
@@ -311,11 +312,11 @@ def test_prod():
     assert val.ndim == 2
     assert val.shape[0] == 5
     assert val.shape[1] == 3
-    assert np.all(val.numpy() == 1.0)
+    assert np.all(to_numpy(val) == 1.0)
 
     # Actually test values
     val = ops.prod(tf.constant([1.1, 2.0, 3.3]))
-    assert is_close(val.numpy(), 7.26)
+    assert is_close(to_numpy(val), 7.26)
 
 
 def test_mean():
@@ -327,7 +328,7 @@ def test_mean():
     assert val.ndim == 2
     assert val.shape[0] == 5
     assert val.shape[1] == 4
-    assert np.all(val.numpy() == 1.0)
+    assert np.all(to_numpy(val) == 1.0)
 
     # But can change that w/ the axis kwarg
     ones = tf.ones([5, 4, 3])
@@ -336,11 +337,11 @@ def test_mean():
     assert val.ndim == 2
     assert val.shape[0] == 5
     assert val.shape[1] == 3
-    assert np.all(val.numpy() == 1.0)
+    assert np.all(to_numpy(val) == 1.0)
 
     # Actually test values
     val = ops.mean(tf.constant([0.9, 1.9, 2.1, 3.1]))
-    assert is_close(val.numpy(), 2.0)
+    assert is_close(to_numpy(val), 2.0)
 
 
 def test_std():
@@ -352,7 +353,7 @@ def test_std():
     assert val.ndim == 2
     assert val.shape[0] == 5
     assert val.shape[1] == 4
-    assert np.all(val.numpy() == 0.0)
+    assert np.all(to_numpy(val) == 0.0)
 
     # But can change that w/ the axis kwarg
     ones = tf.ones([5, 4, 3])
@@ -361,13 +362,13 @@ def test_std():
     assert val.ndim == 2
     assert val.shape[0] == 5
     assert val.shape[1] == 3
-    assert np.all(val.numpy() == 0.0)
+    assert np.all(to_numpy(val) == 0.0)
 
     # Actually test values
     val = ops.std(tf.constant([0.9, 1.9, 2.1, 3.1]))
-    assert is_close(val.numpy(), 0.781024968)
+    assert is_close(to_numpy(val), 0.781024968)
     val = ops.std(tf.constant([1.0, 2.0, 3.0]))
-    assert is_close(val.numpy(), 0.816496581)
+    assert is_close(to_numpy(val), 0.816496581)
 
 
 def _test_elementwise(fn, inputs, outputs):
@@ -383,7 +384,7 @@ def _test_elementwise(fn, inputs, outputs):
     # Actually test values
     val = fn(tf.constant(inputs))
     for i in range(len(outputs)):
-        assert is_close(val.numpy()[i], outputs[i])
+        assert is_close(to_numpy(val)[i], outputs[i])
 
 
 def test_round():
@@ -453,16 +454,16 @@ def test_gather():
     assert output.ndim == 2
     assert output.shape[0] == 5
     assert output.shape[1] == 2
-    assert output.numpy()[0, 0] == 1.0
-    assert output.numpy()[0, 1] == 2.0
-    assert output.numpy()[1, 0] == 3.0
-    assert output.numpy()[1, 1] == 4.0
-    assert output.numpy()[2, 0] == 5.0
-    assert output.numpy()[2, 1] == 6.0
-    assert output.numpy()[3, 0] == 3.0
-    assert output.numpy()[3, 1] == 4.0
-    assert output.numpy()[4, 0] == 1.0
-    assert output.numpy()[4, 1] == 2.0
+    assert to_numpy(output)[0, 0] == 1.0
+    assert to_numpy(output)[0, 1] == 2.0
+    assert to_numpy(output)[1, 0] == 3.0
+    assert to_numpy(output)[1, 1] == 4.0
+    assert to_numpy(output)[2, 0] == 5.0
+    assert to_numpy(output)[2, 1] == 6.0
+    assert to_numpy(output)[3, 0] == 3.0
+    assert to_numpy(output)[3, 1] == 4.0
+    assert to_numpy(output)[4, 0] == 1.0
+    assert to_numpy(output)[4, 1] == 2.0
 
     # But can set axis
     inds = tf.constant([1, 0, 1, 0])
@@ -470,15 +471,15 @@ def test_gather():
     assert output.ndim == 2
     assert output.shape[0] == 3
     assert output.shape[1] == 4
-    assert output.numpy()[0, 0] == 2.0
-    assert output.numpy()[1, 0] == 4.0
-    assert output.numpy()[2, 0] == 6.0
-    assert output.numpy()[0, 1] == 1.0
-    assert output.numpy()[1, 1] == 3.0
-    assert output.numpy()[2, 1] == 5.0
-    assert output.numpy()[0, 2] == 2.0
-    assert output.numpy()[1, 2] == 4.0
-    assert output.numpy()[2, 2] == 6.0
-    assert output.numpy()[0, 3] == 1.0
-    assert output.numpy()[1, 3] == 3.0
-    assert output.numpy()[2, 3] == 5.0
+    assert to_numpy(output)[0, 0] == 2.0
+    assert to_numpy(output)[1, 0] == 4.0
+    assert to_numpy(output)[2, 0] == 6.0
+    assert to_numpy(output)[0, 1] == 1.0
+    assert to_numpy(output)[1, 1] == 3.0
+    assert to_numpy(output)[2, 1] == 5.0
+    assert to_numpy(output)[0, 2] == 2.0
+    assert to_numpy(output)[1, 2] == 4.0
+    assert to_numpy(output)[2, 2] == 6.0
+    assert to_numpy(output)[0, 3] == 1.0
+    assert to_numpy(output)[1, 3] == 3.0
+    assert to_numpy(output)[2, 3] == 5.0

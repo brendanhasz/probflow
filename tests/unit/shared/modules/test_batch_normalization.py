@@ -1,9 +1,10 @@
 import numpy as np
 
+import probflow.utils.ops as O
 from probflow.modules import BatchNormalization, Dense, Sequential
 from probflow.parameters import Parameter
+from probflow.utils.casting import to_numpy
 from probflow.utils.settings import Sampling
-import probflow.utils.ops as O
 from probflow.utils.validation import is_backend_tensor
 
 
@@ -16,7 +17,7 @@ def test_BatchNormalization():
     x = O.randn([4, 5])
     samples1 = bn(x)
     samples2 = bn(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(to_numpy(samples1) == to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 5
@@ -25,7 +26,7 @@ def test_BatchNormalization():
     with Sampling():
         samples1 = bn(x)
         samples2 = bn(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(to_numpy(samples1) == to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 5
@@ -74,7 +75,7 @@ def test_BatchNormalization_2d():
     x = O.randn([5, 4, 3])
     samples1 = bn(x)
     samples2 = bn(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(to_numpy(samples1) == to_numpy(samples2))
     assert samples1.ndim == 3
     assert samples1.shape[0] == 5
     assert samples1.shape[1] == 4

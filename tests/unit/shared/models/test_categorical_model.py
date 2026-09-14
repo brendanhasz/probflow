@@ -7,7 +7,6 @@ from probflow.models import CategoricalModel
 from probflow.parameters import Parameter
 
 
-
 def test_CategoricalModel(plot):
     """Tests probflow.models.CategoricalModel."""
 

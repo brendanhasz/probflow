@@ -1,23 +1,18 @@
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 from probflow.distributions import MultivariateNormal
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+from probflow.utils.validation import (
+    is_backend_distribution,
+    is_backend_tensor,
+)
 
 
 def test_MultivariateNormal():
     """Tests the MultivariateNormal distribution."""
     # Create the distribution
-    loc = tf.constant([1.0, 2.0])
-    cov = tf.constant([[1.0, 0.0], [0.0, 1.0]])
+    loc = np.array([1.0, 2.0])
+    cov = np.array([[1.0, 0.0], [0.0, 1.0]])
     dist = MultivariateNormal(loc, cov)
 
     # But only with Tensor-like objs
@@ -27,7 +22,7 @@ def test_MultivariateNormal():
         dist = MultivariateNormal(loc, "cov")
 
     # Call should return backend obj
-    assert isinstance(dist(), tfd.MultivariateNormalTriL)
+    assert is_backend_distribution(dist())
 
     # Test methods
     prob1 = dist.prob([1.0, 2.0])
@@ -43,11 +38,11 @@ def test_MultivariateNormal():
 
     # Test sampling
     samples = dist.sample()
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 1
     assert samples.shape[0] == 2
     samples = dist.sample(10)
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 2
     assert samples.shape[0] == 10
     assert samples.shape[1] == 2

@@ -3,10 +3,9 @@ import pytest
 
 from probflow.modules import Embedding
 from probflow.parameters import DeterministicParameter
-from probflow.utils.settings import Sampling
-import probflow.utils.ops as O
-from probflow.utils.validation import is_backend_tensor
 from probflow.utils.casting import to_numpy
+from probflow.utils.settings import Sampling
+from probflow.utils.validation import is_backend_tensor
 
 
 def test_Embedding():
@@ -33,7 +32,11 @@ def test_Embedding():
     assert all(isinstance(e, DeterministicParameter) for e in emb.embeddings)
 
     # Test MAP outputs are the same
-    x = np.random.default_rng().integers(low=0, high=9, size=(20, 1)).astype(np.int32)
+    x = (
+        np.random.default_rng()
+        .integers(low=0, high=9, size=(20, 1))
+        .astype(np.int32)
+    )
     samples1 = emb(x)
     samples2 = emb(x)
     assert np.all(to_numpy(samples1) == to_numpy(samples2))
@@ -68,8 +71,12 @@ def test_Embedding():
     # Test MAP outputs are the same
     x = np.concatenate(
         (
-            np.random.default_rng().integers(low=0, high=9, size=(20, 1)).astype(np.int32),
-            np.random.default_rng().integers(low=0, high=19, size=(20, 1)).astype(np.int32),
+            np.random.default_rng()
+            .integers(low=0, high=9, size=(20, 1))
+            .astype(np.int32),
+            np.random.default_rng()
+            .integers(low=0, high=19, size=(20, 1))
+            .astype(np.int32),
         ),
         axis=1,
     )
@@ -82,7 +89,11 @@ def test_Embedding():
 
     # With probabilistic = True, samples should be different
     emb = Embedding(10, 5, probabilistic=True)
-    x = np.random.default_rng().integers(low=0, high=9, size=(20, 1)).astype(np.int32)
+    x = (
+        np.random.default_rng()
+        .integers(low=0, high=9, size=(20, 1))
+        .astype(np.int32)
+    )
     with Sampling(n=1):
         samples1 = emb(x)
         samples2 = emb(x)

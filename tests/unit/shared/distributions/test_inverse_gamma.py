@@ -1,16 +1,12 @@
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 from probflow.distributions import InverseGamma
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+from probflow.utils.casting import to_numpy
+from probflow.utils.validation import (
+    is_backend_distribution,
+    is_backend_tensor,
+)
 
 
 def test_InverseGamma():
@@ -23,21 +19,21 @@ def test_InverseGamma():
     assert dist.scale == 4
 
     # Call should return backend obj
-    assert isinstance(dist(), tfd.InverseGamma)
+    assert is_backend_distribution(dist())
 
     # Test methods
-    assert is_close(dist.prob(1).numpy(), 0.78146726)
-    assert is_close(dist.prob(2).numpy(), 0.09022352)
-    assert is_close(dist.log_prob(1).numpy(), np.log(0.78146726))
-    assert is_close(dist.log_prob(2).numpy(), np.log(0.09022352))
-    assert dist.mean().numpy() == 1.0
+    assert np.isclose(to_numpy(dist.prob(1)), 0.78146726)
+    assert np.isclose(to_numpy(dist.prob(2)), 0.09022352)
+    assert np.isclose(to_numpy(dist.log_prob(1)), np.log(0.78146726))
+    assert np.isclose(to_numpy(dist.log_prob(2)), np.log(0.09022352))
+    assert to_numpy(dist.mean()) == 1.0
 
     # Test sampling
     samples = dist.sample()
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 0
     samples = dist.sample(10)
-    assert isinstance(samples, tf.Tensor)
+    assert is_backend_tensor(samples)
     assert samples.ndim == 1
     assert samples.shape[0] == 10
 

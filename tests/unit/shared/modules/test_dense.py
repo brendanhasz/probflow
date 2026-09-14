@@ -1,18 +1,12 @@
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
+import probflow.utils.ops as O
 from probflow.modules import Dense
 from probflow.parameters import Parameter
+from probflow.utils.casting import to_numpy
 from probflow.utils.settings import Sampling
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+from probflow.utils.validation import is_backend_tensor
 
 
 def test_Dense():
@@ -27,10 +21,10 @@ def test_Dense():
     dense = Dense(5, 1)
 
     # Test MAP outputs are same
-    x = tf.random.normal([4, 5])
+    x = O.randn([4, 5])
     samples1 = dense(x)
     samples2 = dense(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(to_numpy(samples1) == to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 1
@@ -39,7 +33,7 @@ def test_Dense():
     with Sampling(n=1):
         samples1 = dense(x)
         samples2 = dense(x)
-    assert np.all(samples1.numpy() != samples2.numpy())
+    assert np.all(to_numpy(samples1) != to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 1
@@ -59,14 +53,14 @@ def test_Dense():
 
     # kl_loss should return sum of KL losses
     kl_loss = dense.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert is_backend_tensor(kl_loss)
     assert kl_loss.ndim == 0
 
     # test Flipout
     with Sampling(n=1, flipout=True):
         samples1 = dense(x)
         samples2 = dense(x)
-    assert np.all(samples1.numpy() != samples2.numpy())
+    assert np.all(to_numpy(samples1) != to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 1
@@ -76,19 +70,19 @@ def test_Dense():
     with Sampling(n=1):
         samples1 = dense(x)
         samples2 = dense(x)
-    assert np.all(samples1.numpy() == samples2.numpy())
+    assert np.all(to_numpy(samples1) == to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 3
 
     # With the weight and bias kwargs
-    weight_kwargs = {"transform": tf.exp}
-    bias_kwargs = {"transform": tf.math.softplus}
+    weight_kwargs = {"transform": O.exp}
+    bias_kwargs = {"transform": O.softplus}
     dense = Dense(5, 2, weight_kwargs=weight_kwargs, bias_kwargs=bias_kwargs)
     with Sampling(n=1):
         samples1 = dense(x)
         samples2 = dense(x)
-    assert np.all(samples1.numpy() != samples2.numpy())
+    assert np.all(to_numpy(samples1) != to_numpy(samples2))
     assert samples1.ndim == 2
     assert samples1.shape[0] == 4
     assert samples1.shape[1] == 2
