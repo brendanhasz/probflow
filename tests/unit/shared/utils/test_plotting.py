@@ -3,10 +3,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-import tensorflow as tf
 
 import probflow as pf
-from probflow.utils.casting import to_numpy
 
 
 def test_approx_kde(plot):
@@ -183,14 +181,17 @@ def test_plot_discrete_dist(plot):
         plt.show()
 
     # Should work for discrete variables
-    pf.utils.plotting.plot_discrete_dist(to_numpy(tf.random.poisson([200], 5)))
+    pf.utils.plotting.plot_discrete_dist(
+        np.random.default_rng().poisson(lam=5, size=[200])
+    )
+
     if plot:
         plt.title("should be poisson-y")
         plt.show()
 
     # xlabel shouldn't show ALL values if lots of uniques
     pf.utils.plotting.plot_discrete_dist(
-        to_numpy(tf.random.poisson([2000], 10))
+        np.random.default_rng().poisson(lam=10, size=[2000])
     )
     if plot:
         plt.title("should be poisson-y")
@@ -207,7 +208,7 @@ def test_plot_categorical_dist(plot):
 
     # xlabel shouldn't show ALL values if lots of uniques
     pf.utils.plotting.plot_categorical_dist(
-        to_numpy(tf.random.poisson([2000], 50))
+        np.random.default_rng().poisson(lam=50, size=[2000])
     )
     if plot:
         plt.title("should be poisson-y, not showing all xticklabels")

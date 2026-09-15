@@ -50,11 +50,23 @@ def is_backend_tensor(obj: Any) -> bool:
     if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
-        return isinstance(obj, (torch.Tensor))
+        return isinstance(obj, (torch.Tensor, torch.nn.Parameter))
     else:
         import tensorflow as tf
 
         return isinstance(obj, (tf.Tensor, tf.Variable))
+
+
+def is_backend_variable(obj: Any) -> bool:
+    """Determine whether an object is a backend Variable."""
+    if get_backend() == ProbflowBackend.PYTORCH:
+        import torch
+
+        return isinstance(obj, torch.nn.Parameter)
+    else:
+        import tensorflow as tf
+
+        return isinstance(obj, tf.Variable)
 
 
 def is_backend_distribution(obj: Any) -> bool:

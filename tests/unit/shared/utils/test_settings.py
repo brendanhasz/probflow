@@ -3,7 +3,6 @@
 import uuid
 
 import pytest
-import tensorflow as tf
 
 from probflow.utils import settings
 
@@ -90,18 +89,7 @@ def test_backend(monkeypatch):
         settings.set_backend(1)
 
 
-def test_datatype():
-    """Tests get and set_datatype."""
-    assert isinstance(settings.get_datatype(), tf.DType)
-    assert settings.get_datatype() == tf.float32
-
-    settings.set_datatype(tf.float64)
-    assert isinstance(settings.get_datatype(), tf.DType)
-    assert settings.get_datatype() == tf.float64
-    settings.set_datatype(tf.float32)
-
-    with pytest.raises(TypeError):
-        settings.set_datatype("lala")
+# NOTE: get_datatype and set_datatype are tested in the backend-specific tests.
 
 
 def test_samples():

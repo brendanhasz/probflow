@@ -1,15 +1,7 @@
 import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 from probflow.parameters import MultivariateNormalParameter
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+from probflow.utils.validation import is_backend_tensor
 
 
 def test_MultivariateNormalParameter():
@@ -19,7 +11,7 @@ def test_MultivariateNormalParameter():
 
     # kl_loss should still be scalar
     kl_loss = param.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert is_backend_tensor(kl_loss)
     assert kl_loss.ndim == 0
 
     # posterior_mean should return mean
@@ -64,17 +56,17 @@ def test_MultivariateNormalParameter():
 
     # test slicing
     s = param[:-2]
-    assert isinstance(s, tf.Tensor)
+    assert is_backend_tensor(s)
     assert s.ndim == 2
     assert s.shape[0] == 2
     assert s.shape[1] == 1
     s = param[1]
-    assert isinstance(s, tf.Tensor)
+    assert is_backend_tensor(s)
     assert s.ndim == 2
     assert s.shape[0] == 1
     assert s.shape[1] == 1
     s = param[-1]
-    assert isinstance(s, tf.Tensor)
+    assert is_backend_tensor(s)
     assert s.ndim == 2
     assert s.shape[0] == 1
     assert s.shape[1] == 1

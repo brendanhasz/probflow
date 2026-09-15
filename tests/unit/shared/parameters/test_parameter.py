@@ -1,19 +1,17 @@
+"""Test the generic Parameter."""
+
 import numpy as np
 import pytest
-import tensorflow as tf
-import tensorflow_probability as tfp
 
 from probflow.parameters import Parameter
 from probflow.utils.base import BaseDistribution
 from probflow.utils.casting import to_numpy
-from probflow.utils.settings import Sampling
-
-tfd = tfp.distributions
-
-
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
+from probflow.utils.settings import ProbflowBackend, Sampling
+from probflow.utils.validation import (
+    is_backend_distribution,
+    is_backend_tensor,
+    is_backend_variable,
+)
 
 
 def test_Parameter_scalar():
@@ -27,7 +25,7 @@ def test_Parameter_scalar():
     assert isinstance(param.untransformed_variables, dict)
     assert all(isinstance(p, str) for p in param.untransformed_variables)
     assert all(
-        isinstance(p, tf.Variable)
+        is_backend_variable(p)
         for _, p in param.untransformed_variables.items()
     )
 
@@ -38,19 +36,19 @@ def test_Parameter_scalar():
         Parameter(shape=[20, 0, 1])
 
     # trainable_variables should be a property returning list of vars
-    assert all(isinstance(v, tf.Variable) for v in param.trainable_variables)
+    assert all(is_backend_variable(v) for v in param.trainable_variables)
 
     # variables should be a property returning dict of transformed vars
     assert isinstance(param.variables, dict)
     assert all(isinstance(v, str) for v in param.variables)
 
     # loc should be variable, while scale should have been transformed->tensor
-    assert isinstance(param.variables["loc"], tf.Variable)
-    assert isinstance(param.variables["scale"], tf.Tensor)
+    assert is_backend_variable(param.variables["loc"])
+    assert is_backend_tensor(param.variables["scale"])
 
     # posterior should be a distribution object
     assert isinstance(param.posterior, BaseDistribution)
-    assert isinstance(param.posterior(), tfd.Normal)
+    assert is_backend_distribution(param.posterior())
 
     # __call__ should return the MAP estimate by default
     sample1 = param()
@@ -137,7 +135,7 @@ def test_Parameter_scalar():
 
     # kl_loss should return sum of kl divergences
     kl_loss = param.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert is_backend_tensor(kl_loss)
     assert kl_loss.ndim == 0
 
     # prior_sample should be 1D
@@ -148,13 +146,17 @@ def test_Parameter_scalar():
     assert prior_sample.shape[0] == 7
 
     # prior and posterior shouldn't be the same (post was randomly initialized)
-    assert to_numpy(tf.reduce_all(param.prior.loc != param.posterior.loc))
-    assert to_numpy(tf.reduce_all(param.prior.scale != param.posterior.scale))
+    assert np.all(to_numpy(param.prior.loc) != to_numpy(param.posterior.loc))
+    assert np.all(
+        to_numpy(param.prior.scale) != to_numpy(param.posterior.scale)
+    )
 
     # but they should be the same after running bayesian_update
     param.bayesian_update()
-    assert to_numpy(tf.reduce_all(param.prior.loc == param.posterior.loc))
-    assert to_numpy(tf.reduce_all(param.prior.scale == param.posterior.scale))
+    assert np.all(to_numpy(param.prior.loc) == to_numpy(param.posterior.loc))
+    assert np.all(
+        to_numpy(param.prior.scale) == to_numpy(param.posterior.scale)
+    )
 
 
 def test_Parameter_no_prior():
@@ -164,7 +166,7 @@ def test_Parameter_no_prior():
 
     # kl_loss should return 0
     kl_loss = param.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert is_backend_tensor(kl_loss)
     assert kl_loss.ndim == 0
     assert to_numpy(kl_loss) == 0.0
 
@@ -186,7 +188,7 @@ def test_Parameter_1D():
 
     # kl_loss should still be scalar
     kl_loss = param.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert is_backend_tensor(kl_loss)
     assert kl_loss.ndim == 0
 
     # posterior_mean should return mean
@@ -242,7 +244,7 @@ def test_Parameter_2D():
 
     # kl_loss should still be scalar
     kl_loss = param.kl_loss()
-    assert isinstance(kl_loss, tf.Tensor)
+    assert is_backend_tensor(kl_loss)
     assert kl_loss.ndim == 0
 
     # posterior_mean should return mean
@@ -327,12 +329,7 @@ def test_Parameter_slicing():
     assert sl.shape[2] == 4
     assert sl.shape[3] == 5
 
-    sl = to_numpy(param[tf.constant([0]), :, ::2, :])
-    assert sl.ndim == 4
-    assert sl.shape[0] == 1
-    assert sl.shape[1] == 3
-    assert sl.shape[2] == 2
-    assert sl.shape[3] == 5
+    # NOTE: slicing with backend-specific tensor types is tested in the backend-specific test files.
 
 
 def test_Parameter_posterior_ci():
