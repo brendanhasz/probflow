@@ -7,11 +7,6 @@ from probflow.utils import ops
 from probflow.utils.casting import to_numpy
 
 
-def is_close(a, b, tol=1e-3):
-    """Check whether a value is close."""
-    return np.abs(a - b) < tol
-
-
 def test_kl_divergence():
     """Tests kl_divergence."""
     # Divergence between a distribution and itself should be 0
@@ -291,7 +286,7 @@ def test_sum():
 
     # Actually test values
     val = ops.sum(tf.constant([1.1, 2.0, 3.3]))
-    assert is_close(to_numpy(val), 6.4)
+    assert np.isclose(to_numpy(val), 6.4)
 
 
 def test_prod():
@@ -316,7 +311,7 @@ def test_prod():
 
     # Actually test values
     val = ops.prod(tf.constant([1.1, 2.0, 3.3]))
-    assert is_close(to_numpy(val), 7.26)
+    assert np.isclose(to_numpy(val), 7.26)
 
 
 def test_mean():
@@ -341,7 +336,7 @@ def test_mean():
 
     # Actually test values
     val = ops.mean(tf.constant([0.9, 1.9, 2.1, 3.1]))
-    assert is_close(to_numpy(val), 2.0)
+    assert np.isclose(to_numpy(val), 2.0)
 
 
 def test_std():
@@ -366,9 +361,9 @@ def test_std():
 
     # Actually test values
     val = ops.std(tf.constant([0.9, 1.9, 2.1, 3.1]))
-    assert is_close(to_numpy(val), 0.781024968)
+    assert np.isclose(to_numpy(val), 0.781024968)
     val = ops.std(tf.constant([1.0, 2.0, 3.0]))
-    assert is_close(to_numpy(val), 0.816496581)
+    assert np.isclose(to_numpy(val), 0.816496581)
 
 
 def _test_elementwise(fn, inputs, outputs):
@@ -384,7 +379,7 @@ def _test_elementwise(fn, inputs, outputs):
     # Actually test values
     val = fn(tf.constant(inputs))
     for i in range(len(outputs)):
-        assert is_close(to_numpy(val)[i], outputs[i])
+        assert np.isclose(to_numpy(val)[i], outputs[i])
 
 
 def test_round():
