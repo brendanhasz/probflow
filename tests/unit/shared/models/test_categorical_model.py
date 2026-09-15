@@ -40,7 +40,7 @@ def test_CategoricalModel(plot):
         plt.show()
 
 
-def test_ContinuousModel_multivariate():
+def test_CategoricalModel_multivariate():
     """Tests probflow.models.CategoricalModel w/ multivariate target
     I.e., a multitask learner.  Point is, pred_dist_plot shouldn't work then.
     """

@@ -47,7 +47,7 @@ def to_numpy(x: TensorLike) -> np.ndarray:
         import torch
 
         if isinstance(x, torch.Tensor):
-            return x.detach().numpy()
+            return x.detach().clone().numpy()
         else:
             return np.array(x)
     else:

@@ -11,7 +11,7 @@ from probflow.parameters import (
     Parameter,
     ScaleParameter,
 )
-from probflow.utils.casting import to_numpy
+from probflow.utils.casting import to_numpy, to_tensor
 
 
 def test_Model_0D():
@@ -24,6 +24,7 @@ def test_Model_0D():
             self.std = ScaleParameter(name="Std")
 
         def __call__(self, x):
+            x = to_tensor(x)
             return Normal(x * self.weight() + self.bias(), self.std())
 
     # Instantiate the model
@@ -288,6 +289,7 @@ def test_Model_force_eager():
             self.std = ScaleParameter(name="Std")
 
         def __call__(self, x):
+            x = to_tensor(x)
             return Normal(x * self.weight() + self.bias(), self.std())
 
     # Instantiate the model
@@ -309,6 +311,7 @@ def test_Model_force_no_flipout():
             self.std = ScaleParameter(name="Std")
 
         def __call__(self, x):
+            x = to_tensor(x)
             return Normal(x * self.weight() + self.bias(), self.std())
 
     # Instantiate the model
@@ -332,6 +335,7 @@ def test_Model_nonprobabilistic():
             self.std = DeterministicParameter(transform=O.softplus)
 
         def __call__(self, x):
+            x = to_tensor(x)
             return Normal(self.net(x), self.std())
 
     # Instantiate the model
@@ -355,7 +359,7 @@ def test_Model_with_dataframe():
             self.std = ScaleParameter([1, 1], name="Std")
 
         def __call__(self, x):
-            x = x[self.cols].values
+            x = to_tensor(x[self.cols].values)
             return Normal(x @ self.weight() + self.bias(), self.std())
 
     # Data
@@ -390,6 +394,7 @@ def test_Model_ArrayDataGenerators():
             self.std = ScaleParameter(name="Std")
 
         def __call__(self, x):
+            x = to_tensor(x)
             return Normal(x * self.weight() + self.bias(), self.std())
 
     # Instantiate the model
@@ -448,6 +453,7 @@ def test_Model_1D():
             self.std = ScaleParameter([1, 1], name="Std")
 
         def __call__(self, x):
+            x = to_tensor(x)
             return Normal(x @ self.weight() + self.bias(), self.std())
 
     # Instantiate the model
@@ -728,6 +734,7 @@ def test_Model_nesting():
             )
 
         def __call__(self, x):
+            x = to_tensor(x)
             return Normal(self.module(x), self.std())
 
     # Instantiate the model
@@ -766,6 +773,7 @@ def test_Model_multiple_mc_0d_eager():
             self.std = ScaleParameter(name="Std")
 
         def __call__(self, x):
+            x = to_tensor(x)
             w = self.weight()
             b = self.bias()
             s = self.std()
@@ -819,6 +827,7 @@ def test_Model_multiple_mc_0d_noneager():
             self.std = ScaleParameter(name="Std")
 
         def __call__(self, x):
+            x = to_tensor(x)
             # can't check shapes b/c tracing it ignores this code
             # so just check that it works
             return Normal(x * self.weight() + self.bias(), self.std())
@@ -848,6 +857,7 @@ def test_Model_multiple_mc_1d_eager():
             self.std = ScaleParameter([1, 1], name="Std")
 
         def __call__(self, x):
+            x = to_tensor(x)
             w = self.weight()
             b = self.bias()
             s = self.std()
@@ -913,6 +923,7 @@ def test_Model_multiple_mc_1d_noneager():
             self.std = ScaleParameter([1, 1], name="Std")
 
         def __call__(self, x):
+            x = to_tensor(x)
             w = self.weight()
             b = self.bias()
             s = self.std()
@@ -946,6 +957,7 @@ def test_Model_multiple_mc_2d_eager():
             self.std = ScaleParameter([1, d_out], name="Std")
 
         def __call__(self, x):
+            x = to_tensor(x)
             w = self.weight()
             b = self.bias()
             s = self.std()
@@ -1011,6 +1023,7 @@ def test_Model_multiple_mc_2d_noneager():
             self.std = ScaleParameter([1, d_out], name="Std")
 
         def __call__(self, x):
+            x = to_tensor(x)
             w = self.weight()
             b = self.bias()
             s = self.std()
@@ -1044,6 +1057,7 @@ def test_Model_bayesian_updating():
             self.bias = Parameter(name="Bias", initializer=initializer)
 
         def __call__(self, x):
+            x = to_tensor(x)
             return Normal(x * self.weight() + self.bias(), 0.1)
 
     # Instantiate the model
@@ -1059,8 +1073,8 @@ def test_Model_bayesian_updating():
     assert my_model.bias.posterior_mean() > 0
 
     # Store param estimate values
-    weight_loc = my_model.weight.posterior_mean()
-    bias_loc = my_model.bias.posterior_mean()
+    weight_loc = to_numpy(my_model.weight.posterior_mean())
+    bias_loc = to_numpy(my_model.bias.posterior_mean())
 
     # Do Bayesian updating
     my_model.bayesian_update()
@@ -1070,5 +1084,5 @@ def test_Model_bayesian_updating():
     my_model.fit(x, y, batch_size=128, epochs=10, n_mc=10, eager=True)
 
     # Estimates should now be less than they were
-    assert weight_loc > my_model.weight.posterior_mean()
-    assert bias_loc > my_model.bias.posterior_mean()
+    assert weight_loc > to_numpy(my_model.weight.posterior_mean())
+    assert bias_loc > to_numpy(my_model.bias.posterior_mean())
