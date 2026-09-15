@@ -1,9 +1,8 @@
 import numpy as np
 import pytest
-from probflow.utils.casting import to_default_dtype
 
 from probflow.distributions import Dirichlet
-from probflow.utils.casting import to_numpy
+from probflow.utils.casting import to_default_dtype, to_numpy
 from probflow.utils.validation import (
     is_backend_distribution,
     is_backend_tensor,
@@ -48,15 +47,19 @@ def test_Dirichlet():
         dist = Dirichlet("lalala")
 
     # Should use the last dim if passed a Tensor arg
-    dist = Dirichlet(to_default_dtype([[1, 2, 3], [3, 2, 1], [1, 1, 1], [100, 100, 100]]))
+    dist = Dirichlet(
+        to_default_dtype([[1, 2, 3], [3, 2, 1], [1, 1, 1], [100, 100, 100]])
+    )
     probs = to_numpy(
         dist.prob(
-            to_default_dtype([
-                [0, 0, 1],
-                [1, 0, 0],
-                [0.2, 0.2, 0.6],
-                [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
-            ])
+            to_default_dtype(
+                [
+                    [0, 0, 1],
+                    [1, 0, 0],
+                    [0.2, 0.2, 0.6],
+                    [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
+                ]
+            )
         )
     )
     assert probs.ndim == 1

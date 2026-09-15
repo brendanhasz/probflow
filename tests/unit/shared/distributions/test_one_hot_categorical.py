@@ -49,15 +49,24 @@ def test_OneHotCategorical():
 
     # Multi-dim
     dist = OneHotCategorical(
-        probs=to_default_dtype([
-            [0.1, 0.7, 0.2],
-            [0.8, 0.1, 0.1],
-            [0.01, 0.01, 0.98],
-            [0.3, 0.3, 0.4],
-        ])
+        probs=to_default_dtype(
+            [
+                [0.1, 0.7, 0.2],
+                [0.8, 0.1, 0.1],
+                [0.01, 0.01, 0.98],
+                [0.3, 0.3, 0.4],
+            ]
+        )
     )
     probs = dist.prob(
-        to_default_dtype([[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
+        to_default_dtype(
+            [
+                [0.0, 1.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0],
+            ]
+        )
     )
     assert np.isclose(to_numpy(probs[0]), 0.7)
     assert np.isclose(to_numpy(probs[1]), 0.8)

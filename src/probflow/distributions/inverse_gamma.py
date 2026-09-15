@@ -67,13 +67,15 @@ class InverseGamma(BaseDistribution):
         """Get the distribution object from the backend."""
         if get_backend() == ProbflowBackend.PYTORCH:
             import torch
-            #import torch.distributions as tod
+            # import torch.distributions as tod
 
-            #return tod.transformed_distribution.TransformedDistribution(
+            # return tod.transformed_distribution.TransformedDistribution(
             #    tod.gamma.Gamma(self["concentration"], self["scale"]),
             #    tod.transforms.PowerTransform(torch.tensor([-1.0])),
-            #)
-            return torch.distributions.inverse_gamma.InverseGamma(concentration=self["concentration"], rate=self["scale"])
+            # )
+            return torch.distributions.inverse_gamma.InverseGamma(
+                concentration=self["concentration"], rate=self["scale"]
+            )
         else:
             from tensorflow_probability import distributions as tfd
 

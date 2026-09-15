@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 
 import probflow.utils.ops as O
-from probflow.utils.casting import to_default_dtype
 from probflow.distributions import Mixture, Normal
+from probflow.utils.casting import to_default_dtype
 from probflow.utils.validation import (
     is_backend_distribution,
     is_backend_tensor,
@@ -45,7 +45,10 @@ def test_Mixture():
     assert samples.shape[1] == 5
 
     # Test methods
-    dist = Mixture(Normal(to_default_dtype([-1.0, 1.0]), to_default_dtype([1e-3, 1e-3])), to_default_dtype([0.5, 0.5]))
+    dist = Mixture(
+        Normal(to_default_dtype([-1.0, 1.0]), to_default_dtype([1e-3, 1e-3])),
+        to_default_dtype([0.5, 0.5]),
+    )
     probs = dist.prob([-1.0, 1.0])
     assert np.isclose(probs[0] / probs[1], 1.0)
 

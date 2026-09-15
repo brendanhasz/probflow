@@ -13,7 +13,6 @@ from probflow.utils.validation import (
 tfd = tfp.distributions
 
 
-
 def test_HiddenMarkovModel():
     """Tests hidden Markov model distribution."""
     # Create the distribution (3 states)
