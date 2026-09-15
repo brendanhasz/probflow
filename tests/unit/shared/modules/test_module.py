@@ -4,7 +4,7 @@ import probflow.utils.ops as O
 from probflow.distributions.normal import Normal
 from probflow.modules import Module
 from probflow.parameters import Parameter
-from probflow.utils.casting import to_numpy, to_tensor, to_default_dtype
+from probflow.utils.casting import to_default_dtype, to_numpy, to_tensor
 from probflow.utils.settings import Sampling
 from probflow.utils.validation import is_backend_tensor
 

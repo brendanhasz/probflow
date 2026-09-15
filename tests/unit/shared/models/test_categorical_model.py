@@ -5,7 +5,7 @@ import pytest
 from probflow.distributions import Bernoulli
 from probflow.models import CategoricalModel
 from probflow.parameters import Parameter
-from probflow.utils.casting import to_default_dtype, to_tensor
+from probflow.utils.casting import to_tensor
 
 
 def test_CategoricalModel(plot):
