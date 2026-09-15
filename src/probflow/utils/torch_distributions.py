@@ -24,6 +24,10 @@ def get_TorchDeterministic() -> type[BackendDistribution]:
             return self.loc
 
         @property
+        def mode(self):
+            return self.loc
+
+        @property
         def stddev(self):
             return 0.0
 
