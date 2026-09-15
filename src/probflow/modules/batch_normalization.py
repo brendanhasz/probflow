@@ -161,4 +161,6 @@ class BatchNormalization(Module):
         """Perform the forward pass."""
         mean = O.mean(x, axis=-2, keepdims=True)
         std = O.std(x, axis=-2, keepdims=True)
-        return self.weight() * (x - mean) / std + self.bias()
+        # Add a small epsilon to avoid dividing by zero
+        # (e.g. when a feature is constant across a batch, such as a dead ReLU unit)
+        return self.weight() * (x - mean) / (std + 1e-5) + self.bias()

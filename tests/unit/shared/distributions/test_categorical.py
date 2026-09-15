@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from probflow.distributions import Categorical
-from probflow.utils.casting import to_default_dtype, to_numpy, to_tensor
+from probflow.utils.casting import to_default_dtype, to_numpy
 from probflow.utils.validation import (
     is_backend_distribution,
     is_backend_tensor,
@@ -59,7 +59,7 @@ def test_Categorical():
 
     # Should use the last dim if passed a Tensor arg
     dist = Categorical(
-        probs=to_tensor(
+        probs=to_default_dtype(
             [
                 [0.1, 0.7, 0.2],
                 [0.8, 0.1, 0.1],
@@ -68,8 +68,8 @@ def test_Categorical():
             ]
         )
     )
-    a1 = to_tensor([0.0, 1.0, 2.0, 2.0])
-    a2 = to_tensor([2.0, 1.0, 0.0, 0.0])
+    a1 = to_default_dtype([0.0, 1.0, 2.0, 2.0])
+    a2 = to_default_dtype([2.0, 1.0, 0.0, 0.0])
     assert np.isclose(to_numpy(dist.prob(a1))[0], 0.1)
     assert np.isclose(to_numpy(dist.prob(a1))[1], 0.1)
     assert np.isclose(to_numpy(dist.prob(a1))[2], 0.98)

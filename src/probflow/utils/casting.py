@@ -31,7 +31,7 @@ P = ParamSpec("P")
 def to_numpy(x: TensorLike) -> np.ndarray:
     """Convert tensor to numpy array."""
     if isinstance(x, list):
-        return np.array(x)
+        return [to_numpy(e) for e in x]
     elif isinstance(x, np.ndarray):
         return x
     elif isinstance(x, (pd.DataFrame, pd.Series)):
@@ -74,7 +74,7 @@ def to_tensor(x: TensorLike) -> BackendTensor:
         return x  # TensorFlow auto-converts numpy arrays to tensors
 
 
-def to_default_dtype(x: TensorLike) -> TensorLike:
+def to_default_dtype(x: TensorLike) -> BackendTensor:
     """Cast a tensor to the default backend datatype."""
     if get_backend() == ProbflowBackend.PYTORCH:
         import torch
