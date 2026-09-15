@@ -64,7 +64,7 @@ jobs:
         uv sync --extra ${{ matrix.backend }}
     - name: Run tests
       run: |
-        uv run pytest tests/unit/${{ matrix.backend }} --cov=probflow --cov-report xml:coverage.xml
+        uv run pytest tests/unit/shared  tests/unit/${{ matrix.backend }} --cov=probflow --cov-report xml:coverage.xml
     - name: Upload coverage report to CodeCov
       uses: codecov/codecov-action@v5
       with:
