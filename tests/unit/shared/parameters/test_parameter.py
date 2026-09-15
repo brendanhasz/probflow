@@ -6,7 +6,7 @@ import pytest
 from probflow.parameters import Parameter
 from probflow.utils.base import BaseDistribution
 from probflow.utils.casting import to_numpy
-from probflow.utils.settings import ProbflowBackend, Sampling
+from probflow.utils.settings import Sampling
 from probflow.utils.validation import (
     is_backend_distribution,
     is_backend_tensor,

@@ -1,4 +1,3 @@
-
 import torch
 
 from probflow.distributions import HiddenMarkovModel

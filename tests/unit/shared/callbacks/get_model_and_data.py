@@ -3,6 +3,7 @@ import numpy as np
 from probflow.distributions import Normal
 from probflow.models import Model
 from probflow.parameters import Parameter, ScaleParameter
+from probflow.utils.casting import to_tensor
 
 
 def get_model_and_data():
@@ -15,6 +16,7 @@ def get_model_and_data():
             self.std = ScaleParameter(name="Std")
 
         def __call__(self, x):
+            x = to_tensor(x)
             return Normal(x * self.weight() + self.bias(), self.std())
 
     # Instantiate the model

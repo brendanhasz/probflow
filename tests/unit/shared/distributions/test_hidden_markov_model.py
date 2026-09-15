@@ -3,7 +3,6 @@ import pytest
 
 import probflow.utils.ops as O
 from probflow.distributions import HiddenMarkovModel, Normal
-from probflow.utils.settings import ProbflowBackend, get_backend
 from probflow.utils.validation import (
     is_backend_distribution,
     is_backend_tensor,

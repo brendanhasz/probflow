@@ -1,9 +1,7 @@
-
 import tensorflow as tf
 import tensorflow_probability as tfp
 
 from probflow.distributions import HiddenMarkovModel
-
 
 tfd = tfp.distributions
 
