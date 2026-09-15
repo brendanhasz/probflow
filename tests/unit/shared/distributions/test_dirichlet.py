@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from probflow.utils.casting import to_default_dtype
 
 from probflow.distributions import Dirichlet
 from probflow.utils.casting import to_numpy
@@ -12,10 +13,10 @@ from probflow.utils.validation import (
 def test_Dirichlet():
     """Tests Dirichlet distribution."""
     # Create the distribution
-    dist = Dirichlet([1, 2, 3])
+    dist = Dirichlet(to_default_dtype([1, 2, 3]))
 
     # Check default params
-    assert dist.concentration == [1, 2, 3]
+    assert np.all(to_numpy(dist.concentration) == np.array([1, 2, 3]))
 
     # Call should return backend obj
     assert is_backend_distribution(dist())
@@ -47,15 +48,15 @@ def test_Dirichlet():
         dist = Dirichlet("lalala")
 
     # Should use the last dim if passed a Tensor arg
-    dist = Dirichlet([[1, 2, 3], [3, 2, 1], [1, 1, 1], [100, 100, 100]])
+    dist = Dirichlet(to_default_dtype([[1, 2, 3], [3, 2, 1], [1, 1, 1], [100, 100, 100]]))
     probs = to_numpy(
         dist.prob(
-            [
+            to_default_dtype([
                 [0, 0, 1],
                 [1, 0, 0],
                 [0.2, 0.2, 0.6],
                 [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
-            ]
+            ])
         )
     )
     assert probs.ndim == 1
