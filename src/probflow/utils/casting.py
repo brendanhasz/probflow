@@ -47,7 +47,7 @@ def to_numpy(x: TensorLike) -> np.ndarray:
         import torch
 
         if isinstance(x, torch.Tensor):
-            return x.detach().numpy()
+            return x.detach().clone().numpy()
         else:
             return np.array(x)
     else:
@@ -74,7 +74,7 @@ def to_tensor(x: TensorLike) -> BackendTensor:
         return x  # TensorFlow auto-converts numpy arrays to tensors
 
 
-def to_default_dtype(x: TensorLike) -> TensorLike:
+def to_default_dtype(x: TensorLike) -> BackendTensor:
     """Cast a tensor to the default backend datatype."""
     if get_backend() == ProbflowBackend.PYTORCH:
         import torch

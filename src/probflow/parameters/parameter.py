@@ -17,6 +17,7 @@ from probflow.utils.settings import (
     get_samples,
     get_static_sampling_uuid,
 )
+from probflow.utils.shape import get_shape
 from probflow.utils.typing import BackendTensor, BackendVariable, ScalarLike
 
 
@@ -159,7 +160,7 @@ class Parameter(BaseParameter):
         return int(
             sum(
                 [
-                    np.prod(e.shape.as_list())
+                    np.prod(get_shape(e))
                     for e in self.untransformed_variables.values()
                 ]
             )

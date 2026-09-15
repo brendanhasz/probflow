@@ -56,7 +56,6 @@ class HiddenMarkovModel(BaseDistribution):
     def __call__(self) -> BackendDistribution:
         """Get the distribution object from the backend."""
         if get_backend() == ProbflowBackend.PYTORCH:
-            # import torch.distributions as tod
             raise NotImplementedError
         else:
             from tensorflow_probability import distributions as tfd

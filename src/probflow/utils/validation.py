@@ -43,3 +43,41 @@ def ensure_tensor_like(obj: Any, name: str) -> None:
 
         if not isinstance(obj, (tf.Tensor, tf.Variable, BaseParameter)):
             raise TypeError(name + " must be Tensor-like")
+
+
+def is_backend_tensor(obj: Any) -> bool:
+    """Determine whether an object is a backend Tensor."""
+    if get_backend() == ProbflowBackend.PYTORCH:
+        import torch
+
+        return isinstance(obj, (torch.Tensor, torch.nn.Parameter))
+    else:
+        import tensorflow as tf
+
+        return isinstance(obj, (tf.Tensor, tf.Variable))
+
+
+def is_backend_variable(obj: Any) -> bool:
+    """Determine whether an object is a backend Variable."""
+    if get_backend() == ProbflowBackend.PYTORCH:
+        import torch
+
+        return isinstance(obj, torch.nn.Parameter)
+    else:
+        import tensorflow as tf
+
+        return isinstance(obj, tf.Variable)
+
+
+def is_backend_distribution(obj: Any) -> bool:
+    """Determine whether an object is a backend distribution."""
+    if get_backend() == ProbflowBackend.PYTORCH:
+        # PyTorch distributions are instances of torch.distributions.Distribution
+        from torch.distributions import Distribution as TorchDistribution
+
+        return isinstance(obj, TorchDistribution)
+    else:
+        import tensorflow_probability as tfp
+
+        # TensorFlow Probability distributions are instances of tfp.distributions.Distribution
+        return isinstance(obj, tfp.distributions.Distribution)

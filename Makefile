@@ -10,7 +10,7 @@ install:
 
 # Run unit tests
 test-unit: install
-	uv run pytest tests/unit/$(BACKEND)
+	uv run pytest tests/unit/shared tests/unit/$(BACKEND)
 
 # Run statistical checks
 test-stats: install

@@ -1,3 +1,5 @@
+"""Fixtures for unit tests w/ tensorflow backend."""
+
 import probflow as pf
 
 
