@@ -11,7 +11,7 @@ def test_DenseRegression():
     y = x @ w + 1
 
     # Create the model
-    model = DenseRegression([5, 20, 15, 1])
+    model = DenseRegression([5, 15, 1])
 
     # Fit the model
     model.fit(x, y, batch_size=10, epochs=3)
@@ -44,7 +44,7 @@ def test_DenseRegression_heteroscedastic():
     y = y + np.exp(y) * np.random.randn(100, 1).astype("float32")
 
     # Create the model
-    model = DenseRegression([5, 20, 15, 1], heteroscedastic=True)
+    model = DenseRegression([5, 15, 1], heteroscedastic=True)
 
     # Fit the model
     model.fit(x, y, batch_size=10, epochs=3)
