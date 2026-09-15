@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 import probflow.utils.ops as O
+from probflow.utils.casting import to_default_dtype
 from probflow.distributions import Mixture, Normal
 from probflow.utils.validation import (
     is_backend_distribution,
@@ -44,35 +45,35 @@ def test_Mixture():
     assert samples.shape[1] == 5
 
     # Test methods
-    dist = Mixture(Normal([-1.0, 1.0], [1e-3, 1e-3]), [0.5, 0.5])
+    dist = Mixture(Normal(to_default_dtype([-1.0, 1.0]), to_default_dtype([1e-3, 1e-3])), to_default_dtype([0.5, 0.5]))
     probs = dist.prob([-1.0, 1.0])
     assert np.isclose(probs[0] / probs[1], 1.0)
 
     dist = Mixture(
-        Normal([-1.0, 1.0], [1e-3, 1e-3]),
-        np.log(np.array([0.8, 0.2]).astype("float32")),
+        Normal(to_default_dtype([-1.0, 1.0]), to_default_dtype([1e-3, 1e-3])),
+        to_default_dtype(np.log(np.array([0.8, 0.2]))),
     )
     probs = dist.prob([-1.0, 1.0])
     assert np.isclose(probs[0] / probs[1], 4.0)
 
     dist = Mixture(
-        Normal([-1.0, 1.0], [1e-3, 1e-3]),
-        np.log(np.array([0.1, 0.9]).astype("float32")),
+        Normal(to_default_dtype([-1.0, 1.0]), to_default_dtype([1e-3, 1e-3])),
+        to_default_dtype(np.log(np.array([0.1, 0.9]))),
     )
     probs = dist.prob([-1.0, 1.0])
     assert np.isclose(probs[0] / probs[1], 1.0 / 9.0)
 
     # try w/ weight_type
     dist = Mixture(
-        Normal([-1.0, 1.0], [1e-3, 1e-3]),
-        logits=np.log(np.array([0.1, 0.9]).astype("float32")),
+        Normal(to_default_dtype([-1.0, 1.0]), to_default_dtype([1e-3, 1e-3])),
+        logits=to_default_dtype(np.log(np.array([0.1, 0.9]))),
     )
     probs = dist.prob([-1.0, 1.0])
     assert np.isclose(probs[0] / probs[1], 1.0 / 9.0)
 
     dist = Mixture(
-        Normal([-1.0, 1.0], [1e-3, 1e-3]),
-        probs=np.array([0.1, 0.9]).astype("float32"),
+        Normal(to_default_dtype([-1.0, 1.0]), to_default_dtype([1e-3, 1e-3])),
+        probs=to_default_dtype(np.array([0.1, 0.9])),
     )
     probs = dist.prob([-1.0, 1.0])
     assert np.isclose(probs[0] / probs[1], 1.0 / 9.0)
