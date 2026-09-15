@@ -5,6 +5,7 @@ import pytest
 from probflow.distributions import Bernoulli
 from probflow.models import CategoricalModel
 from probflow.parameters import Parameter
+from probflow.utils.casting import to_default_dtype, to_tensor
 
 
 def test_CategoricalModel(plot):
@@ -16,6 +17,7 @@ def test_CategoricalModel(plot):
             self.bias = Parameter([1, 1], name="Bias")
 
         def __call__(self, x):
+            x = to_tensor(x)
             return Bernoulli(x @ self.weight() + self.bias())
 
     # Instantiate the model
@@ -49,6 +51,7 @@ def test_ContinuousModel_multivariate():
             self.bias = Parameter([1, 3], name="Bias")
 
         def __call__(self, x):
+            x = to_tensor(x)
             return Bernoulli(x @ self.weight() + self.bias())
 
     # Instantiate the model
@@ -57,7 +60,7 @@ def test_ContinuousModel_multivariate():
     # Data
     x = np.random.randn(100, 5).astype("float32")
     w = np.random.randn(5, 3).astype("float32")
-    y = ((x @ w) > 0).astype(int)
+    y = ((x @ w) > 0).astype("float32")
 
     # Fit the model
     model.fit(x, y, batch_size=50, epochs=2, lr=0.01, eager=True)
