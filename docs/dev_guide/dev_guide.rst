@@ -59,11 +59,48 @@ Tests
 -----
 
 Then you can edit the source code, which is in ``src/probflow``.  The tests are
-in ``tests``.  To run all the tests, run
+in ``tests``.  To run all the tests, run:
 
 .. code-block:: bash
 
    make test
+
+The above command runs several types of tests including unit tests and statistical tests.
+
+Unit tests are broken down into _shared_ tests (which can be run using either the PyTorch or TensorFlow backends),
+and backend-specific tests.  The shared unit tests are in `tests/shared` and the backend-specific tests are in
+`tests/<backend>`.  To run the unit tests just for a specific backend, run:
+
+.. tabs::
+
+    .. group-tab:: TensorFlow
+
+         .. code-block:: bash
+
+            make test-unit BACKEND=tensorflow
+
+    .. group-tab:: PyTorch
+
+         .. code-block:: bash
+
+            make test-unit BACKEND=pytorch
+
+There are also statistical tests, which are in `tests/stats`, and which check that the models are accurately able to fit data.
+These are all backend-independent tests, but can be run using either backend.  To run the statistical tests, run:
+
+.. tabs::
+
+    .. group-tab:: TensorFlow
+
+         .. code-block:: bash
+
+            make test-stats BACKEND=tensorflow
+
+    .. group-tab:: PyTorch
+
+         .. code-block:: bash
+
+            make test-stats BACKEND=pytorch
 
 If you get an error during the tests and want to debug, the tests are written
 using `pytest <http://docs.pytest.org>`_, so to drop into the
@@ -71,6 +108,7 @@ using `pytest <http://docs.pytest.org>`_, so to drop into the
 
 .. code-block:: bash
 
+   make install BACKEND=<desired backend>
    uv run pytest tests/test_you_want_to_run.py --pdb
 
 
