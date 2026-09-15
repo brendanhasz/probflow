@@ -12,6 +12,7 @@ from probflow.utils.base import BaseDistribution, BaseParameter
 from probflow.utils.casting import to_numpy
 from probflow.utils.initializers import scale_xavier, xavier
 from probflow.utils.plotting import plot_dist
+from probflow.utils.shape import get_shape
 from probflow.utils.settings import (
     Sampling,
     get_samples,
@@ -159,7 +160,7 @@ class Parameter(BaseParameter):
         return int(
             sum(
                 [
-                    np.prod(e.shape.as_list())
+                    np.prod(get_shape(e))
                     for e in self.untransformed_variables.values()
                 ]
             )

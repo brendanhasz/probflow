@@ -4,6 +4,7 @@ import pytest
 from probflow.distributions import Bernoulli
 from probflow.models import Model
 from probflow.parameters import CenteredParameter
+from probflow.utils.casting import to_tensor
 
 
 def is_close(a, b, tol=1e-5):
@@ -223,6 +224,7 @@ def test_CenteredParameter_fit():
             self.w = CenteredParameter([di, do], center_by="column")
 
         def __call__(self, x):
+            x = to_tensor(x)
             return Bernoulli(x @ self.w())
 
     N = 128
@@ -230,7 +232,7 @@ def test_CenteredParameter_fit():
     Do = 3
     x = np.random.randn(N, Di).astype("float32")
     w = np.random.randn(Di, Do).astype("float32")
-    y = x @ w + 0.1 * np.random.randn(N, Do).astype("float32")
+    y = ((x @ w + 0.1 * np.random.randn(N, Do)) > 0).astype("float32")
 
     model = MyModel(Di, Do)
 

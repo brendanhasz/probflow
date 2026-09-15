@@ -4,7 +4,7 @@ import probflow.utils.ops as O
 from probflow.distributions.normal import Normal
 from probflow.modules import Module
 from probflow.parameters import Parameter
-from probflow.utils.casting import to_numpy
+from probflow.utils.casting import to_numpy, to_tensor, to_default_dtype
 from probflow.utils.settings import Sampling
 from probflow.utils.validation import is_backend_tensor
 
@@ -18,6 +18,7 @@ def test_Module():
             self.p2 = Parameter(name="TestParam2", shape=[5, 4])
 
         def __call__(self, x):
+            x = to_tensor(x)
             return O.sum(self.p2(), axis=None) + x * self.p1()
 
     the_module = TestModule()
@@ -202,7 +203,7 @@ def test_Module_lists_and_dicts():
     # Should be able to initialize and add kl losses
     the_module.reset_kl_loss()
     assert the_module.kl_loss_batch() == 0
-    the_module.add_kl_loss(3.145)
+    the_module.add_kl_loss(to_default_dtype(3.145))
     assert np.isclose(to_numpy(the_module.kl_loss_batch()), 3.145)
 
     # And should also be able to add kl losses from two distributions

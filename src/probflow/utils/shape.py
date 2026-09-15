@@ -26,6 +26,6 @@ def get_shape(x: TensorLike) -> tuple[int, ...]:
     if isinstance(x, (int, float)):
         return (1,)
     if isinstance(x, list):
-        return to_numpy(x).shape  # type: ignore
+        return tuple(to_numpy(x).shape)  # type: ignore
     else:
-        return x.shape  # type: ignore
+        return tuple(x.shape)  # type: ignore

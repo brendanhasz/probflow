@@ -384,4 +384,4 @@ def test_Parameter_float_initializer():
 
     # all should have been initialized to 1
     vals = param()
-    assert np.all(vals == 1.0)
+    assert np.all(to_numpy(vals) == 1.0)
