@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "probflow"
-version = "2.6.1"
+version = "2.6.2"
 description = "A Python package for building Bayesian models with TensorFlow or PyTorch"
 readme = { file = "README.md", content-type = "text/markdown" }
 license = "MIT"
