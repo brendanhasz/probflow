@@ -60,10 +60,13 @@ class HiddenMarkovModel(BaseDistribution):
         elif get_backend() == ProbflowBackend.JAX:
             from tensorflow_probability.substrates import jax as tfp_jax
 
-            tfd = tfp_jax.distributions
-            return tfd.HiddenMarkovModel(
-                initial_distribution=tfd.Categorical(self["initial"]),
-                transition_distribution=tfd.Categorical(self["transition"]),
+            return tfp_jax.distributions.HiddenMarkovModel(
+                initial_distribution=tfp_jax.distributions.Categorical(
+                    self["initial"]
+                ),
+                transition_distribution=tfp_jax.distributions.Categorical(
+                    self["transition"]
+                ),
                 observation_distribution=self["observation"],
                 num_steps=self["steps"],
             )

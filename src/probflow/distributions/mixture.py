@@ -53,7 +53,9 @@ class Mixture(BaseDistribution):
             elif get_backend() == ProbflowBackend.JAX:
                 from tensorflow_probability.substrates import jax as tfp_jax
 
-                if not isinstance(distributions, tfp_jax.distributions.Distribution):
+                if not isinstance(
+                    distributions, tfp_jax.distributions.Distribution
+                ):
                     raise TypeError(
                         "requires either a ProbFlow or JAX (tfp) distribution"
                     )
@@ -100,8 +102,6 @@ class Mixture(BaseDistribution):
             import jax.numpy as jnp
             from tensorflow_probability.substrates import jax as tfp_jax
 
-            tfd = tfp_jax.distributions
-
             # Convert to jax distributions if probflow distributions
             if isinstance(self.distributions, BaseDistribution):
                 self.distributions = self.distributions()
@@ -115,8 +115,8 @@ class Mixture(BaseDistribution):
                 args["probs"] = jnp.broadcast_to(self["probs"], shape)
 
             # Return TFP (JAX substrate) distribution object
-            return tfd.MixtureSameFamily(
-                tfd.Categorical(**args), self.distributions
+            return tfp_jax.distributions.MixtureSameFamily(
+                tfp_jax.distributions.Categorical(**args), self.distributions
             )
         else:
             import tensorflow as tf

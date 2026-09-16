@@ -31,15 +31,18 @@ class JaxVariable:
 
     @property
     def shape(self) -> Any:
+        """Get the shape of the variable."""
         return self.value.shape
 
     @property
     def dtype(self) -> Any:
+        """Get the data type of the variable."""
         return self.value.dtype
 
     @property
     def ndim(self) -> int:
-        return self.value.ndim
+        """Get the number of dimensions of the variable."""
+        return int(self.value.ndim)
 
     def __repr__(self) -> str:
         return f"JaxVariable({self.value!r})"

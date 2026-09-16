@@ -34,9 +34,12 @@ def xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
 
         from probflow.utils.settings import _next_jax_key
 
-        return jax.random.truncated_normal(
-            _next_jax_key(), -2.0, 2.0, shape, dtype=get_datatype()
-        ) * scale
+        return (
+            jax.random.truncated_normal(
+                _next_jax_key(), -2.0, 2.0, shape, dtype=get_datatype()
+            )
+            * scale
+        )
     else:
         import tensorflow as tf
 

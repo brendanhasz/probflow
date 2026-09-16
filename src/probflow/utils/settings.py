@@ -68,7 +68,7 @@ import importlib.util
 import uuid
 import warnings
 from enum import Enum
-from typing import Any
+from typing import Any, Self
 
 __all__ = [
     "ProbflowBackend",
@@ -368,11 +368,11 @@ class jax_key_scope:
     def __init__(self, key: Any) -> None:
         self._box = _JaxKeyBox(key)
 
-    def __enter__(self) -> "jax_key_scope":
+    def __enter__(self) -> Self:
         _JAX_KEY_SCOPE_STACK.append(self._box)
         return self
 
-    def __exit__(self, *exc_info: Any) -> None:
+    def __exit__(self, *exc_info: object) -> None:
         _JAX_KEY_SCOPE_STACK.pop()
 
 

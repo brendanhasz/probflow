@@ -217,9 +217,7 @@ def randn(shape: int | Sequence[int]) -> BackendTensor:
 
         if isinstance(shape, int):
             shape = (shape,)
-        return jax.random.normal(
-            _next_jax_key(), shape, dtype=get_datatype()
-        )
+        return jax.random.normal(_next_jax_key(), shape, dtype=get_datatype())
     else:
         import tensorflow as tf
 
@@ -662,7 +660,7 @@ def reshape(x: BackendTensor, new_shape: Sequence[int]) -> BackendTensor:
 def copy_tensor(x: BackendTensor) -> BackendTensor:
     """Copy a tensor, detaching it from the gradient/backend/etc/etc."""
     if get_backend() == ProbflowBackend.PYTORCH:
-        return x.detach().clone()
+        return x.detach().clone()  # type: ignore
     elif get_backend() == ProbflowBackend.JAX:
         import jax
         import jax.numpy as jnp
