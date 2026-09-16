@@ -1,5 +1,6 @@
 """Abstract base class for probflow models."""
 
+import warnings
 from collections.abc import Callable
 from typing import Any
 
@@ -48,10 +49,13 @@ class Model(BaseModel, Module):
     and adds model-specific methods:
 
     * :meth:`~log_likelihood`
+    * :meth:`~elbo_loss`
+    * :meth:`~get_elbo`
     * :meth:`~train_step`
     * :meth:`~fit`
     * :meth:`~stop_training`
     * :meth:`~set_learning_rate`
+    * :meth:`~set_kl_weight`
     * :meth:`~predictive_sample`
     * :meth:`~aleatoric_sample`
     * :meth:`~epistemic_sample`
@@ -64,10 +68,7 @@ class Model(BaseModel, Module):
     * :meth:`~posterior_plot`
     * :meth:`~prior_plot`
     * :meth:`~log_prob`
-    * :meth:`~log_prob_by`
     * :meth:`~prob`
-    * :meth:`~prob_by`
-    * :meth:`~save`
     * :meth:`~summary`
 
     Users implementing child classes should implement the following methods:
@@ -255,6 +256,10 @@ class Model(BaseModel, Module):
         # Use eager if input type is dataframe or series
         eager_types = (pd.DataFrame, pd.Series)
         if any(isinstance(e, eager_types) for e in self._data.get_batch(0)):
+            if eager is False:
+                warnings.warn(
+                    "Eager execution is being enabled because the input data is a pandas DataFrame or Series."
+                )
             eager = True
 
         # Create a function to perform one training step

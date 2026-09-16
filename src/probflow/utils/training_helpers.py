@@ -1,16 +1,20 @@
 """Helper functions for backend-specific tasks during training."""
-from typing import Any
-
-from probflow.utils.typing import BackendVariable
-from probflow.utils.settings import ProbflowBackend, Sampling, get_backend
 
 from typing import TYPE_CHECKING, Any
+
+from probflow.utils.settings import ProbflowBackend, Sampling, get_backend
+from probflow.utils.typing import BackendVariable
 
 if TYPE_CHECKING:
     from probflow.models.model import Model
 
+
 def _train_step_tensorflow(
-    model: "Model", n: int, flipout: bool = False, eager: bool = False, n_mc: int = 1
+    model: "Model",
+    n: int,
+    flipout: bool = False,
+    eager: bool = False,
+    n_mc: int = 1,
 ) -> Any:
     """Get the training step function for TensorFlow."""
     import tensorflow as tf
@@ -32,7 +36,11 @@ def _train_step_tensorflow(
 
 
 def _train_step_pytorch(
-    model: "Model", n: int, flipout: bool = False, eager: bool = False, n_mc: int = 1
+    model: "Model",
+    n: int,
+    flipout: bool = False,
+    eager: bool = False,
+    n_mc: int = 1,
 ) -> Any:
     """Get the training step function for PyTorch."""
     import torch
@@ -57,10 +65,10 @@ def _train_step_pytorch(
 
         class PyTorchModule(torch.nn.Module):
             def __init__(self, model: "Model"):
-                super(PyTorchModule, self).__init__()
+                super().__init__()
                 for i, p in enumerate(model.trainable_variables):
                     setattr(self, str(i), p)
-                self._probflow_model: "Model" = model
+                self._probflow_model: Model = model
 
             def elbo_loss(self, *args) -> Any:
                 self._probflow_model.reset_kl_loss()
@@ -79,8 +87,10 @@ def _train_step_pytorch(
             """Cache traces for inputs of different sizes."""
 
             def __init__(self, model: "Model"):
-                self.fns: dict[str, Any] = {}  # map from input shapes to traced function
-                self.model: "Model" = model
+                self.fns: dict[
+                    str, Any
+                ] = {}  # map from input shapes to traced function
+                self.model: Model = model
 
             def get_traced_module(self, *args) -> Any:
                 shape = "_".join(str(e.shape) for e in args)
@@ -118,7 +128,11 @@ def _train_step_pytorch(
 
 
 def get_training_step_function(
-    model: "Model", n: int, flipout: bool = False, eager: bool = False, n_mc: int = 1
+    model: "Model",
+    n: int,
+    flipout: bool = False,
+    eager: bool = False,
+    n_mc: int = 1,
 ):
     """Get the appropriate training step function for the current backend."""
     if get_backend() == ProbflowBackend.PYTORCH:
@@ -131,8 +145,11 @@ def get_training_step_function(
         )
 
 
-
-def get_default_optimizer(trainable_variables: list[BackendVariable], learning_rate: float, **optimizer_kwargs):
+def get_default_optimizer(
+    trainable_variables: list[BackendVariable],
+    learning_rate: float,
+    **optimizer_kwargs,
+):
     """Return the default optimizer for the current backend."""
     backend: ProbflowBackend = get_backend()
     if backend == ProbflowBackend.PYTORCH:
