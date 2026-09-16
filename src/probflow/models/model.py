@@ -16,6 +16,10 @@ from probflow.utils.casting import to_numpy
 from probflow.utils.metrics import get_metric_fn
 from probflow.utils.settings import ProbflowBackend, Sampling, get_backend
 from probflow.utils.shape import get_shape
+from probflow.utils.training_helpers import (
+    get_default_optimizer,
+    get_training_step_function,
+)
 from probflow.utils.typing import ScalarLike, TensorLike
 
 
@@ -133,112 +137,6 @@ class Model(BaseModel, Module):
         """Get the current ELBO on training data."""
         return self._current_elbo
 
-    def _train_step_tensorflow(
-        self, n: int, flipout: bool = False, eager: bool = False, n_mc: int = 1
-    ) -> Any:
-        """Get the training step function for TensorFlow."""
-        import tensorflow as tf
-
-        def train_fn(x_data, y_data):
-            self.reset_kl_loss()
-            with Sampling(n=n_mc, flipout=flipout):
-                with tf.GradientTape() as tape:
-                    elbo_loss = self.elbo_loss(x_data, y_data, n, n_mc)
-                variables = self.trainable_variables
-                gradients = tape.gradient(elbo_loss, variables)
-                self._optimizer.apply_gradients(zip(gradients, variables))
-            return elbo_loss
-
-        if eager:
-            return train_fn
-        else:
-            return tf.function(train_fn)
-
-    def _train_step_pytorch(
-        self, n: int, flipout: bool = False, eager: bool = False, n_mc: int = 1
-    ) -> Any:
-        """Get the training step function for PyTorch."""
-        import torch
-
-        if eager:
-
-            def train_fn(x_data, y_data):
-                self.reset_kl_loss()
-                with Sampling(n=n_mc, flipout=flipout):
-                    self._optimizer.zero_grad()
-                    elbo_loss = self.elbo_loss(x_data, y_data, n, n_mc)
-                    elbo_loss.backward()
-                    self._optimizer.step()
-                return elbo_loss
-
-            return train_fn
-
-        # Use PyTorch tracing, for which we have to build a module :roll_eyes:
-        # and also a caching class for inputs of different sizes, b/c
-        # last batch might have different number of datapoints :vomiting_face:
-        else:
-
-            class PyTorchModule(torch.nn.Module):
-                def __init__(self, model: "Model"):
-                    super(PyTorchModule, self).__init__()
-                    for i, p in enumerate(model.trainable_variables):
-                        setattr(self, str(i), p)
-                    self._probflow_model = model
-
-                def elbo_loss(self, *args) -> Any:
-                    self._probflow_model.reset_kl_loss()
-                    with Sampling(n=n_mc, flipout=flipout):
-                        if len(args) == 1:
-                            elbo_loss = self._probflow_model.elbo_loss(
-                                None, args[0], n, n_mc
-                            )
-                        else:
-                            elbo_loss = self._probflow_model.elbo_loss(
-                                args[0], args[1], n, n_mc
-                            )
-                    return elbo_loss
-
-            class TraceCacher:
-                """Cache traces for inputs of different sizes."""
-
-                def __init__(self, model):
-                    self.fns = {}  # map from input shapes to traced function
-                    self.model = model
-
-                def get_traced_module(self, *args) -> Any:
-                    shape = "_".join(str(e.shape) for e in args)
-                    if shape in self.fns:
-                        return self.fns[shape]
-                    else:
-                        m = PyTorchModule(self.model)
-                        inputs = {"elbo_loss": args}
-                        self.fns[shape] = torch.jit.trace_module(
-                            m, inputs, check_trace=False
-                        )
-                        return self.fns[shape]
-
-                def __call__(self, *args) -> Any:
-                    self.model._optimizer.zero_grad()
-                    traced_module = self.get_traced_module(*args)
-                    elbo_loss = traced_module.elbo_loss(*args)
-                    elbo_loss.backward()
-                    self.model._optimizer.step()
-                    return elbo_loss
-
-            pytorch_trainer = TraceCacher(self)
-
-            def train_fn(x_data, y_data):
-                if x_data is None:
-                    elbo_loss = pytorch_trainer(torch.tensor(y_data))
-                else:
-                    elbo_loss = pytorch_trainer(
-                        torch.tensor(x_data),
-                        torch.tensor(y_data),
-                    )
-                return elbo_loss
-
-            return train_fn
-
     def train_step(self, x_data: TensorLike, y_data: TensorLike) -> None:
         """Perform one training step."""
         elbo = self._train_fn(x_data, y_data)
@@ -285,12 +183,12 @@ class Model(BaseModel, Module):
         shuffle : bool
             Whether to shuffle the data each epoch.  Note that this is ignored
             if ``x`` is a |DataGenerator|
-            Default = ``True``
+            Default = ``False``
         optimizer : |None| or a backend-specific optimizer
             What optimizer to use for optimizing the variational posterior
-            distributions' variables.  When the backend is |TensorFlow| the
-            default is to use adam (``tf.keras.optimizers.Adam``).  When the
-            backend is |PyTorch| the default is to use TODO
+            distributions' variables.  The default optimizer is Adam (when the
+            backend is |TensorFlow| we use ``tf.keras.optimizers.Adam`` and when
+            the backend is |PyTorch| the default is to use ``torch.optim.Adam`` ).
         optimizer_kwargs : dict
             Keyword arguments to pass to the optimizer.
             Default is an empty dict.
@@ -348,22 +246,11 @@ class Model(BaseModel, Module):
 
         # Use default optimizer if none specified
         if optimizer is None and self._optimizer is None:
-            if get_backend() == ProbflowBackend.PYTORCH:
-                import torch
-
-                self._optimizer = torch.optim.Adam(
-                    self.trainable_variables,
-                    lr=self._learning_rate,
-                    **optimizer_kwargs,
-                )
-            else:
-                import tensorflow as tf
-
-                # Pass a plain float (not a closure over self) so the
-                # optimizer stays picklable/serializable after fitting
-                self._optimizer = tf.keras.optimizers.Adam(
-                    learning_rate=self._learning_rate, **optimizer_kwargs
-                )
+            self._optimizer = get_default_optimizer(
+                self.trainable_variables,
+                self._learning_rate,
+                **optimizer_kwargs,
+            )
 
         # Use eager if input type is dataframe or series
         eager_types = (pd.DataFrame, pd.Series)
@@ -371,14 +258,13 @@ class Model(BaseModel, Module):
             eager = True
 
         # Create a function to perform one training step
-        if get_backend() == ProbflowBackend.PYTORCH:
-            self._train_fn = self._train_step_pytorch(
-                self._data.n_samples, flipout, eager=eager, n_mc=n_mc
-            )
-        else:
-            self._train_fn = self._train_step_tensorflow(
-                self._data.n_samples, flipout, eager=eager, n_mc=n_mc
-            )
+        self._train_fn = get_training_step_function(
+            model=self,
+            n=self._data.n_samples,
+            flipout=flipout,
+            eager=eager,
+            n_mc=n_mc,
+        )
 
         # Assign model param to callbacks
         for c in callbacks:

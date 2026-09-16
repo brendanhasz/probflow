@@ -262,6 +262,8 @@ class BaseModule(ABC):
 class BaseModel(ABC):
     """Abstract base class for ProbFlow Models."""
 
+    _optimizer: Any
+
     @abstractmethod
     def __init__(self, *args):
         """Initialize the model (abstract method)."""
