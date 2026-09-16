@@ -64,6 +64,12 @@ class Bernoulli(BaseDistribution):
             return tod.bernoulli.Bernoulli(
                 logits=self["logits"], probs=self["probs"]
             )
+        elif get_backend() == ProbflowBackend.JAX:
+            from tensorflow_probability.substrates import jax as tfp_jax
+
+            return tfp_jax.distributions.Bernoulli(
+                logits=self["logits"], probs=self["probs"]
+            )
         else:
             from tensorflow_probability import distributions as tfd
 

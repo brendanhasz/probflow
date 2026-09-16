@@ -38,6 +38,13 @@ def ensure_tensor_like(obj: Any, name: str) -> None:
 
         if not isinstance(obj, (torch.Tensor, BaseParameter)):
             raise TypeError(name + " must be Tensor-like")
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax
+
+        from probflow.utils.jax_variable import JaxVariable
+
+        if not isinstance(obj, (jax.Array, JaxVariable, BaseParameter)):
+            raise TypeError(name + " must be Tensor-like")
     else:
         import tensorflow as tf
 
@@ -51,6 +58,12 @@ def is_backend_tensor(obj: Any) -> bool:
         import torch
 
         return isinstance(obj, (torch.Tensor, torch.nn.Parameter))
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax
+
+        from probflow.utils.jax_variable import JaxVariable
+
+        return isinstance(obj, (jax.Array, JaxVariable))
     else:
         import tensorflow as tf
 
@@ -63,6 +76,10 @@ def is_backend_variable(obj: Any) -> bool:
         import torch
 
         return isinstance(obj, torch.nn.Parameter)
+    elif get_backend() == ProbflowBackend.JAX:
+        from probflow.utils.jax_variable import JaxVariable
+
+        return isinstance(obj, JaxVariable)
     else:
         import tensorflow as tf
 
@@ -76,6 +93,10 @@ def is_backend_distribution(obj: Any) -> bool:
         from torch.distributions import Distribution as TorchDistribution
 
         return isinstance(obj, TorchDistribution)
+    elif get_backend() == ProbflowBackend.JAX:
+        from tensorflow_probability.substrates import jax as tfp_jax
+
+        return isinstance(obj, tfp_jax.distributions.Distribution)
     else:
         import tensorflow_probability as tfp
 

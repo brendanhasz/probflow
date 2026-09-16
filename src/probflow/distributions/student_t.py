@@ -79,6 +79,12 @@ class StudentT(BaseDistribution):
             return tod.studentT.StudentT(
                 self["df"], self["loc"], self["scale"]
             )
+        elif get_backend() == ProbflowBackend.JAX:
+            from tensorflow_probability.substrates import jax as tfp_jax
+
+            return tfp_jax.distributions.StudentT(
+                self["df"], self["loc"], self["scale"]
+            )
         else:
             from tensorflow_probability import distributions as tfd
 

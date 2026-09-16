@@ -52,6 +52,10 @@ class Deterministic(BaseDistribution):
         if get_backend() == ProbflowBackend.PYTORCH:
             TorchDeterministic = get_TorchDeterministic()
             return TorchDeterministic(self["loc"])
+        elif get_backend() == ProbflowBackend.JAX:
+            from tensorflow_probability.substrates import jax as tfp_jax
+
+            return tfp_jax.distributions.Deterministic(self["loc"])
         else:
             from tensorflow_probability import distributions as tfd
 

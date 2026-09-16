@@ -50,6 +50,14 @@ def to_numpy(x: TensorLike) -> np.ndarray:
             return x.detach().clone().numpy()
         else:
             return np.array(x)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax
+
+        from probflow.utils.jax_variable import JaxVariable
+
+        if isinstance(x, JaxVariable):
+            x = x.value
+        return jax.device_get(x)
     else:
         return np.array(x)
 
@@ -70,6 +78,10 @@ def to_tensor(x: TensorLike) -> BackendTensor:
             return x
         else:
             return torch.tensor(x)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.asarray(x)
     else:
         return x  # TensorFlow auto-converts numpy arrays to tensors
 
@@ -83,6 +95,10 @@ def to_default_dtype(x: TensorLike) -> BackendTensor:
             return x.to(get_datatype())
         else:
             return torch.tensor(x).to(get_datatype())
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.asarray(x, dtype=get_datatype())
     else:
         import tensorflow as tf
 

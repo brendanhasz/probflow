@@ -2,7 +2,7 @@
 .PHONY: install test-unit test-stats test format docs bump-minor bump-patch clean
 
 BACKEND ?= tensorflow
-AVAILABLE_BACKENDS := tensorflow pytorch
+AVAILABLE_BACKENDS := tensorflow pytorch jax
 
 # Install probflow package and requirements
 install:

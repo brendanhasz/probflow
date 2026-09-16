@@ -110,6 +110,10 @@ def kl_divergence(
         import torch
 
         return torch.distributions.kl.kl_divergence(P, Q)
+    elif get_backend() == ProbflowBackend.JAX:
+        from tensorflow_probability.substrates import jax as tfp_jax
+
+        return tfp_jax.distributions.kl_divergence(P, Q)
     else:
         import tensorflow_probability as tfp
 
@@ -125,6 +129,10 @@ def expand_dims(val: BackendTensor, axis: int | None) -> BackendTensor:
         import torch
 
         return torch.unsqueeze(val, axis)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.expand_dims(val, axis)
     else:
         import tensorflow as tf
 
@@ -138,6 +146,10 @@ def squeeze(val: BackendTensor) -> BackendTensor:
         import torch
 
         return torch.squeeze(val)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.squeeze(val)
     else:
         import tensorflow as tf
 
@@ -150,6 +162,10 @@ def ones(shape: int | Sequence[int]) -> BackendTensor:
         import torch
 
         return torch.ones(shape, dtype=get_datatype())
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.ones(shape, dtype=get_datatype())
     else:
         import tensorflow as tf
 
@@ -162,6 +178,10 @@ def zeros(shape: int | Sequence[int]) -> BackendTensor:
         import torch
 
         return torch.zeros(shape, dtype=get_datatype())
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.zeros(shape, dtype=get_datatype())
     else:
         import tensorflow as tf
 
@@ -174,6 +194,10 @@ def full(shape: int | Sequence[int], value: float) -> BackendTensor:
         import torch
 
         return torch.full(shape, value, dtype=get_datatype())
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.full(shape, value, dtype=get_datatype())
     else:
         import tensorflow as tf
 
@@ -186,6 +210,16 @@ def randn(shape: int | Sequence[int]) -> BackendTensor:
         import torch
 
         return torch.randn(shape, dtype=get_datatype())
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax
+
+        from probflow.utils.settings import _next_jax_key
+
+        if isinstance(shape, int):
+            shape = (shape,)
+        return jax.random.normal(
+            _next_jax_key(), shape, dtype=get_datatype()
+        )
     else:
         import tensorflow as tf
 
@@ -198,6 +232,14 @@ def rand_rademacher(shape: int | Sequence[int]) -> BackendTensor:
         import torch
 
         return 2 * torch.randint(0, 2, shape, dtype=get_datatype()) - 1
+    elif get_backend() == ProbflowBackend.JAX:
+        from tensorflow_probability.substrates import jax as tfp_jax
+
+        from probflow.utils.settings import _next_jax_key
+
+        if isinstance(shape, int):
+            shape = (shape,)
+        return tfp_jax.random.rademacher(shape, seed=_next_jax_key())
     else:
         import tensorflow_probability as tfp
 
@@ -221,6 +263,10 @@ def eye(dims: int) -> BackendTensor:
         import torch
 
         return torch.eye(dims, dtype=get_datatype())
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.eye(dims, dtype=get_datatype())
     else:
         import tensorflow as tf
 
@@ -238,6 +284,10 @@ def sum(
             return torch.sum(val)
         else:
             return torch.sum(val, axis, keepdim=keepdims)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.sum(val, axis=axis, keepdims=keepdims)
     else:
         import tensorflow as tf
 
@@ -252,6 +302,10 @@ def prod(
         import torch
 
         return torch.prod(val, dim=axis, keepdim=keepdims)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.prod(val, axis=axis, keepdims=keepdims)
     else:
         import tensorflow as tf
 
@@ -266,6 +320,10 @@ def mean(
         import torch
 
         return torch.mean(val, dim=axis, keepdim=keepdims)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.mean(val, axis=axis, keepdims=keepdims)
     else:
         import tensorflow as tf
 
@@ -280,6 +338,10 @@ def std(
         import torch
 
         return torch.std(val, dim=axis, keepdim=keepdims)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.std(val, axis=axis, keepdims=keepdims)
     else:
         import tensorflow as tf
 
@@ -292,6 +354,10 @@ def round(val: BackendTensor) -> BackendTensor:
         import torch
 
         return torch.round(val)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.round(val)
     else:
         import tensorflow as tf
 
@@ -304,6 +370,10 @@ def abs(val: BackendTensor) -> BackendTensor:
         import torch
 
         return torch.abs(val)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.abs(val)
     else:
         import tensorflow as tf
 
@@ -314,6 +384,10 @@ def square(val: BackendTensor) -> BackendTensor:
     """Square a tensor."""
     if get_backend() == ProbflowBackend.PYTORCH:
         return val**2
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.square(val)
     else:
         import tensorflow as tf
 
@@ -326,6 +400,10 @@ def sqrt(val: BackendTensor) -> BackendTensor:
         import torch
 
         return torch.sqrt(val)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.sqrt(val)
     else:
         import tensorflow as tf
 
@@ -338,6 +416,10 @@ def exp(val: BackendTensor) -> BackendTensor:
         import torch
 
         return torch.exp(val)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.exp(jnp.asarray(val))
     else:
         import tensorflow as tf
 
@@ -350,6 +432,11 @@ def relu(val: BackendTensor) -> BackendTensor:
         import torch
 
         return torch.nn.ReLU()(val)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.nn
+        import jax.numpy as jnp
+
+        return jax.nn.relu(jnp.asarray(val))
     else:
         import tensorflow as tf
 
@@ -362,6 +449,11 @@ def softplus(val: BackendTensor) -> BackendTensor:
         import torch
 
         return torch.nn.Softplus()(val)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.nn
+        import jax.numpy as jnp
+
+        return jax.nn.softplus(jnp.asarray(val))
     else:
         import tensorflow as tf
 
@@ -374,6 +466,11 @@ def sigmoid(val: BackendTensor) -> BackendTensor:
         import torch
 
         return torch.nn.Sigmoid()(val)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.nn
+        import jax.numpy as jnp
+
+        return jax.nn.sigmoid(jnp.asarray(val))
     else:
         import tensorflow as tf
 
@@ -388,6 +485,10 @@ def gather(
         import torch
 
         return torch.index_select(vals, axis, to_tensor(inds))
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.take(vals, to_tensor(inds), axis=axis)
     else:
         import tensorflow as tf
 
@@ -400,6 +501,10 @@ def cat(vals: Sequence[BackendTensor], axis: int = 0) -> BackendTensor:
         import torch
 
         return torch.cat(vals, dim=axis)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.concatenate(vals, axis=axis)
     else:
         import tensorflow as tf
 
@@ -417,6 +522,16 @@ def additive_logistic_transform(vals: BackendTensor) -> BackendTensor:
             dim=-1,
         )
         return exp_vals / torch.sum(exp_vals, dim=-1, keepdim=True)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        vals = jnp.asarray(vals)
+        ones_shape = [s for s in vals.shape[:-1]] + [1]
+        exp_vals = jnp.concatenate(
+            [jnp.exp(vals), jnp.ones(ones_shape, dtype=get_datatype())],
+            axis=-1,
+        )
+        return exp_vals / jnp.sum(exp_vals, axis=-1, keepdims=True)
     else:
         import tensorflow as tf
 
@@ -437,6 +552,13 @@ def insert_col_of(vals: BackendTensor, val: ScalarLike) -> BackendTensor:
         return torch.cat(
             [val * torch.ones(shape, dtype=get_datatype()), vals], dim=-1
         )
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        shape = [s for s in vals.shape[:-1]] + [1]
+        return jnp.concatenate(
+            [val * jnp.ones(shape, dtype=get_datatype()), vals], axis=-1
+        )
     else:
         import tensorflow as tf
 
@@ -452,6 +574,10 @@ def new_variable(initial_values: TensorLike) -> BackendVariable:
         import torch
 
         return torch.nn.Parameter(initial_values)
+    elif get_backend() == ProbflowBackend.JAX:
+        from probflow.utils.jax_variable import JaxVariable
+
+        return JaxVariable(initial_values)
     else:
         import tensorflow as tf
 
@@ -482,6 +608,13 @@ def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
         E[..., tril_ix[0], tril_ix[1]] = x
         E[..., range(N), range(N)] = torch.exp(torch.diagonal(E))
         return E @ torch.transpose(E, -1, -2)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+        from tensorflow_probability.substrates import jax as tfp_jax
+
+        E = tfp_jax.math.fill_triangular(x)
+        E = E - jnp.diag(jnp.diagonal(E)) + jnp.diag(jnp.exp(jnp.diagonal(E)))
+        return E @ jnp.swapaxes(E, -1, -2)
     else:
         import tensorflow as tf
         import tensorflow_probability as tfp
@@ -497,6 +630,10 @@ def transpose(x: BackendTensor) -> BackendTensor:
         import torch
 
         return torch.transpose(x, -1, -2)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.swapaxes(x, -1, -2)
     else:
         import tensorflow as tf
 
@@ -512,6 +649,10 @@ def reshape(x: BackendTensor, new_shape: Sequence[int]) -> BackendTensor:
         import torch
 
         return torch.reshape(x, tuple(new_shape))
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.reshape(x, tuple(new_shape))
     else:
         import tensorflow as tf
 
@@ -522,6 +663,11 @@ def copy_tensor(x: BackendTensor) -> BackendTensor:
     """Copy a tensor, detaching it from the gradient/backend/etc/etc."""
     if get_backend() == ProbflowBackend.PYTORCH:
         return x.detach().clone()
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax
+        import jax.numpy as jnp
+
+        return jnp.array(jax.lax.stop_gradient(jnp.asarray(x)))
     else:
         import tensorflow as tf
 

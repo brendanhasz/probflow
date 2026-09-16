@@ -61,6 +61,10 @@ class Normal(BaseDistribution):
             import torch.distributions as tod
 
             return tod.normal.Normal(self["loc"], self["scale"])
+        elif get_backend() == ProbflowBackend.JAX:
+            from tensorflow_probability.substrates import jax as tfp_jax
+
+            return tfp_jax.distributions.Normal(self["loc"], self["scale"])
         else:
             from tensorflow_probability import distributions as tfd
 

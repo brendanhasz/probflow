@@ -71,6 +71,14 @@ class MultivariateNormal(BaseDistribution):
             return tod.multivariate_normal.MultivariateNormal(
                 self["loc"], covariance_matrix=self["cov"]
             )
+        elif get_backend() == ProbflowBackend.JAX:
+            import jax.numpy as jnp
+            from tensorflow_probability.substrates import jax as tfp_jax
+
+            tril = jnp.linalg.cholesky(self["cov"])
+            return tfp_jax.distributions.MultivariateNormalTriL(
+                loc=self["loc"], scale_tril=tril
+            )
         else:
             import tensorflow as tf
             from tensorflow_probability import distributions as tfd

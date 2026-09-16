@@ -6,9 +6,13 @@ import numpy as np
 import pandas as pd
 
 if TYPE_CHECKING:
+    import jax
     import tensorflow as tf
     import tensorflow_probability as tfp
     import torch
+    from tensorflow_probability.substrates import jax as tfp_jax
+
+    from probflow.utils.jax_variable import JaxVariable
 
     TensorLike: TypeAlias = (
         int
@@ -21,16 +25,27 @@ if TYPE_CHECKING:
         | tf.Tensor
         | tf.Variable
         | torch.Tensor
+        | jax.Array
+        | JaxVariable
     )
     ScalarLike: TypeAlias = (
-        int | float | np.ndarray | tf.Tensor | tf.Variable | torch.Tensor
+        int
+        | float
+        | np.ndarray
+        | tf.Tensor
+        | tf.Variable
+        | torch.Tensor
+        | jax.Array
     )
-    BackendTensor: TypeAlias = tf.Tensor | tf.Variable | torch.Tensor
-    BackendVariable: TypeAlias = tf.Variable | torch.nn.Parameter
-    BackendDataType: TypeAlias = tf.dtype | torch.dtype
+    BackendTensor: TypeAlias = (
+        tf.Tensor | tf.Variable | torch.Tensor | jax.Array | JaxVariable
+    )
+    BackendVariable: TypeAlias = tf.Variable | torch.nn.Parameter | JaxVariable
+    BackendDataType: TypeAlias = tf.dtype | torch.dtype | np.dtype
     BackendDistribution: TypeAlias = (
         torch.distributions.distribution.Distribution
         | tfp.distributions.Distribution
+        | tfp_jax.distributions.Distribution
     )
 
 else:

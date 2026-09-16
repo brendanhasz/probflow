@@ -76,6 +76,12 @@ class InverseGamma(BaseDistribution):
             return torch.distributions.inverse_gamma.InverseGamma(
                 concentration=self["concentration"], rate=self["scale"]
             )
+        elif get_backend() == ProbflowBackend.JAX:
+            from tensorflow_probability.substrates import jax as tfp_jax
+
+            return tfp_jax.distributions.InverseGamma(
+                self["concentration"], self["scale"]
+            )
         else:
             from tensorflow_probability import distributions as tfd
 

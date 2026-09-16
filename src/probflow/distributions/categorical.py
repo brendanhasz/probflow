@@ -69,6 +69,12 @@ class Categorical(BaseDistribution):
             return tod.categorical.Categorical(
                 logits=self["logits"], probs=self["probs"]
             )
+        elif get_backend() == ProbflowBackend.JAX:
+            from tensorflow_probability.substrates import jax as tfp_jax
+
+            return tfp_jax.distributions.Categorical(
+                logits=self["logits"], probs=self["probs"]
+            )
         else:
             from tensorflow_probability import distributions as tfd
 

@@ -52,6 +52,10 @@ class Poisson(BaseDistribution):
             import torch.distributions as tod
 
             return tod.poisson.Poisson(self["rate"])
+        elif get_backend() == ProbflowBackend.JAX:
+            from tensorflow_probability.substrates import jax as tfp_jax
+
+            return tfp_jax.distributions.Poisson(self["rate"])
         else:
             from tensorflow_probability import distributions as tfd
 

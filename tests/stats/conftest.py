@@ -7,7 +7,7 @@ def pytest_addoption(parser):
         "--backend",
         action="store",
         default="tensorflow",
-        help="run tests for a specific backend (tensorflow or pytorch)",
+        help="run tests for a specific backend (tensorflow, pytorch, or jax)",
     )
 
 
@@ -19,7 +19,7 @@ def set_backend(request):
 
     if backend not in [b.value for b in pf.ProbflowBackend]:
         raise ValueError(
-            "Invalid backend specified. Must be 'tensorflow' or 'pytorch'."
+            "Invalid backend specified. Must be 'tensorflow', 'pytorch', or 'jax'."
         )
 
     pf.set_backend(pf.ProbflowBackend(backend))

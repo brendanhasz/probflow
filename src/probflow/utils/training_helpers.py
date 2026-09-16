@@ -9,6 +9,50 @@ if TYPE_CHECKING:
     from probflow.models.model import Model
 
 
+class JaxAdam:
+    """A minimal Adam optimizer operating on a list of JaxVariables."""
+
+    def __init__(
+        self,
+        trainable_variables: list[Any],
+        learning_rate: float,
+        beta_1: float = 0.9,
+        beta_2: float = 0.999,
+        epsilon: float = 1e-7,
+    ) -> None:
+        import jax.numpy as jnp
+
+        self.variables = list(trainable_variables)
+        self.learning_rate = learning_rate
+        self.beta_1 = beta_1
+        self.beta_2 = beta_2
+        self.epsilon = epsilon
+        self._t = 0
+        self._m = [jnp.zeros_like(v.value) for v in self.variables]
+        self._v = [jnp.zeros_like(v.value) for v in self.variables]
+
+    def zero_grad(self) -> None:
+        """No-op: JAX has no persistent gradient state to clear."""
+
+    def step(self, grads: list[Any]) -> None:
+        """Update each variable in place given a matching list of gradients."""
+        import jax.numpy as jnp
+
+        self._t += 1
+        bias_correction_1 = 1 - self.beta_1**self._t
+        bias_correction_2 = 1 - self.beta_2**self._t
+        for i, (var, grad) in enumerate(zip(self.variables, grads)):
+            self._m[i] = self.beta_1 * self._m[i] + (1 - self.beta_1) * grad
+            self._v[i] = self.beta_2 * self._v[i] + (1 - self.beta_2) * (
+                grad**2
+            )
+            m_hat = self._m[i] / bias_correction_1
+            v_hat = self._v[i] / bias_correction_2
+            var.value = var.value - self.learning_rate * m_hat / (
+                jnp.sqrt(v_hat) + self.epsilon
+            )
+
+
 def _train_step_tensorflow(
     model: "Model",
     n: int,
@@ -127,6 +171,45 @@ def _train_step_pytorch(
         return train_fn
 
 
+def _train_step_jax(
+    model: "Model",
+    n: int,
+    flipout: bool = False,
+    eager: bool = False,
+    n_mc: int = 1,
+) -> Any:
+    """Get the training step function for JAX."""
+    import jax
+
+    from probflow.utils.settings import _next_jax_key, jax_key_scope
+
+    variables = model.trainable_variables
+
+    def loss_fn(values: list[Any], key: Any, x_data: Any, y_data: Any) -> Any:
+        for var, val in zip(variables, values):
+            var.value = val
+        model.reset_kl_loss()
+        with jax_key_scope(key), Sampling(n=n_mc, flipout=flipout):
+            return model.elbo_loss(x_data, y_data, n, n_mc)
+
+    grad_fn = jax.value_and_grad(loss_fn)
+    if not eager:
+        grad_fn = jax.jit(grad_fn)
+
+    def train_fn(x_data: Any, y_data: Any) -> Any:
+        values = [v.value for v in variables]
+        key = _next_jax_key()
+        loss, grads = grad_fn(values, key, x_data, y_data)
+        # Restore concrete values (loss_fn's mutation left stale trace-time
+        # tracers on the variables, which must not escape the transformation)
+        for var, val in zip(variables, values):
+            var.value = val
+        model._optimizer.step(grads)
+        return loss
+
+    return train_fn
+
+
 def get_training_step_function(
     model: "Model",
     n: int,
@@ -137,6 +220,10 @@ def get_training_step_function(
     """Get the appropriate training step function for the current backend."""
     if get_backend() == ProbflowBackend.PYTORCH:
         return _train_step_pytorch(
+            model=model, n=n, flipout=flipout, eager=eager, n_mc=n_mc
+        )
+    elif get_backend() == ProbflowBackend.JAX:
+        return _train_step_jax(
             model=model, n=n, flipout=flipout, eager=eager, n_mc=n_mc
         )
     else:
@@ -165,6 +252,12 @@ def get_default_optimizer(
 
         return tf.keras.optimizers.Adam(
             learning_rate=learning_rate, **optimizer_kwargs
+        )
+    elif backend == ProbflowBackend.JAX:
+        return JaxAdam(
+            trainable_variables,
+            learning_rate,
+            **optimizer_kwargs,
         )
     else:
         raise ValueError(f"Unsupported backend: {backend}")
