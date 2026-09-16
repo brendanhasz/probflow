@@ -1,5 +1,5 @@
-import numpy as np
 import jax.numpy as jnp
+import numpy as np
 from tensorflow_probability.substrates import jax as tfp_jax
 
 import probflow as pf

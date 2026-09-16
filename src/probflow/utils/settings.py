@@ -65,10 +65,16 @@ variational distributions while inside the context manager.
 """
 
 import importlib.util
+import sys
 import uuid
 import warnings
 from enum import Enum
-from typing import Any, Self
+from typing import Any
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 __all__ = [
     "ProbflowBackend",
