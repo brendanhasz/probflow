@@ -27,6 +27,19 @@ test:
 format:
 	uv run pre-commit run --all-files
 
+# Build documentation
+docs:
+	uv sync --extra docs
+	uv run sphinx-build -b html docs docs/_html
+
+# Bump minor version number
+bump-minor:
+	uv version --bump minor
+
+# Bump patch version number
+bump-patch:
+	uv version --bump patch
+
 # Benchmark fitting a linear regression
 benchmark-linear-regression: install
 	uv run scripts/benchmark_linear_regression.py
@@ -41,19 +54,7 @@ benchmark:
 		$(MAKE) benchmark-linear-regression BACKEND=$$backend; \
 	done
 	$(MAKE) benchmark-linear-regression-writeup
-	
-# Build documentation
-docs:
-	uv sync --extra docs
-	uv run sphinx-build -b html docs docs/_html
-
-# Bump minor version number
-bump-minor:
-	uv version --bump minor
-
-# Bump patch version number
-bump-patch:
-	uv version --bump patch
+	$(MAKE) docs
 
 # Clean up build artifacts and caches
 clean:

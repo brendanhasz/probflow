@@ -86,7 +86,7 @@ def save_backend_comparison_plots(df: pd.DataFrame) -> list[dict]:
         sub = df[
             (df["operation"] == operation)
             & (df["n_dimensions"] == d_max)
-            & ((df["operation"] != "train") | (df["eager"] == False))  # noqa: E712
+            & ((df["operation"] != "train") | (df["eager"] == False))
         ]
         if sub.empty:
             continue
@@ -105,7 +105,9 @@ def save_backend_comparison_plots(df: pd.DataFrame) -> list[dict]:
         ax.set_ylabel("Runtime (s)")
         ax.set_xscale("log")
         ax.set_yscale("log")
-        ax.set_title(f"{operation.capitalize()} runtime by backend (d={d_max})")
+        ax.set_title(
+            f"{operation.capitalize()} runtime by backend (d={d_max})"
+        )
         ax.legend(title="Backend")
         fig.tight_layout()
 
@@ -124,20 +126,29 @@ def save_dimensionality_comparison_plots(df: pd.DataFrame) -> list[dict]:
             sub = df[
                 (df["backend"] == backend)
                 & (df["operation"] == operation)
-                & (df["eager"] != True)  # noqa: E712 - only non-eager runs
+                & (df["eager"] != True)
             ]
             if sub.empty:
                 continue
 
             fig, ax = plt.subplots(figsize=(6, 4))
             for d in sorted(sub["n_dimensions"].unique()):
-                data = sub[sub["n_dimensions"] == d].sort_values("n_datapoints")
-                ax.plot(data["n_datapoints"], data["runtime_seconds"], marker="o", label=f"d={d}")
+                data = sub[sub["n_dimensions"] == d].sort_values(
+                    "n_datapoints"
+                )
+                ax.plot(
+                    data["n_datapoints"],
+                    data["runtime_seconds"],
+                    marker="o",
+                    label=f"d={d}",
+                )
             ax.set_xlabel("Number of datapoints")
             ax.set_ylabel("Runtime (s)")
             ax.set_xscale("log")
             ax.set_yscale("log")
-            ax.set_title(f"{operation.capitalize()} runtime by dimensionality ({backend})")
+            ax.set_title(
+                f"{operation.capitalize()} runtime by dimensionality ({backend})"
+            )
             ax.legend(title="Dimensions")
             fig.tight_layout()
 
@@ -195,17 +206,23 @@ def write_rst(
         "Training times across backends",
         "------------------------------",
         "",
-        "The plots below show runtime as a function of the number of "
-        "datapoints, at the largest number of dimensions benchmarked, with "
-        "a separate line for each backend.  Only non-eager (compiled) "
-        "training runs are included.\n",
+        (
+            "The plots below show runtime as a function of the number of "
+            "datapoints, at the largest number of dimensions benchmarked, with "
+            "a separate line for each backend.  Only non-eager (compiled) "
+            "training runs are included.\n"
+        ),
         ".. tabs::",
         "",
     ]
     for plot in backend_plots:
-        backend_lines.append(f"    .. group-tab:: {plot['operation'].capitalize()}")
+        backend_lines.append(
+            f"    .. group-tab:: {plot['operation'].capitalize()}"
+        )
         backend_lines.append("")
-        backend_lines.append(f"        .. image:: ../img/benchmarking/{plot['filename']}")
+        backend_lines.append(
+            f"        .. image:: ../img/benchmarking/{plot['filename']}"
+        )
         backend_lines.append("           :width: 70 %")
         backend_lines.append("           :align: center")
         backend_lines.append("")
@@ -215,10 +232,12 @@ def write_rst(
         "Comparing dimensionality",
         "-------------------------",
         "",
-        "The plots below show runtime as a function of the number of "
-        "datapoints, with a separate line for each number of dimensions.  "
-        "Separate plots are shown for each backend and operation.  Only "
-        "non-eager (compiled) training runs are included.\n",
+        (
+            "The plots below show runtime as a function of the number of "
+            "datapoints, with a separate line for each number of dimensions.  "
+            "Separate plots are shown for each backend and operation.  Only "
+            "non-eager (compiled) training runs are included.\n"
+        ),
         ".. tabs::",
         "",
     ]
@@ -229,14 +248,23 @@ def write_rst(
         dim_lines.append(f"    .. group-tab:: {operation.capitalize()}")
         dim_lines.append("")
         for plot in sorted(op_plots, key=lambda p: p["backend"]):
-            dim_lines.append(f"        .. image:: ../img/benchmarking/{plot['filename']}")
+            dim_lines.append(
+                f"        .. image:: ../img/benchmarking/{plot['filename']}"
+            )
             dim_lines.append("           :width: 70 %")
             dim_lines.append("           :align: center")
             dim_lines.append("")
     sections.append("\n".join(dim_lines))
 
     # Full table
-    cols = ["operation", "n_datapoints", "n_dimensions", "eager", "backend", "runtime_seconds"]
+    cols = [
+        "operation",
+        "n_datapoints",
+        "n_dimensions",
+        "eager",
+        "backend",
+        "runtime_seconds",
+    ]
     sections.append(
         "Full benchmarking results\n"
         "-------------------------\n\n"

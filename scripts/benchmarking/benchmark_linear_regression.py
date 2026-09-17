@@ -1,5 +1,7 @@
-import time
+"""Benchmark the performance of fitting a linear regression with ProbFlow."""
+
 import gc
+import time
 from itertools import product
 
 import numpy as np
@@ -26,7 +28,9 @@ def get_data(N, D, dtype="float32"):
     return x, y
 
 
-def run_single_benchmark_linear_regression(n: int, d: int, eager: bool) -> list[dict]:
+def run_single_benchmark_linear_regression(
+    n: int, d: int, eager: bool
+) -> list[dict]:
     """Run a single linear regression benchmark, returning runtime metrics."""
     # Setup
     model = pf.LinearRegression(d)
@@ -37,40 +41,48 @@ def run_single_benchmark_linear_regression(n: int, d: int, eager: bool) -> list[
     t0 = time.time()
     model.fit(x, y, epochs=EPOCHS, batch_size=TRAIN_BATCH_SIZE, eager=eager)
     t1 = time.time()
-    data.append({ 
-        "n_datapoints": n,
-        "n_dimensions": d,
-        "backend": pf.get_backend().value,
-        "eager": eager,
-        "runtime_seconds": t1 - t0,
-        "operation": "train",
-    })
+    data.append(
+        {
+            "n_datapoints": n,
+            "n_dimensions": d,
+            "backend": pf.get_backend().value,
+            "eager": eager,
+            "runtime_seconds": t1 - t0,
+            "operation": "train",
+        }
+    )
 
     # Benchmark prediction time
     t0 = time.time()
     _ = model.predict(x, batch_size=PREDICT_BATCH_SIZE)
     t1 = time.time()
-    data.append({
-        "n_datapoints": n,
-        "n_dimensions": d,
-        "backend": pf.get_backend().value,
-        "eager": eager,  # NOTE: not really applicable here, but for filtering purposes...
-        "runtime_seconds": t1 - t0,
-        "operation": "predict",
-    })
+    data.append(
+        {
+            "n_datapoints": n,
+            "n_dimensions": d,
+            "backend": pf.get_backend().value,
+            "eager": eager,  # NOTE: not really applicable here, but for filtering purposes...
+            "runtime_seconds": t1 - t0,
+            "operation": "predict",
+        }
+    )
 
     # Benchmark sampling time
     t0 = time.time()
-    _ = model.predictive_sample(x, n=SAMPLE_SIZE, batch_size=PREDICT_BATCH_SIZE)
+    _ = model.predictive_sample(
+        x, n=SAMPLE_SIZE, batch_size=PREDICT_BATCH_SIZE
+    )
     t1 = time.time()
-    data.append({
-        "n_datapoints": n,
-        "n_dimensions": d,
-        "backend": pf.get_backend().value,
-        "eager": eager,  # NOTE: not really applicable here, but for filtering purposes...
-        "runtime_seconds": t1 - t0,
-        "operation": "sample",
-    })
+    data.append(
+        {
+            "n_datapoints": n,
+            "n_dimensions": d,
+            "backend": pf.get_backend().value,
+            "eager": eager,  # NOTE: not really applicable here, but for filtering purposes...
+            "runtime_seconds": t1 - t0,
+            "operation": "sample",
+        }
+    )
 
     print(data)
     return data
@@ -83,14 +95,21 @@ def benchmark_linear_regression():
 
     # For other cases, always use compiled execution (non-eager)
     for n, d, eager in product(ns, ds, eagers):
-        if not eager or n <= MAX_N_FOR_EAGER:  # do not benchmark larger datasets for eager, takes too long
-            data.extend(run_single_benchmark_linear_regression(n=n, d=d, eager=eager))
+        if (
+            not eager or n <= MAX_N_FOR_EAGER
+        ):  # do not benchmark larger datasets for eager, takes too long
+            data.extend(
+                run_single_benchmark_linear_regression(n=n, d=d, eager=eager)
+            )
             gc.collect()
 
     df = pd.DataFrame.from_records(data)
 
     # Save the results to a CSV file
-    df.to_csv(f"scripts/benchmarking/benchmark_linear_regression_{backend.value}.csv", index=False)
+    df.to_csv(
+        f"scripts/benchmarking/benchmark_linear_regression_{backend.value}.csv",
+        index=False,
+    )
 
 
 if __name__ == "__main__":
