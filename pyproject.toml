@@ -51,6 +51,7 @@ dev = [
     "pre-commit >= 3.0.0",
     "pytest >= 6.0.0rc1",
     "pytest-cov >= 2.7.1",
+    "seaborn",
 ]
 
 [tool.hatch.build.targets.wheel]

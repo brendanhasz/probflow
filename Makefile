@@ -31,12 +31,16 @@ format:
 benchmark-linear-regression: install
 	uv run scripts/benchmark_linear_regression.py
 
+# Write results of linear regression benchmark
+benchmark-linear-regression-writeup:
+	uv run scripts/benchmark_linear_regression.py
+
 # Run benchmarking for all backends and write docs file
 benchmark:
 	@for backend in $(AVAILABLE_BACKENDS); do \
 		$(MAKE) benchmark-linear-regression BACKEND=$$backend; \
 	done
-	uv run scripts/write_benchmark_results.py
+	$(MAKE) benchmark-linear-regression-writeup
 	
 # Build documentation
 docs:
