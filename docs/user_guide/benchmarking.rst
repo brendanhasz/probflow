@@ -7,8 +7,8 @@ Benchmarking
 
 ProbFlow's benchmarking suite fits a Bayesian linear regression model (:class:`.LinearRegression`) with each supported backend (TensorFlow, PyTorch, and JAX), for a range of dataset sizes and data dimensionality.  For each combination it measures the time to train the model, the time to generate predictions, and the time to draw samples from the model's predictive distribution.  Training is additionally benchmarked in both eager and non-eager (compiled) modes, for smaller datasets (for larger datasets non-eager/compiled mode is always used).
 
-Eager vs non-eager training
-----------------------------
+Training times using eager vs compiled
+--------------------------------------
 
 The plot below compares training runtime in eager vs non-eager (compiled) mode for each backend, using the smallest number of datapoints and the largest number of dimensions benchmarked.
 
@@ -16,76 +16,80 @@ The plot below compares training runtime in eager vs non-eager (compiled) mode f
    :width: 70 %
    :align: center
 
-Comparing backends
--------------------
+Training times across backends
+------------------------------
 
 The plots below show runtime as a function of the number of datapoints, at the largest number of dimensions benchmarked, with a separate line for each backend.  Only non-eager (compiled) training runs are included.
 
-.. image:: ../img/benchmarking/backend_comparison_train.png
-   :width: 70 %
-   :align: center
+.. tabs::
 
-.. image:: ../img/benchmarking/backend_comparison_predict.png
-   :width: 70 %
-   :align: center
+    .. group-tab:: Train
 
-.. image:: ../img/benchmarking/backend_comparison_sample.png
-   :width: 70 %
-   :align: center
+        .. image:: ../img/benchmarking/backend_comparison_train.png
+           :width: 70 %
+           :align: center
+
+    .. group-tab:: Predict
+
+        .. image:: ../img/benchmarking/backend_comparison_predict.png
+           :width: 70 %
+           :align: center
+
+    .. group-tab:: Sample
+
+        .. image:: ../img/benchmarking/backend_comparison_sample.png
+           :width: 70 %
+           :align: center
 
 
 Comparing dimensionality
 -------------------------
 
-The plots below show runtime as a function of the number of datapoints, with a separate line for each number of dimensions.  Separate plots are shown for each backend, operation, and (for training) eager vs non-eager execution mode.
+The plots below show runtime as a function of the number of datapoints, with a separate line for each number of dimensions.  Separate plots are shown for each backend and operation.  Only non-eager (compiled) training runs are included.
 
-.. image:: ../img/benchmarking/dim_comparison_jax_train_eager.png
-   :width: 70 %
-   :align: center
+.. tabs::
 
-.. image:: ../img/benchmarking/dim_comparison_jax_train_non-eager.png
-   :width: 70 %
-   :align: center
+    .. group-tab:: Train
 
-.. image:: ../img/benchmarking/dim_comparison_jax_predict.png
-   :width: 70 %
-   :align: center
+        .. image:: ../img/benchmarking/dim_comparison_jax_train.png
+           :width: 70 %
+           :align: center
 
-.. image:: ../img/benchmarking/dim_comparison_jax_sample.png
-   :width: 70 %
-   :align: center
+        .. image:: ../img/benchmarking/dim_comparison_pytorch_train.png
+           :width: 70 %
+           :align: center
 
-.. image:: ../img/benchmarking/dim_comparison_pytorch_train_eager.png
-   :width: 70 %
-   :align: center
+        .. image:: ../img/benchmarking/dim_comparison_tensorflow_train.png
+           :width: 70 %
+           :align: center
 
-.. image:: ../img/benchmarking/dim_comparison_pytorch_train_non-eager.png
-   :width: 70 %
-   :align: center
+    .. group-tab:: Predict
 
-.. image:: ../img/benchmarking/dim_comparison_pytorch_predict.png
-   :width: 70 %
-   :align: center
+        .. image:: ../img/benchmarking/dim_comparison_jax_predict.png
+           :width: 70 %
+           :align: center
 
-.. image:: ../img/benchmarking/dim_comparison_pytorch_sample.png
-   :width: 70 %
-   :align: center
+        .. image:: ../img/benchmarking/dim_comparison_pytorch_predict.png
+           :width: 70 %
+           :align: center
 
-.. image:: ../img/benchmarking/dim_comparison_tensorflow_train_eager.png
-   :width: 70 %
-   :align: center
+        .. image:: ../img/benchmarking/dim_comparison_tensorflow_predict.png
+           :width: 70 %
+           :align: center
 
-.. image:: ../img/benchmarking/dim_comparison_tensorflow_train_non-eager.png
-   :width: 70 %
-   :align: center
+    .. group-tab:: Sample
 
-.. image:: ../img/benchmarking/dim_comparison_tensorflow_predict.png
-   :width: 70 %
-   :align: center
+        .. image:: ../img/benchmarking/dim_comparison_jax_sample.png
+           :width: 70 %
+           :align: center
 
-.. image:: ../img/benchmarking/dim_comparison_tensorflow_sample.png
-   :width: 70 %
-   :align: center
+        .. image:: ../img/benchmarking/dim_comparison_pytorch_sample.png
+           :width: 70 %
+           :align: center
+
+        .. image:: ../img/benchmarking/dim_comparison_tensorflow_sample.png
+           :width: 70 %
+           :align: center
 
 
 Full benchmarking results

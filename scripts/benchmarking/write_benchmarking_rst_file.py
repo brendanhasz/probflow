@@ -60,28 +60,16 @@ def save_eager_vs_noneager_plot(df: pd.DataFrame) -> str:
         (df["operation"] == "train")
         & (df["n_datapoints"] == n_min)
         & (df["n_dimensions"] == d_max)
-    ]
-
-    backends = sorted(sub["backend"].unique())
-    eager_values = [True, False]
-    width = 0.8 / len(backends)
+    ].copy()
+    sub["mode"] = sub["eager"].map({True: "Eager", False: "Non-eager"})
 
     fig, ax = plt.subplots(figsize=(6, 4))
-    for i, backend in enumerate(backends):
-        heights = []
-        for eager in eager_values:
-            row = sub[(sub["backend"] == backend) & (sub["eager"] == eager)]
-            heights.append(
-                row["runtime_seconds"].mean() if len(row) else 0.0
-            )
-        xs = [j + i * width for j in range(len(eager_values))]
-        ax.bar(xs, heights, width=width, label=backend, color=BACKEND_COLORS.get(backend))
-
-    ax.set_xticks([j + width * (len(backends) - 1) / 2 for j in range(len(eager_values))])
-    ax.set_xticklabels(["Eager", "Non-eager"])
+    sns.barplot(data=sub, x="backend", y="runtime_seconds", hue="mode", ax=ax)
+    ax.set_xlabel("Backend")
     ax.set_ylabel("Training runtime (s)")
+    ax.set_yscale("log")
     ax.set_title(f"Eager vs non-eager training (n={n_min}, d={d_max})")
-    ax.legend(title="Backend")
+    ax.legend(title="Mode")
     fig.tight_layout()
 
     filename = "eager_vs_noneager.png"
@@ -116,6 +104,7 @@ def save_backend_comparison_plots(df: pd.DataFrame) -> list[dict]:
         ax.set_xlabel("Number of datapoints")
         ax.set_ylabel("Runtime (s)")
         ax.set_xscale("log")
+        ax.set_yscale("log")
         ax.set_title(f"{operation.capitalize()} runtime by backend (d={d_max})")
         ax.legend(title="Backend")
         fig.tight_layout()
@@ -128,49 +117,40 @@ def save_backend_comparison_plots(df: pd.DataFrame) -> list[dict]:
 
 
 def save_dimensionality_comparison_plots(df: pd.DataFrame) -> list[dict]:
-    """Runtime vs n_datapoints, lines per dimensionality, one plot per backend/operation/eager combo."""
+    """Runtime vs n_datapoints, lines per dimensionality, one plot per backend/operation (non-eager only)."""
     plots = []
     for backend in sorted(df["backend"].unique()):
         for operation in ["train", "predict", "sample"]:
-            eager_states = [True, False] if operation == "train" else [None]
-            for eager in eager_states:
-                sub = df[
-                    (df["backend"] == backend)
-                    & (df["operation"] == operation)
-                ]
-                if eager is None:
-                    label = ""
-                else:
-                    sub = sub[sub["eager"] == eager]
-                    label = "eager" if eager else "non-eager"
-                if sub.empty:
-                    continue
+            sub = df[
+                (df["backend"] == backend)
+                & (df["operation"] == operation)
+                & (df["eager"] != True)  # noqa: E712 - only non-eager runs
+            ]
+            if sub.empty:
+                continue
 
-                fig, ax = plt.subplots(figsize=(6, 4))
-                for d in sorted(sub["n_dimensions"].unique()):
-                    data = sub[sub["n_dimensions"] == d].sort_values("n_datapoints")
-                    ax.plot(data["n_datapoints"], data["runtime_seconds"], marker="o", label=f"d={d}")
-                ax.set_xlabel("Number of datapoints")
-                ax.set_ylabel("Runtime (s)")
-                ax.set_xscale("log")
-                title = f"{operation.capitalize()} runtime by dimensionality ({backend}"
-                title += f", {label})" if label else ")"
-                ax.set_title(title)
-                ax.legend(title="Dimensions")
-                fig.tight_layout()
+            fig, ax = plt.subplots(figsize=(6, 4))
+            for d in sorted(sub["n_dimensions"].unique()):
+                data = sub[sub["n_dimensions"] == d].sort_values("n_datapoints")
+                ax.plot(data["n_datapoints"], data["runtime_seconds"], marker="o", label=f"d={d}")
+            ax.set_xlabel("Number of datapoints")
+            ax.set_ylabel("Runtime (s)")
+            ax.set_xscale("log")
+            ax.set_yscale("log")
+            ax.set_title(f"{operation.capitalize()} runtime by dimensionality ({backend})")
+            ax.legend(title="Dimensions")
+            fig.tight_layout()
 
-                suffix = f"_{label}" if label else ""
-                filename = f"dim_comparison_{backend}_{operation}{suffix}.png"
-                fig.savefig(os.path.join(IMG_DIR, filename))
-                plt.close(fig)
-                plots.append(
-                    {
-                        "filename": filename,
-                        "backend": backend,
-                        "operation": operation,
-                        "label": label,
-                    }
-                )
+            filename = f"dim_comparison_{backend}_{operation}.png"
+            fig.savefig(os.path.join(IMG_DIR, filename))
+            plt.close(fig)
+            plots.append(
+                {
+                    "filename": filename,
+                    "backend": backend,
+                    "operation": operation,
+                }
+            )
     return plots
 
 
@@ -200,8 +180,8 @@ def write_rst(
     )
 
     eager_section = (
-        "Eager vs non-eager training\n"
-        "----------------------------\n\n"
+        "Training times using eager vs compiled\n"
+        "--------------------------------------\n\n"
         "The plot below compares training runtime in eager vs non-eager "
         "(compiled) mode for each backend, using the smallest number of "
         "datapoints and the largest number of dimensions benchmarked.\n\n"
@@ -212,18 +192,22 @@ def write_rst(
     sections.append(eager_section)
 
     backend_lines = [
-        "Comparing backends",
-        "-------------------",
+        "Training times across backends",
+        "------------------------------",
         "",
         "The plots below show runtime as a function of the number of "
         "datapoints, at the largest number of dimensions benchmarked, with "
         "a separate line for each backend.  Only non-eager (compiled) "
         "training runs are included.\n",
+        ".. tabs::",
+        "",
     ]
     for plot in backend_plots:
-        backend_lines.append(f".. image:: ../img/benchmarking/{plot['filename']}")
-        backend_lines.append("   :width: 70 %")
-        backend_lines.append("   :align: center")
+        backend_lines.append(f"    .. group-tab:: {plot['operation'].capitalize()}")
+        backend_lines.append("")
+        backend_lines.append(f"        .. image:: ../img/benchmarking/{plot['filename']}")
+        backend_lines.append("           :width: 70 %")
+        backend_lines.append("           :align: center")
         backend_lines.append("")
     sections.append("\n".join(backend_lines))
 
@@ -233,14 +217,22 @@ def write_rst(
         "",
         "The plots below show runtime as a function of the number of "
         "datapoints, with a separate line for each number of dimensions.  "
-        "Separate plots are shown for each backend, operation, and (for "
-        "training) eager vs non-eager execution mode.\n",
+        "Separate plots are shown for each backend and operation.  Only "
+        "non-eager (compiled) training runs are included.\n",
+        ".. tabs::",
+        "",
     ]
-    for plot in dim_plots:
-        dim_lines.append(f".. image:: ../img/benchmarking/{plot['filename']}")
-        dim_lines.append("   :width: 70 %")
-        dim_lines.append("   :align: center")
+    for operation in ["train", "predict", "sample"]:
+        op_plots = [p for p in dim_plots if p["operation"] == operation]
+        if not op_plots:
+            continue
+        dim_lines.append(f"    .. group-tab:: {operation.capitalize()}")
         dim_lines.append("")
+        for plot in sorted(op_plots, key=lambda p: p["backend"]):
+            dim_lines.append(f"        .. image:: ../img/benchmarking/{plot['filename']}")
+            dim_lines.append("           :width: 70 %")
+            dim_lines.append("           :align: center")
+            dim_lines.append("")
     sections.append("\n".join(dim_lines))
 
     # Full table

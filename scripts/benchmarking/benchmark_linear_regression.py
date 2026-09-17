@@ -54,7 +54,7 @@ def run_single_benchmark_linear_regression(n: int, d: int, eager: bool) -> list[
         "n_datapoints": n,
         "n_dimensions": d,
         "backend": pf.get_backend().value,
-        "eager": None,
+        "eager": eager,  # NOTE: not really applicable here, but for filtering purposes...
         "runtime_seconds": t1 - t0,
         "operation": "predict",
     })
@@ -67,7 +67,7 @@ def run_single_benchmark_linear_regression(n: int, d: int, eager: bool) -> list[
         "n_datapoints": n,
         "n_dimensions": d,
         "backend": pf.get_backend().value,
-        "eager": None,
+        "eager": eager,  # NOTE: not really applicable here, but for filtering purposes...
         "runtime_seconds": t1 - t0,
         "operation": "sample",
     })
