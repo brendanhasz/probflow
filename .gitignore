@@ -2,6 +2,10 @@
 *.swp
 *.vim
 
+# UV lock
+# Ignoring the lock file, because it changes depending on what backend is used
+uv.lock
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
