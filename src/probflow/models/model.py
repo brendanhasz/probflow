@@ -19,6 +19,7 @@ from probflow.utils.settings import ProbflowBackend, Sampling, get_backend
 from probflow.utils.shape import get_shape
 from probflow.utils.training_helpers import (
     get_default_optimizer,
+    get_jax_sample_step,
     get_training_step_function,
 )
 from probflow.utils.typing import ScalarLike, TensorLike
@@ -344,15 +345,40 @@ class Model(BaseModel, Module):
         ed: int | None = None,
         axis: int = 1,
         batch_size: int | None = None,
+        jax_op: str | None = None,
+        jax_n: int | None = None,
     ) -> np.ndarray:
         """Sample from the model."""
+        # JAX ops run much slower eagerly than jitted, so use cached jit-compiled step
+        if jax_op is not None and get_backend() == ProbflowBackend.JAX:
+            sample_fn = get_jax_sample_step(self, jax_op, jax_n)
+        else:
+            sample_fn = lambda x: func(self(x))
         samples = []
         for x_data, _ in make_generator(x, test=True, batch_size=batch_size):
-            if x_data is None:
-                samples += [func(self())]
-            else:
-                samples += [func(self(O.expand_dims(x_data, ed)))]
+            x_in = None if x_data is None else O.expand_dims(x_data, ed)
+            samples += [sample_fn(x_in)]
         return np.concatenate(to_numpy(samples), axis=axis)
+
+        # JAX is much slower running these ops eagerly than jitted, so use a
+        # cached, jit-compiled step instead (see get_jax_sample_step).
+        # if jax_op is not None and get_backend() == ProbflowBackend.JAX:
+        #    sample_fn = get_jax_sample_step(self, jax_op, jax_n)
+        #    samples = []
+        #    for x_data, _ in make_generator(
+        #        x, test=True, batch_size=batch_size
+        #    ):
+        #        x_in = None if x_data is None else O.expand_dims(x_data, ed)
+        #        samples += [sample_fn(x_in)]
+        #    return np.concatenate(to_numpy(samples), axis=axis)
+
+        # samples = []
+        # for x_data, _ in make_generator(x, test=True, batch_size=batch_size):
+        #    if x_data is None:
+        #        samples += [func(self())]
+        #    else:
+        #        samples += [func(self(O.expand_dims(x_data, ed)))]
+        # return np.concatenate(to_numpy(samples), axis=axis)
 
     def predictive_sample(
         self,
@@ -385,7 +411,11 @@ class Model(BaseModel, Module):
         """
         with Sampling(n=n, flipout=False):
             return self._sample(
-                x, lambda x: x.sample(), ed=0, batch_size=batch_size
+                x,
+                lambda x: x.sample(),
+                ed=0,
+                batch_size=batch_size,
+                jax_op="sample",
             )
 
     def aleatoric_sample(
@@ -418,7 +448,13 @@ class Model(BaseModel, Module):
             Samples from the predicted mean distribution.  Size
             (num_samples,x.shape[0],...)
         """
-        return self._sample(x, lambda x: x.sample(n=n), batch_size=batch_size)
+        return self._sample(
+            x,
+            lambda x: x.sample(n=n),
+            batch_size=batch_size,
+            jax_op="sample_n",
+            jax_n=n,
+        )
 
     def epistemic_sample(
         self,
@@ -453,7 +489,11 @@ class Model(BaseModel, Module):
         """
         with Sampling(n=n, flipout=False):
             return self._sample(
-                x, lambda x: x.mean(), ed=0, batch_size=batch_size
+                x,
+                lambda x: x.mean(),
+                ed=0,
+                batch_size=batch_size,
+                jax_op="mean",
             )
 
     def predict(
