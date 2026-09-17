@@ -90,7 +90,7 @@ def benchmark_linear_regression():
     df = pd.DataFrame.from_records(data)
 
     # Save the results to a CSV file
-    df.to_csv(f"benchmark_linear_regression_{backend.value}.csv", index=False)
+    df.to_csv(f"scripts/benchmarking/benchmark_linear_regression_{backend.value}.csv", index=False)
 
 
 if __name__ == "__main__":
