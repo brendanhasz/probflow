@@ -10,10 +10,12 @@ EPOCHS = 100
 BATCH_SIZE = 1024
 ns = [1024, 8192, 65536]
 ds = [1, 2, 10, 100]
-backends = [pf.ProbflowBackend.PYTORCH, pf.ProbflowBackend.TENSORFLOW]
+backends = [
+    pf.ProbflowBackend.PYTORCH,
+    pf.ProbflowBackend.TENSORFLOW,
+    pf.ProbflowBackend.JAX,
+]
 eagers = [True, False]
-# TODO: dtype (float32 or float64)
-# TODO: n_mc_samples (when that's implemented)
 
 
 def get_data(N, D, dtype="float32"):
@@ -24,17 +26,16 @@ def get_data(N, D, dtype="float32"):
     return x, y
 
 
-def test_linear_regression_times():
+def benchmark_linear_regression():
     """Test linear regression times."""
     times = []
-
+    cached_data = {}
     for N, D, backend, eager in product(ns, ds, backends, eagers):
         pf.set_backend(backend)
         model = pf.LinearRegression(D)
-        x, y = get_data(N, D)
-        model.fit(
-            x, y, epochs=2, eager=eager
-        )  # don't include compilation time
+        if (N, D) not in cached_data:
+            cached_data[(N, D)] = get_data(N, D)
+        x, y = cached_data[(N, D)]
         t0 = time.time()
         model.fit(x, y, epochs=EPOCHS, eager=eager)
         t1 = time.time()
@@ -49,8 +50,10 @@ def test_linear_regression_times():
         )
 
     df = pd.DataFrame.from_records(times)
-    print(df)
+
+    # Save the results to a CSV file
+    df.to_csv("benchmark_linear_regression.csv", index=False)
 
 
 if __name__ == "__main__":
-    test_linear_regression_times()
+    benchmark_linear_regression()
