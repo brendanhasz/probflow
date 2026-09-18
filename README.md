@@ -151,6 +151,10 @@ ProbFlow also provides more complex modules, such as those required for building
 
 Can be built and fit with ProbFlow in only a few lines:
 
+
+<details open>
+<summary>Tensorflow</summary>
+
 ```python
 import probflow as pf
 import tensorflow as tf
@@ -173,6 +177,66 @@ model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
 # Fit it!
 model.fit(x, y)
 ```
+
+</details>
+
+<details>
+<summary>PyTorch</summary>
+
+```python
+import probflow as pf
+import torch
+
+
+class DensityNetwork(pf.ContinuousModel):
+    def __init__(self, units, head_units):
+        self.core = pf.DenseNetwork(units)
+        self.mean = pf.DenseNetwork(head_units)
+        self.std = pf.DenseNetwork(head_units)
+
+    def __call__(self, x):
+        x = torch.tensor(x)
+        z = torch.nn.ReLU()(self.core(x))
+        return pf.Normal(self.mean(z), torch.exp(self.std(z)))
+
+
+# Create the model
+model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
+
+# Fit it!
+model.fit(x, y)
+```
+
+</details>
+
+<details>
+<summary>JAX</summary>
+
+```python
+import jax.nn
+import jax.numpy as jnp
+import probflow as pf
+
+
+class DensityNetwork(pf.ContinuousModel):
+    def __init__(self, units, head_units):
+        self.core = pf.DenseNetwork(units)
+        self.mean = pf.DenseNetwork(head_units)
+        self.std = pf.DenseNetwork(head_units)
+
+    def __call__(self, x):
+        z = jax.nn.relu(self.core(x))
+        return pf.Normal(self.mean(z), jnp.exp(self.std(z)))
+
+
+# Create the model
+model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
+
+# Fit it!
+model.fit(x, y)
+```
+
+</details>
 
 For convenience, ProbFlow also includes several [pre-built models](http://probflow.readthedocs.io/en/latest/api/applications.html) for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made LinearRegression model:
 
@@ -203,23 +267,34 @@ Or, install with pip.  if you already have your desired backend installed
 pip install probflow
 ```
 
-Or, to install both ProbFlow and the CPU version of TensorFlow + TensorFlow Probability,
+Or, to install both ProbFlow and your desired backend,
+
+<details open>
+<summary>Tensorflow</summary>
 
 ```bash
 pip install probflow[tensorflow]
 ```
 
-Or, to install ProbFlow and PyTorch,
+</details>
+
+<details>
+<summary>PyTorch</summary>
 
 ```bash
 pip install probflow[pytorch]
 ```
 
-Or, to install ProbFlow and JAX,
+</details>
+
+<details>
+<summary>JAX</summary>
 
 ```bash
 pip install probflow[jax]
 ```
+
+</details>
 
 
 ## Support

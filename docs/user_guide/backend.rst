@@ -12,8 +12,12 @@ Setting the Backend
 
 What I mean by "backend" is the system which performs the automatic
 differentiation required to fit models with stochastic variational inference.
-ProbFlow currently supports three backends: |TensorFlow|, |PyTorch|, and JAX.
-TensorFlow is the default backend, but you can set which backend to use:
+ProbFlow currently supports three backends: |TensorFlow|, |PyTorch|, and |JAX|.
+
+ProbFlow detects which of the three you have installed and automatically sets
+it as the backend.
+
+However you can manually set which backend to use:
 
 .. code-block:: python3
 
@@ -52,6 +56,8 @@ to instead use double precision with the TensorFlow backend:
 
 .. code-block:: python3
 
+   import tensorflow as tf
+   
    pf.set_datatype(tf.dtypes.float64)
 
 .. admonition:: Personal opinion warning!
