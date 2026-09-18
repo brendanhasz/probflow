@@ -54,12 +54,14 @@ def df_to_list_table(df: pd.DataFrame, title: str = "") -> str:
 
 def save_eager_vs_noneager_plot(df: pd.DataFrame) -> str:
     """Bar chart comparing eager vs non-eager training runtime by backend."""
+    device = "cpu"
     n_min = df["n_datapoints"].min()
     d_max = df["n_dimensions"].max()
     sub = df[
         (df["operation"] == "train")
         & (df["n_datapoints"] == n_min)
         & (df["n_dimensions"] == d_max)
+        & (df["device"] == device)
     ].copy()
     sub["mode"] = sub["eager"].map({True: "Eager", False: "Non-eager"})
 
@@ -68,7 +70,9 @@ def save_eager_vs_noneager_plot(df: pd.DataFrame) -> str:
     ax.set_xlabel("Backend")
     ax.set_ylabel("Training runtime (s)")
     ax.set_yscale("log")
-    ax.set_title(f"Eager vs non-eager training (n={n_min}, d={d_max})")
+    ax.set_title(
+        f"Eager vs non-eager training (n={n_min}, d={d_max}, device={device})"
+    )
     ax.legend(title="Mode")
     fig.tight_layout()
 
@@ -81,11 +85,13 @@ def save_eager_vs_noneager_plot(df: pd.DataFrame) -> str:
 def save_backend_comparison_plots(df: pd.DataFrame) -> list[dict]:
     """Runtime vs n_datapoints at the largest dimension, lines per backend."""
     d_max = df["n_dimensions"].max()
+    device = "cpu"
     plots = []
     for operation in ["train", "predict", "sample"]:
         sub = df[
             (df["operation"] == operation)
             & (df["n_dimensions"] == d_max)
+            & (df["device"] == device)
             & ((df["operation"] != "train") | (df["eager"] == False))
         ]
         if sub.empty:
@@ -107,7 +113,7 @@ def save_backend_comparison_plots(df: pd.DataFrame) -> list[dict]:
         ax.set_xscale("log")
         ax.set_yscale("log")
         ax.set_title(
-            f"{operation.capitalize()} runtime by backend (d={d_max})"
+            f"{operation.capitalize()} runtime by backend (d={d_max}, device={device})"
         )
         ax.legend(title="Backend")
         fig.tight_layout()
@@ -119,10 +125,44 @@ def save_backend_comparison_plots(df: pd.DataFrame) -> list[dict]:
     return plots
 
 
+def save_cpu_vs_gpu_plots(df: pd.DataFrame) -> list[dict]:
+    """Runtime vs n_datapoints (log-log), comparing CPU vs GPU, per backend."""
+    plots = []
+    sub_all = df[(df["eager"] == False) & (df["operation"] == "train")]
+    for backend in sorted(sub_all["backend"].unique()):
+        sub = sub_all[sub_all["backend"] == backend]
+        if sub.empty:
+            continue
+
+        fig, ax = plt.subplots(figsize=(6, 4))
+        sns.lineplot(
+            data=sub,
+            x="n_datapoints",
+            y="runtime_seconds",
+            hue="device",
+            marker="o",
+            ax=ax,
+        )
+        ax.set_xlabel("Number of datapoints")
+        ax.set_ylabel("Training runtime (s)")
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_title(f"{backend.capitalize()}: CPU vs GPU training runtime")
+        ax.legend(title="Device")
+        fig.tight_layout()
+
+        filename = f"cpu_vs_gpu_{backend}.png"
+        fig.savefig(os.path.join(IMG_DIR, filename))
+        plt.close(fig)
+        plots.append({"filename": filename, "backend": backend})
+    return plots
+
+
 def write_rst(
     df: pd.DataFrame,
     eager_plot: str,
     backend_plots: list[dict],
+    cpu_gpu_plots: list[dict],
 ) -> None:
     """Write the benchmarking RST document."""
     sections = []
@@ -181,6 +221,32 @@ def write_rst(
         backend_lines.append("")
     sections.append("\n".join(backend_lines))
 
+    cpu_gpu_lines = [
+        "Performance on CPU vs GPU",
+        "-------------------------",
+        "",
+        (
+            "The plots below show training runtime as a function of the "
+            "number of datapoints (both on log scales), comparing CPU and "
+            "GPU execution for each backend.  Only non-eager (compiled) "
+            "training runs are included.\n"
+        ),
+        ".. tabs::",
+        "",
+    ]
+    for plot in cpu_gpu_plots:
+        cpu_gpu_lines.append(
+            f"    .. group-tab:: {plot['backend'].capitalize()}"
+        )
+        cpu_gpu_lines.append("")
+        cpu_gpu_lines.append(
+            f"        .. image:: ../img/benchmarking/{plot['filename']}"
+        )
+        cpu_gpu_lines.append("           :width: 70 %")
+        cpu_gpu_lines.append("           :align: center")
+        cpu_gpu_lines.append("")
+    sections.append("\n".join(cpu_gpu_lines))
+
     # Full table
     cols = [
         "operation",
@@ -207,7 +273,8 @@ def write_benchmarking_rst_file() -> None:
     df = load_data()
     eager_plot = save_eager_vs_noneager_plot(df)
     backend_plots = save_backend_comparison_plots(df)
-    write_rst(df, eager_plot, backend_plots)
+    cpu_gpu_plots = save_cpu_vs_gpu_plots(df)
+    write_rst(df, eager_plot, backend_plots, cpu_gpu_plots)
 
 
 if __name__ == "__main__":
