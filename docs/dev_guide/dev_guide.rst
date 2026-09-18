@@ -142,6 +142,18 @@ To build the documentation locally (the docs are written for and built with
    make docs
 
 
+Benchmarking
+------------
+
+To run the benchmarking for all backends and write the results to the documentation, run:
+
+.. code-block:: bash
+
+   make benchmark
+
+This fits a linear regression on datasets of varying size and dimensionality, for each backend.
+
+
 Contributing your changes
 -------------------------
 
