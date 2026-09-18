@@ -141,14 +141,7 @@ class Model(BaseModel, Module):
     def train_step(self, x_data: TensorLike, y_data: TensorLike) -> None:
         """Perform one training step."""
         elbo = self._train_fn(x_data, y_data)
-        if get_backend() == ProbflowBackend.PYTORCH:
-            self._current_elbo += elbo.detach().numpy()
-        elif get_backend() == ProbflowBackend.JAX:
-            import numpy as np
-
-            self._current_elbo += np.asarray(elbo)
-        else:
-            self._current_elbo += elbo.numpy()
+        self._current_elbo += to_numpy(elbo)
 
     def fit(
         self,
