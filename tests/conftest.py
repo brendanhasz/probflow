@@ -33,6 +33,11 @@ def random():
 
         tf.random.set_seed(12345)
     except ModuleNotFoundError:
-        import torch
+        try:
+            import torch
 
-        torch.manual_seed(12345)
+            torch.manual_seed(12345)
+        except ModuleNotFoundError:
+            from probflow.utils.settings import set_jax_seed
+
+            set_jax_seed(12345)

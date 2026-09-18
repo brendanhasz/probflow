@@ -57,6 +57,19 @@ class HiddenMarkovModel(BaseDistribution):
         """Get the distribution object from the backend."""
         if get_backend() == ProbflowBackend.PYTORCH:
             raise NotImplementedError
+        elif get_backend() == ProbflowBackend.JAX:
+            from tensorflow_probability.substrates import jax as tfp_jax
+
+            return tfp_jax.distributions.HiddenMarkovModel(
+                initial_distribution=tfp_jax.distributions.Categorical(
+                    self["initial"]
+                ),
+                transition_distribution=tfp_jax.distributions.Categorical(
+                    self["transition"]
+                ),
+                observation_distribution=self["observation"],
+                num_steps=self["steps"],
+            )
         else:
             from tensorflow_probability import distributions as tfd
 

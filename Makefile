@@ -1,8 +1,8 @@
 
-.PHONY: install test-unit test-stats test format docs bump-minor bump-patch clean
+.PHONY: install test-unit test-stats test format benchmark-linear-regression benchmark docs bump-minor bump-patch clean
 
 BACKEND ?= tensorflow
-AVAILABLE_BACKENDS := tensorflow pytorch
+AVAILABLE_BACKENDS := tensorflow pytorch jax
 
 # Install probflow package and requirements
 install:
@@ -39,6 +39,22 @@ bump-minor:
 # Bump patch version number
 bump-patch:
 	uv version --bump patch
+
+# Benchmark fitting a linear regression
+benchmark-linear-regression: install
+	uv run scripts/benchmarking/benchmark_linear_regression.py
+
+# Write results of linear regression benchmark
+benchmark-linear-regression-writeup:
+	uv run scripts/benchmarking/write_benchmarking_rst_file.py
+
+# Run benchmarking for all backends and write docs file
+benchmark:
+	@for backend in $(AVAILABLE_BACKENDS); do \
+		$(MAKE) benchmark-linear-regression BACKEND=$$backend; \
+	done
+	$(MAKE) benchmark-linear-regression-writeup
+	$(MAKE) docs
 
 # Clean up build artifacts and caches
 clean:

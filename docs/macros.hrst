@@ -5,6 +5,7 @@
 .. |TensorFlow 2.0| replace:: `TensorFlow <http://www.tensorflow.org>`__
 .. |TensorFlow Probability| replace:: `TensorFlow Probability <http://www.tensorflow.org/probability>`__
 .. |PyTorch| replace:: `PyTorch <http://pytorch.org>`__
+.. |JAX| replace:: `JAX <http://docs.jax.dev/>`__
 .. |tfp.Distribution| replace:: `tensorflow_probability.distributions.Distribution <https://www.tensorflow.org/probability/api_docs/python/tfp/distributions>`__
 .. |torch.Distribution| replace:: `torch.distributions.distribution <https://pytorch.org/docs/stable/distributions.html>`__
 

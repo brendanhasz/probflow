@@ -21,6 +21,7 @@ User Guide
    applications
    saving_and_loading
    math
+   benchmarking
 
 .. include:: ../macros.hrst
 

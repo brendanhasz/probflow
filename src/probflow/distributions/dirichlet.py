@@ -58,6 +58,10 @@ class Dirichlet(BaseDistribution):
             import torch.distributions as tod
 
             return tod.dirichlet.Dirichlet(self["concentration"])
+        elif get_backend() == ProbflowBackend.JAX:
+            from tensorflow_probability.substrates import jax as tfp_jax
+
+            return tfp_jax.distributions.Dirichlet(self["concentration"])
         else:
             from tensorflow_probability import distributions as tfd
 

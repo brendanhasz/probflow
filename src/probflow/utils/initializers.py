@@ -29,6 +29,17 @@ def xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
         torch.nn.init.trunc_normal_(x, mean=0.0, std=scale)
         return x
         # return torch.randn(shape, dtype=get_datatype()) * scale
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax
+
+        from probflow.utils.settings import _next_jax_key
+
+        return (
+            jax.random.truncated_normal(
+                _next_jax_key(), -2.0, 2.0, shape, dtype=get_datatype()
+            )
+            * scale
+        )
     else:
         import tensorflow as tf
 
@@ -45,6 +56,11 @@ def scale_xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
 
         numel = torch.prod(torch.Tensor(shape))
         return vals + 2 - 2 * torch.log(numel) / np.log(10.0)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        numel = float(jnp.prod(jnp.array(shape)))
+        return vals + 2 - 2 * np.log(numel) / np.log(10.0)
     else:
         import tensorflow as tf
 
@@ -60,6 +76,11 @@ def pos_xavier(shape: list[int] | tuple[int, ...]) -> BackendTensor:
 
         numel = torch.prod(torch.Tensor(shape))
         return vals + torch.log(numel) / np.log(10.0)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        numel = float(jnp.prod(jnp.array(shape)))
+        return vals + np.log(numel) / np.log(10.0)
     else:
         import tensorflow as tf
 

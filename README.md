@@ -2,7 +2,7 @@
 
 [![Version Badge](https://img.shields.io/pypi/v/probflow)](https://pypi.org/project/probflow/)  [![Build Badge](https://github.com/brendanhasz/probflow/workflows/tests/badge.svg)](https://github.com/brendanhasz/probflow/actions?query=branch%3Amain)  [![Docs Badge](https://readthedocs.org/projects/probflow/badge/)](http://probflow.readthedocs.io)  [![Coverage Badge](https://codecov.io/gh/brendanhasz/probflow/branch/main/graph/badge.svg)](https://codecov.io/gh/brendanhasz/probflow)
 
-ProbFlow is a Python package for building probabilistic Bayesian models with [TensorFlow 2.0](http://www.tensorflow.org/beta) or [PyTorch](http://pytorch.org), performing stochastic variational inference with those models, and evaluating the models' inferences.  It provides both high-level modules for building Bayesian neural networks, as well as low-level parameters and distributions for constructing custom Bayesian models.
+ProbFlow is a Python package for building probabilistic Bayesian models with [TensorFlow 2.0](http://www.tensorflow.org/beta) or [PyTorch](http://pytorch.org) or [JAX](https://docs.jax.dev), performing stochastic variational inference with those models, and evaluating the models' inferences.  It provides both high-level modules for building Bayesian neural networks, as well as low-level parameters and distributions for constructing custom Bayesian models.
 
 It's very much still a work in progress.
 
@@ -13,7 +13,7 @@ It's very much still a work in progress.
 
 ## Getting Started
 
-**ProbFlow** allows you to quickly and less painfully build, fit, and evaluate custom Bayesian models (or [ready-made](http://probflow.readthedocs.io/en/latest/api/applications.html) ones!) which run on top of either [TensorFlow 2.0](http://www.tensorflow.org/beta) and [TensorFlow Probability](http://www.tensorflow.org/probability) or [PyTorch](http://pytorch.org).
+**ProbFlow** allows you to quickly and less painfully build, fit, and evaluate custom Bayesian models (or [ready-made](http://probflow.readthedocs.io/en/latest/api/applications.html) ones!) which run on top of either [TensorFlow 2.0](http://www.tensorflow.org/beta) and [TensorFlow Probability](http://www.tensorflow.org/probability) or [PyTorch](http://pytorch.org) or or [JAX](https://docs.jax.dev).
 
 With ProbFlow, the core building blocks of a Bayesian model are parameters and probability distributions (and, of course, the input data).  Parameters define how the independent variables (the features) predict the probability distribution of the dependent variables (the target).
 
@@ -22,6 +22,9 @@ For example, a simple Bayesian linear regression
 $$y \sim \text{Normal}(wx + b, \sigma)$$
 
 can be built by creating a ProbFlow Model.  This is just a class which inherits `pf.Model` (or `pf.ContinuousModel` or `pf.CategoricalModel` depending on the target type).  The `__init__` method sets up the parameters, and the `__call__` method performs a forward pass of the model, returning the predicted probability distribution of the target:
+
+<details open>
+<summary>Tensorflow</summary>
 
 ```python
 import probflow as pf
@@ -40,6 +43,54 @@ class LinearRegression(pf.ContinuousModel):
 
 model = LinearRegression()
 ```
+
+</details>
+
+<details>
+<summary>PyTorch</summary>
+
+```python
+import probflow as pf
+import torch
+
+
+class LinearRegression(pf.ContinuousModel):
+    def __init__(self):
+        self.weight = pf.Parameter(name="weight")
+        self.bias = pf.Parameter(name="bias")
+        self.std = pf.ScaleParameter(name="sigma")
+
+    def __call__(self, x):
+        x = torch.tensor(x)
+        return pf.Normal(x * self.weight() + self.bias(), self.std())
+
+
+model = LinearRegression()
+```
+
+</details>
+
+<details>
+<summary>JAX</summary>
+
+```python
+import probflow as pf
+
+
+class LinearRegression(pf.ContinuousModel):
+    def __init__(self):
+        self.weight = pf.Parameter(name="weight")
+        self.bias = pf.Parameter(name="bias")
+        self.std = pf.ScaleParameter(name="sigma")
+
+    def __call__(self, x):
+        return pf.Normal(x * self.weight() + self.bias(), self.std())
+
+
+model = LinearRegression()
+```
+
+</details>
 
 Then, the model can be fit using stochastic variational inference, in *one line*:
 
@@ -100,7 +151,15 @@ ProbFlow also provides more complex modules, such as those required for building
 
 Can be built and fit with ProbFlow in only a few lines:
 
+
+<details open>
+<summary>Tensorflow</summary>
+
 ```python
+import probflow as pf
+import tensorflow as tf
+
+
 class DensityNetwork(pf.ContinuousModel):
     def __init__(self, units, head_units):
         self.core = pf.DenseNetwork(units)
@@ -118,6 +177,66 @@ model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
 # Fit it!
 model.fit(x, y)
 ```
+
+</details>
+
+<details>
+<summary>PyTorch</summary>
+
+```python
+import probflow as pf
+import torch
+
+
+class DensityNetwork(pf.ContinuousModel):
+    def __init__(self, units, head_units):
+        self.core = pf.DenseNetwork(units)
+        self.mean = pf.DenseNetwork(head_units)
+        self.std = pf.DenseNetwork(head_units)
+
+    def __call__(self, x):
+        x = torch.tensor(x)
+        z = torch.nn.ReLU()(self.core(x))
+        return pf.Normal(self.mean(z), torch.exp(self.std(z)))
+
+
+# Create the model
+model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
+
+# Fit it!
+model.fit(x, y)
+```
+
+</details>
+
+<details>
+<summary>JAX</summary>
+
+```python
+import jax.nn
+import jax.numpy as jnp
+import probflow as pf
+
+
+class DensityNetwork(pf.ContinuousModel):
+    def __init__(self, units, head_units):
+        self.core = pf.DenseNetwork(units)
+        self.mean = pf.DenseNetwork(head_units)
+        self.std = pf.DenseNetwork(head_units)
+
+    def __call__(self, x):
+        z = jax.nn.relu(self.core(x))
+        return pf.Normal(self.mean(z), jnp.exp(self.std(z)))
+
+
+# Create the model
+model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
+
+# Fit it!
+model.fit(x, y)
+```
+
+</details>
 
 For convenience, ProbFlow also includes several [pre-built models](http://probflow.readthedocs.io/en/latest/api/applications.html) for standard tasks (such as linear regressions, logistic regressions, and multi-layer dense neural networks).  For example, the above linear regression example could have been done with much less work by using ProbFlow's ready-made LinearRegression model:
 
@@ -138,23 +257,44 @@ Using parameters and distributions as simple building blocks, ProbFlow allows fo
 
 ## Installation
 
-If you already have your desired backend installed (i.e. Tensorflow/TFP or PyTorch), then you can just do:
+If you have an existing project, just add `probflow` to your pyproject.toml
+file's dependencies section.
+
+Or, install with pip.  if you already have your desired backend installed
+(i.e. Tensorflow/TFP or PyTorch or JAX), then you can just do:
 
 ```bash
 pip install probflow
 ```
 
-Or, to install both ProbFlow and the CPU version of TensorFlow + TensorFlow Probability,
+Or, to install both ProbFlow and your desired backend,
+
+<details open>
+<summary>Tensorflow</summary>
 
 ```bash
 pip install probflow[tensorflow]
 ```
 
-Or, to install ProbFlow and PyTorch,
+</details>
+
+<details>
+<summary>PyTorch</summary>
 
 ```bash
 pip install probflow[pytorch]
 ```
+
+</details>
+
+<details>
+<summary>JAX</summary>
+
+```bash
+pip install probflow[jax]
+```
+
+</details>
 
 
 ## Support

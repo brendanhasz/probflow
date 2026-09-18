@@ -79,6 +79,10 @@ class CenteredParameter(Parameter):
     --------
     TODO
 
+    References
+    ----------
+    - Stan User's Guide.
+      `Parameterizing Centered Vectors <https://mc-stan.org/docs/2_18/stan-users-guide/parameterizing-centered-vectors.html#qr-decomposition>`_
     """
 
     def __init__(

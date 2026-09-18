@@ -89,6 +89,21 @@ This is our first example of a `generative model <https://en.wikipedia.org/wiki/
                     cov = torch.eye(2) + self.rho()*torch.abs(torch.eye(2)-1)
                     return pf.MultivariateNormal(torch.zeros([2]), cov)
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.numpy as jnp
+
+            class BayesianCorrelation(pf.Model):
+
+                def __init__(self):
+                    self.rho = pf.BoundedParameter(min=-1, max=1)
+
+                def __call__(self):
+                    cov = jnp.eye(2) + self.rho()*jnp.abs(jnp.eye(2)-1)
+                    return pf.MultivariateNormal(jnp.zeros([2]), cov)
+
 
 Then we can instantiate the model.
 

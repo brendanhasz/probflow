@@ -65,9 +65,16 @@ variational distributions while inside the context manager.
 """
 
 import importlib.util
+import sys
 import uuid
 import warnings
 from enum import Enum
+from typing import Any
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 __all__ = [
     "ProbflowBackend",
@@ -80,6 +87,7 @@ __all__ = [
     "set_backend",
     "set_datatype",
     "set_flipout",
+    "set_jax_seed",
     "set_samples",
     "set_static_sampling_uuid",
 ]
@@ -92,6 +100,7 @@ class ProbflowBackend(Enum):
 
     TENSORFLOW = "tensorflow"
     PYTORCH = "pytorch"
+    JAX = "jax"
 
 
 class _Settings:
@@ -110,6 +119,8 @@ class _Settings:
         Default datatype to use for tensors
     _STATIC_SAMPLING_UUID : None or uuid.UUID
         UUID of the current static sampling regime
+    _JAX_KEY : jax.random.PRNGKey or None
+        Current root PRNG key used (and split) for JAX backend randomness
     """
 
     def __init__(self):
@@ -118,6 +129,7 @@ class _Settings:
         self._FLIPOUT: bool = False
         self._DATATYPE: BackendDataType | None = None
         self._STATIC_SAMPLING_UUID: uuid.UUID | None = None
+        self._JAX_KEY: Any = None
 
 
 # Global ProbFlow settings
@@ -144,6 +156,11 @@ def _is_pytorch_installed() -> bool:
     return _is_importable("torch")
 
 
+def _is_jax_installed() -> bool:
+    """Determine whether JAX and TensorFlow Probability packages are installed."""
+    return _is_importable("jax") and _is_importable("tensorflow_probability")
+
+
 def get_backend() -> ProbflowBackend:
     """Get which backend is currently being used.
 
@@ -158,6 +175,8 @@ def get_backend() -> ProbflowBackend:
             __SETTINGS__._BACKEND = ProbflowBackend.TENSORFLOW
         elif _is_pytorch_installed():
             __SETTINGS__._BACKEND = ProbflowBackend.PYTORCH
+        elif _is_jax_installed():
+            __SETTINGS__._BACKEND = ProbflowBackend.JAX
         else:
             warnings.warn(
                 "No backend is installed, continuing with default backend of Tensorflow"
@@ -205,6 +224,10 @@ def get_datatype() -> BackendDataType:
             import torch
 
             return torch.float32
+        elif get_backend() == ProbflowBackend.JAX:
+            import jax.numpy as jnp
+
+            return jnp.float32
         else:
             import tensorflow as tf
 
@@ -228,6 +251,17 @@ def set_datatype(datatype: BackendDataType) -> None:
             __SETTINGS__._DATATYPE = datatype
         else:
             raise TypeError("datatype must be a torch.dtype")
+    elif get_backend() == ProbflowBackend.JAX:
+        import numpy as np
+
+        if datatype is None:
+            __SETTINGS__._DATATYPE = datatype
+        else:
+            try:
+                np.dtype(datatype)
+            except TypeError:
+                raise TypeError("datatype must be a valid numpy/jax dtype")
+            __SETTINGS__._DATATYPE = datatype
     else:
         import tensorflow as tf
 
@@ -302,6 +336,64 @@ def set_static_sampling_uuid(uuid_value: uuid.UUID | None) -> None:
         __SETTINGS__._STATIC_SAMPLING_UUID = uuid_value
     else:
         raise TypeError("must be a uuid or None")
+
+
+def set_jax_seed(seed: int) -> None:
+    """(Re)seed the global JAX PRNG key used for the JAX backend.
+
+    Parameters
+    ----------
+    seed : int
+        Seed to use for the root PRNG key.
+    """
+    import jax
+
+    __SETTINGS__._JAX_KEY = jax.random.PRNGKey(seed)
+
+
+class _JaxKeyBox:
+    """Mutable holder for a PRNG key, local to a single traced call."""
+
+    __slots__ = ("key",)
+
+    def __init__(self, key: Any) -> None:
+        self.key = key
+
+
+_JAX_KEY_SCOPE_STACK: list[_JaxKeyBox] = []
+
+
+class jax_key_scope:
+    """Context manager scoping ``_next_jax_key`` to a locally-owned key.
+
+    Used to thread a PRNG key through a ``jax.grad``/``jax.jit``-traced
+    function without mutating the persistent global key (which would leak a
+    trace-time tracer into global state once the transformation returns).
+    """
+
+    def __init__(self, key: Any) -> None:
+        self._box = _JaxKeyBox(key)
+
+    def __enter__(self) -> Self:
+        _JAX_KEY_SCOPE_STACK.append(self._box)
+        return self
+
+    def __exit__(self, *exc_info: object) -> None:
+        _JAX_KEY_SCOPE_STACK.pop()
+
+
+def _next_jax_key() -> Any:
+    """Split and return a fresh PRNG subkey, advancing the current JAX key."""
+    import jax
+
+    if _JAX_KEY_SCOPE_STACK:
+        box = _JAX_KEY_SCOPE_STACK[-1]
+        box.key, subkey = jax.random.split(box.key)
+        return subkey
+    if __SETTINGS__._JAX_KEY is None:
+        __SETTINGS__._JAX_KEY = jax.random.PRNGKey(0)
+    __SETTINGS__._JAX_KEY, subkey = jax.random.split(__SETTINGS__._JAX_KEY)
+    return subkey
 
 
 class Sampling:

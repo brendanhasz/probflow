@@ -51,20 +51,37 @@ class BaseDistribution(ABC):
         else:
             return param
 
+    def _distribution_value(
+        self, distribution: BackendDistribution, y: TensorLike
+    ) -> BackendTensor:
+        """Cast JAX distribution values to the distribution dtype."""
+        value = to_tensor(y)
+        if get_backend() == ProbflowBackend.JAX:
+            dtype = distribution.dtype
+            if not isinstance(dtype, dict):
+                import jax.numpy as jnp
+
+                value = jnp.asarray(value, dtype=dtype)
+        return value
+
     def prob(self, y: TensorLike) -> BackendTensor:
         """Compute the probability of some data given this distribution."""
+        distribution = self()
+        value = self._distribution_value(distribution, y)
         if get_backend() == ProbflowBackend.PYTORCH:
-            return self().log_prob(to_tensor(y)).exp()
+            return distribution.log_prob(value).exp()
         else:
-            return self().prob(to_tensor(y))
+            return distribution.prob(value)
 
     def log_prob(self, y: TensorLike) -> BackendTensor:
         """Compute the log probability of some data given this distribution."""
-        return self().log_prob(to_tensor(y))
+        distribution = self()
+        return distribution.log_prob(self._distribution_value(distribution, y))
 
     def cdf(self, y: TensorLike) -> BackendTensor:
         """Cumulative probability of some data along this distribution."""
-        return self().cdf(to_tensor(y))
+        distribution = self()
+        return distribution.cdf(self._distribution_value(distribution, y))
 
     def mean(self) -> BackendTensor:
         """Compute the mean of this distribution.
@@ -104,6 +121,16 @@ class BaseDistribution(ABC):
                     return self().sample([n])
                 else:
                     return self().sample(n)
+        elif get_backend() == ProbflowBackend.JAX:
+            from probflow.utils.settings import _next_jax_key
+
+            key = _next_jax_key()
+            if isinstance(n, int) and n == 1:
+                return self().sample(seed=key)
+            elif isinstance(n, int):
+                return self().sample([n], seed=key)
+            else:
+                return self().sample(n, seed=key)
         else:
             if isinstance(n, int) and n == 1:
                 return self().sample()

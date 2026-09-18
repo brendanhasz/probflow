@@ -66,6 +66,12 @@ class Gamma(BaseDistribution):
             import torch.distributions as tod
 
             return tod.gamma.Gamma(self["concentration"], self["rate"])
+        elif get_backend() == ProbflowBackend.JAX:
+            from tensorflow_probability.substrates import jax as tfp_jax
+
+            return tfp_jax.distributions.Gamma(
+                self["concentration"], self["rate"]
+            )
         else:
             from tensorflow_probability import distributions as tfd
 

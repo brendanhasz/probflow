@@ -52,6 +52,22 @@ TODO: diagram
                     preds = x @ self.beta() + self.mu()
                     return pf.Normal(preds, self.sigma())
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import probflow as pf
+            class AutoregressiveModel(pf.Model):
+
+                def __init__(self, k):
+                    self.beta = pf.Parameter([k, 1])
+                    self.mu = pf.Parameter()
+                    self.sigma = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    preds = x @ self.beta() + self.mu()
+                    return pf.Normal(preds, self.sigma())
+
 
 If we have a timeseries ``x``,
 

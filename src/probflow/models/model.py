@@ -143,6 +143,10 @@ class Model(BaseModel, Module):
         elbo = self._train_fn(x_data, y_data)
         if get_backend() == ProbflowBackend.PYTORCH:
             self._current_elbo += elbo.detach().numpy()
+        elif get_backend() == ProbflowBackend.JAX:
+            import numpy as np
+
+            self._current_elbo += np.asarray(elbo)
         else:
             self._current_elbo += elbo.numpy()
 
@@ -321,6 +325,8 @@ class Model(BaseModel, Module):
         if get_backend() == ProbflowBackend.PYTORCH:
             for g in self._optimizer.param_groups:
                 g["lr"] = self._learning_rate
+        elif get_backend() == ProbflowBackend.JAX:
+            self._optimizer.learning_rate = self._learning_rate
         else:
             self._optimizer.learning_rate.assign(self._learning_rate)
 

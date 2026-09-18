@@ -60,6 +60,22 @@ TODO: explain in terms of :math:`\boldsymbol{\varphi}` and :math:`\boldsymbol{\t
                     probs = self.theta[x[:, 0]] @ self.phi()
                     return pf.OneHotCategorical(probs=probs)
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import probflow as pf
+
+            class LDA(pf.Model):
+
+                def __init__(self, Nt, Nd, Nw):
+                    self.phi = pf.DirichletParameter(Nw, Nt)  #per-topic word dists
+                    self.theta = pf.DirichletParameter(Nt, Nd)  #per-document topic dists
+
+                def __call__(self, x):
+                    probs = self.theta[x[:, 0]] @ self.phi()
+                    return pf.OneHotCategorical(probs=probs)
+
 
 To fit the model in this way, ``x`` will be document IDs, and ``y`` will be
 a matrix of size ``(Ndocuments, Nwords)``.
@@ -112,6 +128,20 @@ distributions.
 
                 def __call__(self, x):
                     x = torch.tensor(x)
+                    probs = self.net(x) @ self.phi()
+                    return pf.OneHotCategorical(probs=probs)
+
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            class LdaNet(pf.Model):
+
+                def __init__(self, dims):
+                    self.phi = pf.DirichletParameter(dims[0], dims[-1])
+                    self.net = pf.DenseNetwork(dims)
+
+                def __call__(self, x):
                     probs = self.net(x) @ self.phi()
                     return pf.OneHotCategorical(probs=probs)
 
