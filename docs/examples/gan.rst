@@ -76,7 +76,7 @@ First let's build a generator:
 
             import probflow as pf
             import jax
-            
+
             jax_random_key = jax.random.PRNGKey(42)
 
             class Generator(pf.Model):
@@ -152,7 +152,7 @@ Then a discriminator:
                     self.D = pf.DenseNetwork(dims)
 
                 def __call__(self, x):
-                    return pf.Bernoulli(self.D(jnp.asarray(x)))
+                    return pf.Bernoulli(self.D(x))
 
                 def log_likelihood(self, _, x):
                     labels = jnp.ones([x.shape[0], 1])

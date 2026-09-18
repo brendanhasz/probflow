@@ -65,7 +65,6 @@ TODO: explain in terms of :math:`\boldsymbol{\varphi}` and :math:`\boldsymbol{\t
         .. code-block:: python3
 
             import probflow as pf
-            import jax.numpy as jnp
 
             class LDA(pf.Model):
 
@@ -74,7 +73,6 @@ TODO: explain in terms of :math:`\boldsymbol{\varphi}` and :math:`\boldsymbol{\t
                     self.theta = pf.DirichletParameter(Nt, Nd)  #per-document topic dists
 
                 def __call__(self, x):
-                    x = jnp.asarray(x)
                     probs = self.theta[x[:, 0]] @ self.phi()
                     return pf.OneHotCategorical(probs=probs)
 
