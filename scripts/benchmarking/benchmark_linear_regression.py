@@ -1,6 +1,7 @@
 """Benchmark the performance of fitting a linear regression with ProbFlow."""
 
 import gc
+import sys
 import time
 from itertools import product
 
@@ -97,82 +98,73 @@ def run_single_benchmark_linear_regression(
 def verify_tensor_device(tensor, expected_device: str):
     """Verify that the given tensor is on the expected device."""
     if pf.get_backend() == pf.ProbflowBackend.PYTORCH:
-        assert tensor.device.device_kind == expected_device, (
-            f"Expected device {expected_device}, got {tensor.device.device_kind}"
+        expected_device_type_str = (
+            "cuda" if expected_device == "gpu" else "cpu"
+        )
+        assert tensor.device.type == expected_device_type_str, (
+            f"Expected device {expected_device}, got {tensor.device}"
         )
     elif pf.get_backend() == pf.ProbflowBackend.JAX:
-        assert tensor.device.type == expected_device, (
-            f"Expected device {expected_device}, got {tensor.device.type}"
+        from probflow.utils.jax_variable import JaxVariable
+
+        expected_device_type_str = "gpu" if expected_device == "gpu" else "cpu"
+        if isinstance(tensor, JaxVariable):
+            tensor = tensor.value
+        assert tensor.device.device_kind == expected_device_type_str, (
+            f"Expected device {expected_device}, got {tensor.device}"
         )
     else:  # tensorflow
-        if expected_device == "gpu":
-            assert "GPU" in tensor.device, (
-                f"Expected device {expected_device}, got {tensor.device}"
-            )
-        elif expected_device == "cpu":
-            assert "CPU" in tensor.device, (
-                f"Expected device {expected_device}, got {tensor.device}"
-            )
-        else:
-            raise ValueError(f"Unknown device: {expected_device}")
+        expected_device_type_str = "GPU" if expected_device == "gpu" else "CPU"
+        assert expected_device_type_str in tensor.device, (
+            f"Expected device {expected_device}, got {tensor.device}"
+        )
 
 
-def verify_default_device(device: str):
+def verify_default_device(expected_device: str):
     """Verify and print the default device for the current backend."""
     # Verify default device
     if pf.get_backend() == pf.ProbflowBackend.PYTORCH:
         import torch
 
         default_device = torch.get_default_device()
-        if device == "gpu":
-            assert "cuda" in default_device.type, (
-                f"Expected CUDA device, got {default_device.type}"
-            )
-        elif device == "cpu":
-            assert "cpu" in default_device.type, (
-                f"Expected CPU device, got {default_device.type}"
-            )
-        else:
-            raise ValueError(f"Unknown device: {device}")
-
+        expected_device_type_str = (
+            "cuda" if expected_device == "gpu" else "cpu"
+        )
+        assert expected_device_type_str in default_device.type, (
+            f"Expected device {expected_device}, got {default_device}"
+        )
     elif pf.get_backend() == pf.ProbflowBackend.JAX:
         import jax
 
         default_device = jax.default_backend()
-        if device == "gpu":
-            assert "cuda" in default_device, (
-                f"Expected CUDA device, got {default_device}"
-            )
-        elif device == "cpu":
-            assert "cpu" in default_device, (
-                f"Expected CPU device, got {default_device}"
-            )
-        else:
-            raise ValueError(f"Unknown device: {device}")
+        expected_device_type_str = "gpu" if expected_device == "gpu" else "cpu"
+        assert default_device == expected_device_type_str, (
+            f"Expected device {expected_device}, got {default_device}"
+        )
     else:
         import tensorflow as tf
 
         gpu_device_name = tf.test.gpu_device_name()
 
-        if device == "gpu":
-            assert "cuda" in gpu_device_name, (
+        if expected_device == "gpu":
+            assert "GPU" in gpu_device_name, (
                 f"Expected CUDA device, got {gpu_device_name}"
             )
-        elif device == "cpu":
+        elif expected_device == "cpu":
             assert gpu_device_name == "", (
                 f"Expected CPU device, got {gpu_device_name}"
             )
         else:
-            raise ValueError(f"Unknown device: {device}")
+            raise ValueError(f"Unknown device: {expected_device}")
 
     # Verify a ProbFlow-created parameter uses the correct device for variables
     test_param = pf.Parameter()
-    verify_tensor_device(test_param.posterior.loc, device)
+    verify_tensor_device(test_param.posterior.loc, expected_device)
 
     # Verify ops are executed on the correct device
     import probflow.utils.ops as O
 
-    verify_tensor_device(O.ones([3]), device)
+    verify_tensor_device(O.ones([3]), expected_device)
 
 
 def benchmark_linear_regression(device: str):
@@ -202,7 +194,9 @@ def benchmark_linear_regression(device: str):
 
 
 if __name__ == "__main__":
-    verify_default_device(device="cpu")  # or "gpu" depending on your setup
-    benchmark_linear_regression(
-        device="cpu"
-    )  # or "gpu" depending on your setup
+    EXPECTED_DEVICE = sys.argv[1]
+    assert EXPECTED_DEVICE in ["cpu", "gpu"], (
+        "Expected device must be 'cpu' or 'gpu'"
+    )
+    verify_default_device(expected_device=EXPECTED_DEVICE)
+    benchmark_linear_regression(device=EXPECTED_DEVICE)
