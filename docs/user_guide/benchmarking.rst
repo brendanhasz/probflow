@@ -42,56 +42,6 @@ The plots below show runtime as a function of the number of datapoints, at the l
            :align: center
 
 
-Comparing dimensionality
--------------------------
-
-The plots below show runtime as a function of the number of datapoints, with a separate line for each number of dimensions.  Separate plots are shown for each backend and operation.  Only non-eager (compiled) training runs are included.
-
-.. tabs::
-
-    .. group-tab:: Train
-
-        .. image:: ../img/benchmarking/dim_comparison_jax_train.png
-           :width: 70 %
-           :align: center
-
-        .. image:: ../img/benchmarking/dim_comparison_pytorch_train.png
-           :width: 70 %
-           :align: center
-
-        .. image:: ../img/benchmarking/dim_comparison_tensorflow_train.png
-           :width: 70 %
-           :align: center
-
-    .. group-tab:: Predict
-
-        .. image:: ../img/benchmarking/dim_comparison_jax_predict.png
-           :width: 70 %
-           :align: center
-
-        .. image:: ../img/benchmarking/dim_comparison_pytorch_predict.png
-           :width: 70 %
-           :align: center
-
-        .. image:: ../img/benchmarking/dim_comparison_tensorflow_predict.png
-           :width: 70 %
-           :align: center
-
-    .. group-tab:: Sample
-
-        .. image:: ../img/benchmarking/dim_comparison_jax_sample.png
-           :width: 70 %
-           :align: center
-
-        .. image:: ../img/benchmarking/dim_comparison_pytorch_sample.png
-           :width: 70 %
-           :align: center
-
-        .. image:: ../img/benchmarking/dim_comparison_tensorflow_sample.png
-           :width: 70 %
-           :align: center
-
-
 Full benchmarking results
 -------------------------
 
@@ -123,7 +73,7 @@ The full set of benchmarking results:
      - 1
      - False
      - tensorflow
-     - 0.0021
+     - 0.0033
    * - predict
      - 1024
      - 1
@@ -141,7 +91,7 @@ The full set of benchmarking results:
      - 1
      - True
      - tensorflow
-     - 0.0050
+     - 0.0085
    * - predict
      - 1024
      - 2
@@ -159,7 +109,7 @@ The full set of benchmarking results:
      - 2
      - False
      - tensorflow
-     - 0.0022
+     - 0.0031
    * - predict
      - 1024
      - 2
@@ -177,7 +127,7 @@ The full set of benchmarking results:
      - 2
      - True
      - tensorflow
-     - 0.0020
+     - 0.0031
    * - predict
      - 1024
      - 10
@@ -195,7 +145,7 @@ The full set of benchmarking results:
      - 10
      - False
      - tensorflow
-     - 0.0018
+     - 0.0034
    * - predict
      - 1024
      - 10
@@ -213,7 +163,7 @@ The full set of benchmarking results:
      - 10
      - True
      - tensorflow
-     - 0.0015
+     - 0.0027
    * - predict
      - 1024
      - 100
@@ -231,7 +181,13 @@ The full set of benchmarking results:
      - 100
      - False
      - tensorflow
-     - 0.0023
+     - 0.0032
+   * - predict
+     - 1024
+     - 100
+     - False
+     - tensorflow
+     - 0.0032
    * - predict
      - 1024
      - 100
@@ -249,7 +205,25 @@ The full set of benchmarking results:
      - 100
      - True
      - tensorflow
-     - 0.0017
+     - 0.0028
+   * - predict
+     - 1024
+     - 100
+     - True
+     - tensorflow
+     - 0.0064
+   * - predict
+     - 2048
+     - 100
+     - False
+     - tensorflow
+     - 0.0055
+   * - predict
+     - 4096
+     - 100
+     - False
+     - tensorflow
+     - 0.0094
    * - predict
      - 8192
      - 1
@@ -267,7 +241,7 @@ The full set of benchmarking results:
      - 1
      - False
      - tensorflow
-     - 0.0124
+     - 0.0197
    * - predict
      - 8192
      - 2
@@ -285,7 +259,7 @@ The full set of benchmarking results:
      - 2
      - False
      - tensorflow
-     - 0.0114
+     - 0.0200
    * - predict
      - 8192
      - 10
@@ -303,7 +277,7 @@ The full set of benchmarking results:
      - 10
      - False
      - tensorflow
-     - 0.0126
+     - 0.0198
    * - predict
      - 8192
      - 100
@@ -321,7 +295,25 @@ The full set of benchmarking results:
      - 100
      - False
      - tensorflow
-     - 0.0163
+     - 0.0181
+   * - predict
+     - 8192
+     - 100
+     - False
+     - tensorflow
+     - 0.0211
+   * - predict
+     - 16384
+     - 100
+     - False
+     - tensorflow
+     - 0.0324
+   * - predict
+     - 32768
+     - 100
+     - False
+     - tensorflow
+     - 0.0631
    * - predict
      - 65536
      - 1
@@ -339,7 +331,7 @@ The full set of benchmarking results:
      - 1
      - False
      - tensorflow
-     - 0.1112
+     - 0.1557
    * - predict
      - 65536
      - 2
@@ -357,7 +349,7 @@ The full set of benchmarking results:
      - 2
      - False
      - tensorflow
-     - 0.0916
+     - 0.1582
    * - predict
      - 65536
      - 10
@@ -375,7 +367,7 @@ The full set of benchmarking results:
      - 10
      - False
      - tensorflow
-     - 0.0931
+     - 0.1624
    * - predict
      - 65536
      - 100
@@ -393,7 +385,19 @@ The full set of benchmarking results:
      - 100
      - False
      - tensorflow
-     - 0.0910
+     - 0.1269
+   * - predict
+     - 65536
+     - 100
+     - False
+     - tensorflow
+     - 0.1700
+   * - predict
+     - 131072
+     - 100
+     - False
+     - tensorflow
+     - 0.2502
    * - sample
      - 1024
      - 1
@@ -411,7 +415,7 @@ The full set of benchmarking results:
      - 1
      - False
      - tensorflow
-     - 0.0226
+     - 0.0337
    * - sample
      - 1024
      - 1
@@ -429,7 +433,7 @@ The full set of benchmarking results:
      - 1
      - True
      - tensorflow
-     - 0.1061
+     - 0.1471
    * - sample
      - 1024
      - 2
@@ -447,7 +451,7 @@ The full set of benchmarking results:
      - 2
      - False
      - tensorflow
-     - 0.0220
+     - 0.0314
    * - sample
      - 1024
      - 2
@@ -465,7 +469,7 @@ The full set of benchmarking results:
      - 2
      - True
      - tensorflow
-     - 0.0254
+     - 0.0361
    * - sample
      - 1024
      - 10
@@ -483,7 +487,7 @@ The full set of benchmarking results:
      - 10
      - False
      - tensorflow
-     - 0.0230
+     - 0.0329
    * - sample
      - 1024
      - 10
@@ -501,7 +505,7 @@ The full set of benchmarking results:
      - 10
      - True
      - tensorflow
-     - 0.0240
+     - 0.0372
    * - sample
      - 1024
      - 100
@@ -519,7 +523,13 @@ The full set of benchmarking results:
      - 100
      - False
      - tensorflow
-     - 0.0247
+     - 0.0331
+   * - sample
+     - 1024
+     - 100
+     - False
+     - tensorflow
+     - 0.0344
    * - sample
      - 1024
      - 100
@@ -537,7 +547,25 @@ The full set of benchmarking results:
      - 100
      - True
      - tensorflow
-     - 0.0227
+     - 0.0419
+   * - sample
+     - 1024
+     - 100
+     - True
+     - tensorflow
+     - 0.1216
+   * - sample
+     - 2048
+     - 100
+     - False
+     - tensorflow
+     - 0.0788
+   * - sample
+     - 4096
+     - 100
+     - False
+     - tensorflow
+     - 0.1381
    * - sample
      - 8192
      - 1
@@ -555,7 +583,7 @@ The full set of benchmarking results:
      - 1
      - False
      - tensorflow
-     - 0.1768
+     - 0.2908
    * - sample
      - 8192
      - 2
@@ -573,7 +601,7 @@ The full set of benchmarking results:
      - 2
      - False
      - tensorflow
-     - 0.1701
+     - 0.2687
    * - sample
      - 8192
      - 10
@@ -591,7 +619,7 @@ The full set of benchmarking results:
      - 10
      - False
      - tensorflow
-     - 0.1644
+     - 0.2888
    * - sample
      - 8192
      - 100
@@ -609,7 +637,25 @@ The full set of benchmarking results:
      - 100
      - False
      - tensorflow
-     - 0.1782
+     - 0.2596
+   * - sample
+     - 8192
+     - 100
+     - False
+     - tensorflow
+     - 0.3162
+   * - sample
+     - 16384
+     - 100
+     - False
+     - tensorflow
+     - 0.5327
+   * - sample
+     - 32768
+     - 100
+     - False
+     - tensorflow
+     - 1.0417
    * - sample
      - 65536
      - 1
@@ -627,7 +673,7 @@ The full set of benchmarking results:
      - 1
      - False
      - tensorflow
-     - 1.5435
+     - 2.3177
    * - sample
      - 65536
      - 2
@@ -645,7 +691,7 @@ The full set of benchmarking results:
      - 2
      - False
      - tensorflow
-     - 1.3799
+     - 2.5890
    * - sample
      - 65536
      - 10
@@ -663,7 +709,7 @@ The full set of benchmarking results:
      - 10
      - False
      - tensorflow
-     - 1.4873
+     - 2.3435
    * - sample
      - 65536
      - 100
@@ -681,7 +727,19 @@ The full set of benchmarking results:
      - 100
      - False
      - tensorflow
-     - 1.5398
+     - 2.1398
+   * - sample
+     - 65536
+     - 100
+     - False
+     - tensorflow
+     - 2.7709
+   * - sample
+     - 131072
+     - 100
+     - False
+     - tensorflow
+     - 4.7513
    * - train
      - 1024
      - 1
@@ -699,7 +757,7 @@ The full set of benchmarking results:
      - 1
      - False
      - tensorflow
-     - 1.7707
+     - 2.6671
    * - train
      - 1024
      - 1
@@ -717,7 +775,7 @@ The full set of benchmarking results:
      - 1
      - True
      - tensorflow
-     - 6.5328
+     - 5.6455
    * - train
      - 1024
      - 2
@@ -735,7 +793,7 @@ The full set of benchmarking results:
      - 2
      - False
      - tensorflow
-     - 0.7478
+     - 1.1905
    * - train
      - 1024
      - 2
@@ -753,7 +811,7 @@ The full set of benchmarking results:
      - 2
      - True
      - tensorflow
-     - 3.0784
+     - 4.4745
    * - train
      - 1024
      - 10
@@ -771,7 +829,7 @@ The full set of benchmarking results:
      - 10
      - False
      - tensorflow
-     - 0.6542
+     - 1.2027
    * - train
      - 1024
      - 10
@@ -789,7 +847,7 @@ The full set of benchmarking results:
      - 10
      - True
      - tensorflow
-     - 2.3830
+     - 4.3776
    * - train
      - 1024
      - 100
@@ -807,7 +865,13 @@ The full set of benchmarking results:
      - 100
      - False
      - tensorflow
-     - 0.6602
+     - 1.1892
+   * - train
+     - 1024
+     - 100
+     - False
+     - tensorflow
+     - 2.6654
    * - train
      - 1024
      - 100
@@ -825,7 +889,25 @@ The full set of benchmarking results:
      - 100
      - True
      - tensorflow
-     - 2.3786
+     - 4.4074
+   * - train
+     - 1024
+     - 100
+     - True
+     - tensorflow
+     - 5.6328
+   * - train
+     - 2048
+     - 100
+     - False
+     - tensorflow
+     - 1.4975
+   * - train
+     - 4096
+     - 100
+     - False
+     - tensorflow
+     - 1.3429
    * - train
      - 8192
      - 1
@@ -843,7 +925,7 @@ The full set of benchmarking results:
      - 1
      - False
      - tensorflow
-     - 1.0981
+     - 2.0973
    * - train
      - 8192
      - 2
@@ -861,7 +943,7 @@ The full set of benchmarking results:
      - 2
      - False
      - tensorflow
-     - 1.1159
+     - 1.9994
    * - train
      - 8192
      - 10
@@ -879,7 +961,7 @@ The full set of benchmarking results:
      - 10
      - False
      - tensorflow
-     - 1.1356
+     - 2.1315
    * - train
      - 8192
      - 100
@@ -897,7 +979,25 @@ The full set of benchmarking results:
      - 100
      - False
      - tensorflow
-     - 1.2922
+     - 1.8096
+   * - train
+     - 8192
+     - 100
+     - False
+     - tensorflow
+     - 2.6268
+   * - train
+     - 16384
+     - 100
+     - False
+     - tensorflow
+     - 2.6402
+   * - train
+     - 32768
+     - 100
+     - False
+     - tensorflow
+     - 4.3746
    * - train
      - 65536
      - 1
@@ -915,7 +1015,7 @@ The full set of benchmarking results:
      - 1
      - False
      - tensorflow
-     - 5.1239
+     - 8.4454
    * - train
      - 65536
      - 2
@@ -933,7 +1033,7 @@ The full set of benchmarking results:
      - 2
      - False
      - tensorflow
-     - 5.7988
+     - 9.6065
    * - train
      - 65536
      - 10
@@ -951,7 +1051,7 @@ The full set of benchmarking results:
      - 10
      - False
      - tensorflow
-     - 5.3632
+     - 10.1852
    * - train
      - 65536
      - 100
@@ -969,4 +1069,16 @@ The full set of benchmarking results:
      - 100
      - False
      - tensorflow
-     - 5.8745
+     - 7.9833
+   * - train
+     - 65536
+     - 100
+     - False
+     - tensorflow
+     - 10.2184
+   * - train
+     - 131072
+     - 100
+     - False
+     - tensorflow
+     - 14.8537

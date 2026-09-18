@@ -119,62 +119,10 @@ def save_backend_comparison_plots(df: pd.DataFrame) -> list[dict]:
     return plots
 
 
-def save_dimensionality_comparison_plots(df: pd.DataFrame) -> list[dict]:
-    """Runtime vs n_datapoints, lines per dimensionality, one plot per backend/operation (non-eager only)."""
-    plots = []
-    for backend in sorted(df["backend"].unique()):
-        for operation in ["train", "predict", "sample"]:
-            sub = df[
-                (df["backend"] == backend)
-                & (df["operation"] == operation)
-                & (df["eager"] != True)
-            ]
-            if sub.empty:
-                continue
-
-            fig, ax = plt.subplots(figsize=(6, 4))
-            sub = sub.assign(
-                dimensions=sub["n_dimensions"].map(lambda d: f"d={d}")
-            )
-            sns.lineplot(
-                data=sub,
-                x="n_datapoints",
-                y="runtime_seconds",
-                hue="dimensions",
-                hue_order=[
-                    f"d={d}" for d in sorted(sub["n_dimensions"].unique())
-                ],
-                marker="o",
-                ax=ax,
-            )
-            ax.set_xlabel("Number of datapoints")
-            ax.set_ylabel("Runtime (s)")
-            ax.set_xscale("log")
-            ax.set_yscale("log")
-            ax.set_title(
-                f"{operation.capitalize()} runtime by dimensionality ({backend})"
-            )
-            ax.legend(title="Dimensions")
-            fig.tight_layout()
-
-            filename = f"dim_comparison_{backend}_{operation}.png"
-            fig.savefig(os.path.join(IMG_DIR, filename))
-            plt.close(fig)
-            plots.append(
-                {
-                    "filename": filename,
-                    "backend": backend,
-                    "operation": operation,
-                }
-            )
-    return plots
-
-
 def write_rst(
     df: pd.DataFrame,
     eager_plot: str,
     backend_plots: list[dict],
-    dim_plots: list[dict],
 ) -> None:
     """Write the benchmarking RST document."""
     sections = []
@@ -187,7 +135,7 @@ def write_rst(
         "ProbFlow's benchmarking suite fits a Bayesian linear regression model "
         "(:class:`.LinearRegression`) with each supported backend "
         "(TensorFlow, PyTorch, and JAX), for a range of dataset sizes "
-        "and data dimensionality.  For each combination it "
+        "with 100 dimensions.  For each combination it "
         "measures the time to train the model, the time to generate "
         "predictions, and the time to draw samples from the model's "
         "predictive distribution.  Training is additionally benchmarked in "
@@ -233,34 +181,6 @@ def write_rst(
         backend_lines.append("")
     sections.append("\n".join(backend_lines))
 
-    dim_lines = [
-        "Comparing dimensionality",
-        "-------------------------",
-        "",
-        (
-            "The plots below show runtime as a function of the number of "
-            "datapoints, with a separate line for each number of dimensions.  "
-            "Separate plots are shown for each backend and operation.  Only "
-            "non-eager (compiled) training runs are included.\n"
-        ),
-        ".. tabs::",
-        "",
-    ]
-    for operation in ["train", "predict", "sample"]:
-        op_plots = [p for p in dim_plots if p["operation"] == operation]
-        if not op_plots:
-            continue
-        dim_lines.append(f"    .. group-tab:: {operation.capitalize()}")
-        dim_lines.append("")
-        for plot in sorted(op_plots, key=lambda p: p["backend"]):
-            dim_lines.append(
-                f"        .. image:: ../img/benchmarking/{plot['filename']}"
-            )
-            dim_lines.append("           :width: 70 %")
-            dim_lines.append("           :align: center")
-            dim_lines.append("")
-    sections.append("\n".join(dim_lines))
-
     # Full table
     cols = [
         "operation",
@@ -287,8 +207,7 @@ def write_benchmarking_rst_file() -> None:
     df = load_data()
     eager_plot = save_eager_vs_noneager_plot(df)
     backend_plots = save_backend_comparison_plots(df)
-    dim_plots = save_dimensionality_comparison_plots(df)
-    write_rst(df, eager_plot, backend_plots, dim_plots)
+    write_rst(df, eager_plot, backend_plots)
 
 
 if __name__ == "__main__":
