@@ -138,8 +138,6 @@ keeps track of the weight and bias parameters, create a class which inherits
 
         .. code-block:: python3
 
-            import jax.numpy as jnp
-
             class DenseLayer(pf.Module):
 
                 def __init__(self, d_in, d_out):
@@ -147,7 +145,6 @@ keeps track of the weight and bias parameters, create a class which inherits
                     self.b = pf.Parameter([1, d_out])
 
                 def __call__(self, x):
-                    x = jnp.asarray(x)
                     return x @ self.w() + self.b()
 
 
@@ -268,8 +265,6 @@ returns a *probability distribution*!
 
         .. code-block:: python3
 
-            import jax.numpy as jnp
-
             class DenseRegression(pf.ContinuousModel):
 
                 def __init__(self, dims):
@@ -277,7 +272,7 @@ returns a *probability distribution*!
                     self.s = pf.ScaleParameter([1, 1])
 
                 def __call__(self, x):
-                    return pf.Normal(self.net(jnp.asarray(x)), self.s())
+                    return pf.Normal(self.net(x), self.s())
 
 
 Then we can instantiate the model.  We'll create a fully-connected Bayesian
@@ -399,7 +394,6 @@ more easily:
         .. code-block:: python3
 
             import jax.nn
-            import jax.numpy as jnp
 
             class DenseRegression(pf.Model):
 
@@ -414,7 +408,7 @@ more easily:
                     self.s = pf.ScaleParameter()
 
                 def __call__(self, x):
-                    return pf.Normal(self.net(jnp.asarray(x)), self.s())
+                    return pf.Normal(self.net(x), self.s())
 
 Then we can instantiate and fit the network similarly to before:
 

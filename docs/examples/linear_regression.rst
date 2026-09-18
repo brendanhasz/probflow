@@ -121,8 +121,6 @@ parameters to generate probabilistic predictions.
 
         .. code-block:: python3
 
-            import jax.numpy as jnp
-
             pf.set_backend(pf.ProbflowBackend.JAX)
 
             class SimpleLinearRegression(pf.ContinuousModel):
@@ -133,7 +131,7 @@ parameters to generate probabilistic predictions.
                     self.s = pf.ScaleParameter(name='Std')
 
                 def __call__(self, x):
-                    return pf.Normal(jnp.asarray(x)*self.w()+self.b(), self.s())
+                    return pf.Normal(x*self.w()+self.b(), self.s())
 
 
 After defining the model class, we just need to create an instance of the model, and then we can fit it to the data using stochastic variational inference!
@@ -346,8 +344,6 @@ Also note that below we're using the ``@`` operator, which is the
 
         .. code-block:: python3
 
-            import jax.numpy as jnp
-
             class MultipleLinearRegression(pf.ContinuousModel):
 
                 def __init__(self, dims):
@@ -356,8 +352,7 @@ Also note that below we're using the ``@`` operator, which is the
                     self.s = pf.ScaleParameter(name='Std')
 
                 def __call__(self, x):
-                    x = jnp.asarray(x.values)
-                    return pf.Normal(x @ self.w() + self.b(), self.s())
+                    return pf.Normal(x.values @ self.w() + self.b(), self.s())
 
 
 Again, just instantiate the model and fit it to the data.  You can control the
@@ -482,11 +477,10 @@ the parameter.
                     self.betas = pf.MultivariateNormalParameter(dims+2)
 
                 def __call__(self, x):
-                    x = jnp.asarray(x.values)
                     w = self.betas[:-2]
                     b = self.betas[-2]
                     s = jax.nn.softplus(self.betas[-1])
-                    return pf.Normal(x @ w + b, s)
+                    return pf.Normal(x.values @ w + b, s)
 
 
 Then we can instantiate the model and fit it:

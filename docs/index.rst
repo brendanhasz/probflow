@@ -98,8 +98,6 @@ predicted probability distribution of the target:
         .. code-block:: python3
 
             import probflow as pf
-            import jax.numpy as jnp
-
             class LinearRegression(pf.ContinuousModel):
 
                 def __init__(self):
@@ -108,7 +106,6 @@ predicted probability distribution of the target:
                     self.std = pf.ScaleParameter(name='sigma')
 
                 def __call__(self, x):
-                    x = jnp.asarray(x)
                     return pf.Normal(x*self.weight()+self.bias(), self.std())
 
             model = LinearRegression()
@@ -261,7 +258,7 @@ Can be built and fit with ProbFlow in only a few lines:
                     self.std  = pf.DenseNetwork(head_units)
 
                 def __call__(self, x):
-                    z = jax.nn.relu(self.core(jnp.asarray(x)))
+                    z = jax.nn.relu(self.core(x))
                     return pf.Normal(self.mean(z), jnp.exp(self.std(z)))
 
             # Create the model

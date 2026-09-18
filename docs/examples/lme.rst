@@ -48,27 +48,6 @@ where
                     Z = x[:, self.Nf:]
                     return pf.Normal(X @ self.w() + Z @ self.u(), self.sigma())
 
-    .. group-tab:: JAX
-
-        .. code-block:: python3
-
-            import probflow as pf
-            import jax.numpy as jnp
-
-            class LinearMixedEffectsModel(pf.Model):
-
-                def __init__(self, Nf, Nr):
-                    self.Nf = Nf
-                    self.w = pf.Parameter([Nf, 1])
-                    self.u = pf.Parameter([Nr, 1])
-                    self.sigma = pf.ScaleParameter([1, 1])
-
-                def __call__(self, x):
-                    x = jnp.asarray(x)
-                    X = x[:, :self.Nf]
-                    Z = x[:, self.Nf:]
-                    return pf.Normal(X @ self.w() + Z @ self.u(), self.sigma())
-
     .. group-tab:: PyTorch
 
         .. code-block:: python3
@@ -86,6 +65,24 @@ where
 
                 def __call__(self, x):
                     x = torch.tensor(x)
+                    X = x[:, :self.Nf]
+                    Z = x[:, self.Nf:]
+                    return pf.Normal(X @ self.w() + Z @ self.u(), self.sigma())
+
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import probflow as pf
+            class LinearMixedEffectsModel(pf.Model):
+
+                def __init__(self, Nf, Nr):
+                    self.Nf = Nf
+                    self.w = pf.Parameter([Nf, 1])
+                    self.u = pf.Parameter([Nr, 1])
+                    self.sigma = pf.ScaleParameter([1, 1])
+
+                def __call__(self, x):
                     X = x[:, :self.Nf]
                     Z = x[:, self.Nf:]
                     return pf.Normal(X @ self.w() + Z @ self.u(), self.sigma())

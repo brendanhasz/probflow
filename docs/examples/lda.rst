@@ -135,8 +135,6 @@ distributions.
 
         .. code-block:: python3
 
-            import jax.numpy as jnp
-
             class LdaNet(pf.Model):
 
                 def __init__(self, dims):
@@ -144,7 +142,7 @@ distributions.
                     self.net = pf.DenseNetwork(dims)
 
                 def __call__(self, x):
-                    probs = self.net(jnp.asarray(x)) @ self.phi()
+                    probs = self.net(x) @ self.phi()
                     return pf.OneHotCategorical(probs=probs)
 
 

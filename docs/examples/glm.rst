@@ -138,7 +138,6 @@ observation distribution.
                     self.b = pf.Parameter([1, 1], name='Bias')
 
                 def __call__(self, x):
-                    x = jnp.asarray(x)
                     return pf.Poisson(jnp.exp(x @ self.w() + self.b()))
 
 

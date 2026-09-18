@@ -138,8 +138,6 @@ predictions given the parameters and the input data:
 
         .. code-block:: python3
 
-            import jax.numpy as jnp
-
             pf.set_backend(pf.ProbflowBackend.JAX)
 
             class LogisticRegression(pf.CategoricalModel):
@@ -149,7 +147,6 @@ predictions given the parameters and the input data:
                     self.b = pf.Parameter([1, 1], name='Bias')
 
                 def __call__(self, x):
-                    x = jnp.asarray(x)
                     return pf.Bernoulli(x @ self.w() + self.b())
 
 

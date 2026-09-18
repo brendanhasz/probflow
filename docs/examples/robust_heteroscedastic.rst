@@ -206,7 +206,6 @@ Let's create this model with ProbFlow:
                     self.bs = pf.Parameter([1, 1], name='Scale bias')
 
                 def __call__(self, x):
-                    x = jnp.asarray(x)
                     means = x @ self.wm() + self.bm()
                     stds = jnp.exp(x @ self.ws() + self.bs())
                     return pf.Cauchy(means, stds)
@@ -336,7 +335,6 @@ the distribution are):
                     self.df = pf.ScaleParameter(name='Degrees of freedom')
 
                 def __call__(self, x):
-                    x = jnp.asarray(x)
                     means = x @ self.mw() + self.mb()
                     stds = jnp.exp(x @ self.sw() + self.sb())
                     return pf.StudentT(self.df(), means, stds)

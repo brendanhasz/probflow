@@ -57,8 +57,6 @@ TODO: diagram
         .. code-block:: python3
 
             import probflow as pf
-            import jax.numpy as jnp
-
             class AutoregressiveModel(pf.Model):
 
                 def __init__(self, k):
@@ -67,7 +65,6 @@ TODO: diagram
                     self.sigma = pf.ScaleParameter()
 
                 def __call__(self, x):
-                    x = jnp.asarray(x)
                     preds = x @ self.beta() + self.mu()
                     return pf.Normal(preds, self.sigma())
 
