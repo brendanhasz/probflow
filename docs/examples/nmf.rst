@@ -52,6 +52,25 @@ TODO: for a vanilla matrix factorization, description, diagram, math
                     logits = user_vec @ torch.t(item_vec)
                     return pf.Bernoulli(logits)
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import probflow as pf
+            import jax.numpy as jnp
+
+            class MatrixFactorization(pf.Model):
+
+                def __init__(self, Nu, Ni, Nd):
+                    self.user_emb = pf.Embedding(Nu, Nd)
+                    self.item_emb = pf.Embedding(Ni, Nd)
+
+                def __call__(self, x):
+                    user_vec = self.user_emb(jnp.asarray(x['user_id']))
+                    item_vec = self.item_emb(jnp.asarray(x['item_id']))
+                    logits = user_vec @ jnp.swapaxes(item_vec, -1, -2)
+                    return pf.Bernoulli(logits)
+
 
 TODO: Then can instantiate the model
 
@@ -112,6 +131,25 @@ TODO: cite https://arxiv.org/abs/1708.05031
                     logits = self.net(torch.cat([user_vec, item_vec], 1))
                     return pf.Bernoulli(logits)
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.numpy as jnp
+
+            class MatrixFactorization(pf.Model):
+
+                def __init__(self, Nu, Ni, Nd, dims):
+                    self.user_emb = pf.Embedding(Nu, Nd)
+                    self.item_emb = pf.Embedding(Ni, Nd)
+                    self.net = pf.DenseNetwork(dims)
+
+                def __call__(self, x):
+                    user_vec = self.user_emb(jnp.asarray(x['user_id']))
+                    item_vec = self.item_emb(jnp.asarray(x['item_id']))
+                    logits = self.net(jnp.concatenate([user_vec, item_vec], 1))
+                    return pf.Bernoulli(logits)
+
 
 Neural Matrix Factorization
 ---------------------------
@@ -168,6 +206,34 @@ or for neural matrix factorization https://arxiv.org/abs/1708.05031
                     preds_mf = user_mf*item_mf
                     preds_ncf = self.net(torch.cat([user_ncf, item_ncf], 1))
                     logits = self.linear(torch.cat([preds_mf, preds_ncf], 1))
+                    return pf.Bernoulli(logits)
+
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.numpy as jnp
+
+            class NeuralMatrixFactorization(pf.Model):
+
+                def __init__(self, Nu, Ni, Nd, dims):
+                    self.user_mf = pf.Embedding(Nu, Nd)
+                    self.item_mf = pf.Embedding(Ni, Nd)
+                    self.user_ncf = pf.Embedding(Nu, Nd)
+                    self.item_ncf = pf.Embedding(Ni, Nd)
+                    self.net = pf.DenseNetwork(dims)
+                    self.linear = pf.Dense(dims[-1]+Nd)
+
+                def __call__(self, x):
+                    uid = jnp.asarray(x['user_id'])
+                    iid = jnp.asarray(x['item_id'])
+                    user_mf = self.user_mf(uid)
+                    item_mf = self.item_mf(iid)
+                    user_ncf = self.user_ncf(uid)
+                    item_ncf = self.item_ncf(iid)
+                    preds_mf = user_mf*item_mf
+                    preds_ncf = self.net(jnp.concatenate([user_ncf, item_ncf], 1))
+                    logits = self.linear(jnp.concatenate([preds_mf, preds_ncf], 1))
                     return pf.Bernoulli(logits)
 
 

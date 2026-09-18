@@ -125,6 +125,22 @@ observation distribution.
                     x = torch.tensor(x)
                     return pf.Poisson(torch.exp(x @ self.w() + self.b()))
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.numpy as jnp
+
+            class PoissonRegression(pf.DiscreteModel):
+
+                def __init__(self, dims):
+                    self.w = pf.Parameter([dims, 1], name='Weights')
+                    self.b = pf.Parameter([1, 1], name='Bias')
+
+                def __call__(self, x):
+                    x = jnp.asarray(x)
+                    return pf.Poisson(jnp.exp(x @ self.w() + self.b()))
+
 
 Then, we can create an instance of our model and fit it to the data:
 

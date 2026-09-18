@@ -49,8 +49,14 @@ Then, to set up a development environment with probflow and required packages in
 
             make install BACKEND=pytorch
 
+    .. group-tab:: JAX
+
+         .. code-block:: bash
+
+            make install BACKEND=jax
+
 The above command creates a virtual environment (via ``uv``), and installs
-the requirements (including tensorflow or pytorch), dev requirements, and the
+the requirements (including tensorflow or pytorch or jax), dev requirements, and the
 ProbFlow package in editable mode from your version of the source code - see
 the ``Makefile`` for the commands it's running).
 
@@ -84,6 +90,12 @@ and backend-specific tests.  The shared unit tests are in `tests/shared` and the
          .. code-block:: bash
 
             make test-unit BACKEND=pytorch
+            
+    .. group-tab:: JAX
+
+         .. code-block:: bash
+
+            make test-unit BACKEND=jax
 
 There are also statistical tests, which are in `tests/stats`, and which check that the models are accurately able to fit data.
 These are all backend-independent tests, but can be run using either backend.  To run the statistical tests, run:
@@ -101,6 +113,12 @@ These are all backend-independent tests, but can be run using either backend.  T
          .. code-block:: bash
 
             make test-stats BACKEND=pytorch
+            
+    .. group-tab:: JAX
+
+         .. code-block:: bash
+
+            make test-stats BACKEND=jax
 
 If you get an error during the tests and want to debug, the tests are written
 using `pytest <http://docs.pytest.org>`_, so to drop into the

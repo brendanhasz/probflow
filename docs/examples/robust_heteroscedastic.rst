@@ -191,6 +191,26 @@ Let's create this model with ProbFlow:
                     stds = torch.exp(x @ self.ws() + self.bs())
                     return pf.Cauchy(means, stds)
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.numpy as jnp
+
+            class RobustHeteroscedasticRegression(pf.ContinuousModel):
+
+                def __init__(self, dims):
+                    self.wm = pf.Parameter([dims, 1], name='Mean weights')
+                    self.bm = pf.Parameter([1, 1], name='Mean bias')
+                    self.ws = pf.Parameter([dims, 1], name='Scale weights')
+                    self.bs = pf.Parameter([1, 1], name='Scale bias')
+
+                def __call__(self, x):
+                    x = jnp.asarray(x)
+                    means = x @ self.wm() + self.bm()
+                    stds = jnp.exp(x @ self.ws() + self.bs())
+                    return pf.Cauchy(means, stds)
+
 
 And fit it to the data:
 
@@ -298,4 +318,25 @@ the distribution are):
                     x = torch.tensor(x)
                     means = x @ self.wm() + self.bm()
                     stds = torch.exp(x @ self.ws() + self.bs())
+                    return pf.StudentT(self.df(), means, stds)
+
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.numpy as jnp
+
+            class RobustHeteroscedasticRegression(pf.ContinuousModel):
+
+                def __init__(self, dims):
+                    self.mw = pf.Parameter([dims, 1], name='Mean weight')
+                    self.mb = pf.Parameter([1, 1], name='Mean bias')
+                    self.sw = pf.Parameter([dims, 1], name='Scale weight')
+                    self.sb = pf.Parameter([1, 1], name='Scale bias')
+                    self.df = pf.ScaleParameter(name='Degrees of freedom')
+
+                def __call__(self, x):
+                    x = jnp.asarray(x)
+                    means = x @ self.mw() + self.mb()
+                    stds = jnp.exp(x @ self.sw() + self.sb())
                     return pf.StudentT(self.df(), means, stds)

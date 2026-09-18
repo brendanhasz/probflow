@@ -117,6 +117,24 @@ parameters to generate probabilistic predictions.
                     x = torch.tensor(x)
                     return pf.Normal(x*self.w()+self.b(), self.s())
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.numpy as jnp
+
+            pf.set_backend(pf.ProbflowBackend.JAX)
+
+            class SimpleLinearRegression(pf.ContinuousModel):
+
+                def __init__(self):
+                    self.w = pf.Parameter(name='Weight')
+                    self.b = pf.Parameter(name='Bias')
+                    self.s = pf.ScaleParameter(name='Std')
+
+                def __call__(self, x):
+                    return pf.Normal(jnp.asarray(x)*self.w()+self.b(), self.s())
+
 
 After defining the model class, we just need to create an instance of the model, and then we can fit it to the data using stochastic variational inference!
 
@@ -324,6 +342,23 @@ Also note that below we're using the ``@`` operator, which is the
                     x = torch.tensor(x.values)
                     return pf.Normal(x @ self.w() + self.b(), self.s())
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.numpy as jnp
+
+            class MultipleLinearRegression(pf.ContinuousModel):
+
+                def __init__(self, dims):
+                    self.w = pf.Parameter([dims, 1], name='Weights')
+                    self.b = pf.Parameter(name='Bias')
+                    self.s = pf.ScaleParameter(name='Std')
+
+                def __call__(self, x):
+                    x = jnp.asarray(x.values)
+                    return pf.Normal(x @ self.w() + self.b(), self.s())
+
 
 Again, just instantiate the model and fit it to the data.  You can control the
 learning rate and the number of epochs used to fit the data with the ``lr``
@@ -432,6 +467,25 @@ the parameter.
                     w = self.betas[:-2]
                     b = self.betas[-2]
                     s = torch.nn.Softplus()(self.betas[-1])
+                    return pf.Normal(x @ w + b, s)
+
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.nn
+            import jax.numpy as jnp
+
+            class LinearRegression(pf.ContinuousModel):
+
+                def __init__(self, dims):
+                    self.betas = pf.MultivariateNormalParameter(dims+2)
+
+                def __call__(self, x):
+                    x = jnp.asarray(x.values)
+                    w = self.betas[:-2]
+                    b = self.betas[-2]
+                    s = jax.nn.softplus(self.betas[-1])
                     return pf.Normal(x @ w + b, s)
 
 

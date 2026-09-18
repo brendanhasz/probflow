@@ -134,6 +134,22 @@ keeps track of the weight and bias parameters, create a class which inherits
                 def __call__(self, x):
                     return x @ self.w() + self.b()
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.numpy as jnp
+
+            class DenseLayer(pf.Module):
+
+                def __init__(self, d_in, d_out):
+                    self.w = pf.Parameter([d_in, d_out])
+                    self.b = pf.Parameter([1, d_out])
+
+                def __call__(self, x):
+                    x = jnp.asarray(x)
+                    return x @ self.w() + self.b()
+
 
 Side note: we've used ``@``, the
 `infix operator for matrix multiplication <https://docs.python.org/3/whatsnew/3.5.html#whatsnew-pep-465>`_.
@@ -177,6 +193,25 @@ functions in between each (but no activation after the final layer).  In
                     Nl = len(dims)-1 #number of layers
                     self.layers = [DenseLayer(dims[i], dims[i+1]) for i in range(Nl)]
                     self.activations = (Nl-1)*[torch.nn.ReLU()] + [lambda x: x]
+
+                def __call__(self, x):
+                    for i in range(len(self.activations)):
+                        x = self.layers[i](x)
+                        x = self.activations[i](x)
+                    return x
+
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.nn
+
+            class DenseNetwork(pf.Module):
+
+                def __init__(self, dims):
+                    Nl = len(dims)-1 #number of layers
+                    self.layers = [DenseLayer(dims[i], dims[i+1]) for i in range(Nl)]
+                    self.activations = (Nl-1)*[jax.nn.relu] + [lambda x: x]
 
                 def __call__(self, x):
                     for i in range(len(self.activations)):
@@ -228,6 +263,21 @@ returns a *probability distribution*!
                 def __call__(self, x):
                     x = torch.tensor(x)
                     return pf.Normal(self.net(x), self.s())
+
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.numpy as jnp
+
+            class DenseRegression(pf.ContinuousModel):
+
+                def __init__(self, dims):
+                    self.net = DenseNetwork(dims)
+                    self.s = pf.ScaleParameter([1, 1])
+
+                def __call__(self, x):
+                    return pf.Normal(self.net(jnp.asarray(x)), self.s())
 
 
 Then we can instantiate the model.  We'll create a fully-connected Bayesian
@@ -343,6 +393,28 @@ more easily:
                 def __call__(self, x):
                     x = torch.tensor(x)
                     return pf.Normal(self.net(x), self.s())
+
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.nn
+            import jax.numpy as jnp
+
+            class DenseRegression(pf.Model):
+
+                def __init__(self, d_in):
+                    self.net = pf.Sequential([
+                        pf.Dense(d_in, 32),
+                        jax.nn.relu,
+                        pf.Dense(32, 32),
+                        jax.nn.relu,
+                        pf.Dense(32, 1),
+                    ])
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    return pf.Normal(self.net(jnp.asarray(x)), self.s())
 
 Then we can instantiate and fit the network similarly to before:
 

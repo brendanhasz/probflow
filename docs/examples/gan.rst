@@ -70,6 +70,31 @@ First let's build a generator:
                     true_ll = self.D(self(x)).log_prob(labels)
                     return torch.sum(true_ll)
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import probflow as pf
+            import jax
+            
+            jax_random_key = jax.random.PRNGKey(42)
+
+            class Generator(pf.Model):
+
+                def __init__(self, dims):
+                    self.Dz = dims[0]
+                    self.G = pf.DenseNetwork(dims)
+                    self.D = None
+
+                def __call__(self, x):
+                    z = jax.random.normal(key, shape=[x.shape[0], self.Dz])
+                    return self.G(z)
+
+                def log_likelihood(self, _, x):
+                    labels = jnp.ones([x.shape[0], 1])
+                    true_ll = self.D(self(x)).log_prob(labels)
+                    return jnp.sum(true_ll)
+
 
 Then a discriminator:
 
@@ -113,6 +138,27 @@ Then a discriminator:
                     true_ll = self(x).log_prob(labels)
                     fake_ll = self(self.G(x)).log_prob(0*labels)
                     return torch.sum(true_ll + fake_ll)
+
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.numpy as jnp
+
+            class Discriminator(pf.Model):
+
+                def __init__(self, dims):
+                    self.G = None
+                    self.D = pf.DenseNetwork(dims)
+
+                def __call__(self, x):
+                    return pf.Bernoulli(self.D(jnp.asarray(x)))
+
+                def log_likelihood(self, _, x):
+                    labels = jnp.ones([x.shape[0], 1])
+                    true_ll = self(x).log_prob(labels)
+                    fake_ll = self(self.G(x)).log_prob(0*labels)
+                    return jnp.sum(true_ll + fake_ll)
 
 
 And a callback to train the generator for an epoch at the end of each epoch

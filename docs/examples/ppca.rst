@@ -48,3 +48,21 @@ TODO: diagram
                     W = self.W()
                     cov = W @ torch.t(W) + self.sigma()*torch.eye(W.shape[0])
                     return pf.MultivariateNormal(torch.zeros(W.shape[0]), cov)
+
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import probflow as pf
+            import jax.numpy as jnp
+
+            class PPCA(pf.Model):
+
+                def __init__(self, d, q):
+                    self.W = pf.Parameter(shape=[d, q])
+                    self.sigma = pf.ScaleParameter()
+
+                def __call__(self):
+                    W = self.W()
+                    cov = W @ W.T + self.sigma()*jnp.eye(W.shape[0])
+                    return pf.MultivariateNormal(jnp.zeros(W.shape[0]), cov)

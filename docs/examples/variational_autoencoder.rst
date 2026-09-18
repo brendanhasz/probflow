@@ -31,6 +31,25 @@ TODO: talk about how this model requires adding additional KL divergence term
                     self.add_kl_loss(z, pf.Normal(0, 1))
                     return self.decoder(z.sample())
 
+    .. group-tab:: JAX
+
+        .. code-block:: python
+
+            import probflow as pf
+            import jax.numpy as jnp
+
+            class VariationalAutoencoder(pf.ContinuousModel):
+
+                def __init__(self, dims):
+                    self.encoder = pf.DenseRegression(dims, heteroscedastic=True)
+                    self.decoder = pf.DenseRegression(dims[::-1], heteroscedastic=True)
+
+                def __call__(self, x):
+                    x = jnp.asarray(x)
+                    z = self.encoder(x)
+                    self.add_kl_loss(z, pf.Normal(0, 1))
+                    return self.decoder(z.sample())
+
     .. group-tab:: PyTorch
 
         .. code-block:: python

@@ -62,3 +62,27 @@ from the :doc:`previous example <fully_connected>`:
                     x = torch.tensor(x)
                     return pf.Normal(self.net(x), self.s())
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import probflow as pf
+            import jax.nn
+
+            class DenseRegression(pf.Model):
+
+                def __init__(self):
+                    self.net = pf.Sequential([
+                        pf.Dense(5, 128),
+                        pf.BatchNormalization(128),
+                        jax.nn.relu,
+                        pf.Dense(128, 64),
+                        pf.BatchNormalization(64),
+                        jax.nn.relu,
+                        pf.Dense(64, 1),
+                    ])
+                    self.s = pf.ScaleParameter()
+
+                def __call__(self, x):
+                    return pf.Normal(self.net(x), self.s())
+

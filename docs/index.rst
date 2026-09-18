@@ -93,6 +93,26 @@ predicted probability distribution of the target:
 
             model = LinearRegression()
 
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import probflow as pf
+            import jax.numpy as jnp
+
+            class LinearRegression(pf.ContinuousModel):
+
+                def __init__(self):
+                    self.weight = pf.Parameter(name='weight')
+                    self.bias = pf.Parameter(name='bias')
+                    self.std = pf.ScaleParameter(name='sigma')
+
+                def __call__(self, x):
+                    x = jnp.asarray(x)
+                    return pf.Normal(x*self.weight()+self.bias(), self.std())
+
+            model = LinearRegression()
+
     .. group-tab:: PyTorch
 
         .. code-block:: python3
@@ -219,6 +239,30 @@ Can be built and fit with ProbFlow in only a few lines:
                     x = torch.tensor(x)
                     z = torch.nn.ReLU()(self.core(x))
                     return pf.Normal(self.mean(z), torch.exp(self.std(z)))
+
+            # Create the model
+            model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
+
+            # Fit it!
+            model.fit(x, y)
+
+    .. group-tab:: JAX
+
+        .. code-block:: python3
+
+            import jax.nn
+            import jax.numpy as jnp
+
+            class DensityNetwork(pf.ContinuousModel):
+
+                def __init__(self, units, head_units):
+                    self.core = pf.DenseNetwork(units)
+                    self.mean = pf.DenseNetwork(head_units)
+                    self.std  = pf.DenseNetwork(head_units)
+
+                def __call__(self, x):
+                    z = jax.nn.relu(self.core(jnp.asarray(x)))
+                    return pf.Normal(self.mean(z), jnp.exp(self.std(z)))
 
             # Create the model
             model = DensityNetwork([x.shape[1], 256, 128], [128, 64, 32, 1])
