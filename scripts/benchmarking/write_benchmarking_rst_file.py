@@ -144,7 +144,7 @@ def write_rst(
     )
 
     eager_section = (
-        "Training times using eager vs compiled\n"
+        "Eager vs compiled\n"
         "--------------------------------------\n\n"
         "The plot below compares training runtime in eager vs non-eager "
         "(compiled) mode for each backend, using the smallest number of "
@@ -156,8 +156,8 @@ def write_rst(
     sections.append(eager_section)
 
     backend_lines = [
-        "Training times across backends",
-        "------------------------------",
+        "Performance by backend type",
+        "---------------------------",
         "",
         (
             "The plots below show runtime as a function of the number of "
