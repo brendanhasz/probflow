@@ -42,11 +42,11 @@ bump-patch:
 
 # Benchmark fitting a linear regression
 benchmark-linear-regression: install
-	uv run scripts/benchmark_linear_regression.py
+	uv run scripts/benchmarking/benchmark_linear_regression.py
 
 # Write results of linear regression benchmark
 benchmark-linear-regression-writeup:
-	uv run scripts/benchmark_linear_regression.py
+	uv run scripts/benchmarking/write_benchmarking_rst_file.py
 
 # Run benchmarking for all backends and write docs file
 benchmark:

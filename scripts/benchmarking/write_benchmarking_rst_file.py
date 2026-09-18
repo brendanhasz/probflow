@@ -92,15 +92,16 @@ def save_backend_comparison_plots(df: pd.DataFrame) -> list[dict]:
             continue
 
         fig, ax = plt.subplots(figsize=(6, 4))
-        for backend in sorted(sub["backend"].unique()):
-            data = sub[sub["backend"] == backend].sort_values("n_datapoints")
-            ax.plot(
-                data["n_datapoints"],
-                data["runtime_seconds"],
-                marker="o",
-                label=backend,
-                color=BACKEND_COLORS.get(backend),
-            )
+        sns.lineplot(
+            data=sub,
+            x="n_datapoints",
+            y="runtime_seconds",
+            hue="backend",
+            hue_order=sorted(sub["backend"].unique()),
+            palette=BACKEND_COLORS,
+            marker="o",
+            ax=ax,
+        )
         ax.set_xlabel("Number of datapoints")
         ax.set_ylabel("Runtime (s)")
         ax.set_xscale("log")
@@ -132,16 +133,20 @@ def save_dimensionality_comparison_plots(df: pd.DataFrame) -> list[dict]:
                 continue
 
             fig, ax = plt.subplots(figsize=(6, 4))
-            for d in sorted(sub["n_dimensions"].unique()):
-                data = sub[sub["n_dimensions"] == d].sort_values(
-                    "n_datapoints"
-                )
-                ax.plot(
-                    data["n_datapoints"],
-                    data["runtime_seconds"],
-                    marker="o",
-                    label=f"d={d}",
-                )
+            sub = sub.assign(
+                dimensions=sub["n_dimensions"].map(lambda d: f"d={d}")
+            )
+            sns.lineplot(
+                data=sub,
+                x="n_datapoints",
+                y="runtime_seconds",
+                hue="dimensions",
+                hue_order=[
+                    f"d={d}" for d in sorted(sub["n_dimensions"].unique())
+                ],
+                marker="o",
+                ax=ax,
+            )
             ax.set_xlabel("Number of datapoints")
             ax.set_ylabel("Runtime (s)")
             ax.set_xscale("log")
