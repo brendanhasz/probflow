@@ -167,7 +167,10 @@ To run the benchmarking for all backends and write the results to the documentat
 
 .. code-block:: bash
 
-   make benchmark
+   make benchmark BENCHMARKING_DEVICE=<device>
+
+Where ``<device>`` is the device your current hardware is using (``cpu`` or ``gpu``).
+For more on that, see :ref:`selecting-a-device`.
 
 This fits a linear regression on datasets of varying size and dimensionality, for each backend.
 

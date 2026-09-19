@@ -3,6 +3,7 @@
 import gc
 import sys
 import time
+import tracemalloc
 from itertools import product
 
 import numpy as np
@@ -44,9 +45,13 @@ def run_single_benchmark_linear_regression(
     data = []
 
     # Benchmark training time
+    tracemalloc.start()
+    mem_start, _ = tracemalloc.get_traced_memory()
     t0 = time.time()
     model.fit(x, y, epochs=EPOCHS, batch_size=batch_size, eager=eager)
     t1 = time.time()
+    _, mem_max = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
     data.append(
         {
             "n_datapoints": n,
@@ -54,6 +59,7 @@ def run_single_benchmark_linear_regression(
             "backend": pf.get_backend().value,
             "eager": eager,
             "runtime_seconds": t1 - t0,
+            "memory_usage": mem_max - mem_start,
             "operation": "train",
             "device": device,
         }

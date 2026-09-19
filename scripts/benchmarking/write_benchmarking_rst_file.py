@@ -251,10 +251,11 @@ def write_rst(
     cols = [
         "operation",
         "n_datapoints",
-        "n_dimensions",
+        # "n_dimensions",
         "eager",
         "backend",
         "runtime_seconds",
+        "memory_usage",
     ]
     sections.append(
         "Full benchmarking results\n"

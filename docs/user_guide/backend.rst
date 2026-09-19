@@ -1,5 +1,5 @@
-Selecting a Backend and Datatype
-================================
+Selecting a Backend, Datatype, and Device
+=========================================
 
 .. include:: ../macros.hrst
 
@@ -67,3 +67,73 @@ to instead use double precision with the TensorFlow backend:
    precision?  Single precision is also a lot faster on most GPUs.  If your
    data is of a different type, just cast it with (for numpy arrays and pandas
    DataFrames) ``.astype('float32')``.
+
+
+.. _selecting-a-device:
+
+Selecting a Device (CPU or GPU)
+-------------------------------
+
+You can select which device the ProbFlow backend should use for computations
+(i.e., whether to use the CPU or GPU).
+
+To see what the current device is, you can use:
+
+.. code-block:: python3
+
+   import probflow as pf
+
+   pf.get_default_device()
+
+ProbFlow does not provide tools for controlling the device selection, instead
+you should use device management tools provided by the backend you are using:
+
+.. tabs::
+
+   .. group-tab:: TensorFlow
+
+      TensorFlow automatically detects and uses a GPU if available. To force it
+      to use the CPU even if a GPU is available, you can set the ``CUDA_VISIBLE_DEVICES``
+      environment variable, **before** importing TensorFlow or ProbFlow:
+
+      .. code-block:: python3
+
+         import os
+         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
+         # NOTE: set the above env var BEFORE importing TensorFlow or ProbFlow
+         import tensorflow as tf
+         import probflow as pf
+
+
+   .. group-tab:: PyTorch
+
+      PyTorch does **NOT** automatically detect/use a GPU when available.  Even if
+      your hardware has a GPU device, PyTorch will not use it unless you explicitly set the device.
+      To use a GPU with PyTorch, explicitly set the device to 'cuda', **before**
+      initializing any of your ProbFlow code.
+
+      .. code-block:: python3
+
+         import torch
+         torch.set_default_device('cuda')
+
+         # NOTE: set the above env var BEFORE importing ProbFlow
+         # (technically just before initializing any ProbFlow models/modules)
+         import probflow as pf
+
+   .. group-tab:: JAX
+
+      JAX automatically detects and uses a GPU if available. To force it to use the CPU
+      even if a GPU is available, you can set the ``JAX_PLATFORMS`` environment
+      variable, **before** importing JAX or ProbFlow:
+
+      .. code-block:: python3
+
+         import os
+         os.environ["JAX_PLATFORMS"] = "cpu"
+
+         # NOTE: set the above env var BEFORE importing JAX + ProbFlow
+         import jax
+         import jax.numpy as jnp
+         import probflow as pf
