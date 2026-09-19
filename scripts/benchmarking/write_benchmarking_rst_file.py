@@ -64,16 +64,22 @@ def save_eager_vs_noneager_plot(df: pd.DataFrame) -> str:
         & (df["device"] == device)
     ].copy()
     sub["mode"] = sub["eager"].map({True: "Eager", False: "Non-eager"})
+    sub["memory_usage_mb"] = sub["memory_usage"] / 1_000_000
 
-    fig, ax = plt.subplots(figsize=(6, 4))
-    sns.barplot(data=sub, x="backend", y="runtime_seconds", hue="mode", ax=ax)
-    ax.set_xlabel("Backend")
-    ax.set_ylabel("Training runtime (s)")
-    ax.set_yscale("log")
-    ax.set_title(
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 8))
+    sns.barplot(data=sub, x="backend", y="runtime_seconds", hue="mode", ax=ax1)
+    ax1.set_xlabel("Backend")
+    ax1.set_ylabel("Training runtime (s)")
+    ax1.set_yscale("log")
+    ax1.set_title(
         f"Eager vs non-eager training (n={n_min}, d={d_max}, device={device})"
     )
-    ax.legend(title="Mode")
+    ax1.legend(title="Mode")
+
+    sns.barplot(data=sub, x="backend", y="memory_usage_mb", hue="mode", ax=ax2)
+    ax2.set_xlabel("Backend")
+    ax2.set_ylabel("RAM Usage (MB)")
+    ax2.legend(title="Mode")
     fig.tight_layout()
 
     filename = "eager_vs_noneager.png"
@@ -97,7 +103,15 @@ def save_backend_comparison_plots(df: pd.DataFrame) -> list[dict]:
         if sub.empty:
             continue
 
-        fig, ax = plt.subplots(figsize=(6, 4))
+        # only training runs have memory usage data, so only add that panel there
+        if operation == "train":
+            sub = sub.copy()
+            sub["memory_usage_mb"] = sub["memory_usage"] / 1_000_000
+            fig, (ax, ax2) = plt.subplots(2, 1, figsize=(6, 8))
+        else:
+            fig, ax = plt.subplots(figsize=(6, 4))
+            ax2 = None
+
         sns.lineplot(
             data=sub,
             x="n_datapoints",
@@ -116,6 +130,23 @@ def save_backend_comparison_plots(df: pd.DataFrame) -> list[dict]:
             f"{operation.capitalize()} runtime by backend (d={d_max}, device={device})"
         )
         ax.legend(title="Backend")
+
+        if ax2 is not None:
+            sns.lineplot(
+                data=sub,
+                x="n_datapoints",
+                y="memory_usage_mb",
+                hue="backend",
+                hue_order=sorted(sub["backend"].unique()),
+                palette=BACKEND_COLORS,
+                marker="o",
+                ax=ax2,
+            )
+            ax2.set_xlabel("Number of datapoints")
+            ax2.set_ylabel("RAM Usage (MB)")
+            ax2.set_xscale("log")
+            ax2.legend(title="Backend")
+
         fig.tight_layout()
 
         filename = f"backend_comparison_{operation}.png"
@@ -128,13 +159,14 @@ def save_backend_comparison_plots(df: pd.DataFrame) -> list[dict]:
 def save_cpu_vs_gpu_plots(df: pd.DataFrame) -> list[dict]:
     """Runtime vs n_datapoints (log-log), comparing CPU vs GPU, per backend."""
     plots = []
-    sub_all = df[(df["eager"] == False) & (df["operation"] == "train")]
+    sub_all = df[(df["eager"] == False) & (df["operation"] == "train")].copy()
+    sub_all["memory_usage_mb"] = sub_all["memory_usage"] / 1_000_000
     for backend in sorted(sub_all["backend"].unique()):
         sub = sub_all[sub_all["backend"] == backend]
         if sub.empty:
             continue
 
-        fig, ax = plt.subplots(figsize=(6, 4))
+        fig, (ax, ax2) = plt.subplots(2, 1, figsize=(6, 8))
         sns.lineplot(
             data=sub,
             x="n_datapoints",
@@ -149,6 +181,19 @@ def save_cpu_vs_gpu_plots(df: pd.DataFrame) -> list[dict]:
         ax.set_yscale("log")
         ax.set_title(f"{backend.capitalize()}: CPU vs GPU training runtime")
         ax.legend(title="Device")
+
+        sns.lineplot(
+            data=sub,
+            x="n_datapoints",
+            y="memory_usage_mb",
+            hue="device",
+            marker="o",
+            ax=ax2,
+        )
+        ax2.set_xlabel("Number of datapoints")
+        ax2.set_ylabel("RAM Usage (MB)")
+        ax2.set_xscale("log")
+        ax2.legend(title="Device")
         fig.tight_layout()
 
         filename = f"cpu_vs_gpu_{backend}.png"
