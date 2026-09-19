@@ -47,7 +47,7 @@ def to_numpy(x: TensorLike) -> np.ndarray:
         import torch
 
         if isinstance(x, torch.Tensor):
-            return x.detach().clone().numpy()
+            return x.detach().clone().cpu().numpy()
         else:
             return np.array(x)
     elif get_backend() == ProbflowBackend.JAX:
@@ -57,7 +57,7 @@ def to_numpy(x: TensorLike) -> np.ndarray:
 
         if isinstance(x, JaxVariable):
             x = x.value
-        return jax.device_get(x)
+        return np.asarray(jax.device_get(x))
     else:
         return np.array(x)
 

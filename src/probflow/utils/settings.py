@@ -4,8 +4,8 @@ Backend
 -------
 
 Which backend to use.  Can be either
-`TensorFlow 2.0 <http://www.tensorflow.org/beta/>`_
-or `PyTorch <http://pytorch.org/>`_.
+`TensorFlow <http://www.tensorflow.org/beta/>`_
+or `PyTorch <http://pytorch.org/>`_ or |JAX| .
 
 * :func:`.get_backend`
 * :func:`.set_backend`
@@ -62,6 +62,15 @@ variational distributions while inside the context manager.
 * :class:`.Sampling`
 
 
+Default device
+--------------
+
+The device on which tensors and calculations are computed should be controlled by
+Tensorflow, PyTorch, or JAX code.  However, ProbFlow provides a function to check
+what the current default device is being used:
+
+* :func:`.get_default_device`
+
 """
 
 import importlib.util
@@ -81,6 +90,7 @@ __all__ = [
     "Sampling",
     "get_backend",
     "get_datatype",
+    "get_default_device",
     "get_flipout",
     "get_samples",
     "get_static_sampling_uuid",
@@ -496,3 +506,19 @@ class Sampling:
             set_flipout(False)
         if self._static:
             set_static_sampling_uuid(None)
+
+
+def get_default_device() -> Any:
+    """Get the default device currently used by the backend."""
+    if get_backend() == ProbflowBackend.PYTORCH:
+        import torch
+
+        return torch.ones([1], dtype=get_datatype()).device
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.ones([1], dtype=get_datatype()).device
+    else:
+        import tensorflow as tf
+
+        return tf.ones([1], dtype=get_datatype()).device

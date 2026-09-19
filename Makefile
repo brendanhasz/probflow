@@ -3,6 +3,7 @@
 
 BACKEND ?= tensorflow
 AVAILABLE_BACKENDS := tensorflow pytorch jax
+BENCHMARKING_DEVICE ?= cpu
 
 # Install probflow package and requirements
 install:
@@ -42,7 +43,7 @@ bump-patch:
 
 # Benchmark fitting a linear regression
 benchmark-linear-regression: install
-	uv run scripts/benchmarking/benchmark_linear_regression.py
+	uv run scripts/benchmarking/benchmark_linear_regression.py $(BENCHMARKING_DEVICE)
 
 # Write results of linear regression benchmark
 benchmark-linear-regression-writeup:
@@ -51,7 +52,7 @@ benchmark-linear-regression-writeup:
 # Run benchmarking for all backends and write docs file
 benchmark:
 	@for backend in $(AVAILABLE_BACKENDS); do \
-		$(MAKE) benchmark-linear-regression BACKEND=$$backend; \
+		$(MAKE) benchmark-linear-regression BACKEND=$$backend BENCHMARKING_DEVICE=$(BENCHMARKING_DEVICE); \
 	done
 	$(MAKE) benchmark-linear-regression-writeup
 	$(MAKE) docs

@@ -5,9 +5,9 @@ Benchmarking
 
 .. include:: ../macros.hrst
 
-ProbFlow's benchmarking suite fits a Bayesian linear regression model (:class:`.LinearRegression`) with each supported backend (TensorFlow, PyTorch, and JAX), for a range of dataset sizes and data dimensionality.  For each combination it measures the time to train the model, the time to generate predictions, and the time to draw samples from the model's predictive distribution.  Training is additionally benchmarked in both eager and non-eager (compiled) modes, for smaller datasets (for larger datasets non-eager/compiled mode is always used).
+ProbFlow's benchmarking suite fits a Bayesian linear regression model (:class:`.LinearRegression`) with each supported backend (TensorFlow, PyTorch, and JAX), for a range of dataset sizes with 100 dimensions.  For each combination it measures the time to train the model, the time to generate predictions, and the time to draw samples from the model's predictive distribution.  Training is additionally benchmarked in both eager and non-eager (compiled) modes, for smaller datasets (for larger datasets non-eager/compiled mode is always used).
 
-Training times using eager vs compiled
+Eager vs compiled
 --------------------------------------
 
 The plot below compares training runtime in eager vs non-eager (compiled) mode for each backend, using the smallest number of datapoints and the largest number of dimensions benchmarked.
@@ -16,8 +16,8 @@ The plot below compares training runtime in eager vs non-eager (compiled) mode f
    :width: 70 %
    :align: center
 
-Training times across backends
-------------------------------
+Performance by backend type
+---------------------------
 
 The plots below show runtime as a function of the number of datapoints, at the largest number of dimensions benchmarked, with a separate line for each backend.  Only non-eager (compiled) training runs are included.
 
@@ -42,52 +42,28 @@ The plots below show runtime as a function of the number of datapoints, at the l
            :align: center
 
 
-Comparing dimensionality
+Performance on CPU vs GPU
 -------------------------
 
-The plots below show runtime as a function of the number of datapoints, with a separate line for each number of dimensions.  Separate plots are shown for each backend and operation.  Only non-eager (compiled) training runs are included.
+The plots below show training runtime as a function of the number of datapoints (both on log scales), comparing CPU and GPU execution for each backend.  Only non-eager (compiled) training runs are included.
 
 .. tabs::
 
-    .. group-tab:: Train
+    .. group-tab:: Jax
 
-        .. image:: ../img/benchmarking/dim_comparison_jax_train.png
+        .. image:: ../img/benchmarking/cpu_vs_gpu_jax.png
            :width: 70 %
            :align: center
 
-        .. image:: ../img/benchmarking/dim_comparison_pytorch_train.png
+    .. group-tab:: Pytorch
+
+        .. image:: ../img/benchmarking/cpu_vs_gpu_pytorch.png
            :width: 70 %
            :align: center
 
-        .. image:: ../img/benchmarking/dim_comparison_tensorflow_train.png
-           :width: 70 %
-           :align: center
+    .. group-tab:: Tensorflow
 
-    .. group-tab:: Predict
-
-        .. image:: ../img/benchmarking/dim_comparison_jax_predict.png
-           :width: 70 %
-           :align: center
-
-        .. image:: ../img/benchmarking/dim_comparison_pytorch_predict.png
-           :width: 70 %
-           :align: center
-
-        .. image:: ../img/benchmarking/dim_comparison_tensorflow_predict.png
-           :width: 70 %
-           :align: center
-
-    .. group-tab:: Sample
-
-        .. image:: ../img/benchmarking/dim_comparison_jax_sample.png
-           :width: 70 %
-           :align: center
-
-        .. image:: ../img/benchmarking/dim_comparison_pytorch_sample.png
-           :width: 70 %
-           :align: center
-
-        .. image:: ../img/benchmarking/dim_comparison_tensorflow_sample.png
+        .. image:: ../img/benchmarking/cpu_vs_gpu_tensorflow.png
            :width: 70 %
            :align: center
 
@@ -102,871 +78,817 @@ The full set of benchmarking results:
 
    * - operation
      - n_datapoints
-     - n_dimensions
      - eager
      - backend
      - runtime_seconds
+     - memory_usage
    * - predict
      - 1024
-     - 1
      - False
      - jax
-     - 0.0021
+     - 0.0066
+     - 
    * - predict
      - 1024
-     - 1
      - False
      - pytorch
-     - 0.0010
+     - 0.0013
+     - 
    * - predict
      - 1024
-     - 1
-     - False
-     - tensorflow
-     - 0.0021
-   * - predict
-     - 1024
-     - 1
-     - True
-     - jax
-     - 0.1071
-   * - predict
-     - 1024
-     - 1
-     - True
-     - pytorch
-     - 0.0003
-   * - predict
-     - 1024
-     - 1
-     - True
-     - tensorflow
-     - 0.0050
-   * - predict
-     - 1024
-     - 2
-     - False
-     - jax
-     - 0.0023
-   * - predict
-     - 1024
-     - 2
      - False
      - pytorch
-     - 0.0004
-   * - predict
-     - 1024
-     - 2
-     - False
-     - tensorflow
      - 0.0022
+     - 
    * - predict
      - 1024
-     - 2
+     - False
+     - tensorflow
+     - 0.0072
+     - 
+   * - predict
+     - 1024
+     - False
+     - tensorflow
+     - 0.0136
+     - 
+   * - predict
+     - 1024
      - True
      - jax
-     - 0.0449
+     - 0.3759
+     - 
    * - predict
      - 1024
-     - 2
      - True
      - pytorch
-     - 0.0005
+     - 0.0033
+     - 
    * - predict
      - 1024
-     - 2
-     - True
-     - tensorflow
-     - 0.0020
-   * - predict
-     - 1024
-     - 10
-     - False
-     - jax
-     - 0.0023
-   * - predict
-     - 1024
-     - 10
-     - False
-     - pytorch
-     - 0.0018
-   * - predict
-     - 1024
-     - 10
-     - False
-     - tensorflow
-     - 0.0018
-   * - predict
-     - 1024
-     - 10
-     - True
-     - jax
-     - 0.0467
-   * - predict
-     - 1024
-     - 10
      - True
      - pytorch
-     - 0.0012
+     - 0.0038
+     - 
    * - predict
      - 1024
-     - 10
      - True
      - tensorflow
-     - 0.0015
+     - 0.0112
+     - 
    * - predict
      - 1024
-     - 100
-     - False
-     - jax
-     - 0.0025
-   * - predict
-     - 1024
-     - 100
-     - False
-     - pytorch
-     - 0.0003
-   * - predict
-     - 1024
-     - 100
-     - False
-     - tensorflow
-     - 0.0023
-   * - predict
-     - 1024
-     - 100
-     - True
-     - jax
-     - 0.0630
-   * - predict
-     - 1024
-     - 100
-     - True
-     - pytorch
-     - 0.0003
-   * - predict
-     - 1024
-     - 100
      - True
      - tensorflow
-     - 0.0017
+     - 0.0675
+     - 
    * - predict
-     - 8192
-     - 1
+     - 2048
      - False
      - jax
-     - 0.0154
-   * - predict
-     - 8192
-     - 1
-     - False
-     - pytorch
-     - 0.0016
-   * - predict
-     - 8192
-     - 1
-     - False
-     - tensorflow
-     - 0.0124
-   * - predict
-     - 8192
-     - 2
-     - False
-     - jax
-     - 0.0162
-   * - predict
-     - 8192
-     - 2
-     - False
-     - pytorch
-     - 0.0016
-   * - predict
-     - 8192
-     - 2
-     - False
-     - tensorflow
-     - 0.0114
-   * - predict
-     - 8192
-     - 10
-     - False
-     - jax
-     - 0.0144
-   * - predict
-     - 8192
-     - 10
-     - False
-     - pytorch
-     - 0.0014
-   * - predict
-     - 8192
-     - 10
-     - False
-     - tensorflow
-     - 0.0126
-   * - predict
-     - 8192
-     - 100
-     - False
-     - jax
-     - 0.0145
-   * - predict
-     - 8192
-     - 100
-     - False
-     - pytorch
-     - 0.0019
-   * - predict
-     - 8192
-     - 100
-     - False
-     - tensorflow
-     - 0.0163
-   * - predict
-     - 65536
-     - 1
-     - False
-     - jax
-     - 0.1205
-   * - predict
-     - 65536
-     - 1
-     - False
-     - pytorch
-     - 0.0152
-   * - predict
-     - 65536
-     - 1
-     - False
-     - tensorflow
-     - 0.1112
-   * - predict
-     - 65536
-     - 2
-     - False
-     - jax
-     - 0.1057
-   * - predict
-     - 65536
-     - 2
-     - False
-     - pytorch
-     - 0.0091
-   * - predict
-     - 65536
-     - 2
-     - False
-     - tensorflow
-     - 0.0916
-   * - predict
-     - 65536
-     - 10
-     - False
-     - jax
-     - 0.1236
-   * - predict
-     - 65536
-     - 10
-     - False
-     - pytorch
      - 0.0122
+     - 
+   * - predict
+     - 2048
+     - False
+     - pytorch
+     - 0.0024
+     - 
+   * - predict
+     - 2048
+     - False
+     - pytorch
+     - 0.0043
+     - 
+   * - predict
+     - 2048
+     - False
+     - tensorflow
+     - 0.0178
+     - 
+   * - predict
+     - 2048
+     - False
+     - tensorflow
+     - 0.0188
+     - 
+   * - predict
+     - 4096
+     - False
+     - jax
+     - 0.0217
+     - 
+   * - predict
+     - 4096
+     - False
+     - pytorch
+     - 0.0033
+     - 
+   * - predict
+     - 4096
+     - False
+     - pytorch
+     - 0.0066
+     - 
+   * - predict
+     - 4096
+     - False
+     - tensorflow
+     - 0.0201
+     - 
+   * - predict
+     - 4096
+     - False
+     - tensorflow
+     - 0.0291
+     - 
+   * - predict
+     - 8192
+     - False
+     - jax
+     - 0.0402
+     - 
+   * - predict
+     - 8192
+     - False
+     - pytorch
+     - 0.0100
+     - 
+   * - predict
+     - 8192
+     - False
+     - pytorch
+     - 0.0123
+     - 
+   * - predict
+     - 8192
+     - False
+     - tensorflow
+     - 0.0385
+     - 
+   * - predict
+     - 8192
+     - False
+     - tensorflow
+     - 0.0472
+     - 
+   * - predict
+     - 16384
+     - False
+     - jax
+     - 0.0817
+     - 
+   * - predict
+     - 16384
+     - False
+     - pytorch
+     - 0.0140
+     - 
+   * - predict
+     - 16384
+     - False
+     - pytorch
+     - 0.0246
+     - 
+   * - predict
+     - 16384
+     - False
+     - tensorflow
+     - 0.0694
+     - 
+   * - predict
+     - 16384
+     - False
+     - tensorflow
+     - 0.0870
+     - 
+   * - predict
+     - 32768
+     - False
+     - jax
+     - 0.1843
+     - 
+   * - predict
+     - 32768
+     - False
+     - pytorch
+     - 0.0299
+     - 
+   * - predict
+     - 32768
+     - False
+     - pytorch
+     - 0.0458
+     - 
+   * - predict
+     - 32768
+     - False
+     - tensorflow
+     - 0.1383
+     - 
+   * - predict
+     - 32768
+     - False
+     - tensorflow
+     - 0.1586
+     - 
    * - predict
      - 65536
-     - 10
      - False
-     - tensorflow
-     - 0.0931
+     - jax
+     - 0.3178
+     - 
    * - predict
      - 65536
-     - 100
      - False
-     - jax
-     - 0.1196
+     - pytorch
+     - 0.0420
+     - 
    * - predict
      - 65536
-     - 100
      - False
      - pytorch
-     - 0.0319
+     - 0.0955
+     - 
    * - predict
      - 65536
-     - 100
      - False
      - tensorflow
-     - 0.0910
-   * - sample
-     - 1024
-     - 1
+     - 0.2869
+     - 
+   * - predict
+     - 65536
+     - False
+     - tensorflow
+     - 0.3386
+     - 
+   * - predict
+     - 131072
      - False
      - jax
-     - 0.1959
-   * - sample
-     - 1024
-     - 1
+     - 0.6357
+     - 
+   * - predict
+     - 131072
      - False
      - pytorch
-     - 0.0283
-   * - sample
-     - 1024
-     - 1
+     - 0.1166
+     - 
+   * - predict
+     - 131072
+     - False
+     - pytorch
+     - 0.2265
+     - 
+   * - predict
+     - 131072
      - False
      - tensorflow
-     - 0.0226
+     - 0.5704
+     - 
+   * - predict
+     - 131072
+     - False
+     - tensorflow
+     - 0.6503
+     - 
    * - sample
      - 1024
-     - 1
+     - False
+     - jax
+     - 0.7469
+     - 
+   * - sample
+     - 1024
+     - False
+     - pytorch
+     - 0.0064
+     - 
+   * - sample
+     - 1024
+     - False
+     - pytorch
+     - 0.0553
+     - 
+   * - sample
+     - 1024
+     - False
+     - tensorflow
+     - 0.0280
+     - 
+   * - sample
+     - 1024
+     - False
+     - tensorflow
+     - 0.0727
+     - 
+   * - sample
+     - 1024
      - True
      - jax
-     - 0.9256
+     - 3.1792
+     - 
    * - sample
      - 1024
-     - 1
      - True
      - pytorch
-     - 0.0156
+     - 0.0111
+     - 
    * - sample
      - 1024
-     - 1
-     - True
-     - tensorflow
-     - 0.1061
-   * - sample
-     - 1024
-     - 2
-     - False
-     - jax
-     - 0.1777
-   * - sample
-     - 1024
-     - 2
-     - False
-     - pytorch
-     - 0.0160
-   * - sample
-     - 1024
-     - 2
-     - False
-     - tensorflow
-     - 0.0220
-   * - sample
-     - 1024
-     - 2
-     - True
-     - jax
-     - 0.3198
-   * - sample
-     - 1024
-     - 2
      - True
      - pytorch
-     - 0.0197
+     - 0.0766
+     - 
    * - sample
      - 1024
-     - 2
      - True
      - tensorflow
-     - 0.0254
+     - 0.2347
+     - 
    * - sample
      - 1024
-     - 10
-     - False
-     - jax
-     - 0.1891
-   * - sample
-     - 1024
-     - 10
-     - False
-     - pytorch
-     - 0.0192
-   * - sample
-     - 1024
-     - 10
-     - False
-     - tensorflow
-     - 0.0230
-   * - sample
-     - 1024
-     - 10
-     - True
-     - jax
-     - 0.3664
-   * - sample
-     - 1024
-     - 10
-     - True
-     - pytorch
-     - 0.0174
-   * - sample
-     - 1024
-     - 10
      - True
      - tensorflow
-     - 0.0240
+     - 0.6430
+     - 
    * - sample
-     - 1024
-     - 100
+     - 2048
      - False
      - jax
-     - 0.1875
+     - 1.5119
+     - 
    * - sample
-     - 1024
-     - 100
+     - 2048
      - False
      - pytorch
-     - 0.0268
+     - 0.0142
+     - 
    * - sample
-     - 1024
-     - 100
+     - 2048
+     - False
+     - pytorch
+     - 0.1275
+     - 
+   * - sample
+     - 2048
      - False
      - tensorflow
-     - 0.0247
+     - 0.0921
+     - 
    * - sample
+     - 2048
+     - False
+     - tensorflow
+     - 0.1411
+     - 
+   * - sample
+     - 4096
+     - False
+     - jax
+     - 2.9452
+     - 
+   * - sample
+     - 4096
+     - False
+     - pytorch
+     - 0.0287
+     - 
+   * - sample
+     - 4096
+     - False
+     - pytorch
+     - 0.2504
+     - 
+   * - sample
+     - 4096
+     - False
+     - tensorflow
+     - 0.1124
+     - 
+   * - sample
+     - 4096
+     - False
+     - tensorflow
+     - 0.2623
+     - 
+   * - sample
+     - 8192
+     - False
+     - jax
+     - 7.0083
+     - 
+   * - sample
+     - 8192
+     - False
+     - pytorch
+     - 0.0605
+     - 
+   * - sample
+     - 8192
+     - False
+     - pytorch
+     - 0.5467
+     - 
+   * - sample
+     - 8192
+     - False
+     - tensorflow
+     - 0.2250
+     - 
+   * - sample
+     - 8192
+     - False
+     - tensorflow
+     - 0.5120
+     - 
+   * - sample
+     - 16384
+     - False
+     - jax
+     - 12.9754
+     - 
+   * - sample
+     - 16384
+     - False
+     - pytorch
+     - 0.1253
+     - 
+   * - sample
+     - 16384
+     - False
+     - pytorch
+     - 1.0257
+     - 
+   * - sample
+     - 16384
+     - False
+     - tensorflow
+     - 0.4454
+     - 
+   * - sample
+     - 16384
+     - False
+     - tensorflow
+     - 1.0652
+     - 
+   * - sample
+     - 32768
+     - False
+     - jax
+     - 26.1943
+     - 
+   * - sample
+     - 32768
+     - False
+     - pytorch
+     - 0.2521
+     - 
+   * - sample
+     - 32768
+     - False
+     - pytorch
+     - 3.0564
+     - 
+   * - sample
+     - 32768
+     - False
+     - tensorflow
+     - 0.8988
+     - 
+   * - sample
+     - 32768
+     - False
+     - tensorflow
+     - 2.7354
+     - 
+   * - sample
+     - 65536
+     - False
+     - jax
+     - 51.3290
+     - 
+   * - sample
+     - 65536
+     - False
+     - pytorch
+     - 0.5143
+     - 
+   * - sample
+     - 65536
+     - False
+     - pytorch
+     - 4.1766
+     - 
+   * - sample
+     - 65536
+     - False
+     - tensorflow
+     - 1.7781
+     - 
+   * - sample
+     - 65536
+     - False
+     - tensorflow
+     - 4.2621
+     - 
+   * - sample
+     - 131072
+     - False
+     - jax
+     - 101.0821
+     - 
+   * - sample
+     - 131072
+     - False
+     - pytorch
+     - 1.1038
+     - 
+   * - sample
+     - 131072
+     - False
+     - pytorch
+     - 9.1291
+     - 
+   * - sample
+     - 131072
+     - False
+     - tensorflow
+     - 3.5619
+     - 
+   * - sample
+     - 131072
+     - False
+     - tensorflow
+     - 11.2442
+     - 
+   * - train
      - 1024
-     - 100
+     - False
+     - jax
+     - 6.3979
+     - 1981649.0000
+   * - train
+     - 1024
+     - False
+     - pytorch
+     - 0.8247
+     - 54920.0000
+   * - train
+     - 1024
+     - False
+     - pytorch
+     - 1.7825
+     - 178457.0000
+   * - train
+     - 1024
+     - False
+     - tensorflow
+     - 11.4120
+     - 4262734.0000
+   * - train
+     - 1024
+     - False
+     - tensorflow
+     - 15.2351
+     - 4261753.0000
+   * - train
+     - 1024
      - True
      - jax
-     - 0.4127
-   * - sample
+     - 233.3745
+     - 212160901.0000
+   * - train
      - 1024
-     - 100
      - True
      - pytorch
-     - 0.0331
-   * - sample
-     - 1024
-     - 100
-     - True
-     - tensorflow
-     - 0.0227
-   * - sample
-     - 8192
-     - 1
-     - False
-     - jax
-     - 1.4423
-   * - sample
-     - 8192
-     - 1
-     - False
-     - pytorch
-     - 0.1377
-   * - sample
-     - 8192
-     - 1
-     - False
-     - tensorflow
-     - 0.1768
-   * - sample
-     - 8192
-     - 2
-     - False
-     - jax
-     - 1.4391
-   * - sample
-     - 8192
-     - 2
-     - False
-     - pytorch
-     - 0.0939
-   * - sample
-     - 8192
-     - 2
-     - False
-     - tensorflow
-     - 0.1701
-   * - sample
-     - 8192
-     - 10
-     - False
-     - jax
-     - 1.4363
-   * - sample
-     - 8192
-     - 10
-     - False
-     - pytorch
-     - 0.0934
-   * - sample
-     - 8192
-     - 10
-     - False
-     - tensorflow
-     - 0.1644
-   * - sample
-     - 8192
-     - 100
-     - False
-     - jax
-     - 1.4904
-   * - sample
-     - 8192
-     - 100
-     - False
-     - pytorch
-     - 0.2029
-   * - sample
-     - 8192
-     - 100
-     - False
-     - tensorflow
-     - 0.1782
-   * - sample
-     - 65536
-     - 1
-     - False
-     - jax
-     - 12.0752
-   * - sample
-     - 65536
-     - 1
-     - False
-     - pytorch
-     - 1.0688
-   * - sample
-     - 65536
-     - 1
-     - False
-     - tensorflow
-     - 1.5435
-   * - sample
-     - 65536
-     - 2
-     - False
-     - jax
-     - 12.8104
-   * - sample
-     - 65536
-     - 2
-     - False
-     - pytorch
-     - 0.7253
-   * - sample
-     - 65536
-     - 2
-     - False
-     - tensorflow
-     - 1.3799
-   * - sample
-     - 65536
-     - 10
-     - False
-     - jax
-     - 12.8615
-   * - sample
-     - 65536
-     - 10
-     - False
-     - pytorch
-     - 0.9260
-   * - sample
-     - 65536
-     - 10
-     - False
-     - tensorflow
-     - 1.4873
-   * - sample
-     - 65536
-     - 100
-     - False
-     - jax
-     - 13.2683
-   * - sample
-     - 65536
-     - 100
-     - False
-     - pytorch
-     - 2.0836
-   * - sample
-     - 65536
-     - 100
-     - False
-     - tensorflow
-     - 1.5398
+     - 14.2693
+     - 67472934.0000
    * - train
      - 1024
-     - 1
-     - False
-     - jax
-     - 0.7825
-   * - train
-     - 1024
-     - 1
-     - False
-     - pytorch
-     - 0.4383
-   * - train
-     - 1024
-     - 1
-     - False
-     - tensorflow
-     - 1.7707
-   * - train
-     - 1024
-     - 1
-     - True
-     - jax
-     - 21.9519
-   * - train
-     - 1024
-     - 1
      - True
      - pytorch
-     - 4.6179
+     - 38.9175
+     - 78652464.0000
    * - train
      - 1024
-     - 1
      - True
      - tensorflow
-     - 6.5328
+     - 42.3649
+     - 48039817.0000
    * - train
      - 1024
-     - 2
-     - False
-     - jax
-     - 0.7420
-   * - train
-     - 1024
-     - 2
-     - False
-     - pytorch
-     - 0.3008
-   * - train
-     - 1024
-     - 2
-     - False
-     - tensorflow
-     - 0.7478
-   * - train
-     - 1024
-     - 2
-     - True
-     - jax
-     - 18.9255
-   * - train
-     - 1024
-     - 2
-     - True
-     - pytorch
-     - 0.5095
-   * - train
-     - 1024
-     - 2
      - True
      - tensorflow
-     - 3.0784
+     - 43.4427
+     - 48041726.0000
    * - train
-     - 1024
-     - 10
+     - 2048
      - False
      - jax
-     - 0.7395
+     - 5.4820
+     - 1590916.0000
    * - train
-     - 1024
-     - 10
+     - 2048
      - False
      - pytorch
-     - 0.3970
+     - 1.0945
+     - 58259.0000
    * - train
-     - 1024
-     - 10
+     - 2048
+     - False
+     - pytorch
+     - 2.3677
+     - 187586.0000
+   * - train
+     - 2048
      - False
      - tensorflow
-     - 0.6542
+     - 4.9678
+     - 3045711.0000
    * - train
-     - 1024
-     - 10
-     - True
-     - jax
-     - 20.0666
-   * - train
-     - 1024
-     - 10
-     - True
-     - pytorch
-     - 0.2536
-   * - train
-     - 1024
-     - 10
-     - True
+     - 2048
+     - False
      - tensorflow
-     - 2.3830
+     - 6.3980
+     - 3043035.0000
    * - train
-     - 1024
-     - 100
+     - 4096
      - False
      - jax
-     - 0.7638
+     - 8.0567
+     - 1588851.0000
    * - train
-     - 1024
-     - 100
+     - 4096
      - False
      - pytorch
-     - 0.9779
+     - 1.8856
+     - 67774.0000
    * - train
-     - 1024
-     - 100
+     - 4096
+     - False
+     - pytorch
+     - 3.4129
+     - 227195.0000
+   * - train
+     - 4096
      - False
      - tensorflow
-     - 0.6602
+     - 5.5753
+     - 3051972.0000
    * - train
-     - 1024
-     - 100
-     - True
-     - jax
-     - 21.6070
-   * - train
-     - 1024
-     - 100
-     - True
-     - pytorch
-     - 0.2846
-   * - train
-     - 1024
-     - 100
-     - True
+     - 4096
+     - False
      - tensorflow
-     - 2.3786
+     - 6.4939
+     - 3053964.0000
    * - train
      - 8192
-     - 1
      - False
      - jax
-     - 1.9150
+     - 11.0620
+     - 1588058.0000
    * - train
      - 8192
-     - 1
      - False
      - pytorch
-     - 0.8115
+     - 4.5761
+     - 85839.0000
    * - train
      - 8192
-     - 1
+     - False
+     - pytorch
+     - 5.2089
+     - 274424.0000
+   * - train
+     - 8192
      - False
      - tensorflow
-     - 1.0981
+     - 8.2938
+     - 3073601.0000
    * - train
      - 8192
-     - 2
+     - False
+     - tensorflow
+     - 9.3237
+     - 3076821.0000
+   * - train
+     - 16384
      - False
      - jax
-     - 1.9208
+     - 16.3205
+     - 1589611.0000
    * - train
-     - 8192
-     - 2
+     - 16384
      - False
      - pytorch
-     - 0.8963
+     - 6.6453
+     - 123022.0000
    * - train
-     - 8192
-     - 2
+     - 16384
+     - False
+     - pytorch
+     - 10.1101
+     - 295999.0000
+   * - train
+     - 16384
      - False
      - tensorflow
-     - 1.1159
+     - 11.0820
+     - 3132560.0000
    * - train
-     - 8192
-     - 10
+     - 16384
+     - False
+     - tensorflow
+     - 14.3108
+     - 3133822.0000
+   * - train
+     - 32768
      - False
      - jax
-     - 1.8534
+     - 28.7589
+     - 1588602.0000
    * - train
-     - 8192
-     - 10
+     - 32768
      - False
      - pytorch
-     - 0.7565
+     - 14.9850
+     - 139373.0000
    * - train
-     - 8192
-     - 10
+     - 32768
+     - False
+     - pytorch
+     - 19.5333
+     - 308842.0000
+   * - train
+     - 32768
      - False
      - tensorflow
-     - 1.1356
+     - 16.0620
+     - 3158316.0000
    * - train
-     - 8192
-     - 100
+     - 32768
+     - False
+     - tensorflow
+     - 25.2832
+     - 3163477.0000
+   * - train
+     - 65536
      - False
      - jax
-     - 2.1196
-   * - train
-     - 8192
-     - 100
-     - False
-     - pytorch
-     - 1.0277
-   * - train
-     - 8192
-     - 100
-     - False
-     - tensorflow
-     - 1.2922
+     - 53.7458
+     - 1592431.0000
    * - train
      - 65536
-     - 1
+     - False
+     - pytorch
+     - 27.2720
+     - 139744.0000
+   * - train
+     - 65536
+     - False
+     - pytorch
+     - 36.7689
+     - 299354.0000
+   * - train
+     - 65536
+     - False
+     - tensorflow
+     - 28.1539
+     - 3167298.0000
+   * - train
+     - 65536
+     - False
+     - tensorflow
+     - 47.7508
+     - 3173626.0000
+   * - train
+     - 131072
      - False
      - jax
-     - 12.2566
+     - 102.4001
+     - 1590250.0000
    * - train
-     - 65536
-     - 1
+     - 131072
      - False
      - pytorch
-     - 5.9947
+     - 57.1212
+     - 137812.0000
    * - train
-     - 65536
-     - 1
-     - False
-     - tensorflow
-     - 5.1239
-   * - train
-     - 65536
-     - 2
-     - False
-     - jax
-     - 12.4524
-   * - train
-     - 65536
-     - 2
+     - 131072
      - False
      - pytorch
-     - 6.3375
+     - 74.0363
+     - 297794.0000
    * - train
-     - 65536
-     - 2
+     - 131072
      - False
      - tensorflow
-     - 5.7988
+     - 54.4925
+     - 3159073.0000
    * - train
-     - 65536
-     - 10
-     - False
-     - jax
-     - 11.6966
-   * - train
-     - 65536
-     - 10
-     - False
-     - pytorch
-     - 9.5214
-   * - train
-     - 65536
-     - 10
+     - 131072
      - False
      - tensorflow
-     - 5.3632
-   * - train
-     - 65536
-     - 100
-     - False
-     - jax
-     - 12.8164
-   * - train
-     - 65536
-     - 100
-     - False
-     - pytorch
-     - 9.3513
-   * - train
-     - 65536
-     - 100
-     - False
-     - tensorflow
-     - 5.8745
+     - 91.8901
+     - 3163690.0000
