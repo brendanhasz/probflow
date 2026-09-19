@@ -11,7 +11,6 @@ import pandas as pd
 
 import probflow as pf
 
-CPU_OR_GPU = "cpu"  # or "GPU" depending on the system being benchmarked
 EPOCHS = 100
 BATCHES_PER_EPOCH = 128
 MIN_BATCH_SIZE = 1024
@@ -113,10 +112,12 @@ def verify_tensor_device(tensor, expected_device: str):
     elif pf.get_backend() == pf.ProbflowBackend.JAX:
         from probflow.utils.jax_variable import JaxVariable
 
-        expected_device_type_str = "gpu" if expected_device == "gpu" else "cpu"
         if isinstance(tensor, JaxVariable):
             tensor = tensor.value
-        assert tensor.device.device_kind == expected_device_type_str, (
+        expected_device_type_str = (
+            "cuda" if expected_device == "gpu" else "CPU"
+        )
+        assert expected_device_type_str in str(tensor.device), (
             f"Expected device {expected_device}, got {tensor.device}"
         )
     else:  # tensorflow
