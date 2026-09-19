@@ -23,6 +23,5 @@ package:
 * Gaussian processes (again, maybe someday, but nonparametric models also don't quite fit in to the ProbFlow framework.  Though again one could hack together a GP w/ ProbFlow, for example using `tfd.GaussianProcess <https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/GaussianProcess>`_).  See `this issue <https://github.com/brendanhasz/probflow/issues/7>`_ for more info.  If you want to use Gaussian processes with TensorFlow, I'd suggest `GPflow <https://github.com/GPflow/GPflow>`_, or `GPyTorch <https://gpytorch.ai>`_ for PyTorch.
 * Bayesian networks (though again, could probably manually hack one together in ProbFlow, at least one with a fixed DAG structure where you just want to infer the weights)
 * Bayesian model comparison (also maybe someday)
-* Backends other than TensorFlow/TFP and PyTorch
 * Automatic variational posterior generation (`a la Pyro <http://docs.pyro.ai/en/stable/infer.autoguide.html>`_).
 * Automatic reparameterizations
