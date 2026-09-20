@@ -70,6 +70,7 @@ convention = "numpy"
 [tool.ruff.lint.per-file-ignores]
 "src/probflow/__init__.py" = ["F401", "F403"]
 "tests/**" = ["D"]  # ignore docstring checks in tests
+"notebooks/**" = ["D101", "D102"]
 
 [tool.pytest.ini_options]
 addopts = "-p no:warnings"
