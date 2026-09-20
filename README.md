@@ -308,10 +308,10 @@ pip install probflow[jax] jax[cuda13]
 
 ## Jupyter Notebook
 
-To run ProbFlow code in a Jupyter Notebook, you can either install ProbFlow into your 
+To run ProbFlow code in a Jupyter Notebook, you can either install ProbFlow into your
 existing kernel environment (see above), or clone the repo and run the notebook server
 from there.  There is a convenient Makefile command for this. You can start a notebook
-server with ProbFlow and a given backend pre-installed by running: 
+server with ProbFlow and a given backend pre-installed by running:
 
 <details>
 <summary>Tensorflow</summary>
