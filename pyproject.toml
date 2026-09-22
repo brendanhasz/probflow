@@ -37,8 +37,8 @@ pytorch = [
     "torch >= 1.5.0",
 ]
 jax = [
-    "jax",
-    "tensorflow-probability >= 0.10.0",
+    "jax == 0.6.2",
+    "tensorflow-probability == 0.25.0",
 ]
 docs = [
     "sphinx >= 3.1.2",
