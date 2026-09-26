@@ -290,7 +290,7 @@ pip install probflow[pytorch]
 <details>
 <summary>JAX</summary>
 
-Unlike TensorFlow and PyTorch, JAX requires a GPU-specific installation for GPU support.
+Unlike TensorFlow and PyTorch, JAX requires a GPU-specific installation to run on GPU.
 If you are only planning on running ProbFlow on the CPU, you can just use the standard JAX installation:
 
 ```bash
