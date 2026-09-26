@@ -317,7 +317,7 @@ Or, to install both ProbFlow and a specific backend,
 
 .. tabs::
 
-    .. tab:: TensorFlow CPU
+    .. tab:: TensorFlow
 
         .. code-block:: bash
 
@@ -331,9 +331,55 @@ Or, to install both ProbFlow and a specific backend,
 
     .. tab:: JAX
 
+        Unlike TensorFlow and PyTorch, JAX requires a GPU-specific installation for GPU support.
+        If you are only planning on running ProbFlow on the CPU, you can just use the standard JAX installation:
+
         .. code-block:: bash
 
             pip install probflow[jax]
+
+        But if you want to run on your GPU, also install the appropriate JAX CUDA package:
+
+        .. code-block:: bash
+
+            pip install probflow[jax] jax[cuda13]
+
+
+Jupyter Notebook
+----------------
+
+To run ProbFlow code in a Jupyter Notebook, you can either install ProbFlow into your 
+existing kernel environment (see above), or clone the repo and run the notebook server
+from there.  There is a convenient Makefile command for this. You can start a notebook
+server with ProbFlow and a given backend pre-installed by running: 
+
+.. tabs::
+
+    .. tab:: TensorFlow
+
+        .. code-block:: bash
+
+            git clone git@github.com:brendanhasz/probflow.git
+            cd probflow
+            make notebook-server BACKEND=tensorflow
+
+    .. tab:: PyTorch
+
+        .. code-block:: bash
+
+            git clone git@github.com:brendanhasz/probflow.git
+            cd probflow
+            make notebook-server BACKEND=pytorch
+
+    .. tab:: JAX
+
+        .. code-block:: bash
+
+            git clone git@github.com:brendanhasz/probflow.git
+            cd probflow
+            make notebook-server BACKEND=jax
+
+Then open your web browser and navigate to `http://localhost:8888` to access the Jupyter Notebook server.
 
 
 Support
