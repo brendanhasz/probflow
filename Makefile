@@ -1,5 +1,5 @@
 
-.PHONY: install test-unit test-stats test format benchmark-linear-regression benchmark docs bump-minor bump-patch clean
+.PHONY: install test-unit test-stats test format docs bump-minor bump-patch benchmark-linear-regression benchmark-linear-regression-writeup benchmark notebook-server clean
 
 BACKEND ?= tensorflow
 AVAILABLE_BACKENDS := tensorflow pytorch jax
@@ -56,6 +56,10 @@ benchmark:
 	done
 	$(MAKE) benchmark-linear-regression-writeup
 	$(MAKE) docs
+
+# Spin up a Jupyter notebook server with ProbFlow environment
+notebook-server: install
+	uv run --with jupyter jupyter notebook --NotebookApp.token='' --NotebookApp.password=''
 
 # Clean up build artifacts and caches
 clean:
