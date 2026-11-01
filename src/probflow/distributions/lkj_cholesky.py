@@ -57,7 +57,7 @@ class LKJCholesky(BaseDistribution):
             from tensorflow_probability.substrates import jax as tfp_jax
 
             return tfp_jax.distributions.CholeskyLKJ(
-                dimension=self.dim, eta=self.eta
+                dimension=self.dim, concentration=self.eta
             )
         else:
             from tensorflow_probability import distributions as tfd
