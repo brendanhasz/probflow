@@ -116,3 +116,11 @@ def test_matrix_helpers():
     covariance = ops.log_cholesky_transform(jnp.array([0.0, 0.0, 0.0]))
     assert covariance.shape == (2, 2)
     close(covariance, jnp.eye(2))
+
+    values = jnp.array([0.1, 0.2, 0.3])
+    factor = ops.log_cholesky_transform(values, output_tril=True)
+    covariance = ops.log_cholesky_transform(values)
+    assert factor.shape == (2, 2)
+    close(jnp.triu(factor, k=1), jnp.zeros((2, 2)))
+    assert jnp.all(jnp.diag(factor) > 0)
+    close(covariance, factor @ factor.T)

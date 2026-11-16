@@ -478,3 +478,16 @@ def test_gather():
     assert to_numpy(output)[0, 3] == 1.0
     assert to_numpy(output)[1, 3] == 3.0
     assert to_numpy(output)[2, 3] == 5.0
+
+
+def test_log_cholesky_transform_output_tril():
+    """Tests the lower-triangular output of the log-Cholesky transform."""
+    values = tf.constant([0.1, 0.2, 0.3])
+    factor = ops.log_cholesky_transform(values, output_tril=True)
+    covariance = ops.log_cholesky_transform(values)
+
+    factor_array = to_numpy(factor)
+    assert factor.shape == (2, 2)
+    assert np.allclose(factor_array, np.tril(factor_array))
+    assert np.all(np.diag(factor_array) > 0)
+    assert np.allclose(to_numpy(covariance), factor_array @ factor_array.T)

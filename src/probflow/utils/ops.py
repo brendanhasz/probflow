@@ -582,12 +582,18 @@ def new_variable(initial_values: TensorLike) -> BackendVariable:
         return tf.Variable(initial_values)
 
 
-def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
+def log_cholesky_transform(x: BackendTensor, output_tril: bool = False) -> BackendTensor:
     r"""Perform the log cholesky transform on a vector of values.
 
     This turns a vector of :math:`\frac{N(N+1)}{2}` unconstrained values into a
     valid :math:`N \times N` covariance matrix.
 
+    Parameters
+    ----------
+    x : BackendTensor
+        Vector of unconstrained values of length :math:`\frac{N(N+1)}{2}`.
+    output_tril : bool, default False
+        If True, return the lower triangular matrix instead of the full covariance matrix.
 
     References
     ----------
@@ -605,6 +611,8 @@ def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
         tril_ix = torch.tril_indices(row=N, col=N, offset=0)
         E[..., tril_ix[0], tril_ix[1]] = x
         E[..., range(N), range(N)] = torch.exp(torch.diagonal(E))
+        if output_tril:
+            return E
         return E @ torch.transpose(E, -1, -2)
     elif get_backend() == ProbflowBackend.JAX:
         import jax.numpy as jnp
@@ -612,6 +620,8 @@ def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
 
         E = tfp_jax.math.fill_triangular(x)
         E = E - jnp.diag(jnp.diagonal(E)) + jnp.diag(jnp.exp(jnp.diagonal(E)))
+        if output_tril:
+            return E
         return E @ jnp.swapaxes(E, -1, -2)
     else:
         import tensorflow as tf
@@ -619,6 +629,8 @@ def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
 
         E = tfp.math.fill_triangular(x)
         E = tf.linalg.set_diag(E, tf.exp(tf.linalg.tensor_diag_part(E)))
+        if output_tril:
+            return E
         return E @ tf.transpose(E)
 
 

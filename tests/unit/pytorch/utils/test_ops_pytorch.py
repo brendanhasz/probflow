@@ -533,3 +533,16 @@ def test_insert_col_of():
     assert val.shape[1] == 3
     assert val.shape[2] == 6
     assert (val[:, :, 0] == 1).all()
+
+
+def test_log_cholesky_transform_output_tril():
+    """Tests the lower-triangular output of the log-Cholesky transform."""
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
+    values = torch.tensor([0.1, 0.2, 0.3])
+    factor = ops.log_cholesky_transform(values, output_tril=True)
+    covariance = ops.log_cholesky_transform(values)
+
+    assert factor.shape == (2, 2)
+    assert torch.allclose(factor, torch.tril(factor))
+    assert torch.all(torch.diagonal(factor) > 0)
+    assert torch.allclose(covariance, factor @ factor.T)
