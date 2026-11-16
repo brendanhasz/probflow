@@ -582,6 +582,22 @@ def new_variable(initial_values: TensorLike) -> BackendVariable:
         return tf.Variable(initial_values)
 
 
+def cholesky(x: BackendTensor) -> BackendTensor:
+    r"""Perform the cholesky decomposition on a matrix."""
+    if get_backend() == ProbflowBackend.PYTORCH:
+        import torch
+
+        return torch.linalg.cholesky(x)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.linalg.cholesky(x)
+    else:
+        import tensorflow as tf
+
+        return tf.linalg.cholesky(x)
+
+
 def log_cholesky_transform(x: BackendTensor, output_tril: bool = False) -> BackendTensor:
     r"""Perform the log cholesky transform on a vector of values.
 

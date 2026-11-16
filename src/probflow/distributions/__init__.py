@@ -11,6 +11,7 @@ Continuous Distributions
 * :class:`.Deterministic`
 * :class:`.Normal`
 * :class:`.MultivariateNormal`
+* :class:`.Wishart`
 * :class:`.StudentT`
 * :class:`.Cauchy`
 * :class:`.Gamma`
@@ -50,6 +51,7 @@ __all__ = [
     "OneHotCategorical",
     "Poisson",
     "StudentT",
+    "Wishart",
 ]
 
 
@@ -67,3 +69,4 @@ from .normal import Normal
 from .one_hot_categorical import OneHotCategorical
 from .poisson import Poisson
 from .student_t import StudentT
+from .wishart import Wishart

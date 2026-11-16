@@ -1,5 +1,8 @@
 """A parameter with a Wishart posterior + prior."""
 
+from collections.abc import Callable
+from typing import Any
+
 import probflow.utils.ops as O
 from probflow.distributions import Wishart
 from probflow.parameters.parameter import Parameter
@@ -25,8 +28,9 @@ class WishartParameter(Parameter):
         Prior probability distribution function which has been instantiated
         with parameters.
         Default = :class:`.Wishart` ``(d+1, I(d, d))``
-    expand_dims : int or None
-        Dimension to expand output samples along.
+    output_tril : bool
+        If False (default), the parameter samples will be full covariance matrices.
+        If True, the parameter samples will be lower triangular matrices.
     name : str
         Name of the parameter(s).
         Default = ``'WishartParameter'``
@@ -46,8 +50,7 @@ class WishartParameter(Parameter):
         self,
         d: int,
         prior: BaseDistribution | None = None,
-        output_tril: bool = True,
-        #expand_dims: int = -1,
+        output_tril: bool = False,
         name: str = "WishartParameter",
     ):
 
@@ -57,18 +60,18 @@ class WishartParameter(Parameter):
 
         # Transform
         if output_tril:
-            transform = None
+            transform = lambda x: O.cholesky(x)
         else:
-            transform = lambda x: x @ O.transpose(x)
+            transform = None
 
         # Initializer and variable transforms
         initializer = {
             "df": lambda x: xavier([1]),
             "scale_tril": lambda x: xavier([int(d * (d + 1) / 2)]),
         }
-        var_transform = {
-            "df": lambda x: d + tf.exp(x),
-            "scale_tril": O.log_cholesky_transform,
+        var_transform: dict[str, Callable[..., Any] | None] = {
+            "df": lambda x: d + O.exp(x),
+            "scale_tril": lambda x: O.log_cholesky_transform(x, output_tril=True),
         }
 
         super().__init__(

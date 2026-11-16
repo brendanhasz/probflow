@@ -39,8 +39,14 @@ class Wishart(BaseDistribution):
 
         # Check input
         ensure_tensor_like(df, "df")
-        if covariance_matrix is None and precision_matrix is None and scale_tril is None:
-            raise ValueError("At least one of covariance_matrix, precision_matrix, or scale_tril must be provided.")
+        if (
+            covariance_matrix is None
+            and precision_matrix is None
+            and scale_tril is None
+        ):
+            raise ValueError(
+                "At least one of covariance_matrix, precision_matrix, or scale_tril must be provided."
+            )
         if covariance_matrix is not None:
             ensure_tensor_like(covariance_matrix, "covariance_matrix")
         if precision_matrix is not None:
@@ -66,8 +72,47 @@ class Wishart(BaseDistribution):
                 scale_tril=self.scale_tril,
             )
         elif get_backend() == ProbflowBackend.JAX:
-            raise NotImplementedError("Wishart distribution is not yet implemented for JAX backend.")
+            import jax.numpy as jnp
+            from tensorflow_probability.substrates import jax as tfp_jax
+
+            if self.scale_tril is not None:
+                return tfp_jax.distributions.WishartTriL(
+                    df=self.df,
+                    scale_tril=self.scale_tril,
+                )
+            else:
+                if self.covariance_matrix is not None:
+                    return tfp_jax.distributions.WishartTriL(
+                        df=self.df,
+                        scale_tril=jnp.linalg.cholesky(self.covariance_matrix),
+                    )
+                else:  # using precision matrix, which is inverse of covariance matrix
+                    return tfp_jax.distributions.WishartTriL(
+                        df=self.df,
+                        scale_tril=jnp.linalg.cholesky(
+                            jnp.linalg.inv(self.precision_matrix)
+                        ),
+                    )
 
         else:
-            raise NotImplementedError("Wishart distribution is not yet implemented for TensorFlow backend.")
+            import tensorflow as tf
+            from tensorflow_probability import distributions as tfd
 
+            if self.scale_tril is not None:
+                return tfd.WishartTriL(
+                    df=self.df,
+                    scale_tril=self.scale_tril,
+                )
+            else:
+                if self.covariance_matrix is not None:
+                    return tfd.WishartTriL(
+                        df=self.df,
+                        scale_tril=tf.linalg.cholesky(self.covariance_matrix),
+                    )
+                else:  # using precision matrix, which is inverse of covariance matrix
+                    return tfd.WishartTriL(
+                        df=self.df,
+                        scale_tril=tf.linalg.cholesky(
+                            tf.linalg.inv(self.precision_matrix)
+                        ),
+                    )

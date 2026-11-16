@@ -32,6 +32,7 @@ a :class:`.Parameter`:
 * :class:`.MultivariateNormalParameter` - parameter with a multivariate Normal
   posterior
 * :class:`.CenteredParameter` - parameter array with a mean of 0
+* :class:`.WishartParameter` - parameter with a Wishart posterior (for covariance matrices)
 
 See the :doc:`user guide <../user_guide/parameters>` for more information on
 Parameters.
@@ -50,6 +51,7 @@ __all__ = [
     "Parameter",
     "PositiveParameter",
     "ScaleParameter",
+    "WishartParameter",
 ]
 
 
@@ -62,3 +64,4 @@ from .multivariate_normal_parameter import MultivariateNormalParameter
 from .parameter import Parameter
 from .positive_parameter import PositiveParameter
 from .scale_parameter import ScaleParameter
+from .wishart_parameter import WishartParameter
