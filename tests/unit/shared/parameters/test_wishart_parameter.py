@@ -2,7 +2,7 @@ import numpy as np
 
 from probflow.distributions import Wishart
 from probflow.parameters import WishartParameter
-from probflow.utils.casting import to_numpy
+from probflow.utils.casting import to_default_dtype, to_numpy
 from probflow.utils.validation import is_backend_tensor
 
 
@@ -50,9 +50,10 @@ def test_WishartParameter_default_prior():
     param = WishartParameter(3)
     assert isinstance(param.prior, Wishart)
 
-    custom = Wishart(10, np.eye(3, dtype="float32") * 2)
+    custom = Wishart(10, to_default_dtype(np.eye(3) * 2))
     param = WishartParameter(3, prior=custom)
     assert param.prior is custom
+    assert param.prior_sample().shape == (3, 3)
 
 
 def test_WishartParameter_kl_loss():
@@ -89,7 +90,7 @@ def test_WishartParameter_samples_are_covariance_matrices():
     assert not np.any(np.diagonal(mean, axis1=-2, axis2=-1) == 1.0)
 
     # Large-scale prior should give clearly non-unit diagonals
-    big = Wishart(d + 1, np.eye(d, dtype="float32") * 100.0)
+    big = Wishart(d + 1, to_default_dtype(np.eye(d) * 100.0))
     param_big = WishartParameter(d, prior=big)
     prior_samples = np.asarray(param_big.prior_sample(50))
     assert _is_symmetric_pd(prior_samples)

@@ -13,9 +13,21 @@ install:
 test-unit: install
 	uv run pytest tests/unit/shared tests/unit/$(BACKEND)
 
+# Run unit tests for all backends
+test-unit-all:
+	@for backend in $(AVAILABLE_BACKENDS); do \
+		$(MAKE) test-unit BACKEND=$$backend; \
+	done
+
 # Run statistical checks
 test-stats: install
 	uv run pytest tests/stats --backend=$(BACKEND)
+
+# Run statistical checks for all backends
+test-stats-all:
+	@for backend in $(AVAILABLE_BACKENDS); do \
+		$(MAKE) test-stats BACKEND=$$backend; \
+	done
 
 # Run all tests, including statistical checks, for all backends
 test:
