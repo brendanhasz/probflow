@@ -71,7 +71,9 @@ class WishartParameter(Parameter):
         }
         var_transform: dict[str, Callable[..., Any] | None] = {
             "df": lambda x: d + O.exp(x),
-            "scale_tril": lambda x: O.log_cholesky_transform(x, output_tril=True),
+            "scale_tril": lambda x: O.log_cholesky_transform(
+                x, output_tril=True
+            ),
         }
 
         super().__init__(

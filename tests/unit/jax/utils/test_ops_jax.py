@@ -1,8 +1,8 @@
+import jax
 import jax.numpy as jnp
 import numpy as np
 from tensorflow_probability.substrates import jax as tfp_jax
-import jax
-import jax.numpy as jnp
+
 import probflow as pf
 from probflow.utils import ops
 from probflow.utils.jax_variable import JaxVariable

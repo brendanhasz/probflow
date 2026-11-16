@@ -140,7 +140,9 @@ def _wishart_kl_pytorch(
     import torch
 
     if P.event_shape != Q.event_shape:
-        raise ValueError("Wishart distributions must have the same event shape")
+        raise ValueError(
+            "Wishart distributions must have the same event shape"
+        )
     d = P.event_shape[-1]
     L_p, L_q = P.scale_tril, Q.scale_tril
     logdet_p = 2 * L_p.diagonal(dim1=-2, dim2=-1).log().sum(-1)
@@ -165,11 +167,17 @@ def _wishart_kl_tensorflow(
     import tensorflow as tf
 
     if not P.event_shape.is_compatible_with(Q.event_shape):
-        raise ValueError("Wishart distributions must have the same event shape")
+        raise ValueError(
+            "Wishart distributions must have the same event shape"
+        )
     L_p, L_q = P.scale_tril, Q.scale_tril
     d = tf.shape(L_p)[-1]
-    logdet_p = 2 * tf.reduce_sum(tf.math.log(tf.linalg.diag_part(L_p)), axis=-1)
-    logdet_q = 2 * tf.reduce_sum(tf.math.log(tf.linalg.diag_part(L_q)), axis=-1)
+    logdet_p = 2 * tf.reduce_sum(
+        tf.math.log(tf.linalg.diag_part(L_p)), axis=-1
+    )
+    logdet_q = 2 * tf.reduce_sum(
+        tf.math.log(tf.linalg.diag_part(L_q)), axis=-1
+    )
     solved = tf.linalg.triangular_solve(L_q, L_p, lower=True)
     trace = tf.reduce_sum(tf.square(solved), axis=(-2, -1))
     offsets = tf.cast(tf.range(d), P.df.dtype)
@@ -188,11 +196,12 @@ def _wishart_kl_jax(
 ) -> BackendTensor:
     """Calculate KL(P || Q) between two Wishart distributions, for JAX."""
     import jax.numpy as jnp
-    import jax.scipy.linalg as linalg
-    import jax.scipy.special as special
+    from jax.scipy import linalg, special
 
     if not P.event_shape.is_compatible_with(Q.event_shape):
-        raise ValueError("Wishart distributions must have the same event shape")
+        raise ValueError(
+            "Wishart distributions must have the same event shape"
+        )
     L_p, L_q = P.scale_tril, Q.scale_tril
     d = L_p.shape[-1]
     logdet_p = 2 * jnp.log(jnp.diagonal(L_p, axis1=-2, axis2=-1)).sum(-1)
@@ -689,7 +698,9 @@ def cholesky(x: BackendTensor) -> BackendTensor:
         return tf.linalg.cholesky(x)
 
 
-def log_cholesky_transform(x: BackendTensor, output_tril: bool = False) -> BackendTensor:
+def log_cholesky_transform(
+    x: BackendTensor, output_tril: bool = False
+) -> BackendTensor:
     r"""Perform the log cholesky transform on a vector of values.
 
     This turns a vector of :math:`\frac{N(N+1)}{2}` unconstrained values into a

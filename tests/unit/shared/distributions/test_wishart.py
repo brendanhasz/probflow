@@ -27,7 +27,10 @@ def test_Wishart():
         assert is_backend_distribution(distribution())
 
     value = to_default_dtype([[3.0, 0.2], [0.2, 2.0]])
-    log_probs = [to_numpy(distribution.log_prob(value)) for distribution in distributions]
+    log_probs = [
+        to_numpy(distribution.log_prob(value))
+        for distribution in distributions
+    ]
     assert np.allclose(log_probs[0], log_probs[1])
     assert np.allclose(log_probs[0], log_probs[2])
 
