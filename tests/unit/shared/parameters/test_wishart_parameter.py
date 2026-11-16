@@ -2,6 +2,8 @@ import numpy as np
 
 from probflow.distributions import Wishart
 from probflow.parameters import WishartParameter
+from probflow.utils.casting import to_numpy
+from probflow.utils.validation import is_backend_tensor
 
 
 def _is_symmetric_pd(samples):
@@ -51,6 +53,18 @@ def test_WishartParameter_default_prior():
     custom = Wishart(10, np.eye(3, dtype="float32") * 2)
     param = WishartParameter(3, prior=custom)
     assert param.prior is custom
+
+
+def test_WishartParameter_kl_loss():
+    param = WishartParameter(3)
+    loss = param.kl_loss()
+    assert is_backend_tensor(loss)
+    assert loss.ndim == 0
+    assert np.isfinite(to_numpy(loss))
+    assert to_numpy(loss) >= 0
+
+    param.bayesian_update()
+    np.testing.assert_allclose(to_numpy(param.kl_loss()), 0, atol=1e-5)
 
 
 def test_WishartParameter_samples_are_covariance_matrices():

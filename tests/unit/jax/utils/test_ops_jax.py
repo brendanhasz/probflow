@@ -1,7 +1,8 @@
 import jax.numpy as jnp
 import numpy as np
 from tensorflow_probability.substrates import jax as tfp_jax
-
+import jax
+import jax.numpy as jnp
 import probflow as pf
 from probflow.utils import ops
 from probflow.utils.jax_variable import JaxVariable
@@ -25,6 +26,34 @@ def test_kl_divergence():
     )
     dist = pf.Normal(0.0, 1.0)
     close(ops.kl_divergence(dist, dist), 0.0)
+
+
+def test_wishart_kl_divergence(jax_backend):
+    def kl(df_p, scale_p, df_q, scale_q):
+        p = tfp_jax.distributions.WishartTriL(df_p, scale_p)
+        q = tfp_jax.distributions.WishartTriL(df_q, scale_q)
+        return ops.kl_divergence(p, q)
+
+    args = (
+        jnp.array(6.0),
+        jnp.array([[2.0, 0.0], [1.0, 1.0]]),
+        jnp.array(4.0),
+        jnp.array([[1.0, 0.0], [0.2, 1.5]]),
+    )
+    np.testing.assert_allclose(jax.jit(kl)(*args), kl(*args), rtol=1e-5)
+    gradients = jax.grad(kl, argnums=(0, 1, 2, 3))(*args)
+    step = 1e-3
+    for arg_index, gradient in enumerate(gradients):
+        for index in np.ndindex(gradient.shape):
+            perturbation = jnp.zeros_like(args[arg_index]).at[index].set(step)
+            plus = list(args)
+            minus = list(args)
+            plus[arg_index] = args[arg_index] + perturbation
+            minus[arg_index] = args[arg_index] - perturbation
+            numerical = (kl(*plus) - kl(*minus)) / (2 * step)
+            np.testing.assert_allclose(
+                gradient[index], numerical, rtol=2e-2, atol=2e-3
+            )
 
 
 def test_shape_helpers():

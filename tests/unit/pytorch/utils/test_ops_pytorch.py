@@ -36,6 +36,32 @@ def test_kl_divergence():
     assert ops.kl_divergence(dist, dist).numpy() == 0.0
 
 
+def test_wishart_kl_gradients():
+    """Analytic gradients agree with finite differences for both distributions."""
+    pf.set_backend(pf.ProbflowBackend.PYTORCH)
+
+    def kl(df_p, scale_p, df_q, scale_q):
+        p = torch.distributions.Wishart(
+            df_p, scale_tril=scale_p, validate_args=False
+        )
+        q = torch.distributions.Wishart(
+            df_q, scale_tril=scale_q, validate_args=False
+        )
+        return ops.kl_divergence(p, q)
+
+    inputs = [
+        torch.tensor(6.0, dtype=torch.float64, requires_grad=True),
+        torch.tensor(
+            [[2.0, 0.0], [1.0, 1.0]], dtype=torch.float64, requires_grad=True
+        ),
+        torch.tensor(4.0, dtype=torch.float64, requires_grad=True),
+        torch.tensor(
+            [[1.0, 0.0], [0.2, 1.5]], dtype=torch.float64, requires_grad=True
+        ),
+    ]
+    assert torch.autograd.gradcheck(kl, inputs)
+
+
 def test_squeeze():
     """Tests squeeze."""
     x = torch.randn([3, 2, 1])

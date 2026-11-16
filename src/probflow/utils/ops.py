@@ -89,15 +89,16 @@ def kl_divergence(
 
     Parameters
     ----------
-    P : |tfp.Distribution| or |torch.Distribution|
+    P : |Distribution| or backend distribution
         The first distribution
-    Q : |tfp.Distribution| or |torch.Distribution|
+    Q : |Distribution| or backend distribution
         The second distribution
 
     Returns
     -------
     kld : Tensor
-        The Kullback–Leibler divergence between P and Q (KL(P || Q))
+        The batchwise Kullback–Leibler divergence between P and Q (KL(P || Q)).
+        For Wishart distributions, KL divergence is computed using the analytic formula for TensorFlow, PyTorch, and JAX.
     """
     # Get the backend distribution if needed
     if isinstance(P, BaseDistribution):
@@ -109,15 +110,105 @@ def kl_divergence(
     if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
+        if isinstance(P, torch.distributions.Wishart) and isinstance(
+            Q, torch.distributions.Wishart
+        ):
+            return _wishart_kl_pytorch(P, Q)
         return torch.distributions.kl.kl_divergence(P, Q)
     elif get_backend() == ProbflowBackend.JAX:
         from tensorflow_probability.substrates import jax as tfp_jax
 
+        if isinstance(P, tfp_jax.distributions.WishartTriL) and isinstance(
+            Q, tfp_jax.distributions.WishartTriL
+        ):
+            return _wishart_kl_jax(P, Q)
         return tfp_jax.distributions.kl_divergence(P, Q)
     else:
         import tensorflow_probability as tfp
 
+        if isinstance(P, tfp.distributions.WishartTriL) and isinstance(
+            Q, tfp.distributions.WishartTriL
+        ):
+            return _wishart_kl_tensorflow(P, Q)
         return tfp.distributions.kl_divergence(P, Q)
+
+
+def _wishart_kl_pytorch(
+    P: BackendDistribution, Q: BackendDistribution
+) -> BackendTensor:
+    """Calculate KL(P || Q) between two Wishart distributions, for PyTorch."""
+    import torch
+
+    if P.event_shape != Q.event_shape:
+        raise ValueError("Wishart distributions must have the same event shape")
+    d = P.event_shape[-1]
+    L_p, L_q = P.scale_tril, Q.scale_tril
+    logdet_p = 2 * L_p.diagonal(dim1=-2, dim2=-1).log().sum(-1)
+    logdet_q = 2 * L_q.diagonal(dim1=-2, dim2=-1).log().sum(-1)
+    solved = torch.linalg.solve_triangular(L_q, L_p, upper=False)
+    trace = solved.square().sum(dim=(-2, -1))
+    offsets = torch.arange(d, dtype=P.df.dtype, device=P.df.device)
+    a = (P.df.unsqueeze(-1) - offsets) / 2
+    b = (Q.df.unsqueeze(-1) - offsets) / 2
+    return (
+        0.5 * Q.df * (logdet_q - logdet_p)
+        + 0.5 * P.df * (trace - d)
+        + (torch.lgamma(b) - torch.lgamma(a)).sum(-1)
+        + 0.5 * (P.df - Q.df) * torch.digamma(a).sum(-1)
+    )
+
+
+def _wishart_kl_tensorflow(
+    P: BackendDistribution, Q: BackendDistribution
+) -> BackendTensor:
+    """Calculate KL(P || Q) between two Wishart distributions, for TensorFlow."""
+    import tensorflow as tf
+
+    if not P.event_shape.is_compatible_with(Q.event_shape):
+        raise ValueError("Wishart distributions must have the same event shape")
+    L_p, L_q = P.scale_tril, Q.scale_tril
+    d = tf.shape(L_p)[-1]
+    logdet_p = 2 * tf.reduce_sum(tf.math.log(tf.linalg.diag_part(L_p)), axis=-1)
+    logdet_q = 2 * tf.reduce_sum(tf.math.log(tf.linalg.diag_part(L_q)), axis=-1)
+    solved = tf.linalg.triangular_solve(L_q, L_p, lower=True)
+    trace = tf.reduce_sum(tf.square(solved), axis=(-2, -1))
+    offsets = tf.cast(tf.range(d), P.df.dtype)
+    a = (P.df[..., tf.newaxis] - offsets) / 2
+    b = (Q.df[..., tf.newaxis] - offsets) / 2
+    return (
+        0.5 * Q.df * (logdet_q - logdet_p)
+        + 0.5 * P.df * (trace - tf.cast(d, P.df.dtype))
+        + tf.reduce_sum(tf.math.lgamma(b) - tf.math.lgamma(a), axis=-1)
+        + 0.5 * (P.df - Q.df) * tf.reduce_sum(tf.math.digamma(a), axis=-1)
+    )
+
+
+def _wishart_kl_jax(
+    P: BackendDistribution, Q: BackendDistribution
+) -> BackendTensor:
+    """Calculate KL(P || Q) between two Wishart distributions, for JAX."""
+    import jax.numpy as jnp
+    import jax.scipy.linalg as linalg
+    import jax.scipy.special as special
+
+    if not P.event_shape.is_compatible_with(Q.event_shape):
+        raise ValueError("Wishart distributions must have the same event shape")
+    L_p, L_q = P.scale_tril, Q.scale_tril
+    d = L_p.shape[-1]
+    logdet_p = 2 * jnp.log(jnp.diagonal(L_p, axis1=-2, axis2=-1)).sum(-1)
+    logdet_q = 2 * jnp.log(jnp.diagonal(L_q, axis1=-2, axis2=-1)).sum(-1)
+    L_q_broadcast, L_p_broadcast = jnp.broadcast_arrays(L_q, L_p)
+    solved = linalg.solve_triangular(L_q_broadcast, L_p_broadcast, lower=True)
+    trace = jnp.square(solved).sum(axis=(-2, -1))
+    offsets = jnp.arange(d, dtype=P.df.dtype)
+    a = (P.df[..., None] - offsets) / 2
+    b = (Q.df[..., None] - offsets) / 2
+    return (
+        0.5 * Q.df * (logdet_q - logdet_p)
+        + 0.5 * P.df * (trace - d)
+        + (special.gammaln(b) - special.gammaln(a)).sum(-1)
+        + 0.5 * (P.df - Q.df) * special.digamma(a).sum(-1)
+    )
 
 
 @make_input_tensor

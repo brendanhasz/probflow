@@ -31,6 +31,42 @@ def test_kl_divergence():
     assert to_numpy(ops.kl_divergence(dist, dist)) == 0.0
 
 
+def test_wishart_kl_divergence():
+    """Tests kl_divergence for Wishart distributions in tensorflow."""
+
+    def kl(df_p, scale_p, df_q, scale_q):
+        p = tfp.distributions.WishartTriL(df_p, scale_p)
+        q = tfp.distributions.WishartTriL(df_q, scale_q)
+        return ops.kl_divergence(p, q)
+
+    inputs = [
+        tf.constant(6.0, dtype=tf.float64),
+        tf.constant([[2.0, 0.0], [1.0, 1.0]], dtype=tf.float64),
+        tf.constant(4.0, dtype=tf.float64),
+        tf.constant([[1.0, 0.0], [0.2, 1.5]], dtype=tf.float64),
+    ]
+    theoretical, numerical = tf.test.compute_gradient(kl, inputs)
+    for actual, expected in zip(theoretical, numerical):
+        np.testing.assert_allclose(actual, expected, rtol=1e-4, atol=1e-5)
+
+
+def test_wishart_kl_divergence_tf_function():
+    @tf.function(
+        input_signature=[
+            tf.TensorSpec([None, None], tf.float32),
+            tf.TensorSpec([None, None], tf.float32),
+        ]
+    )
+    def kl(scale_p, scale_q):
+        p = tfp.distributions.WishartTriL(6.0, scale_p)
+        q = tfp.distributions.WishartTriL(4.0, scale_q)
+        return ops.kl_divergence(p, q)
+
+    actual = kl([[2.0, 0.0], [1.0, 1.0]], tf.eye(2))
+    expected = 97 / 6 - 6 * np.log(2) - np.log(3) - 2 * np.euler_gamma
+    np.testing.assert_allclose(actual.numpy(), expected, rtol=1e-5)
+
+
 def test_squeeze():
     """Tests squeeze."""
     x = tf.random.normal([3, 2, 1])
