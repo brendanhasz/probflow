@@ -31,6 +31,42 @@ def test_kl_divergence():
     assert to_numpy(ops.kl_divergence(dist, dist)) == 0.0
 
 
+def test_wishart_kl_divergence():
+    """Tests kl_divergence for Wishart distributions in tensorflow."""
+
+    def kl(df_p, scale_p, df_q, scale_q):
+        p = tfp.distributions.WishartTriL(df_p, scale_p)
+        q = tfp.distributions.WishartTriL(df_q, scale_q)
+        return ops.kl_divergence(p, q)
+
+    inputs = [
+        tf.constant(6.0, dtype=tf.float64),
+        tf.constant([[2.0, 0.0], [1.0, 1.0]], dtype=tf.float64),
+        tf.constant(4.0, dtype=tf.float64),
+        tf.constant([[1.0, 0.0], [0.2, 1.5]], dtype=tf.float64),
+    ]
+    theoretical, numerical = tf.test.compute_gradient(kl, inputs)
+    for actual, expected in zip(theoretical, numerical):
+        np.testing.assert_allclose(actual, expected, rtol=1e-4, atol=1e-5)
+
+
+def test_wishart_kl_divergence_tf_function():
+    @tf.function(
+        input_signature=[
+            tf.TensorSpec([None, None], tf.float32),
+            tf.TensorSpec([None, None], tf.float32),
+        ]
+    )
+    def kl(scale_p, scale_q):
+        p = tfp.distributions.WishartTriL(6.0, scale_p)
+        q = tfp.distributions.WishartTriL(4.0, scale_q)
+        return ops.kl_divergence(p, q)
+
+    actual = kl([[2.0, 0.0], [1.0, 1.0]], tf.eye(2))
+    expected = 97 / 6 - 6 * np.log(2) - np.log(3) - 2 * np.euler_gamma
+    np.testing.assert_allclose(actual.numpy(), expected, rtol=1e-5)
+
+
 def test_squeeze():
     """Tests squeeze."""
     x = tf.random.normal([3, 2, 1])
@@ -478,3 +514,16 @@ def test_gather():
     assert to_numpy(output)[0, 3] == 1.0
     assert to_numpy(output)[1, 3] == 3.0
     assert to_numpy(output)[2, 3] == 5.0
+
+
+def test_log_cholesky_transform_output_tril():
+    """Tests the lower-triangular output of the log-Cholesky transform."""
+    values = tf.constant([0.1, 0.2, 0.3])
+    factor = ops.log_cholesky_transform(values, output_tril=True)
+    covariance = ops.log_cholesky_transform(values)
+
+    factor_array = to_numpy(factor)
+    assert factor.shape == (2, 2)
+    assert np.allclose(factor_array, np.tril(factor_array))
+    assert np.all(np.diag(factor_array) > 0)
+    assert np.allclose(to_numpy(covariance), factor_array @ factor_array.T)

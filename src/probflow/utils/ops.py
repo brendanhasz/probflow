@@ -89,15 +89,16 @@ def kl_divergence(
 
     Parameters
     ----------
-    P : |tfp.Distribution| or |torch.Distribution|
+    P : |Distribution| or backend distribution
         The first distribution
-    Q : |tfp.Distribution| or |torch.Distribution|
+    Q : |Distribution| or backend distribution
         The second distribution
 
     Returns
     -------
     kld : Tensor
-        The Kullback–Leibler divergence between P and Q (KL(P || Q))
+        The batchwise Kullback–Leibler divergence between P and Q (KL(P || Q)).
+        For Wishart distributions, KL divergence is computed using the analytic formula for TensorFlow, PyTorch, and JAX.
     """
     # Get the backend distribution if needed
     if isinstance(P, BaseDistribution):
@@ -109,15 +110,114 @@ def kl_divergence(
     if get_backend() == ProbflowBackend.PYTORCH:
         import torch
 
+        if isinstance(P, torch.distributions.Wishart) and isinstance(
+            Q, torch.distributions.Wishart
+        ):
+            return _wishart_kl_pytorch(P, Q)
         return torch.distributions.kl.kl_divergence(P, Q)
     elif get_backend() == ProbflowBackend.JAX:
         from tensorflow_probability.substrates import jax as tfp_jax
 
+        if isinstance(P, tfp_jax.distributions.WishartTriL) and isinstance(
+            Q, tfp_jax.distributions.WishartTriL
+        ):
+            return _wishart_kl_jax(P, Q)
         return tfp_jax.distributions.kl_divergence(P, Q)
     else:
         import tensorflow_probability as tfp
 
+        if isinstance(P, tfp.distributions.WishartTriL) and isinstance(
+            Q, tfp.distributions.WishartTriL
+        ):
+            return _wishart_kl_tensorflow(P, Q)
         return tfp.distributions.kl_divergence(P, Q)
+
+
+def _wishart_kl_pytorch(
+    P: BackendDistribution, Q: BackendDistribution
+) -> BackendTensor:
+    """Calculate KL(P || Q) between two Wishart distributions, for PyTorch."""
+    import torch
+
+    if P.event_shape != Q.event_shape:
+        raise ValueError(
+            "Wishart distributions must have the same event shape"
+        )
+    d = P.event_shape[-1]
+    L_p, L_q = P.scale_tril, Q.scale_tril
+    logdet_p = 2 * L_p.diagonal(dim1=-2, dim2=-1).log().sum(-1)
+    logdet_q = 2 * L_q.diagonal(dim1=-2, dim2=-1).log().sum(-1)
+    solved = torch.linalg.solve_triangular(L_q, L_p, upper=False)
+    trace = solved.square().sum(dim=(-2, -1))
+    offsets = torch.arange(d, dtype=P.df.dtype, device=P.df.device)
+    a = (P.df.unsqueeze(-1) - offsets) / 2
+    b = (Q.df.unsqueeze(-1) - offsets) / 2
+    return (
+        0.5 * Q.df * (logdet_q - logdet_p)
+        + 0.5 * P.df * (trace - d)
+        + (torch.lgamma(b) - torch.lgamma(a)).sum(-1)
+        + 0.5 * (P.df - Q.df) * torch.digamma(a).sum(-1)
+    )
+
+
+def _wishart_kl_tensorflow(
+    P: BackendDistribution, Q: BackendDistribution
+) -> BackendTensor:
+    """Calculate KL(P || Q) between two Wishart distributions, for TensorFlow."""
+    import tensorflow as tf
+
+    if not P.event_shape.is_compatible_with(Q.event_shape):
+        raise ValueError(
+            "Wishart distributions must have the same event shape"
+        )
+    L_p, L_q = P.scale_tril, Q.scale_tril
+    d = tf.shape(L_p)[-1]
+    logdet_p = 2 * tf.reduce_sum(
+        tf.math.log(tf.linalg.diag_part(L_p)), axis=-1
+    )
+    logdet_q = 2 * tf.reduce_sum(
+        tf.math.log(tf.linalg.diag_part(L_q)), axis=-1
+    )
+    solved = tf.linalg.triangular_solve(L_q, L_p, lower=True)
+    trace = tf.reduce_sum(tf.square(solved), axis=(-2, -1))
+    offsets = tf.cast(tf.range(d), P.df.dtype)
+    a = (P.df[..., tf.newaxis] - offsets) / 2
+    b = (Q.df[..., tf.newaxis] - offsets) / 2
+    return (
+        0.5 * Q.df * (logdet_q - logdet_p)
+        + 0.5 * P.df * (trace - tf.cast(d, P.df.dtype))
+        + tf.reduce_sum(tf.math.lgamma(b) - tf.math.lgamma(a), axis=-1)
+        + 0.5 * (P.df - Q.df) * tf.reduce_sum(tf.math.digamma(a), axis=-1)
+    )
+
+
+def _wishart_kl_jax(
+    P: BackendDistribution, Q: BackendDistribution
+) -> BackendTensor:
+    """Calculate KL(P || Q) between two Wishart distributions, for JAX."""
+    import jax.numpy as jnp
+    from jax.scipy import linalg, special
+
+    if not P.event_shape.is_compatible_with(Q.event_shape):
+        raise ValueError(
+            "Wishart distributions must have the same event shape"
+        )
+    L_p, L_q = P.scale_tril, Q.scale_tril
+    d = L_p.shape[-1]
+    logdet_p = 2 * jnp.log(jnp.diagonal(L_p, axis1=-2, axis2=-1)).sum(-1)
+    logdet_q = 2 * jnp.log(jnp.diagonal(L_q, axis1=-2, axis2=-1)).sum(-1)
+    L_q_broadcast, L_p_broadcast = jnp.broadcast_arrays(L_q, L_p)
+    solved = linalg.solve_triangular(L_q_broadcast, L_p_broadcast, lower=True)
+    trace = jnp.square(solved).sum(axis=(-2, -1))
+    offsets = jnp.arange(d, dtype=P.df.dtype)
+    a = (P.df[..., None] - offsets) / 2
+    b = (Q.df[..., None] - offsets) / 2
+    return (
+        0.5 * Q.df * (logdet_q - logdet_p)
+        + 0.5 * P.df * (trace - d)
+        + (special.gammaln(b) - special.gammaln(a)).sum(-1)
+        + 0.5 * (P.df - Q.df) * special.digamma(a).sum(-1)
+    )
 
 
 @make_input_tensor
@@ -582,12 +682,36 @@ def new_variable(initial_values: TensorLike) -> BackendVariable:
         return tf.Variable(initial_values)
 
 
-def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
+def cholesky(x: BackendTensor) -> BackendTensor:
+    r"""Perform the cholesky decomposition on a matrix."""
+    if get_backend() == ProbflowBackend.PYTORCH:
+        import torch
+
+        return torch.linalg.cholesky(x)
+    elif get_backend() == ProbflowBackend.JAX:
+        import jax.numpy as jnp
+
+        return jnp.linalg.cholesky(x)
+    else:
+        import tensorflow as tf
+
+        return tf.linalg.cholesky(x)
+
+
+def log_cholesky_transform(
+    x: BackendTensor, output_tril: bool = False
+) -> BackendTensor:
     r"""Perform the log cholesky transform on a vector of values.
 
     This turns a vector of :math:`\frac{N(N+1)}{2}` unconstrained values into a
     valid :math:`N \times N` covariance matrix.
 
+    Parameters
+    ----------
+    x : BackendTensor
+        Vector of unconstrained values of length :math:`\frac{N(N+1)}{2}`.
+    output_tril : bool, default False
+        If True, return the lower triangular matrix instead of the full covariance matrix.
 
     References
     ----------
@@ -605,6 +729,8 @@ def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
         tril_ix = torch.tril_indices(row=N, col=N, offset=0)
         E[..., tril_ix[0], tril_ix[1]] = x
         E[..., range(N), range(N)] = torch.exp(torch.diagonal(E))
+        if output_tril:
+            return E
         return E @ torch.transpose(E, -1, -2)
     elif get_backend() == ProbflowBackend.JAX:
         import jax.numpy as jnp
@@ -612,6 +738,8 @@ def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
 
         E = tfp_jax.math.fill_triangular(x)
         E = E - jnp.diag(jnp.diagonal(E)) + jnp.diag(jnp.exp(jnp.diagonal(E)))
+        if output_tril:
+            return E
         return E @ jnp.swapaxes(E, -1, -2)
     else:
         import tensorflow as tf
@@ -619,6 +747,8 @@ def log_cholesky_transform(x: BackendTensor) -> BackendTensor:
 
         E = tfp.math.fill_triangular(x)
         E = tf.linalg.set_diag(E, tf.exp(tf.linalg.tensor_diag_part(E)))
+        if output_tril:
+            return E
         return E @ tf.transpose(E)
 
 
