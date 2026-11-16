@@ -28,7 +28,7 @@ def test_kl_divergence():
     close(ops.kl_divergence(dist, dist), 0.0)
 
 
-def test_wishart_kl_divergence(jax_backend):
+def test_wishart_kl_divergence():
     def kl(df_p, scale_p, df_q, scale_q):
         p = tfp_jax.distributions.WishartTriL(df_p, scale_p)
         q = tfp_jax.distributions.WishartTriL(df_q, scale_q)
